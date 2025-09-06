@@ -1,0 +1,232 @@
+# Git Ignore File for Cranberry Hearing & Balance Center ETL Pipeline
+# This file ensures sensitive business data is not committed to the repository
+
+# =============================================================================
+# SENSITIVE BUSINESS DATA - NEVER COMMIT
+# =============================================================================
+
+# Financial Data (QuickBooks exports, tax documents, bank statements)
+01_FINANCIAL_DATA/
+*.CSV
+*.csv
+*.xlsx
+*.xls
+*.pdf
+*.PDF
+*.zip
+
+# Operational Data (Sales data, customer information)
+02_OPERATIONAL_DATA/Sales_Data/
+*report-*.csv
+*sales*.csv
+*customer*.csv
+*transaction*.csv
+
+# Legal Documents (Contracts, leases, insurance)
+03_LEGAL_DOCUMENTS/
+*.pdf
+*.doc
+*.docx
+
+# Equipment Documents (Quotes, invoices)
+04_EQUIPMENT_DOCUMENTS/
+*M1566*.pdf
+*quote*.pdf
+*invoice*.pdf
+
+# Generated Data Files (Contains real business data)
+05_ANALYSIS_TOOLS/data/
+05_ANALYSIS_TOOLS/logs/
+05_ANALYSIS_TOOLS/reports/
+
+# ALL sensitive directories - completely exclude
+01_FINANCIAL_DATA/
+02_OPERATIONAL_DATA/
+03_LEGAL_DOCUMENTS/
+04_EQUIPMENT_DOCUMENTS/
+
+# Website build files and generated content
+website/_next/
+website/.wrangler/
+website/404/
+website/functions/
+website/js/
+website/*.html
+website/*.txt
+website/*.webmanifest
+website/package.json
+website/wrangler.toml
+website/README.md
+
+# Backup files (protect from accidental commits)
+*backup*
+*legacy*
+*_backup_*
+*_legacy_*
+
+# =============================================================================
+# DEVELOPMENT FILES
+# =============================================================================
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# Virtual Environment
+venv/
+env/
+ENV/
+env.bak/
+venv.bak/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# =============================================================================
+# SYSTEM FILES
+# =============================================================================
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+Icon
+._*
+.DocumentRevisions-V100
+.fseventsd
+.Spotlight-V100
+.TemporaryItems
+.Trashes
+.VolumeIcon.icns
+.com.apple.timemachine.donotpresent
+.AppleDB
+.AppleDesktop
+Network Trash Folder
+Temporary Items
+.apdisk
+
+# Windows
+Thumbs.db
+Thumbs.db:encryptable
+ehthumbs.db
+ehthumbs_vista.db
+*.stackdump
+[Dd]esktop.ini
+$RECYCLE.BIN/
+*.cab
+*.msi
+*.msix
+*.msm
+*.msp
+*.lnk
+
+# Linux
+*~
+.fuse_hidden*
+.directory
+.Trash-*
+.nfs*
+
+# =============================================================================
+# LOGS AND TEMPORARY FILES
+# =============================================================================
+
+# Log files
+*.log
+logs/
+*.out
+*.err
+
+# Temporary files
+*.tmp
+*.temp
+*.bak
+*.backup
+*.old
+
+# =============================================================================
+# CONFIGURATION FILES WITH SENSITIVE DATA
+# =============================================================================
+
+# Environment variables
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# API keys and secrets
+*secret*
+*key*
+*password*
+*credential*
+
+# =============================================================================
+# CLOUD DEPLOYMENT
+# =============================================================================
+
+# Cloudflare
+.wrangler/
+wrangler.toml
+
+# Vercel
+.vercel
+
+# Netlify
+.netlify
+
+# =============================================================================
+# DOCUMENTATION WITH SENSITIVE INFO
+# =============================================================================
+
+# Remove any documentation that might contain real business data
+*meeting*.md
+*summary*.md
+*notes*.md
+*feedback*.md
+
+# =============================================================================
+# SAMPLE DATA (KEEP THESE FOR DEMONSTRATION)
+# =============================================================================
+
+# These files should be kept as examples:
+# - Sample configuration files
+# - Example data structures
+# - Documentation templates
+# - README files
+
+# =============================================================================
+# NOTES FOR OPEN SOURCE PREPARATION
+# =============================================================================
+
+# 1. Replace all real business data with sample/anonymized data
+# 2. Update configuration files to use example values
+# 3. Remove any personal information or business names
+# 4. Add sample data files for demonstration
+# 5. Update documentation to remove sensitive references

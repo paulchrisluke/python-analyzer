@@ -1,0 +1,167 @@
+#!/usr/bin/env python3
+"""
+Debug EBITDA calculation to understand why it's so different from website.
+"""
+
+import json
+import pandas as pd
+from pathlib import Path
+from collections import defaultdict
+
+def debug_ebitda_calculation():
+    """Debug the EBITDA calculation step by step."""
+    
+    print("🔍 EBITDA CALCULATION DEBUG")
+    print("=" * 60)
+    
+    # Load financial data
+    financial_file = Path("data/raw/financial_raw.json")
+    if not financial_file.exists():
+        print("❌ Financial data not found!")
+        return
+    
+    with open(financial_file, 'r') as f:
+        financial_data = json.load(f)
+    
+    print("📊 WEBSITE TARGETS:")
+    print("-" * 30)
+    print("Annual EBITDA: $266,517")
+    print("EBITDA Margin: 25.6%")
+    print("Annual Revenue: $1,041,667")
+    print("Monthly Revenue: $86,806")
+    
+    print("\n📊 OUR PIPELINE RESULTS:")
+    print("-" * 30)
+    print("Annual EBITDA: $1,510,629")
+    print("EBITDA Margin: 5.3%")
+    print("Annual Revenue: $955,924")
+    print("Monthly Revenue: $79,660")
+    
+    print("\n🔍 STEP-BY-STEP EBITDA ANALYSIS:")
+    print("-" * 50)
+    
+    # Analyze P&L data
+    pnl_data = financial_data.get('profit_loss', {})
+    print(f"Found {len(pnl_data)} P&L statements")
+    
+    monthly_ebitdas = []
+    monthly_revenues = []
+    monthly_expenses = []
+    
+    for pnl_key, pnl_info in pnl_data.items():
+        if isinstance(pnl_info, dict) and 'data' in pnl_info:
+            df = pd.DataFrame(pnl_info['data'])
+            
+            # Calculate revenue
+            revenue_rows = df[df['Unnamed: 0'].str.contains('Sales|Investment Income', case=False, na=False)]
+            monthly_revenue = 0
+            for _, row in revenue_rows.iterrows():
+                if pd.notna(row.get('TOTAL')) and row.get('TOTAL') != 0:
+                    monthly_revenue += float(row['TOTAL'])
+            
+            # Calculate expenses
+            expense_rows = df[df['Unnamed: 0'].str.contains('Salaries|Wages|Rent|Insurance|Utilities|Office|Marketing|Professional|Payroll|Employee|Equipment|Supplies|Telephone|Travel|Training|Legal|Accounting|Interest|Tax|Depreciation|Amortization|COGS|Cost|Expense', case=False, na=False)]
+            
+            monthly_operational_expenses = 0
+            monthly_total_expenses = 0
+            
+            for _, row in expense_rows.iterrows():
+                if pd.notna(row.get('TOTAL')) and row.get('TOTAL') != 0:
+                    expense_name = row['Unnamed: 0']
+                    expense_amount = float(row['TOTAL'])
+                    
+                    monthly_total_expenses += expense_amount
+                    
+                    # For EBITDA: exclude Interest, Tax, Depreciation, Amortization
+                    if not any(exclude in expense_name for exclude in ['Interest', 'Tax', 'Depreciation', 'Amortization', 'Total', 'Summary']):
+                        monthly_operational_expenses += expense_amount
+            
+            # Calculate monthly EBITDA
+            if monthly_revenue > 0:
+                monthly_ebitda = monthly_revenue - monthly_operational_expenses
+                monthly_ebitdas.append(monthly_ebitda)
+                monthly_revenues.append(monthly_revenue)
+                monthly_expenses.append(monthly_operational_expenses)
+                
+                print(f"\n{pnl_key}:")
+                print(f"  Revenue: ${monthly_revenue:,.2f}")
+                print(f"  Op Expenses: ${monthly_operational_expenses:,.2f}")
+                print(f"  Total Expenses: ${monthly_total_expenses:,.2f}")
+                print(f"  Monthly EBITDA: ${monthly_ebitda:,.2f}")
+                print(f"  EBITDA Margin: {(monthly_ebitda/monthly_revenue)*100:.1f}%")
+    
+    if monthly_ebitdas:
+        avg_monthly_ebitda = sum(monthly_ebitdas) / len(monthly_ebitdas)
+        avg_monthly_revenue = sum(monthly_revenues) / len(monthly_revenues)
+        avg_monthly_expenses = sum(monthly_expenses) / len(monthly_expenses)
+        
+        print(f"\n📈 AVERAGE MONTHLY CALCULATIONS:")
+        print("-" * 40)
+        print(f"Average Monthly Revenue: ${avg_monthly_revenue:,.2f}")
+        print(f"Average Monthly Op Expenses: ${avg_monthly_expenses:,.2f}")
+        print(f"Average Monthly EBITDA: ${avg_monthly_ebitda:,.2f}")
+        print(f"Average EBITDA Margin: {(avg_monthly_ebitda/avg_monthly_revenue)*100:.1f}%")
+        
+        annual_ebitda = avg_monthly_ebitda * 12
+        print(f"Annual EBITDA (Monthly × 12): ${annual_ebitda:,.2f}")
+        
+        print(f"\n🎯 COMPARISON WITH WEBSITE:")
+        print("-" * 40)
+        print(f"Website Annual EBITDA: $266,517")
+        print(f"Our Annual EBITDA: ${annual_ebitda:,.2f}")
+        print(f"Difference: ${annual_ebitda - 266517:,.2f} ({(annual_ebitda/266517 - 1)*100:+.1f}%)")
+        
+        # Let's see what the website might be doing differently
+        print(f"\n🤔 POSSIBLE ISSUES:")
+        print("-" * 40)
+        
+        # Check if we're including too much revenue
+        if avg_monthly_revenue > 100000:  # If monthly revenue > $100k
+            print("⚠️  Monthly revenue seems high - might be including non-revenue items")
+        
+        # Check if we're excluding too many expenses
+        if avg_monthly_expenses < avg_monthly_revenue * 0.5:  # If expenses < 50% of revenue
+            print("⚠️  Expenses seem low - might be missing expense categories")
+        
+        # Check EBITDA margin
+        ebitda_margin = (avg_monthly_ebitda/avg_monthly_revenue)*100
+        if ebitda_margin > 20:  # If EBITDA margin > 20%
+            print("⚠️  EBITDA margin seems high - might be excluding too many expenses")
+        elif ebitda_margin < 5:  # If EBITDA margin < 5%
+            print("⚠️  EBITDA margin seems low - might be including too many expenses")
+        
+        # Let's try a different approach - what if we use the website's methodology?
+        print(f"\n💡 ALTERNATIVE CALCULATIONS:")
+        print("-" * 40)
+        
+        # What if we use the website's revenue and margin?
+        website_monthly_revenue = 86806
+        website_ebitda_margin = 25.6
+        
+        calculated_monthly_ebitda = website_monthly_revenue * (website_ebitda_margin / 100)
+        calculated_annual_ebitda = calculated_monthly_ebitda * 12
+        
+        print(f"Using Website Revenue & Margin:")
+        print(f"  Monthly Revenue: ${website_monthly_revenue:,.2f}")
+        print(f"  EBITDA Margin: {website_ebitda_margin}%")
+        print(f"  Monthly EBITDA: ${calculated_monthly_ebitda:,.2f}")
+        print(f"  Annual EBITDA: ${calculated_annual_ebitda:,.2f}")
+        
+        # What if we use our revenue with website margin?
+        our_revenue_website_margin = avg_monthly_revenue * (website_ebitda_margin / 100) * 12
+        print(f"\nUsing Our Revenue with Website Margin:")
+        print(f"  Our Monthly Revenue: ${avg_monthly_revenue:,.2f}")
+        print(f"  Website EBITDA Margin: {website_ebitda_margin}%")
+        print(f"  Annual EBITDA: ${our_revenue_website_margin:,.2f}")
+        
+        print(f"\n🔍 KEY INSIGHTS:")
+        print("-" * 40)
+        print("1. Our monthly EBITDA average is much higher than expected")
+        print("2. We might be including revenue that shouldn't be counted")
+        print("3. We might be excluding expenses that should be included")
+        print("4. The website might be using a different calculation method")
+        print("5. We might need to filter P&L data by location too!")
+        print("6. P&L data includes ALL 4 locations, but we only want 2 for sale")
+
+if __name__ == "__main__":
+    debug_ebitda_calculation()

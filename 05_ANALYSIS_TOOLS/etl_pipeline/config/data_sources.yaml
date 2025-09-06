@@ -1,0 +1,102 @@
+# Data Sources Configuration
+# Defines all data sources for the ETL pipeline
+
+data_sources:
+  sales:
+    type: csv
+    path: "../02_OPERATIONAL_DATA/Sales_Data/report-371-1755757545-sales.csv"
+    encoding: utf-8
+    delimiter: ","
+    has_header: true
+    description: "Main sales transaction data"
+    
+  sales_returns:
+    type: csv
+    path: "../02_OPERATIONAL_DATA/Sales_Data/report-371-1755757545-returns.csv"
+    encoding: utf-8
+    delimiter: ","
+    has_header: true
+    description: "Sales returns data"
+    
+  sales_exchanges:
+    type: csv
+    path: "../02_OPERATIONAL_DATA/Sales_Data/report-371-1755757545-exchanges.csv"
+    encoding: utf-8
+    delimiter: ","
+    has_header: true
+    description: "Sales exchanges data"
+    
+  sales_replacements:
+    type: csv
+    path: "../02_OPERATIONAL_DATA/Sales_Data/report-371-1755757545-replacements.csv"
+    encoding: utf-8
+    delimiter: ","
+    has_header: true
+    description: "Sales replacements data"
+    
+  sales_cancelled:
+    type: csv
+    path: "../02_OPERATIONAL_DATA/Sales_Data/report-371-1755757545-cancelled.csv"
+    encoding: utf-8
+    delimiter: ","
+    has_header: true
+    description: "Cancelled sales data"
+    
+  sales_conversions:
+    type: csv
+    path: "../02_OPERATIONAL_DATA/Sales_Data/report-371-1755757545-conversions.csv"
+    encoding: utf-8
+    delimiter: ","
+    has_header: true
+    description: "Sales conversions data"
+    
+  financial_pnl_2023:
+    type: csv
+    path: "../01_FINANCIAL_DATA/QuickBooks_Exports/fwd2023profitlossstatements"
+    pattern: "*.CSV"
+    encoding: utf-8
+    delimiter: ","
+    has_header: true
+    description: "2023 Profit & Loss statements"
+    
+  financial_pnl_2024:
+    type: csv
+    path: "../01_FINANCIAL_DATA/QuickBooks_Exports/fwdplallclassesjandec2024"
+    pattern: "*.CSV"
+    encoding: utf-8
+    delimiter: ","
+    has_header: true
+    description: "2024 Profit & Loss statements"
+    
+  financial_balance_sheets:
+    type: csv
+    path: "../01_FINANCIAL_DATA/QuickBooks_Exports/fwdbalancesheetbymonth2022_contents"
+    pattern: "*.CSV"
+    encoding: utf-8
+    delimiter: ","
+    has_header: true
+    description: "Balance sheet data"
+    
+  financial_general_ledger:
+    type: csv
+    path: "../01_FINANCIAL_DATA/QuickBooks_Exports/fwdgeneralledger20212025_contents"
+    pattern: "*.CSV"
+    encoding: utf-8
+    delimiter: ","
+    has_header: true
+    description: "General ledger data"
+    
+  financial_cogs:
+    type: csv
+    path: "../01_FINANCIAL_DATA/QuickBooks_Exports/fwdstarkeycogs20212022202320242025_contents"
+    pattern: "*.csv"
+    encoding: utf-8
+    delimiter: ","
+    has_header: true
+    description: "Cost of Goods Sold data"
+    
+  equipment_quotes:
+    type: pdf
+    path: "../04_EQUIPMENT_DOCUMENTS/"
+    pattern: "M1566*.pdf"
+    description: "Equipment quote PDFs"

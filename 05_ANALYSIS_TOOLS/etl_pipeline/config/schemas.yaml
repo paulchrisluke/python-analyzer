@@ -1,0 +1,118 @@
+# Data Schemas Configuration
+# Defines the structure for each stage of the ETL pipeline
+
+schemas:
+  sales_raw:
+    fields:
+      sale_date: string
+      delivery_date: string
+      return_date: string
+      staff_name: string
+      patient_name: string
+      patient_id: string
+      patient_zip: string
+      clinic_name: string
+      referral_source: string
+      subcategory: string
+      ref_description: string
+      campaign: string
+      units: integer
+      type: string
+      product: string
+      description: string
+      serial_number: string
+      notes: string
+      invoice_no: string
+      cpt_code: string
+      gross_price: float
+      discount: float
+      discount_type_1: string
+      discount_amount_1: float
+      discount_type_2: string
+      discount_amount_2: float
+      discount_type_3: string
+      discount_amount_3: float
+      net_price: float
+      sales_tax: float
+      total_price: float
+      receipt_paid: string
+      
+  sales_normalized:
+    fields:
+      transaction_id: string
+      sale_date: datetime
+      delivery_date: datetime
+      return_date: datetime
+      staff_name: string
+      patient_id: string
+      patient_zip: string
+      clinic_name: string
+      referral_source: string
+      product_category: string
+      product_name: string
+      units: integer
+      transaction_type: string
+      gross_price: float
+      total_discounts: float
+      net_price: float
+      sales_tax: float
+      total_price: float
+      is_paid: boolean
+      year: integer
+      month: integer
+      quarter: integer
+      
+  financial_raw:
+    fields:
+      source_file: string
+      account_name: string
+      account_type: string
+      amount: float
+      date: string
+      description: string
+      reference: string
+      
+  financial_normalized:
+    fields:
+      account_name: string
+      account_type: string
+      amount: float
+      date: datetime
+      period: string
+      category: string
+      subcategory: string
+      year: integer
+      month: integer
+      
+  business_metrics:
+    fields:
+      total_revenue: float
+      total_transactions: integer
+      average_transaction: float
+      revenue_by_location: dict
+      revenue_by_staff: dict
+      revenue_by_year: dict
+      revenue_by_month: dict
+      growth_rates: dict
+      ebitda: float
+      profit_margin: float
+      roi: float
+      
+  equipment_raw:
+    fields:
+      file_name: string
+      equipment_name: string
+      description: string
+      price: float
+      category: string
+      quote_date: string
+      
+  equipment_normalized:
+    fields:
+      equipment_id: string
+      name: string
+      description: string
+      category: string
+      price: float
+      quote_date: datetime
+      location: string
