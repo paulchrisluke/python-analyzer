@@ -111,6 +111,27 @@ class FinancialExtractor(BaseExtractor):
                 except Exception as e:
                     logger.exception("Error loading P&L 2024 file %s", file_path)
         
+        # 2025 P&L data
+        pnl_2025_path = Path(self.config.get('financial_pnl_2025', {}).get('path', ''))
+        if pnl_2025_path.exists():
+            pnl_2025_files = FileUtils.find_files(str(pnl_2025_path), "*.[cC][sS][vV]")
+            for file_path in pnl_2025_files:
+                try:
+                    # Try different encodings for QuickBooks CSV files
+                    for encoding in ['utf-8', 'latin-1', 'cp1252', 'iso-8859-1']:
+                        try:
+                            df = pd.read_csv(file_path, encoding=encoding, low_memory=False)
+                            filename = Path(file_path).stem
+                            pnl_data[f'pnl_2025_{filename}'] = df
+                            logger.info(f"Loaded P&L 2025 data: {filename} ({len(df)} records) with {encoding} encoding")
+                            break
+                        except UnicodeDecodeError:
+                            continue
+                    else:
+                        logger.error(f"Could not decode P&L 2025 file {file_path} with any encoding")
+                except Exception as e:
+                    logger.exception("Error loading P&L 2025 file %s", file_path)
+        
         return pnl_data if pnl_data else None
     
     def _extract_balance_sheet_data(self) -> Optional[Dict[str, pd.DataFrame]]:

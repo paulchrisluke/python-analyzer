@@ -245,6 +245,20 @@ logs/
 # - README files
 
 # =============================================================================
+# ADDITIONAL SAFETY MEASURES
+# =============================================================================
+
+# Test files that might contain real data
+*test_data*
+*sample_real*
+*production_data*
+
+# Database files
+*.db
+*.sqlite
+*.sqlite3
+
+# =============================================================================
 # NOTES FOR OPEN SOURCE PREPARATION
 # =============================================================================
 

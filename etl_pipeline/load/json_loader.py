@@ -577,8 +577,18 @@ class JsonLoader(BaseLoader):
     
     def _create_financial_summary(self, business_metrics: Dict[str, Any]) -> Dict[str, Any]:
         """Create financial summary."""
+        financial_data = business_metrics.get('financial', {})
+        
+        # Debug logging to see what we're getting
+        logger.info(f"Creating financial summary from business metrics:")
+        logger.info(f"  Business metrics keys: {list(business_metrics.keys())}")
+        logger.info(f"  Financial data keys: {list(financial_data.keys())}")
+        if 'revenue_metrics' in financial_data:
+            revenue_metrics = financial_data['revenue_metrics']
+            logger.info(f"  Revenue metrics: {revenue_metrics}")
+        
         return {
-            "summary": business_metrics.get('financial', {}),
+            "summary": financial_data,
             "generated_at": datetime.now().isoformat(),
             "data_source": "ETL Pipeline Analysis"
         }

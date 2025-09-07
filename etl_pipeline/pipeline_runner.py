@@ -107,6 +107,14 @@ class ETLPipeline:
             
             logger.info("Starting ETL pipeline execution...")
             
+            # Load configuration files first
+            self._load_configurations()
+            
+            # Initialize pipeline components
+            self._initialize_extractors()
+            self._initialize_transformers()
+            self._initialize_loaders()
+            
             # Phase 1: Extract
             logger.info("Phase 1: Data Extraction")
             if not self._extract_data():
@@ -302,11 +310,20 @@ class ETLPipeline:
             if 'business_metrics' in self.transformers:
                 logger.info("Calculating business metrics...")
                 # Pass both normalized and raw data for comprehensive analysis
-                # Fall back to raw data if normalized data is empty
+                # The business metrics calculator expects the data structure to match the raw data structure
+                financial_data = self.raw_data.get('financial', {})
                 combined_data = {
                     'sales': self.normalized_data.get('sales', {}),
-                    'financial': self.normalized_data.get('financial', self.raw_data.get('financial', {}))
+                    'profit_loss': financial_data.get('profit_loss', {}),
+                    'balance_sheets': financial_data.get('balance_sheets', {}),
+                    'general_ledger': financial_data.get('general_ledger', {}),
+                    'cogs': financial_data.get('cogs', {}),
+                    'summary': financial_data.get('summary', {})
                 }
+                # Debug: Log the data structure being passed
+                logger.info(f"Combined data keys: {list(combined_data.keys())}")
+                logger.info(f"P&L data count: {len(combined_data.get('profit_loss', {}))}")
+                
                 business_metrics = self.transformers['business_metrics'].calculate_comprehensive_metrics(combined_data)
                 self.final_data['business_metrics'] = business_metrics
                 logger.info("Business metrics calculation completed")

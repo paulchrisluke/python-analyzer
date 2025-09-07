@@ -22,6 +22,15 @@ data_sources:
     has_header: true
     description: "2024 Profit & Loss statements"
     
+  financial_pnl_2025:
+    type: csv
+    path: "docs/financials/Profit_and_Loss/2025_Profit_and_Loss/"
+    pattern: "*.[cC][sS][vV]"
+    encoding: utf-8
+    delimiter: ","
+    has_header: true
+    description: "2025 Profit & Loss statements"
+    
   financial_balance_sheets:
     type: csv
     path: "docs/financials/Balance_Sheets/2022_Balance_Sheets/"

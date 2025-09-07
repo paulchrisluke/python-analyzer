@@ -19,19 +19,20 @@ sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from etl_pipeline.utils.due_diligence_manager import DueDiligenceManager
 
-# Known-good values from business_rules.yaml configuration
+# Known-good values from corrected P&L data analysis (2023-01-01 to 2025-06-30)
+# Updated after fixing revenue calculation bug - now using correct monthly averages
 KNOWN_GOOD_VALUES = {
     "sales": {
-        "total_revenue": 259811.19,  # From real P&L data analysis period
+        "total_revenue": 2366626.53,  # Total revenue for 30-month analysis period (corrected)
         "total_transactions": 0  # No transaction data available (using P&L only)
     },
     "financials": {
-        "annual_revenue_projection": 3117734.33,  # From real P&L data
-        "estimated_annual_ebitda": 1402980.45,  # From real P&L data
-        "roi_percentage": 215.84  # From real P&L data
+        "annual_revenue_projection": 946650.61,  # Corrected annual projection from monthly average
+        "estimated_annual_ebitda": 288732.58,  # Corrected annual EBITDA from monthly average
+        "roi_percentage": 44.42  # Corrected ROI from corrected EBITDA
     },
     "equipment": {
-        "total_value": 61727.5  # From real equipment data
+        "total_value": 61727.5  # From real equipment data (unchanged)
     }
 }
 
