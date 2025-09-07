@@ -29,17 +29,19 @@ def test_schema():
     internal_data = manager.get_stage_view("internal")
     
     # Check a financial document
-    if "financials" in internal_data and "documents" in internal_data["financials"]:
-        doc = internal_data["financials"]["documents"][0]
-        print(f"Sample document: {doc['name']}")
-        print(f"Required fields present:")
-        
-        required_fields = ["name", "status", "notes", "due_date", "file_type", "file_path", "file_size", "visibility"]
-        for field in required_fields:
-            if field in doc:
-                print(f"  ✅ {field}: {doc[field]}")
-            else:
-                print(f"  ❌ {field}: MISSING")
+    required_fields = ["name", "status", "notes", "due_date", "file_type", "file_path", "file_size", "visibility"]
+    
+    assert "financials" in internal_data, "financials category missing from internal data"
+    assert "documents" in internal_data["financials"], "documents missing from financials"
+    assert len(internal_data["financials"]["documents"]) > 0, "no documents in financials"
+    
+    doc = internal_data["financials"]["documents"][0]
+    print(f"Sample document: {doc['name']}")
+    print(f"Required fields present:")
+    
+    for field in required_fields:
+        assert field in doc, f"Missing required field '{field}' in financial document: {doc.get('name', 'unnamed')}"
+        print(f"  ✅ {field}: {doc[field]}")
     
     # Export to verify
     test_dir = Path(__file__).parent / "schema_test_output"
@@ -51,13 +53,14 @@ def test_schema():
         exported_data = json.load(f)
     
     print(f"\nExported file verification:")
-    if "financials" in exported_data and "documents" in exported_data["financials"]:
-        doc = exported_data["financials"]["documents"][0]
-        for field in required_fields:
-            if field in doc:
-                print(f"  ✅ {field}: {doc[field]}")
-            else:
-                print(f"  ❌ {field}: MISSING")
+    assert "financials" in exported_data, "financials category missing from exported data"
+    assert "documents" in exported_data["financials"], "documents missing from exported financials"
+    assert len(exported_data["financials"]["documents"]) > 0, "no documents in exported financials"
+    
+    doc = exported_data["financials"]["documents"][0]
+    for field in required_fields:
+        assert field in doc, f"Missing required field '{field}' in exported financial document: {doc.get('name', 'unnamed')}"
+        print(f"  ✅ {field}: {doc[field]}")
     
     # Clean up
     import shutil

@@ -55,7 +55,7 @@ class DueDiligenceManager:
             docs_dir: Directory containing human-readable documents (PDFs, etc.)
         """
         self.data_dir = Path(data_dir) if data_dir else Path(__file__).parent.parent.parent / "data"
-        self.docs_dir = Path(docs_dir) if docs_dir else Path(__file__).parent.parent.parent.parent / "docs"
+        self.docs_dir = Path(docs_dir) if docs_dir else Path(__file__).parent.parent.parent / "docs"
         
         # Ensure directories exist
         self.docs_dir.mkdir(exist_ok=True)
@@ -115,8 +115,14 @@ class DueDiligenceManager:
         categories = ["financials", "equipment", "legal", "corporate", "other"]
         for category in categories:
             category_data = getattr(self.data, category, {})
-            if "documents" in category_data and len(category_data["documents"]) > 0:
-                return True
+            if category == "equipment":
+                # Equipment category stores items under "items" key
+                if (category_data.get("documents") and len(category_data["documents"]) > 0) or \
+                   (category_data.get("items") and len(category_data["items"]) > 0):
+                    return True
+            else:
+                if "documents" in category_data and len(category_data["documents"]) > 0:
+                    return True
         return False
     
     def _integrate_business_data(self, business_data: Dict[str, Any]) -> None:
@@ -620,24 +626,31 @@ class DueDiligenceManager:
         
         for category in categories:
             category_data = getattr(self.data, category, {})
+            
+            # Handle both "documents" and "items" (for equipment)
+            items_to_check = []
             if "documents" in category_data:
-                for doc in category_data["documents"]:
-                    file_checks["checked_files"] += 1
-                    
-                    file_path = doc.get("file_path")
-                    if file_path:
-                        # Check if file exists
-                        full_path = self._resolve_file_path(file_path)
-                        if full_path.exists():
-                            file_checks["existing_files"] += 1
-                            doc["status"] = True
-                            doc["file_size"] = self._get_file_size(full_path)
-                            file_checks["updated_statuses"] += 1
-                        else:
-                            file_checks["missing_files"] += 1
-                            doc["status"] = False
-                            doc["file_size"] = None
-                            file_checks["updated_statuses"] += 1
+                items_to_check.extend(category_data["documents"])
+            if category == "equipment" and "items" in category_data:
+                items_to_check.extend(category_data["items"])
+            
+            for doc in items_to_check:
+                file_checks["checked_files"] += 1
+                
+                file_path = doc.get("file_path")
+                if file_path:
+                    # Check if file exists
+                    full_path = self._resolve_file_path(file_path)
+                    if full_path.exists():
+                        file_checks["existing_files"] += 1
+                        doc["status"] = True
+                        doc["file_size"] = self._get_file_size(full_path)
+                        file_checks["updated_statuses"] += 1
+                    else:
+                        file_checks["missing_files"] += 1
+                        doc["status"] = False
+                        doc["file_size"] = None
+                        file_checks["updated_statuses"] += 1
         
         return file_checks
     

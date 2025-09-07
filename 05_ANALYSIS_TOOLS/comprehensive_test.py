@@ -39,17 +39,13 @@ def test_all_requirements():
         
         # Verify no file paths in public/nda/buyer stages
         if stage in ["public", "nda", "buyer"]:
-            has_file_paths = False
-            for category, data in stage_data.items():
-                if isinstance(data, dict) and "documents" in data:
-                    for doc in data["documents"]:
-                        if doc.get("file_path") is not None:
-                            has_file_paths = True
-                            break
-            if has_file_paths:
-                print(f"❌ {stage} stage contains file paths (should be hidden)")
-            else:
-                print(f"✅ {stage} stage properly hides file paths")
+            has_file_paths = any(
+                doc.get("file_path") is not None
+                for category, data in stage_data.items()
+                if isinstance(data, dict) and "documents" in data
+                for doc in data["documents"]
+            )
+            assert not has_file_paths, f"{stage} stage contains file paths (should be hidden)"
     
     # Test scoring
     print("\n3. Testing calculate_scores()...")
@@ -88,12 +84,12 @@ def test_all_requirements():
     
     # Verify all stage files were created
     expected_files = ["public.json", "nda.json", "buyer.json", "closing.json", "internal.json"]
+    missing_files = []
     for filename in expected_files:
         file_path = test_dir / filename
-        if file_path.exists():
-            print(f"✅ {filename} created successfully")
-        else:
-            print(f"❌ {filename} missing")
+        if not file_path.exists():
+            missing_files.append(filename)
+    assert not missing_files, f"Missing expected files: {missing_files}"
     
     # Test schema compliance
     print("\n7. Testing schema compliance...")
@@ -101,34 +97,22 @@ def test_all_requirements():
     
     # Check required fields in documents
     required_fields = ["name", "status", "file_type", "file_path", "file_size", "visibility"]
-    schema_compliant = True
     
     for category in ["financials", "equipment", "legal", "corporate", "other"]:
         if category in internal_data and "documents" in internal_data[category]:
             for doc in internal_data[category]["documents"]:
                 for field in required_fields:
-                    if field not in doc:
-                        print(f"❌ Missing required field '{field}' in {category} document")
-                        schema_compliant = False
-    
-    if schema_compliant:
-        print("✅ All documents comply with required schema")
+                    assert field in doc, f"Missing required field '{field}' in {category} document: {doc.get('name', 'unnamed')}"
     
     # Test visibility filtering
     print("\n8. Testing visibility filtering...")
-    visibility_test_passed = True
     
     # Check that public stage only shows public visibility items
     public_data = manager.get_stage_view("public")
     for category, data in public_data.items():
         if isinstance(data, dict) and "documents" in data:
             for doc in data["documents"]:
-                if "public" not in doc.get("visibility", []):
-                    print(f"❌ Non-public document found in public stage: {doc['name']}")
-                    visibility_test_passed = False
-    
-    if visibility_test_passed:
-        print("✅ Visibility filtering works correctly")
+                assert "public" in doc.get("visibility", []), f"Non-public document found in public stage: {doc['name']}"
     
     # Test dataclasses usage
     print("\n9. Testing dataclasses implementation...")

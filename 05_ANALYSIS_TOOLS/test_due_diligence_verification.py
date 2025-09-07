@@ -238,11 +238,12 @@ class TestDueDiligenceManager:
                     assert isinstance(doc["name"], str)
                     assert isinstance(doc["status"], bool)
                     assert isinstance(doc["visibility"], list)
-                    
-                    # Equipment items should have value field
-                    if category == "equipment":
-                        assert "value" in doc, f"Missing 'value' field in equipment item: {doc['name']}"
-                        assert isinstance(doc["value"], (int, float, type(None)))
+        
+        # Separate pass for equipment-specific validation
+        if "equipment" in internal_data and "documents" in internal_data["equipment"]:
+            for doc in internal_data["equipment"]["documents"]:
+                assert "value" in doc, f"Missing 'value' field in equipment item: {doc['name']}"
+                assert isinstance(doc["value"], (int, float, type(None))), f"Equipment value must be number or None, got {type(doc['value'])}"
     
     def test_stage_filtering_public(self, manager):
         """Test that public stage hides file paths and only shows high-level stats."""

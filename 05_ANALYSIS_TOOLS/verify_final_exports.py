@@ -108,4 +108,12 @@ def verify_final_exports():
     return all_valid
 
 if __name__ == "__main__":
-    verify_final_exports()
+    import sys
+    try:
+        result = verify_final_exports()
+        if not result:
+            sys.exit(1)
+        sys.exit(0)
+    except Exception as e:
+        print(f"Error during verification: {e}")
+        sys.exit(1)

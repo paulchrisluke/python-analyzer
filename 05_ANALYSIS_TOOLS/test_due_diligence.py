@@ -53,6 +53,18 @@ def test_due_diligence_manager():
     # Test scoring
     print("\n3. Testing scoring...")
     scores = manager.calculate_scores()
+    
+    # Assert scoring results are valid
+    assert isinstance(scores['overall_score'], (int, float)), "Overall score must be a number"
+    assert 0 <= scores['overall_score'] <= 100, f"Overall score must be between 0-100, got {scores['overall_score']}"
+    
+    for category, score in scores['category_scores'].items():
+        assert isinstance(score, (int, float)), f"Category score for {category} must be a number"
+        assert 0 <= score <= 100, f"Category score for {category} must be between 0-100, got {score}"
+    
+    assert isinstance(scores['recommendations'], (list, tuple)), "Recommendations must be a list or iterable"
+    assert len(scores['recommendations']) >= 0, "Recommendations list must have non-negative length"
+    
     print(f"Overall Score: {scores['overall_score']}%")
     print(f"Category Scores:")
     for category, score in scores['category_scores'].items():
@@ -64,6 +76,13 @@ def test_due_diligence_manager():
     # Test validation
     print("\n4. Testing validation...")
     validation = manager.validate()
+    
+    # Assert validation results are valid
+    assert "status" in validation, "Validation result must include status"
+    assert validation["status"] in ["valid", "invalid", "warning"], f"Invalid validation status: {validation['status']}"
+    assert "file_checks" in validation, "Validation result must include file_checks"
+    assert validation["file_checks"], "File checks must be present and non-empty"
+    
     print(f"Validation Status: {validation['status']}")
     print(f"Issues: {len(validation['issues'])}")
     print(f"Warnings: {len(validation['warnings'])}")
@@ -79,16 +98,20 @@ def test_due_diligence_manager():
     
     # Test export
     print("\n6. Testing export...")
-    test_output_dir = Path(__file__).parent / "test_output"
-    test_output_dir.mkdir(exist_ok=True)
+    import tempfile
     
-    manager.export_all(str(test_output_dir))
-    print(f"Exported all stages to: {test_output_dir}")
-    
-    # Show file sizes
-    for stage_file in test_output_dir.glob("*.json"):
-        size = stage_file.stat().st_size
-        print(f"  {stage_file.name}: {size} bytes")
+    with tempfile.TemporaryDirectory() as temp_dir:
+        temp_path = Path(temp_dir)
+        manager.export_all(str(temp_path))
+        print(f"Exported all stages to: {temp_path}")
+        
+        # Assert expected files exist and have content
+        expected_files = ["public.json", "nda.json", "buyer.json", "closing.json", "internal.json"]
+        for filename in expected_files:
+            file_path = temp_path / filename
+            assert file_path.exists(), f"Missing expected export file: {filename}"
+            assert file_path.stat().st_size > 0, f"Export file {filename} is empty"
+            print(f"  {filename}: {file_path.stat().st_size} bytes")
     
     # Test summary
     print("\n7. Testing summary...")
