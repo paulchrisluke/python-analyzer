@@ -1,0 +1,13 @@
+name = "cranberry-business-sale"
+compatibility_date = "2025-01-27"
+
+[pages]
+# Static site configuration
+pages_build_output_dir = "."
+# No build command needed for static HTML
+
+# Environment variables for authentication
+# Set these using: wrangler secret put AUTH_USERNAME
+# Set these using: wrangler secret put AUTH_PASSWORD
+# Example: wrangler secret put AUTH_USERNAME --env production
+# Example: wrangler secret put AUTH_PASSWORD --env production
