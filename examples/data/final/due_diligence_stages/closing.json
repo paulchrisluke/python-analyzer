@@ -1,0 +1,112 @@
+{
+  "meta": {
+    "business_name": "Cranberry Hearing & Balance Center",
+    "analysis_period": "2023-01 to 2025-06",
+    "generated_at": "2025-09-07T10:21:27.735855"
+  },
+  "sales": {
+    "monthly": {
+      "2023-01": {
+        "transactions": 400,
+        "revenue": 75000,
+        "status": true
+      },
+      "2023-02": {
+        "transactions": 380,
+        "revenue": 72000,
+        "status": true
+      },
+      "2023-03": {
+        "transactions": 420,
+        "revenue": 78000,
+        "status": true
+      },
+      "2023-04": {
+        "transactions": 450,
+        "revenue": 82000,
+        "status": true
+      },
+      "2023-05": {
+        "transactions": 480,
+        "revenue": 85000,
+        "status": true
+      },
+      "2023-06": {
+        "transactions": 460,
+        "revenue": 83000,
+        "status": true
+      }
+    },
+    "totals": {
+      "transactions": 12900,
+      "revenue": 3948425.87,
+      "visibility": [
+        "public",
+        "nda",
+        "buyer",
+        "internal"
+      ]
+    }
+  },
+  "financials": {
+    "metrics": {
+      "annual_revenue_projection": 955924.34,
+      "estimated_annual_ebitda": 248138.61,
+      "roi_percentage": 38.17,
+      "visibility": [
+        "public",
+        "nda",
+        "buyer",
+        "internal"
+      ]
+    },
+    "documents": []
+  },
+  "equipment": {
+    "total_value": 48500,
+    "visibility": [
+      "public",
+      "nda",
+      "buyer",
+      "internal"
+    ],
+    "items": []
+  },
+  "legal": {
+    "documents": []
+  },
+  "corporate": {
+    "documents": []
+  },
+  "other": {
+    "documents": []
+  },
+  "closing": {
+    "milestones": [
+      {
+        "name": "Offer Received",
+        "status": false,
+        "visibility": [
+          "closing",
+          "internal"
+        ]
+      },
+      {
+        "name": "LOI Signed",
+        "status": false,
+        "visibility": [
+          "closing",
+          "internal"
+        ]
+      },
+      {
+        "name": "Final Contract Executed",
+        "status": false,
+        "visibility": [
+          "closing",
+          "internal"
+        ]
+      }
+    ]
+  }
+}

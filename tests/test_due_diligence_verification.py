@@ -13,9 +13,9 @@ from typing import Dict, Any, List
 import jsonschema
 from jsonschema import validate, ValidationError
 
-# Add the current directory to the Python path
+# Add the parent directory to the Python path
 import sys
-sys.path.insert(0, str(Path(__file__).parent))
+sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from etl_pipeline.utils.due_diligence_manager import DueDiligenceManager
 

@@ -45,6 +45,9 @@
 03_LEGAL_DOCUMENTS/
 04_EQUIPMENT_DOCUMENTS/
 
+# Reorganized business data (contains all sensitive business documents)
+docs/
+
 # Website build files and generated content
 website/_next/
 website/.wrangler/

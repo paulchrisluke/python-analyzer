@@ -8,8 +8,8 @@ import jsonschema
 from pathlib import Path
 import sys
 
-# Add the current directory to the Python path
-sys.path.insert(0, str(Path(__file__).parent))
+# Add the parent directory to the Python path
+sys.path.insert(0, str(Path(__file__).parent.parent))
 
 # Import the schema from the test file
 from test_due_diligence_verification import MASTER_SCHEMA
@@ -20,7 +20,7 @@ def verify_final_exports():
     print("VERIFYING FINAL EXPORTED FILES")
     print("="*60)
     
-    stages_dir = Path(__file__).parent / "data" / "final" / "due_diligence_stages"
+    stages_dir = Path(__file__).parent.parent / "examples" / "data" / "final" / "due_diligence_stages"
     
     if not stages_dir.exists():
         print("❌ Stages directory does not exist!")

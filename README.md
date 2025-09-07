@@ -1,6 +1,6 @@
 # ETL Pipeline for Business Analysis
 
-A comprehensive Extract, Transform, Load (ETL) pipeline for business analysis and valuation, with specialized features for audiology practice due diligence.
+A comprehensive Extract, Transform, Load (ETL) pipeline for business analysis and valuation, with specialized features for due diligence data management.
 
 ## 🚀 Quick Start
 
@@ -11,7 +11,6 @@ A comprehensive Extract, Transform, Load (ETL) pipeline for business analysis an
 
 2. **Run the pipeline**:
    ```bash
-   cd 05_ANALYSIS_TOOLS
    python run_pipeline.py
    ```
 
@@ -23,9 +22,19 @@ A comprehensive Extract, Transform, Load (ETL) pipeline for business analysis an
 ## 📁 Repository Structure
 
 ```
-├── 05_ANALYSIS_TOOLS/           # ETL pipeline and analysis tools
+├── etl_pipeline/                # Core ETL pipeline modules
+│   ├── config/                  # Configuration files
+│   ├── extract/                 # Data extraction modules
+│   ├── transform/               # Data transformation modules
+│   ├── load/                    # Data loading modules
+│   └── utils/                   # Utility functions
+├── tests/                       # Test suite
+├── examples/                    # Example scripts and usage
+├── docs/                        # Documentation
 ├── website/                     # Cloudflare Pages website
-├── .gitignore                   # Privacy protection
+├── run_pipeline.py              # Main pipeline runner
+├── deploy_to_website.py         # Website deployment script
+├── requirements.txt             # Python dependencies
 └── README.md                    # This file
 ```
 
@@ -39,7 +48,7 @@ A comprehensive Extract, Transform, Load (ETL) pipeline for business analysis an
 
 ## 🔧 Configuration
 
-Configure business rules and data sources in `05_ANALYSIS_TOOLS/etl_pipeline/config/`:
+Configure business rules and data sources in `etl_pipeline/config/`:
 
 - `business_rules.yaml` - Business logic and analysis parameters
 - `data_sources.yaml` - Data source paths and processing options
@@ -54,8 +63,7 @@ The pipeline generates:
 ## 🧪 Testing
 
 ```bash
-cd 05_ANALYSIS_TOOLS
-python test_pipeline.py
+python -m pytest tests/
 ```
 
 ## 🔒 Privacy & Security

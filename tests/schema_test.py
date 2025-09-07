@@ -7,8 +7,8 @@ import sys
 import json
 from pathlib import Path
 
-# Add the current directory to the Python path
-sys.path.insert(0, str(Path(__file__).parent))
+# Add the parent directory to the Python path
+sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from etl_pipeline.utils.due_diligence_manager import DueDiligenceManager
 
