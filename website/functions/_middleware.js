@@ -29,9 +29,9 @@ export async function onRequest(context) {
     const decoded = atob(encoded);
     const [username, password] = decoded.split(':');
 
-    // Set your credentials here - CHANGE THESE!
-    const VALID_USERNAME = 'cranberry2025';
-    const VALID_PASSWORD = 'dueDiligence375K';
+    // Get credentials from environment variables
+    const VALID_USERNAME = context.env.AUTH_USERNAME;
+    const VALID_PASSWORD = context.env.AUTH_PASSWORD;
 
     if (username !== VALID_USERNAME || password !== VALID_PASSWORD) {
       return new Response('Invalid credentials', {
