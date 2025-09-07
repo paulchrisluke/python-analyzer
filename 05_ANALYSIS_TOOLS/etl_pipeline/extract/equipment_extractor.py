@@ -35,7 +35,9 @@ class EquipmentExtractor(BaseExtractor):
         """
         logger.info("Starting equipment data extraction...")
         
-        # Skip base config validation for equipment extractor
+        # Validate configuration before extraction
+        if not self._validate_config():
+            raise ValueError("Equipment extractor configuration validation failed")
         
         # Extract equipment quotes
         equipment_quotes = self._extract_equipment_quotes()
@@ -50,6 +52,41 @@ class EquipmentExtractor(BaseExtractor):
         self.log_extraction_summary(total_items, "Equipment PDF files")
         
         return self.equipment_data
+    
+    def _validate_config(self) -> bool:
+        """
+        Validate equipment extractor configuration.
+        
+        Returns:
+            True if configuration is valid, False otherwise
+        """
+        try:
+            # Check if path is configured and exists
+            path = self.config.get('path', '')
+            if not path:
+                logger.error("Equipment extractor: 'path' not configured")
+                return False
+            
+            path_obj = Path(path)
+            if not path_obj.exists():
+                logger.error(f"Equipment extractor: path does not exist: {path}")
+                return False
+            
+            if not path_obj.is_dir():
+                logger.error(f"Equipment extractor: path is not a directory: {path}")
+                return False
+            
+            # Check if pattern is configured
+            pattern = self.config.get('pattern', '')
+            if not pattern:
+                logger.warning("Equipment extractor: 'pattern' not configured, using default 'M1566*.pdf'")
+            
+            logger.info(f"Equipment extractor configuration validated: path={path}, pattern={pattern}")
+            return True
+            
+        except Exception as e:
+            logger.error(f"Equipment extractor configuration validation failed: {str(e)}")
+            return False
     
     def _extract_equipment_quotes(self) -> Optional[List[Dict[str, Any]]]:
         """Extract equipment data from PDF quote files."""

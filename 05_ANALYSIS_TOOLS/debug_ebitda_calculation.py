@@ -97,29 +97,38 @@ def debug_ebitda_calculation():
         if isinstance(pnl_info, dict) and 'data' in pnl_info:
             df = pd.DataFrame(pnl_info['data'])
             
-            # Calculate revenue
-            revenue_rows = df[df['Unnamed: 0'].str.contains('Sales', case=False, na=False)]
+            # Calculate revenue - check for required columns first
             monthly_revenue = 0
-            for _, row in revenue_rows.iterrows():
-                if pd.notna(row.get('TOTAL')) and row.get('TOTAL') != 0:
-                    monthly_revenue += parse_currency_value(row['TOTAL'])
+            if 'Unnamed: 0' in df.columns and 'TOTAL' in df.columns:
+                revenue_rows = df[df['Unnamed: 0'].str.contains('Sales', case=False, na=False)]
+                for _, row in revenue_rows.iterrows():
+                    total_value = row.get('TOTAL')
+                    if pd.notna(total_value) and total_value != 0:
+                        monthly_revenue += parse_currency_value(total_value)
+            else:
+                print(f"⚠️  Missing required columns in {pnl_key}: 'Unnamed: 0' or 'TOTAL' not found")
+                continue
             
-            # Calculate expenses
-            expense_rows = df[df['Unnamed: 0'].str.contains('Salaries|Wages|Rent|Insurance|Utilities|Office|Marketing|Professional|Payroll|Employee|Equipment|Supplies|Telephone|Travel|Training|Legal|Accounting|Interest|Tax|Depreciation|Amortization|COGS|Cost|Expense', case=False, na=False)]
-            
+            # Calculate expenses - check for required columns first
             monthly_operational_expenses = 0
             monthly_total_expenses = 0
             
-            for _, row in expense_rows.iterrows():
-                if pd.notna(row.get('TOTAL')) and row.get('TOTAL') != 0:
-                    expense_name = row['Unnamed: 0']
-                    expense_amount = parse_currency_value(row['TOTAL'])
-                    
-                    monthly_total_expenses += expense_amount
-                    
-                    # For EBITDA: exclude Interest, Tax, Depreciation, Amortization
-                    if not any(exclude in expense_name for exclude in ['Interest', 'Tax', 'Depreciation', 'Amortization', 'Total', 'Summary']):
-                        monthly_operational_expenses += expense_amount
+            if 'Unnamed: 0' in df.columns and 'TOTAL' in df.columns:
+                expense_rows = df[df['Unnamed: 0'].str.contains('Salaries|Wages|Rent|Insurance|Utilities|Office|Marketing|Professional|Payroll|Employee|Equipment|Supplies|Telephone|Travel|Training|Legal|Accounting|Interest|Tax|Depreciation|Amortization|COGS|Cost|Expense', case=False, na=False)]
+                
+                for _, row in expense_rows.iterrows():
+                    total_value = row.get('TOTAL')
+                    if pd.notna(total_value) and total_value != 0:
+                        expense_name = row.get('Unnamed: 0', '')
+                        expense_amount = parse_currency_value(total_value)
+                        
+                        monthly_total_expenses += expense_amount
+                        
+                        # For EBITDA: exclude Interest, Tax, Depreciation, Amortization (case-insensitive)
+                        expense_name_lower = expense_name.lower() if expense_name else ''
+                        exclude_terms = ['interest', 'tax', 'depreciation', 'amortization', 'total', 'summary']
+                        if not any(exclude_term in expense_name_lower for exclude_term in exclude_terms):
+                            monthly_operational_expenses += expense_amount
             
             # Calculate monthly EBITDA
             if monthly_revenue > 0:

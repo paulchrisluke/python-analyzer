@@ -296,9 +296,10 @@ class ETLPipeline:
             if 'business_metrics' in self.transformers:
                 logger.info("Calculating business metrics...")
                 # Pass both normalized and raw data for comprehensive analysis
+                # Fall back to raw data if normalized data is empty
                 combined_data = {
                     'sales': self.normalized_data.get('sales', {}),
-                    'financial': self.normalized_data.get('financial', {})
+                    'financial': self.normalized_data.get('financial', self.raw_data.get('financial', {}))
                 }
                 business_metrics = self.transformers['business_metrics'].calculate_comprehensive_metrics(combined_data)
                 self.final_data['business_metrics'] = business_metrics

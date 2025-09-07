@@ -106,6 +106,12 @@ class BaseLoader(ABC):
     
     def start_load_session(self) -> None:
         """Start a new load session."""
+        # Reset per-session metadata fields
+        self.load_metadata['load_events'] = []
+        self.load_metadata['files_created'] = []
+        self.load_metadata['errors'] = []
+        self.load_metadata['total_records_processed'] = 0
+        
         self.load_metadata['start_time'] = datetime.now().isoformat()
         self.add_load_event('session_started', 'Load session started')
     

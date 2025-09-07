@@ -132,7 +132,7 @@ def main():
             return 1
             
     except Exception as e:
-        logger.error(f"Unexpected error: {str(e)}")
+        logger.exception("Unexpected error: %s", e)
         return 1
 
 if __name__ == "__main__":

@@ -38,25 +38,44 @@ class ReportGenerator(BaseLoader):
         """
         logger.info("Starting report generation...")
         
-        report_results = {}
+        # Start load session and reset results
+        self.load_results = {}
+        self.start_load_session()
         
-        # Generate business sale report
-        business_report = self._generate_business_sale_report(transformed_data)
-        if business_report:
-            report_results['business_sale_report'] = business_report
-        
-        # Generate verifiable analysis report
-        verifiable_report = self._generate_verifiable_analysis_report(transformed_data)
-        if verifiable_report:
-            report_results['verifiable_analysis_report'] = verifiable_report
-        
-        # Generate West View analysis report
-        west_view_report = self._generate_west_view_report(transformed_data)
-        if west_view_report:
-            report_results['west_view_report'] = west_view_report
-        
-        logger.info("Report generation completed")
-        return report_results
+        try:
+            # Generate business sale report
+            business_report = self._generate_business_sale_report(transformed_data)
+            if business_report:
+                self.load_results['business_sale_report'] = business_report
+                self.add_load_event('file_created', f'Business sale report generated: {business_report}')
+            
+            # Generate verifiable analysis report
+            verifiable_report = self._generate_verifiable_analysis_report(transformed_data)
+            if verifiable_report:
+                self.load_results['verifiable_analysis_report'] = verifiable_report
+                self.add_load_event('file_created', f'Verifiable analysis report generated: {verifiable_report}')
+            
+            # Generate West View analysis report
+            west_view_report = self._generate_west_view_report(transformed_data)
+            if west_view_report:
+                self.load_results['west_view_report'] = west_view_report
+                self.add_load_event('file_created', f'West View report generated: {west_view_report}')
+            
+            # Add session metadata
+            self.load_results['session_id'] = id(self)
+            self.load_results['generated_at'] = datetime.now().isoformat()
+            self.load_results['status'] = 'completed'
+            self.load_results['reports_generated'] = len(self.load_results) - 3  # Exclude metadata fields
+            
+            logger.info("Report generation completed")
+            return self.load_results
+            
+        except Exception as e:
+            self.add_load_event('error', f'Report generation failed: {str(e)}')
+            self.load_results['status'] = 'failed'
+            raise
+        finally:
+            self.end_load_session()
     
     def _generate_business_sale_report(self, transformed_data: Dict[str, Any]) -> Optional[str]:
         """Generate professional business sale report."""
@@ -76,7 +95,7 @@ class ReportGenerator(BaseLoader):
             return str(report_path)
             
         except Exception as e:
-            logger.error(f"Error generating business sale report: {str(e)}")
+            logger.exception("Error generating business sale report: %s", e)
             return None
     
     def _generate_verifiable_analysis_report(self, transformed_data: Dict[str, Any]) -> Optional[str]:
@@ -98,7 +117,7 @@ class ReportGenerator(BaseLoader):
             return str(report_path)
             
         except Exception as e:
-            logger.error(f"Error generating verifiable analysis report: {str(e)}")
+            logger.exception("Error generating verifiable analysis report: %s", e)
             return None
     
     def _generate_west_view_report(self, transformed_data: Dict[str, Any]) -> Optional[str]:
@@ -119,7 +138,7 @@ class ReportGenerator(BaseLoader):
             return str(report_path)
             
         except Exception as e:
-            logger.error(f"Error generating West View report: {str(e)}")
+            logger.exception("Error generating West View report: %s", e)
             return None
     
     def _create_business_sale_html(self, business_metrics: Dict[str, Any]) -> str:

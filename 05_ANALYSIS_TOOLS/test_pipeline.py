@@ -454,9 +454,9 @@ def test_data_coverage_analysis():
             if coverage_type in coverage_data:
                 coverage_info = coverage_data[coverage_type]
                 if isinstance(coverage_info, dict):
-                    coverage_pct = coverage_info.get('coverage_percentage', 0)
+                    completeness_score = coverage_info.get('completeness_score', 0)
                     status = coverage_info.get('status', 'unknown')
-                    print(f"✅ {coverage_type}: {coverage_pct}% coverage, status: {status}")
+                    print(f"✅ {coverage_type}: {completeness_score}% completeness score, status: {status}")
                 else:
                     print(f"✅ {coverage_type}: {coverage_info}")
             else:

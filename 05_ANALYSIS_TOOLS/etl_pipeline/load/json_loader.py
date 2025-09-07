@@ -242,9 +242,12 @@ class JsonLoader(BaseLoader):
         final_dir = self.output_dir / "final"
         final_dir.mkdir(exist_ok=True)
         
+        # Sanitize coverage analysis before JSON serialization
+        sanitized_coverage = self._sanitize_for_json(coverage_analysis)
+        
         # Save coverage analysis
         coverage_file = final_dir / "due_diligence_coverage.json"
-        FileUtils.save_json(coverage_analysis, str(coverage_file))
+        FileUtils.save_json(sanitized_coverage, str(coverage_file))
         self.load_results['due_diligence_coverage'] = str(coverage_file)
         logger.info(f"Due diligence coverage analysis saved to: {coverage_file}")
     
@@ -522,9 +525,17 @@ class JsonLoader(BaseLoader):
         
         for key, value in equipment_data.items():
             if isinstance(value, pd.DataFrame):
-                # Convert DataFrame to list of dictionaries
+                # Convert DataFrame to list of dictionaries with proper normalization
+                records = value.to_dict('records')
+                normalized_records = []
+                for record in records:
+                    normalized_record = {}
+                    for k, v in record.items():
+                        normalized_record[k] = self._normalize_scalar_value(v)
+                    normalized_records.append(normalized_record)
+                
                 converted_data[key] = {
-                    'data': value.to_dict('records'),
+                    'data': normalized_records,
                     'columns': list(value.columns),
                     'shape': value.shape,
                     'dtypes': {k: str(v) for k, v in value.dtypes.to_dict().items()}
@@ -537,25 +548,46 @@ class JsonLoader(BaseLoader):
                         # Ensure all values are JSON-serializable
                         serializable_item = {}
                         for k, v in item.items():
-                            if hasattr(v, 'isoformat'):  # datetime objects
-                                serializable_item[k] = v.isoformat()
-                            elif isinstance(v, (int, float, str, bool, type(None))):
-                                serializable_item[k] = v
-                            else:
-                                serializable_item[k] = str(v)
+                            serializable_item[k] = self._normalize_scalar_value(v)
                         converted_data[key].append(serializable_item)
                     else:
-                        converted_data[key].append(str(item))
+                        converted_data[key].append(self._normalize_scalar_value(item))
             elif isinstance(value, dict):
                 # Recursively convert nested dictionaries
                 converted_data[key] = self._convert_equipment_to_json_serializable(value)
             else:
                 # Handle other types
-                if hasattr(value, 'isoformat'):  # datetime objects
-                    converted_data[key] = value.isoformat()
-                elif isinstance(value, (int, float, str, bool, type(None))):
-                    converted_data[key] = value
-                else:
-                    converted_data[key] = str(value)
+                converted_data[key] = self._normalize_scalar_value(value)
         
         return converted_data
+    
+    def _normalize_scalar_value(self, value: Any) -> Any:
+        """Normalize scalar values to be JSON-safe."""
+        import math
+        
+        # Handle numpy scalars
+        if isinstance(value, (np.integer, np.floating)):
+            return value.item()
+        
+        # Handle numpy arrays
+        if isinstance(value, np.ndarray):
+            return value.tolist()
+        
+        # Handle NaN/Inf values
+        if pd.isna(value) or (isinstance(value, float) and not math.isfinite(value)):
+            return None
+        
+        # Handle timezone-aware datetimes
+        if hasattr(value, 'isoformat'):
+            if hasattr(value, 'tzinfo') and value.tzinfo is not None:
+                # Convert to UTC then to ISO string
+                return value.astimezone().isoformat()
+            else:
+                return value.isoformat()
+        
+        # Handle basic JSON-safe types
+        if isinstance(value, (int, float, str, bool, type(None))):
+            return value
+        
+        # Fallback to string representation
+        return str(value)

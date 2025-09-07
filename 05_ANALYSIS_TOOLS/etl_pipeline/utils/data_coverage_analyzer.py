@@ -92,14 +92,20 @@ class DataCoverageAnalyzer:
             coverage['data_quality_issues'].append('No main sales data found')
             return coverage
         
-        # Get analysis period
+        # Get analysis period with proper date normalization
         analysis_period = self.business_rules.get('analysis_period', {})
         start_date = pd.to_datetime(analysis_period.get('start_date', '2021-01-01'))
-        # Clamp end_date to today to avoid penalizing future months
         end_date = pd.to_datetime(analysis_period.get('end_date', '2025-12-31'))
         today = pd.to_datetime('today')
-        if end_date > today:
-            end_date = today
+        
+        # Clamp end_date to today to avoid penalizing future months
+        end_date = min(end_date, today)
+        
+        # Short-circuit if start_date > end_date to avoid invalid analysis periods
+        if start_date > end_date:
+            coverage['status'] = 'invalid_period'
+            coverage['data_quality_issues'].append(f'Invalid analysis period: start_date ({start_date.date()}) > end_date ({end_date.date()})')
+            return coverage
         
         # Ensure we have a DataFrame
         if not isinstance(df, pd.DataFrame):
@@ -138,6 +144,7 @@ class DataCoverageAnalyzer:
         completeness_score = (actual_months_count / total_expected_months) * 100
         
         coverage['completeness_score'] = round(completeness_score, 1)
+        coverage['coverage_percentage'] = round(completeness_score, 1)  # Add mirror field for backward compatibility
         coverage['missing_periods'] = sorted([str(month) for month in missing_months])
         coverage['coverage_details'] = {
             'total_expected_months': total_expected_months,
@@ -220,6 +227,7 @@ class DataCoverageAnalyzer:
         completeness_score = (found_count / total_expected) * 100
         
         coverage['completeness_score'] = round(completeness_score, 1)
+        coverage['coverage_percentage'] = round(completeness_score, 1)  # Add mirror field for backward compatibility
         coverage['missing_documents'] = missing_docs
         coverage['coverage_details'] = {
             'found_documents': found_docs,
@@ -300,6 +308,7 @@ class DataCoverageAnalyzer:
         completeness_score = (len(found_categories) / len(expected_categories)) * 100
         
         coverage['completeness_score'] = round(completeness_score, 1)
+        coverage['coverage_percentage'] = round(completeness_score, 1)  # Add mirror field for backward compatibility
         coverage['missing_documents'] = list(missing_categories)
         coverage['coverage_details'] = {
             'equipment_count': equipment_count,

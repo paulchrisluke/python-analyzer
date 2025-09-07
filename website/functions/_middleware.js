@@ -15,9 +15,8 @@ export async function onRequest(context) {
       });
     }
 
-    const [scheme, encoded] = auth.split(' ');
-
-    if (!encoded || scheme !== 'Basic') {
+    const authParts = auth.split(' ');
+    if (authParts.length !== 2) {
       return new Response('Invalid authentication', {
         status: 401,
         headers: {
@@ -26,8 +25,41 @@ export async function onRequest(context) {
       });
     }
 
-    const decoded = atob(encoded);
-    const [username, password] = decoded.split(':');
+    const [scheme, encoded] = authParts;
+
+    if (!encoded || scheme.toLowerCase() !== 'basic') {
+      return new Response('Invalid authentication', {
+        status: 401,
+        headers: {
+          'WWW-Authenticate': 'Basic realm="Due Diligence Documents"'
+        }
+      });
+    }
+
+    let decoded;
+    try {
+      decoded = atob(encoded);
+    } catch (e) {
+      return new Response('Invalid authentication', {
+        status: 401,
+        headers: {
+          'WWW-Authenticate': 'Basic realm="Due Diligence Documents"'
+        }
+      });
+    }
+
+    const colonIndex = decoded.indexOf(':');
+    if (colonIndex === -1) {
+      return new Response('Invalid authentication', {
+        status: 401,
+        headers: {
+          'WWW-Authenticate': 'Basic realm="Due Diligence Documents"'
+        }
+      });
+    }
+
+    const username = decoded.substring(0, colonIndex);
+    const password = decoded.substring(colonIndex + 1);
 
     // Get credentials from environment variables
     const VALID_USERNAME = context.env.AUTH_USERNAME;

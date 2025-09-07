@@ -88,7 +88,7 @@ class FinancialExtractor(BaseExtractor):
                     else:
                         logger.error(f"Could not decode P&L 2023 file {file_path} with any encoding")
                 except Exception as e:
-                    logger.error(f"Error loading P&L 2023 file {file_path}: {str(e)}")
+                    logger.exception("Error loading P&L 2023 file %s", file_path)
         
         # 2024 P&L data
         pnl_2024_path = Path(self.config.get('financial_pnl_2024', {}).get('path', ''))
@@ -109,7 +109,7 @@ class FinancialExtractor(BaseExtractor):
                     else:
                         logger.error(f"Could not decode P&L 2024 file {file_path} with any encoding")
                 except Exception as e:
-                    logger.error(f"Error loading P&L 2024 file {file_path}: {str(e)}")
+                    logger.exception("Error loading P&L 2024 file %s", file_path)
         
         return pnl_data if pnl_data else None
     
@@ -135,7 +135,7 @@ class FinancialExtractor(BaseExtractor):
                     else:
                         logger.error(f"Could not decode balance sheet file {file_path} with any encoding")
                 except Exception as e:
-                    logger.error(f"Error loading balance sheet file {file_path}: {str(e)}")
+                    logger.exception("Error loading balance sheet file %s", file_path)
         
         return balance_sheet_data if balance_sheet_data else None
     
@@ -161,7 +161,7 @@ class FinancialExtractor(BaseExtractor):
                     else:
                         logger.error(f"Could not decode general ledger file {file_path} with any encoding")
                 except Exception as e:
-                    logger.error(f"Error loading general ledger file {file_path}: {str(e)}")
+                    logger.exception("Error loading general ledger file %s", file_path)
         
         return general_ledger_data if general_ledger_data else None
     
@@ -179,7 +179,7 @@ class FinancialExtractor(BaseExtractor):
                     cogs_data[f'cogs_{filename}'] = df
                     logger.info(f"Loaded COGS data: {filename} ({len(df)} records)")
                 except Exception as e:
-                    logger.error(f"Error loading COGS file {file_path}: {str(e)}")
+                    logger.exception("Error loading COGS file %s", file_path)
         
         return cogs_data if cogs_data else None
     

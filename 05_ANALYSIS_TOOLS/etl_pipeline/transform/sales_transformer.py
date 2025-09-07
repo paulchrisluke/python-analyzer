@@ -167,11 +167,17 @@ class SalesTransformer(BaseTransformer):
         
         # Clean boolean columns
         if 'receipt_paid' in df.columns:
-            # First coerce to strings, strip whitespace, then lowercase before checking membership
-            # Preserve original nulls by treating NaNs separately
-            df['receipt_paid'] = df['receipt_paid'].astype(str).str.strip().str.lower().isin(['yes', 'true', '1', 'y'])
-            # Set result to NaN where original value was null
+            # Capture original nulls before any operations
             original_nulls = df['receipt_paid'].isnull()
+            
+            # Perform string coercion, strip, and lowercase
+            df['receipt_paid'] = df['receipt_paid'].astype(str).str.strip().str.lower()
+            
+            # Create boolean mask for valid values
+            boolean_mask = df['receipt_paid'].isin(['yes', 'true', '1', 'y'])
+            
+            # Apply boolean mask and restore original nulls
+            df['receipt_paid'] = boolean_mask
             df.loc[original_nulls, 'receipt_paid'] = None
         
         return df

@@ -118,7 +118,12 @@ class SalesExtractor(BaseExtractor):
             'conversions': self.config.get('conversions_pattern', '*conversions*.csv')
         }
         
-        base_path = Path(self.config['path']).parent
+        # Detect whether config path is a directory or file
+        config_path = Path(self.config['path'])
+        if config_path.is_dir():
+            base_path = config_path
+        else:
+            base_path = config_path.parent
         
         for data_type, pattern in related_types.items():
             try:
