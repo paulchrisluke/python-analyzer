@@ -17,7 +17,7 @@ logger = logging.getLogger(__name__)
 
 def parse_price_value(price_raw):
     """
-    Robust price parser that handles currency strings, N/A values, and various formats.
+    Robust price parser that handles currency strings, N/A values, negatives, and parentheses.
     Returns 0.0 on failure.
     """
     if price_raw is None:
@@ -31,15 +31,31 @@ def parse_price_value(price_raw):
         if not price_str or price_str.upper() in ['N/A', 'NA', 'NULL', 'NONE', '']:
             return 0.0
         
-        # Use regex to extract the first numeric pattern
-        # This handles formats like "$1,234.56", "1,234.56", "1234.56", etc.
-        numeric_match = re.search(r'[\d,]+\.?\d*', price_str)
+        # Check for parentheses (negative values)
+        is_negative = price_str.startswith('(') and price_str.endswith(')')
+        if is_negative:
+            price_str = price_str[1:-1]  # Remove parentheses
+        
+        # Check for explicit negative sign
+        has_negative_sign = price_str.startswith('-')
+        if has_negative_sign:
+            price_str = price_str[1:]  # Remove negative sign
+        
+        # Use regex to extract numeric pattern with optional decimal
+        # This handles formats like "$1,234.56", "1,234.56", "1234.56", ".99", etc.
+        numeric_match = re.search(r'[\d,]*\.?\d+', price_str)
         if numeric_match:
             numeric_str = numeric_match.group()
             # Remove commas
             numeric_str = numeric_str.replace(',', '')
             # Convert to float
-            return float(numeric_str)
+            result = float(numeric_str)
+            
+            # Apply negative if parentheses or negative sign were present
+            if is_negative or has_negative_sign:
+                result = -result
+                
+            return result
         else:
             return 0.0
             
@@ -67,7 +83,7 @@ class JsonLoader(BaseLoader):
             transformed_data: Transformed data to load
             
         Returns:
-            Dict containing load results
+            Dict containing load results and metadata
         """
         logger.info("Starting JSON data loading...")
         
@@ -96,12 +112,13 @@ class JsonLoader(BaseLoader):
             if 'equipment_data' in transformed_data:
                 self._load_equipment_data(transformed_data['equipment_data'])
             
-            logger.info("JSON data loading completed")
-            return self.load_results
-            
         except Exception as e:
-            self.add_load_event('error', f'Load failed: {str(e)}')
+            self.add_load_event('error', f'Load failed: {e!s}')
+            logger.exception("Load failed")
             raise
+        else:
+            logger.info("JSON data loading completed")
+            return {"results": self.load_results, "metadata": self.get_load_metadata()}
         finally:
             self.end_load_session()
     
