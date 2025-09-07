@@ -3,9 +3,10 @@ Logging configuration for ETL pipeline.
 """
 
 import logging
+import os
 import sys
 from pathlib import Path
-from datetime import datetime
+from datetime import datetime, timezone
 
 def setup_logging(log_level=logging.INFO, log_file=None):
     """
@@ -22,7 +23,7 @@ def setup_logging(log_level=logging.INFO, log_file=None):
     
     # Default log file if none provided
     if log_file is None:
-        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        timestamp = datetime.now(timezone.utc).strftime("%Y%m%d_%H%M%S")
         log_file = log_dir / f"etl_pipeline_{timestamp}.log"
     
     # Configure logging

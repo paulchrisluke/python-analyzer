@@ -7,6 +7,50 @@ This script reads the actual pipeline output and compares it with website target
 import json
 import sys
 import os
+import re
+
+def _to_number(value):
+    """Convert various string/numeric formats to float, handling currency symbols and commas."""
+    if value is None:
+        return 0.0
+    
+    if isinstance(value, (int, float)):
+        return float(value)
+    
+    if isinstance(value, str):
+        # Remove currency symbols, commas, and whitespace
+        cleaned = re.sub(r'[$,\s]', '', value.strip())
+        try:
+            return float(cleaned)
+        except ValueError:
+            return 0.0
+    
+    return 0.0
+
+def _normalize_percent(value):
+    """Convert percentage values to decimal, handling both percentage strings and numeric values."""
+    if value is None:
+        return 0.0
+    
+    if isinstance(value, (int, float)):
+        # If value is > 1, assume it's a percentage and convert to decimal
+        if value > 1:
+            return value / 100
+        return value
+    
+    if isinstance(value, str):
+        # Remove % symbol and whitespace
+        cleaned = re.sub(r'[%\s]', '', value.strip())
+        try:
+            num_value = float(cleaned)
+            # If value is > 1, assume it's a percentage and convert to decimal
+            if num_value > 1:
+                return num_value / 100
+            return num_value
+        except ValueError:
+            return 0.0
+    
+    return 0.0
 
 def main():
     print("🔍 EBITDA CALCULATION DEBUG ANALYSIS")

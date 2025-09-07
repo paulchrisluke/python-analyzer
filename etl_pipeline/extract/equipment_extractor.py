@@ -8,6 +8,8 @@ import logging
 from pathlib import Path
 import subprocess
 import json
+import re
+from decimal import Decimal, InvalidOperation
 from .base_extractor import BaseExtractor
 from ..utils.file_utils import FileUtils
 
@@ -93,22 +95,24 @@ class EquipmentExtractor(BaseExtractor):
         equipment_quotes = []
         
         # Find equipment PDF files
-        base_path = Path(self.config.get('path', ''))
-        if base_path.exists():
-            # Get pattern from config with fallback to default
-            pattern = self.config.get('pattern', 'M1566*.pdf')
-            if not isinstance(pattern, str) or not pattern.strip():
-                pattern = 'M1566*.pdf'
-            pdf_files = FileUtils.find_files(str(base_path), pattern)
-            
-            for pdf_file in pdf_files:
-                try:
-                    equipment_info = self._extract_pdf_equipment_data(pdf_file)
-                    if equipment_info:
-                        equipment_quotes.append(equipment_info)
-                        logger.info(f"Extracted equipment data from: {Path(pdf_file).name}")
-                except Exception as e:
-                    logger.error(f"Error extracting equipment data from {pdf_file}: {str(e)}")
+        path_str = self.config.get('path', '')
+        if path_str and path_str.strip():
+            base_path = Path(path_str)
+            if base_path.exists():
+                # Get pattern from config with fallback to default
+                pattern = self.config.get('pattern', 'M1566*.pdf')
+                if not isinstance(pattern, str) or not pattern.strip():
+                    pattern = 'M1566*.pdf'
+                pdf_files = FileUtils.find_files(str(base_path), pattern)
+                
+                for pdf_file in pdf_files:
+                    try:
+                        equipment_info = self._extract_pdf_equipment_data(pdf_file)
+                        if equipment_info:
+                            equipment_quotes.append(equipment_info)
+                            logger.info(f"Extracted equipment data from: {Path(pdf_file).name}")
+                    except Exception as e:
+                        logger.error(f"Error extracting equipment data from {pdf_file}: {str(e)}")
         
         return equipment_quotes if equipment_quotes else None
     
@@ -132,8 +136,14 @@ class EquipmentExtractor(BaseExtractor):
     def _extract_pdf_text(self, pdf_path: str) -> Optional[str]:
         """Extract text from PDF using pdftotext command."""
         try:
+            # Validate that pdf_path is a valid file
+            pdf_file = Path(pdf_path)
+            if not pdf_file.is_file():
+                logger.warning(f"Invalid PDF path: {pdf_path}")
+                return None
+
             result = subprocess.run(
-                ['pdftotext', pdf_path, '-'],
+                ['pdftotext', str(pdf_file), '-'],
                 capture_output=True,
                 text=True,
                 timeout=30
@@ -203,7 +213,6 @@ class EquipmentExtractor(BaseExtractor):
     
     def _extract_price_from_text(self, text: str) -> Optional[float]:
         """Extract price information from text."""
-        import re
         
         # Look for price patterns
         price_patterns = [
@@ -219,15 +228,14 @@ class EquipmentExtractor(BaseExtractor):
                 # Extract numeric value from first match
                 price_str = re.sub(r'[^\d.,]', '', matches[0])
                 try:
-                    return float(price_str.replace(',', ''))
-                except ValueError:
+                    return Decimal(price_str.replace(',', '')).quantize(Decimal('0.01'))
+                except (ValueError, InvalidOperation):
                     continue
         
         return None
     
     def _extract_date_from_text(self, text: str) -> Optional[str]:
         """Extract date information from text."""
-        import re
         
         # Look for date patterns
         date_patterns = [

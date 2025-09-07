@@ -14,6 +14,23 @@ sys.path.insert(0, str(Path(__file__).parent.parent))
 # Import the schema from the test file
 from test_due_diligence_verification import MASTER_SCHEMA
 
+def has_file_paths(cat_data):
+    """Check if category data contains any non-None file paths in documents or equipment items."""
+    if not isinstance(cat_data, dict):
+        return False
+    
+    # Check documents
+    for doc in cat_data["documents"]:
+        if doc["file_path"] is not None:
+            return True
+    
+    # Check equipment items
+    for item in cat_data["equipment"]["items"]:
+        if item["file_path"] is not None:
+            return True
+    
+    return False
+
 def verify_final_exports():
     """Verify the final exported files."""
     print("="*60)

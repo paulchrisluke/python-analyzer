@@ -6,7 +6,7 @@ from abc import ABC, abstractmethod
 from typing import Dict, Any, List, Optional
 import pandas as pd
 import logging
-from datetime import datetime
+from datetime import datetime, timezone
 
 logger = logging.getLogger(__name__)
 
@@ -74,5 +74,5 @@ class BaseTransformer(ABC):
             'input_count': input_count,
             'output_count': output_count,
             'transformation_type': transformation_type,
-            'transformation_timestamp': datetime.now().isoformat()
+            'transformation_timestamp': datetime.now(timezone.utc).isoformat()
         })

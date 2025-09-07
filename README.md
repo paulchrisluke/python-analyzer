@@ -27,14 +27,24 @@ A comprehensive Extract, Transform, Load (ETL) pipeline for business analysis an
 │   ├── extract/                 # Data extraction modules
 │   ├── transform/               # Data transformation modules
 │   ├── load/                    # Data loading modules
-│   └── utils/                   # Utility functions
+│   ├── utils/                   # Utility functions
+│   └── pipeline_runner.py       # Internal pipeline runner
+├── data/                        # Data storage and processing
+│   ├── final/                   # Processed output data
+│   ├── normalized/              # Normalized data files
+│   ├── raw/                     # Raw input data
+│   └── pipeline_summary.json    # Pipeline execution summary
+├── reports/                     # Generated analysis reports
+├── logs/                        # Pipeline execution logs
 ├── tests/                       # Test suite
 ├── examples/                    # Example scripts and usage
 ├── docs/                        # Documentation
 ├── website/                     # Cloudflare Pages website
 ├── run_pipeline.py              # Main pipeline runner
 ├── deploy_to_website.py         # Website deployment script
+├── deploy_website.sh            # Website deployment shell script
 ├── requirements.txt             # Python dependencies
+├── ETL_PIPELINE_TECHNICAL_DOCUMENTATION.md  # Technical documentation
 └── README.md                    # This file
 ```
 

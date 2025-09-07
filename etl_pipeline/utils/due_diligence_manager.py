@@ -281,6 +281,25 @@ class DueDiligenceManager:
         
         return stage_data
     
+    def _hide_file_paths_for_stage(self, item: Dict[str, Any], stage: str) -> Dict[str, Any]:
+        """
+        Hide file paths in an item based on the stage.
+        
+        Args:
+            item: Dictionary containing document/item data
+            stage: Stage name (public, nda, buyer, closing, internal)
+            
+        Returns:
+            Copy of item with file paths hidden if needed
+        """
+        filtered_item = item.copy()
+        
+        # Hide file paths for buyer, nda, and public stages
+        if stage in ["buyer", "nda", "public"] and "file_path" in filtered_item:
+            filtered_item["file_path"] = None
+        
+        return filtered_item
+
     def _filter_meta(self, stage: str) -> Dict[str, Any]:
         """Filter metadata for stage."""
         if stage == "public":
@@ -328,20 +347,7 @@ class DueDiligenceManager:
             filtered["documents"] = []
             for doc in self.data.financials["documents"]:
                 if stage in doc.get("visibility", ["internal"]):
-                    filtered_doc = doc.copy()
-                    
-                    # Hide file paths for buyer stage
-                    if stage == "buyer" and "file_path" in filtered_doc:
-                        filtered_doc["file_path"] = None
-                    
-                    # Hide file paths for nda stage
-                    if stage == "nda" and "file_path" in filtered_doc:
-                        filtered_doc["file_path"] = None
-                    
-                    # Hide file paths for public stage
-                    if stage == "public" and "file_path" in filtered_doc:
-                        filtered_doc["file_path"] = None
-                    
+                    filtered_doc = self._hide_file_paths_for_stage(doc, stage)
                     filtered["documents"].append(filtered_doc)
         
         return filtered
@@ -360,20 +366,7 @@ class DueDiligenceManager:
             filtered["items"] = []
             for item in self.data.equipment["items"]:
                 if stage in item.get("visibility", ["internal"]):
-                    filtered_item = item.copy()
-                    
-                    # Hide file paths for buyer stage
-                    if stage == "buyer" and "file_path" in filtered_item:
-                        filtered_item["file_path"] = None
-                    
-                    # Hide file paths for nda stage
-                    if stage == "nda" and "file_path" in filtered_item:
-                        filtered_item["file_path"] = None
-                    
-                    # Hide file paths for public stage
-                    if stage == "public" and "file_path" in filtered_item:
-                        filtered_item["file_path"] = None
-                    
+                    filtered_item = self._hide_file_paths_for_stage(item, stage)
                     filtered["items"].append(filtered_item)
         
         return filtered
@@ -387,20 +380,7 @@ class DueDiligenceManager:
             filtered_docs = []
             for doc in self.data.legal["documents"]:
                 if stage in doc.get("visibility", ["internal"]):
-                    filtered_doc = doc.copy()
-                    
-                    # Hide file paths for buyer stage
-                    if stage == "buyer" and "file_path" in filtered_doc:
-                        filtered_doc["file_path"] = None
-                    
-                    # Hide file paths for nda stage
-                    if stage == "nda" and "file_path" in filtered_doc:
-                        filtered_doc["file_path"] = None
-                    
-                    # Hide file paths for public stage
-                    if stage == "public" and "file_path" in filtered_doc:
-                        filtered_doc["file_path"] = None
-                    
+                    filtered_doc = self._hide_file_paths_for_stage(doc, stage)
                     filtered_docs.append(filtered_doc)
             
             return {"documents": filtered_docs}
@@ -416,20 +396,7 @@ class DueDiligenceManager:
             filtered_docs = []
             for doc in self.data.corporate["documents"]:
                 if stage in doc.get("visibility", ["internal"]):
-                    filtered_doc = doc.copy()
-                    
-                    # Hide file paths for buyer stage
-                    if stage == "buyer" and "file_path" in filtered_doc:
-                        filtered_doc["file_path"] = None
-                    
-                    # Hide file paths for nda stage
-                    if stage == "nda" and "file_path" in filtered_doc:
-                        filtered_doc["file_path"] = None
-                    
-                    # Hide file paths for public stage
-                    if stage == "public" and "file_path" in filtered_doc:
-                        filtered_doc["file_path"] = None
-                    
+                    filtered_doc = self._hide_file_paths_for_stage(doc, stage)
                     filtered_docs.append(filtered_doc)
             
             return {"documents": filtered_docs}
@@ -445,20 +412,7 @@ class DueDiligenceManager:
             filtered_docs = []
             for doc in self.data.other["documents"]:
                 if stage in doc.get("visibility", ["internal"]):
-                    filtered_doc = doc.copy()
-                    
-                    # Hide file paths for buyer stage
-                    if stage == "buyer" and "file_path" in filtered_doc:
-                        filtered_doc["file_path"] = None
-                    
-                    # Hide file paths for nda stage
-                    if stage == "nda" and "file_path" in filtered_doc:
-                        filtered_doc["file_path"] = None
-                    
-                    # Hide file paths for public stage
-                    if stage == "public" and "file_path" in filtered_doc:
-                        filtered_doc["file_path"] = None
-                    
+                    filtered_doc = self._hide_file_paths_for_stage(doc, stage)
                     filtered_docs.append(filtered_doc)
             
             return {"documents": filtered_docs}
@@ -750,10 +704,15 @@ class DueDiligenceManager:
             sales_revenue = self.data.sales.get("totals", {}).get("revenue", 0)
             financial_revenue = self.data.financials.get("metrics", {}).get("annual_revenue_projection", 0)
             
-            if sales_revenue > 0 and financial_revenue > 0:
+            # Guard against division by zero
+            denom = max(sales_revenue, financial_revenue)
+            if denom == 0:
+                # If both revenues are zero, consider it consistent (no inconsistency to flag)
+                cross_checks["sales_financial_consistency"] = True
+            else:
                 # Check if they're within 20% tolerance
                 tolerance = 0.2
-                if abs(sales_revenue - financial_revenue) / max(sales_revenue, financial_revenue) > tolerance:
+                if abs(sales_revenue - financial_revenue) / denom > tolerance:
                     cross_checks["sales_financial_consistency"] = False
         
         # Check equipment value reasonableness

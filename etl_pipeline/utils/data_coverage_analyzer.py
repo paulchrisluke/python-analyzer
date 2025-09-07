@@ -8,6 +8,7 @@ import logging
 from pathlib import Path
 from datetime import datetime, timedelta
 import json
+from decimal import Decimal, ROUND_HALF_UP
 
 logger = logging.getLogger(__name__)
 
@@ -152,7 +153,7 @@ class DataCoverageAnalyzer:
             'missing_months': len(missing_months),
             'date_range': f"{df_filtered['sale_date'].min().date()} to {df_filtered['sale_date'].max().date()}",
             'total_transactions': len(df_filtered),
-            'total_revenue': float(self._get_total_revenue(df_filtered))
+            'total_revenue': Decimal(str(self._get_total_revenue(df_filtered))).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
         }
         
         # Determine status

@@ -6,6 +6,7 @@ import pandas as pd
 from typing import Dict, Any, List, Optional
 import logging
 from pathlib import Path
+from decimal import Decimal, ROUND_HALF_UP
 from .base_extractor import BaseExtractor
 
 logger = logging.getLogger(__name__)
@@ -58,8 +59,18 @@ class SalesExtractor(BaseExtractor):
     def _extract_main_sales(self) -> Optional[pd.DataFrame]:
         """Extract main sales data."""
         try:
+            # Validate required 'path' configuration
+            if 'path' not in self.config:
+                logger.error("Missing required 'path' configuration for sales data extraction")
+                return None
+            
+            path_value = self.config['path']
+            if not path_value or not isinstance(path_value, str):
+                logger.error(f"Invalid 'path' configuration: must be a non-empty string, got {type(path_value).__name__}")
+                return None
+            
             # Check if path is a directory (use pattern) or file (direct path)
-            path = Path(self.config['path'])
+            path = Path(path_value)
             
             if path.is_dir():
                 # Use pattern to find the most recent sales file
@@ -109,6 +120,18 @@ class SalesExtractor(BaseExtractor):
         """Extract related sales data (returns, exchanges, etc.)."""
         related_data = {}
         
+        # Validate required 'path' configuration
+        path_value = self.config.get('path')
+        if not path_value or not isinstance(path_value, str):
+            logger.error(f"Missing or invalid 'path' configuration for related sales data extraction: {type(path_value).__name__}")
+            return related_data
+        
+        # Coerce to Path and verify it exists
+        config_path = Path(path_value)
+        if not config_path.exists():
+            logger.warning(f"Path does not exist for related sales data: {config_path}")
+            return related_data
+        
         # Define related data types with configurable patterns
         related_types = {
             'returns': self.config.get('returns_pattern', '*returns*.csv'),
@@ -119,7 +142,6 @@ class SalesExtractor(BaseExtractor):
         }
         
         # Detect whether config path is a directory or file
-        config_path = Path(self.config['path'])
         if config_path.is_dir():
             base_path = config_path
         else:
@@ -190,10 +212,10 @@ class SalesExtractor(BaseExtractor):
                 df['Total Price'] = pd.to_numeric(df['Total Price'], errors='coerce')
                 valid_prices = df['Total Price'].dropna()
                 if len(valid_prices) > 0:
-                    summary['total_revenue'] = float(valid_prices.sum())
-                    summary['average_transaction'] = float(valid_prices.mean())
-                    summary['min_transaction'] = float(valid_prices.min())
-                    summary['max_transaction'] = float(valid_prices.max())
+                    summary['total_revenue'] = Decimal(str(valid_prices.sum())).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
+                    summary['average_transaction'] = Decimal(str(valid_prices.mean())).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
+                    summary['min_transaction'] = Decimal(str(valid_prices.min())).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
+                    summary['max_transaction'] = Decimal(str(valid_prices.max())).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
             
             # Location statistics
             if 'Clinic Name' in df.columns:

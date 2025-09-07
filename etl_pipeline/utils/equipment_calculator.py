@@ -8,6 +8,7 @@ import os
 from pathlib import Path
 from typing import Dict, Any, List
 import logging
+from decimal import Decimal, InvalidOperation
 
 logger = logging.getLogger(__name__)
 
@@ -122,9 +123,9 @@ class EquipmentCalculator:
                 # Extract price
                 price_str = row.get('total_price', '').replace('$', '').replace(',', '').strip()
                 try:
-                    price = float(price_str)
-                except ValueError:
-                    price = 0.0
+                    price = Decimal(price_str).quantize(Decimal('0.01'))
+                except (ValueError, InvalidOperation):
+                    price = Decimal('0.00')
                 
                 # Skip items with no price or very low price (likely headers/totals)
                 if price < 10:
@@ -147,7 +148,7 @@ class EquipmentCalculator:
                     'name': row.get('description', '').strip(),
                     'part_number': row.get('part_number', '').strip(),
                     'quantity': quantity,
-                    'unit_price': float(row.get('unit_price', '').replace('$', '').replace(',', '') or 0),
+                    'unit_price': Decimal(str(row.get('unit_price', '').replace('$', '').replace(',', '') or 0)).quantize(Decimal('0.01')),
                     'total_price': price,
                     'category': self._categorize_equipment(row.get('description', '')),
                     'source_file': csv_file.name

@@ -8,6 +8,7 @@ import logging
 from datetime import datetime
 import numpy as np
 from collections import defaultdict
+from decimal import Decimal, ROUND_HALF_UP
 
 logger = logging.getLogger(__name__)
 
@@ -85,47 +86,47 @@ class BusinessMetricsCalculator:
                 logger.info(f"Filtered sales data to analysis period: {start_date.date()} to {end_date.date()} ({len(df)} records)")
             
             # Basic sales metrics
-            sales_metrics['total_revenue'] = float(df['total_price'].sum())
+            sales_metrics['total_revenue'] = Decimal(str(df['total_price'].sum())).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
             sales_metrics['total_transactions'] = len(df)
-            sales_metrics['average_transaction_value'] = float(df['total_price'].mean())
-            sales_metrics['median_transaction_value'] = float(df['total_price'].median())
+            sales_metrics['average_transaction_value'] = Decimal(str(df['total_price'].mean())).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
+            sales_metrics['median_transaction_value'] = Decimal(str(df['total_price'].median())).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
             
             # Revenue distribution
             sales_metrics['revenue_percentiles'] = {
-                '25th': float(df['total_price'].quantile(0.25)),
-                '50th': float(df['total_price'].quantile(0.50)),
-                '75th': float(df['total_price'].quantile(0.75)),
-                '90th': float(df['total_price'].quantile(0.90)),
-                '95th': float(df['total_price'].quantile(0.95))
+                '25th': Decimal(str(df['total_price'].quantile(0.25))).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP),
+                '50th': Decimal(str(df['total_price'].quantile(0.50))).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP),
+                '75th': Decimal(str(df['total_price'].quantile(0.75))).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP),
+                '90th': Decimal(str(df['total_price'].quantile(0.90))).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP),
+                '95th': Decimal(str(df['total_price'].quantile(0.95))).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
             }
             
             # Location performance
             location_metrics = df.groupby('clinic_name').agg({
                 'total_price': ['sum', 'count', 'mean'],
-                'patient_id': 'nunique'
+                'patient_id_hash': 'nunique'
             }).round(2)
             
             sales_metrics['location_performance'] = {}
             for location in location_metrics.index:
                 sales_metrics['location_performance'][location] = {
-                    'total_revenue': float(location_metrics.loc[location, ('total_price', 'sum')]),
+                    'total_revenue': Decimal(str(location_metrics.loc[location, ('total_price', 'sum')])).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP),
                     'transaction_count': int(location_metrics.loc[location, ('total_price', 'count')]),
-                    'average_transaction': float(location_metrics.loc[location, ('total_price', 'mean')]),
+                    'average_transaction': Decimal(str(location_metrics.loc[location, ('total_price', 'mean')])).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP),
                     'unique_patients': int(location_metrics.loc[location, ('patient_id', 'nunique')])
                 }
             
             # Staff performance
             staff_metrics = df.groupby('staff_name').agg({
                 'total_price': ['sum', 'count', 'mean'],
-                'patient_id': 'nunique'
+                'patient_id_hash': 'nunique'
             }).round(2)
             
             sales_metrics['staff_performance'] = {}
             for staff in staff_metrics.index:
                 sales_metrics['staff_performance'][staff] = {
-                    'total_revenue': float(staff_metrics.loc[staff, ('total_price', 'sum')]),
+                    'total_revenue': Decimal(str(staff_metrics.loc[staff, ('total_price', 'sum')])).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP),
                     'transaction_count': int(staff_metrics.loc[staff, ('total_price', 'count')]),
-                    'average_transaction': float(staff_metrics.loc[staff, ('total_price', 'mean')]),
+                    'average_transaction': Decimal(str(staff_metrics.loc[staff, ('total_price', 'mean')])).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP),
                     'unique_patients': int(staff_metrics.loc[staff, ('patient_id', 'nunique')])
                 }
             
@@ -133,15 +134,15 @@ class BusinessMetricsCalculator:
             if 'year' in df.columns:
                 yearly_metrics = df.groupby('year').agg({
                     'total_price': ['sum', 'count', 'mean'],
-                    'patient_id': 'nunique'
+                    'patient_id_hash': 'nunique'
                 }).round(2)
                 
                 sales_metrics['yearly_performance'] = {}
                 for year in yearly_metrics.index:
                     sales_metrics['yearly_performance'][str(year)] = {
-                        'total_revenue': float(yearly_metrics.loc[year, ('total_price', 'sum')]),
+                        'total_revenue': Decimal(str(yearly_metrics.loc[year, ('total_price', 'sum')])).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP),
                         'transaction_count': int(yearly_metrics.loc[year, ('total_price', 'count')]),
-                        'average_transaction': float(yearly_metrics.loc[year, ('total_price', 'mean')]),
+                        'average_transaction': Decimal(str(yearly_metrics.loc[year, ('total_price', 'mean')])).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP),
                         'unique_patients': int(yearly_metrics.loc[year, ('patient_id', 'nunique')])
                     }
                 
@@ -169,9 +170,9 @@ class BusinessMetricsCalculator:
                 sales_metrics['product_category_performance'] = {}
                 for category in product_metrics.index:
                     sales_metrics['product_category_performance'][category] = {
-                        'total_revenue': float(product_metrics.loc[category, ('total_price', 'sum')]),
+                        'total_revenue': Decimal(str(product_metrics.loc[category, ('total_price', 'sum')])).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP),
                         'transaction_count': int(product_metrics.loc[category, ('total_price', 'count')]),
-                        'average_transaction': float(product_metrics.loc[category, ('total_price', 'mean')])
+                        'average_transaction': Decimal(str(product_metrics.loc[category, ('total_price', 'mean')])).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
                     }
         
         return sales_metrics
@@ -197,132 +198,75 @@ class BusinessMetricsCalculator:
             months_in_period = 24  # Default fallback for P&L data (2023-2024)
         
         # Always try P&L-based revenue calculation with missing data detection
-        pnl_revenue = self._estimate_revenue_from_pnl(normalized_data)
-        logger.info(f"P&L revenue calculation result: ${pnl_revenue:,.2f}")
+        pnl_monthly_revenue_avg = self._calculate_monthly_revenue_average_from_pnl(normalized_data)
+        logger.info(f"P&L monthly revenue average calculation result: ${pnl_monthly_revenue_avg:,.2f}")
         
-        if sales_metrics:
+        # Determine revenue source and calculate metrics
+        if pnl_monthly_revenue_avg > 0:
+            # Use P&L-based revenue calculation (preferred - has missing data detection)
+            monthly_revenue_avg = pnl_monthly_revenue_avg
+            total_revenue = monthly_revenue_avg * months_in_period
+            logger.info(f"Using P&L-based revenue calculation with missing data detection: ${total_revenue:,.2f} total (${monthly_revenue_avg:,.2f} monthly avg × {months_in_period} months)")
+        elif sales_metrics:
+            # Fallback to sales-based revenue calculation
             sales_revenue = sales_metrics.get('total_revenue', 0)
-            
-            # Always use P&L revenue if available (it has missing data detection)
-            if pnl_revenue > 0:
-                total_revenue = pnl_revenue
-                logger.info(f"Using P&L-based revenue calculation with missing data detection: ${total_revenue:,.2f}")
-            else:
-                total_revenue = sales_revenue
-                logger.info(f"Using sales-based revenue calculation: ${total_revenue:,.2f}")
-            
-            # Basic financial ratios
-            financial_metrics['revenue_metrics'] = {
-                'total_revenue': total_revenue,
-                'annual_revenue_projection': self._calculate_annual_projection(sales_metrics),
-                'monthly_revenue_average': total_revenue / months_in_period if total_revenue > 0 else 0,
-                'analysis_period_months': months_in_period
-            }
-            
-            # Add analysis period dates for json_loader
-            if analysis_period:
-                financial_metrics['start_date'] = analysis_period.get('start_date')
-                financial_metrics['end_date'] = analysis_period.get('end_date')
+            total_revenue = sales_revenue
+            monthly_revenue_avg = total_revenue / months_in_period if total_revenue > 0 else 0
+            logger.info(f"Using sales-based revenue calculation: ${total_revenue:,.2f} total (${monthly_revenue_avg:,.2f} monthly avg)")
         else:
-            # No sales data available, use P&L-based revenue calculation only
-            logger.info("No sales data available, calculating financial metrics from P&L data only")
-            total_revenue = pnl_revenue if pnl_revenue > 0 else 0
-            logger.info(f"Using P&L revenue: ${total_revenue:,.2f}, months_in_period: {months_in_period}")
-            
-            # Basic financial ratios using P&L data only
-            # pnl_revenue is now the monthly average, not total revenue
-            monthly_revenue_avg = pnl_revenue
-            total_revenue = monthly_revenue_avg * months_in_period  # Calculate total for the analysis period
-            financial_metrics['revenue_metrics'] = {
-                'total_revenue': total_revenue,
-                'annual_revenue_projection': monthly_revenue_avg * 12 if monthly_revenue_avg > 0 else 0,
-                'monthly_revenue_average': monthly_revenue_avg,
-                'analysis_period_months': months_in_period
-            }
-            logger.info(f"Final revenue metrics: {financial_metrics['revenue_metrics']}")
-            
-            # Add analysis period dates for json_loader
-            if analysis_period:
-                financial_metrics['start_date'] = analysis_period.get('start_date')
-                financial_metrics['end_date'] = analysis_period.get('end_date')
-            
-            # EBITDA calculation - use real data if available, otherwise use margin
-            if real_ebitda is not None:
-                # Real EBITDA is monthly, so calculate monthly revenue average for consistent units
-                monthly_revenue_avg = total_revenue / months_in_period if months_in_period > 0 else 0
-                ebitda_margin = real_ebitda / monthly_revenue_avg if monthly_revenue_avg > 0 else 0
-                estimated_ebitda = real_ebitda  # Keep as monthly for consistency
-                logger.info(f"Using real EBITDA from financial data: ${estimated_ebitda:,.2f} monthly")
-                logger.info(f"Monthly revenue average: ${monthly_revenue_avg:,.2f}, EBITDA margin: {ebitda_margin:.1%}")
-            else:
-                ebitda_margin = self.business_rules.get('financial_metrics', {}).get('ebitda_margin_target', 0.25)
-                monthly_revenue_avg = total_revenue / months_in_period if months_in_period > 0 else 0
-                estimated_ebitda = monthly_revenue_avg * ebitda_margin
-                logger.info(f"Using estimated EBITDA with {ebitda_margin:.1%} margin: ${estimated_ebitda:,.2f} monthly")
-            
-            # Calculate annual EBITDA projection
-            annual_ebitda = estimated_ebitda * 12
-            
-            financial_metrics['profitability'] = {
-                'estimated_ebitda': estimated_ebitda,
-                'ebitda_margin': ebitda_margin * 100,
-                'estimated_annual_ebitda': annual_ebitda
-            }
-            
-            # ROI calculation
-            asking_price = 650000  # From business sale data
-            roi = (annual_ebitda / asking_price) * 100 if asking_price > 0 else 0
-            
-            financial_metrics['investment_metrics'] = {
-                'asking_price': asking_price,
-                'estimated_annual_ebitda': annual_ebitda,
-                'roi_percentage': roi,
-                'payback_period_years': asking_price / annual_ebitda if annual_ebitda > 0 else 0
-            }
-            # Use real EBITDA if calculated from P&L data
-            if real_ebitda is not None:
-                estimated_ebitda = real_ebitda
-                # Calculate actual EBITDA margin from P&L data
-                pnl_revenue = self._estimate_revenue_from_pnl(normalized_data)
-                ebitda_margin = (real_ebitda / pnl_revenue) if pnl_revenue > 0 else self.business_rules.get('financial_metrics', {}).get('ebitda_margin_target', 0.25)
-                logger.info(f"Using real EBITDA from P&L data: ${estimated_ebitda:,.2f} monthly with {ebitda_margin:.1%} margin")
-            else:
-                # Fallback to business rules
-                ebitda_margin = self.business_rules.get('financial_metrics', {}).get('ebitda_margin_target', 0.25)
-                # Estimate revenue from P&L data if available
-                total_revenue = self._estimate_revenue_from_pnl(normalized_data)
-                monthly_revenue_avg = total_revenue / months_in_period if months_in_period > 0 else 0
-                estimated_ebitda = monthly_revenue_avg * ebitda_margin
-                logger.info(f"Using estimated EBITDA with {ebitda_margin:.1%} margin: ${estimated_ebitda:,.2f} monthly")
-            
-            # Calculate annual projections
-            annual_ebitda = estimated_ebitda * 12
-            annual_revenue = (estimated_ebitda / ebitda_margin) * 12 if ebitda_margin > 0 else 0
-            
-            # Basic financial ratios - use P&L-based revenue if available, otherwise use EBITDA-based
-            if pnl_revenue > 0:
-                # Use P&L-based revenue calculation (already calculated above)
-                logger.info(f"Using P&L-based revenue metrics (not overwriting): ${pnl_revenue:,.2f}")
-                # Don't overwrite the revenue_metrics that were already calculated with P&L data
-            else:
-                # Fallback to EBITDA-based calculation
-                financial_metrics['revenue_metrics'] = {
-                    'total_revenue': annual_revenue / 12,  # Monthly average
-                    'annual_revenue_projection': annual_revenue,
-                    'monthly_revenue_average': annual_revenue / 12,
-                    'analysis_period_months': months_in_period
-                }
-            
-            # Add analysis period dates for json_loader
-            if analysis_period:
-                financial_metrics['start_date'] = analysis_period.get('start_date')
-                financial_metrics['end_date'] = analysis_period.get('end_date')
-            
-            financial_metrics['profitability'] = {
-                'estimated_ebitda': estimated_ebitda,
-                'ebitda_margin': ebitda_margin * 100,
-                'estimated_annual_ebitda': annual_ebitda
-            }
+            # No revenue data available
+            total_revenue = 0
+            monthly_revenue_avg = 0
+            logger.warning("No revenue data available from P&L or sales data")
+        
+        # Calculate revenue metrics (consolidated logic)
+        financial_metrics['revenue_metrics'] = {
+            'total_revenue': total_revenue,
+            'annual_revenue_projection': monthly_revenue_avg * 12 if monthly_revenue_avg > 0 else 0,
+            'monthly_revenue_average': monthly_revenue_avg,
+            'analysis_period_months': months_in_period
+        }
+        
+        # Add analysis period dates for json_loader
+        if analysis_period:
+            financial_metrics['start_date'] = analysis_period.get('start_date')
+            financial_metrics['end_date'] = analysis_period.get('end_date')
+        
+        logger.info(f"Final revenue metrics: {financial_metrics['revenue_metrics']}")
+        
+        # EBITDA calculation - use real data if available, otherwise use margin
+        if real_ebitda is not None:
+            # Real EBITDA is monthly, so calculate monthly revenue average for consistent units
+            monthly_revenue_avg = total_revenue / months_in_period if months_in_period > 0 else 0
+            ebitda_margin = real_ebitda / monthly_revenue_avg if monthly_revenue_avg > 0 else 0
+            estimated_ebitda = real_ebitda  # Keep as monthly for consistency
+            logger.info(f"Using real EBITDA from financial data: ${estimated_ebitda:,.2f} monthly")
+            logger.info(f"Monthly revenue average: ${monthly_revenue_avg:,.2f}, EBITDA margin: {ebitda_margin:.1%}")
+        else:
+            ebitda_margin = self.business_rules.get('financial_metrics', {}).get('ebitda_margin_target', 0.25)
+            monthly_revenue_avg = total_revenue / months_in_period if months_in_period > 0 else 0
+            estimated_ebitda = monthly_revenue_avg * ebitda_margin
+            logger.info(f"Using estimated EBITDA with {ebitda_margin:.1%} margin: ${estimated_ebitda:,.2f} monthly")
+        
+        # Calculate annual EBITDA projection
+        annual_ebitda = estimated_ebitda * 12
+        
+        financial_metrics['profitability'] = {
+            'estimated_ebitda': estimated_ebitda,
+            'ebitda_margin': ebitda_margin * 100,
+            'estimated_annual_ebitda': annual_ebitda
+        }
+        
+        # ROI calculation
+        asking_price = 650000  # From business sale data
+        roi = (annual_ebitda / asking_price) * 100 if asking_price > 0 else 0
+        
+        financial_metrics['investment_metrics'] = {
+            'asking_price': asking_price,
+            'estimated_annual_ebitda': annual_ebitda,
+            'roi_percentage': roi,
+            'payback_period_years': asking_price / annual_ebitda if annual_ebitda > 0 else 0
+        }
         
         return financial_metrics
     
@@ -345,7 +289,7 @@ class BusinessMetricsCalculator:
                 df = df[(df['sale_date'] >= start_date) & (df['sale_date'] <= end_date)]
             
             # Patient metrics
-            unique_patients = df['patient_id'].nunique()
+            unique_patients = df['patient_id_hash'].nunique()
             total_transactions = len(df)
             
             operational_metrics['patient_metrics'] = {
@@ -359,14 +303,14 @@ class BusinessMetricsCalculator:
             if 'staff_name' in df.columns:
                 staff_efficiency = df.groupby('staff_name').agg({
                     'total_price': ['sum', 'count'],
-                    'patient_id': 'nunique'
+                    'patient_id_hash': 'nunique'
                 })
                 
                 operational_metrics['staff_efficiency'] = {}
                 for staff in staff_efficiency.index:
                     revenue = staff_efficiency.loc[staff, ('total_price', 'sum')]
                     transactions = staff_efficiency.loc[staff, ('total_price', 'count')]
-                    patients = staff_efficiency.loc[staff, ('patient_id', 'nunique')]
+                    patients = staff_efficiency.loc[staff, ('patient_id_hash', 'nunique')]
                     
                     operational_metrics['staff_efficiency'][staff] = {
                         'revenue_per_transaction': revenue / transactions if transactions > 0 else 0,
@@ -378,14 +322,14 @@ class BusinessMetricsCalculator:
             if 'clinic_name' in df.columns:
                 location_efficiency = df.groupby('clinic_name').agg({
                     'total_price': ['sum', 'count'],
-                    'patient_id': 'nunique'
+                    'patient_id_hash': 'nunique'
                 })
                 
                 operational_metrics['location_efficiency'] = {}
                 for location in location_efficiency.index:
                     revenue = location_efficiency.loc[location, ('total_price', 'sum')]
                     transactions = location_efficiency.loc[location, ('total_price', 'count')]
-                    patients = location_efficiency.loc[location, ('patient_id', 'nunique')]
+                    patients = location_efficiency.loc[location, ('patient_id_hash', 'nunique')]
                     
                     operational_metrics['location_efficiency'][location] = {
                         'revenue_per_transaction': revenue / transactions if transactions > 0 else 0,
@@ -685,8 +629,12 @@ class BusinessMetricsCalculator:
         
         return expected_months
     
-    def _estimate_revenue_from_pnl(self, normalized_data: Dict[str, Any]) -> float:
-        """Estimate total revenue from P&L data with missing data detection and fallback."""
+    def _calculate_monthly_revenue_average_from_pnl(self, normalized_data: Dict[str, Any]) -> float:
+        """Calculate monthly revenue average from P&L data with missing data detection and fallback.
+        
+        Returns:
+            float: Monthly revenue average (not total revenue)
+        """
         try:
             # P&L data is directly under normalized_data, not under 'financial'
             pnl_data = normalized_data.get('profit_loss', {})
@@ -752,54 +700,59 @@ class BusinessMetricsCalculator:
                 processed_count += 1
                 
                 # Find revenue categories (only Sales, not Investment Income)
-                # Look for "Total 5017 · Sales" first, then fall back to "5017 · Sales"
+                # Look for various sales line item patterns to handle different P&L formats
                 # Handle different column structures across years
                 if 'Unnamed: 0' not in df.columns:
                     logger.warning(f"  Skipping P&L {pnl_key} - missing 'Unnamed: 0' column")
                     continue
-                    
-                total_sales_row = df[df['Unnamed: 0'].str.contains('Total 5017 · Sales', case=False, na=False)]
-                logger.debug(f"  Found {len(total_sales_row)} 'Total 5017 · Sales' rows")
                 
-                if not total_sales_row.empty:
-                    logger.debug(f"  Processing 'Total 5017 · Sales' row for {pnl_key}")
-                    if 'Pennsylvania' in df.columns and pd.notna(total_sales_row['Pennsylvania'].iloc[0]):
+                # Try multiple patterns to find sales revenue
+                sales_patterns = [
+                    'Total 5017 · Sales',  # Most common format
+                    '^5017 · Sales$',      # Exact match
+                    '^5017 · Sales - Other$',  # Alternative format
+                    '5017 · Sales'         # General pattern (fallback)
+                ]
+                
+                monthly_revenue = 0
+                sales_row = None
+                
+                for pattern in sales_patterns:
+                    if pattern.startswith('^') and pattern.endswith('$'):
+                        # Regex pattern
+                        sales_row = df[df['Unnamed: 0'].str.contains(pattern, case=False, na=False, regex=True)]
+                    else:
+                        # Simple contains pattern
+                        sales_row = df[df['Unnamed: 0'].str.contains(pattern, case=False, na=False)]
+                    
+                    if not sales_row.empty:
+                        logger.debug(f"  Found sales row using pattern '{pattern}' for {pnl_key}")
+                        break
+                
+                if not sales_row.empty:
+                    logger.debug(f"  Processing sales row for {pnl_key}")
+                    if 'Pennsylvania' in df.columns and pd.notna(sales_row['Pennsylvania'].iloc[0]):
                         # 2023 data structure: Pennsylvania, Virginia, Unclassified
                         # Only use Pennsylvania column (sale locations only)
-                        monthly_revenue = float(total_sales_row['Pennsylvania'].iloc[0])
+                        monthly_revenue = Decimal(str(sales_row['Pennsylvania'].iloc[0])).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
                         logger.debug(f"  Using Pennsylvania column (sale locations only): ${monthly_revenue:,.2f}")
                     elif 'Cranberry' in df.columns and 'West View' in df.columns:
                         # 2024/2025 data structure: Cranberry, Virginia, West View
                         # Only include Cranberry + West View (sale locations), exclude Virginia
-                        cranberry_revenue = float(total_sales_row['Cranberry'].iloc[0]) if pd.notna(total_sales_row['Cranberry'].iloc[0]) else 0
-                        west_view_revenue = float(total_sales_row['West View'].iloc[0]) if pd.notna(total_sales_row['West View'].iloc[0]) else 0
+                        cranberry_revenue = Decimal(str(sales_row['Cranberry'].iloc[0])).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP) if pd.notna(sales_row['Cranberry'].iloc[0]) else Decimal('0.00')
+                        west_view_revenue = Decimal(str(sales_row['West View'].iloc[0])).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP) if pd.notna(sales_row['West View'].iloc[0]) else Decimal('0.00')
                         monthly_revenue = cranberry_revenue + west_view_revenue
                         logger.debug(f"  Using Cranberry+West View (sale locations only): ${monthly_revenue:,.2f} (Cranberry: ${cranberry_revenue:,.2f}, West View: ${west_view_revenue:,.2f})")
                     else:
                         if 'TOTAL' in df.columns:
-                            monthly_revenue = float(total_sales_row['TOTAL'].iloc[0]) if pd.notna(total_sales_row['TOTAL'].iloc[0]) else 0
+                            monthly_revenue = Decimal(str(sales_row['TOTAL'].iloc[0])).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP) if pd.notna(sales_row['TOTAL'].iloc[0]) else Decimal('0.00')
                             logger.warning(f"  Using TOTAL column (includes all locations): ${monthly_revenue:,.2f}")
                         else:
                             logger.warning(f"  No suitable revenue columns found in {pnl_key}")
                             monthly_revenue = 0
                 else:
-                    # Fall back to "5017 · Sales" if "Total 5017 · Sales" doesn't exist
-                    sales_row = df[df['Unnamed: 0'].str.contains('^5017 · Sales$', case=False, na=False, regex=True)]
-                    if not sales_row.empty:
-                        if 'Pennsylvania' in df.columns and pd.notna(sales_row['Pennsylvania'].iloc[0]):
-                            # 2023 data structure: Pennsylvania, Virginia, Unclassified
-                            # Only use Pennsylvania column (sale locations only)
-                            monthly_revenue = float(sales_row['Pennsylvania'].iloc[0])
-                        elif 'Cranberry' in df.columns and 'West View' in df.columns:
-                            # 2024/2025 data structure: Cranberry, Virginia, West View
-                            # Only include Cranberry + West View (sale locations), exclude Virginia
-                            cranberry_revenue = float(sales_row['Cranberry'].iloc[0]) if pd.notna(sales_row['Cranberry'].iloc[0]) else 0
-                            west_view_revenue = float(sales_row['West View'].iloc[0]) if pd.notna(sales_row['West View'].iloc[0]) else 0
-                            monthly_revenue = cranberry_revenue + west_view_revenue
-                        else:
-                            monthly_revenue = float(sales_row['TOTAL'].iloc[0]) if pd.notna(sales_row['TOTAL'].iloc[0]) else 0
-                    else:
-                        monthly_revenue = 0
+                    logger.debug(f"  No sales revenue found for {pnl_key}")
+                    monthly_revenue = 0
                 
                 if monthly_revenue > 0:
                     total_revenue += monthly_revenue
@@ -838,7 +791,7 @@ class BusinessMetricsCalculator:
             
             # Calculate monthly average from actual data
             monthly_revenue_avg = total_revenue / month_count if month_count > 0 else 0.0
-            logger.info(f"P&L revenue calculation complete: ${total_revenue:,.2f} from {month_count} months (processed {processed_count}, skipped {skipped_count})")
+            logger.info(f"P&L monthly revenue average calculation complete: ${total_revenue:,.2f} total from {month_count} months (processed {processed_count}, skipped {skipped_count})")
             logger.info(f"Monthly revenue average: ${monthly_revenue_avg:,.2f}")
             return monthly_revenue_avg
             
@@ -921,11 +874,11 @@ class BusinessMetricsCalculator:
     
     def _calculate_patient_retention(self, df: pd.DataFrame) -> float:
         """Calculate patient retention rate."""
-        if 'patient_id' not in df.columns or 'sale_date' not in df.columns:
+        if 'patient_id_hash' not in df.columns or 'sale_date' not in df.columns:
             return 0
         
         # Group by patient and count unique months
-        patient_months = df.groupby('patient_id')['sale_date'].apply(
+        patient_months = df.groupby('patient_id_hash')['sale_date'].apply(
             lambda x: x.dt.to_period('M').nunique()
         )
         

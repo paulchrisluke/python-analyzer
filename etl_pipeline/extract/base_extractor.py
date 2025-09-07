@@ -7,6 +7,8 @@ from typing import Dict, Any, List, Optional
 import pandas as pd
 import logging
 from pathlib import Path
+from urllib.parse import urlparse
+from ..utils.file_utils import FileUtils
 
 logger = logging.getLogger(__name__)
 
@@ -41,21 +43,38 @@ class BaseExtractor(ABC):
         Returns:
             bool: True if configuration is valid
         """
-        required_fields = ['type', 'path']
-        for field in required_fields:
-            if field not in self.config:
-                logger.error(f"Missing required configuration field: {field}")
+        try:
+            # Check required fields
+            required_fields = ['type']
+            for field in required_fields:
+                value = self.config.get(field)
+                if value is None or (isinstance(value, str) and not value.strip()):
+                    logger.error(f"Missing or empty configuration field: {field}")
+                    return False
+
+            # Safely validate path configuration
+            try:
+                path_obj = FileUtils.safe_path_from_config(self.config, 'path', required=True)
+                if path_obj is None:
+                    return False
+                
+                # Check that the path actually exists
+                parsed_scheme = urlparse(str(path_obj)).scheme
+                # Only check local filesystem paths
+                if parsed_scheme in ('', 'file'):
+                    if not path_obj.exists():
+                        logger.error(f"Configuration path does not exist: {path_obj.absolute()}")
+                        return False
+                
+                return True
+                
+            except ValueError as e:
+                logger.error(f"Path validation failed: {str(e)}")
                 return False
-        
-        # Check that the path actually exists
-        path = self.config.get('path')
-        if path:
-            path_obj = Path(path)
-            if not path_obj.exists():
-                logger.error(f"Configuration path does not exist: {path_obj.absolute()}")
-                return False
-        
-        return True
+                
+        except Exception as e:
+            logger.error(f"Configuration validation failed: {str(e)}")
+            return False
     
     def get_metadata(self) -> Dict[str, Any]:
         """

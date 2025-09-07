@@ -57,6 +57,11 @@ def main():
         action="store_true",
         help="Run only due diligence processing (standalone mode)"
     )
+    parser.add_argument(
+        "--no-early-exit",
+        action="store_true",
+        help="Disable early exit on critical failures (continue despite failures)"
+    )
     
     args = parser.parse_args()
     
@@ -70,7 +75,12 @@ def main():
         logger.info("="*60)
         logger.info(f"Pipeline started at: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
         
-        pipeline = ETLPipeline(config_dir=args.config_dir)
+        # Initialize pipeline with early exit configuration
+        early_exit_enabled = not args.no_early_exit
+        pipeline = ETLPipeline(
+            config_dir=args.config_dir,
+            early_exit_on_critical_failure=early_exit_enabled
+        )
         
         # Check if running due diligence only
         if args.due_diligence_only:

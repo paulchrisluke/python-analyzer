@@ -16,7 +16,7 @@ def setup_website_data_access():
     print("🚀 Setting up Website Data Access...")
     
     # Define paths
-    pipeline_data_dir = Path("05_ANALYSIS_TOOLS/data/final")
+    pipeline_data_dir = Path("data/final")
     website_data_dir = Path("website/data")
     
     # Create website data directory
@@ -67,18 +67,50 @@ class BusinessDataLoader {
         try {
             // Load ETL pipeline data from website data folder
             const response = await fetch('./data/business_sale_data.json');
-            if (response.ok) {
-                this.data = await response.json();
-                console.log('✅ Loaded ETL pipeline data from website data folder');
-                return this.data;
-            } else {
-                throw new Error('ETL data not available');
+            
+            // Check response status and content type
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
             }
+            
+            const contentType = response.headers.get('content-type');
+            if (!contentType || !contentType.includes('application/json')) {
+                throw new Error(`Invalid content type: ${contentType || 'unknown'}`);
+            }
+            
+            // Safely parse JSON with separate error handling
+            let jsonData;
+            try {
+                jsonData = await response.json();
+            } catch (jsonError) {
+                throw new Error(`Malformed JSON response: ${jsonError.message}`);
+            }
+            
+            this.data = jsonData;
+            console.log('✅ Loaded ETL pipeline data from website data folder');
+            return this.data;
+            
         } catch (error) {
-            console.warn('⚠️ ETL data not available, no fallback data configured');
-            this.error = 'No business data available';
-            console.error('❌ Failed to load business data:', error);
-            return null;
+            // Handle network/fetch errors vs JSON parse errors
+            if (error.name === 'TypeError' && error.message.includes('fetch')) {
+                console.error('❌ Network error: Failed to fetch business data:', error.message);
+                this.error = 'Network error: Unable to connect to data source';
+                this.data = []; // Fallback to empty array
+            } else if (error.message.includes('Malformed JSON')) {
+                console.error('❌ JSON parse error: Invalid data format:', error.message);
+                this.error = 'Data format error: Invalid JSON response';
+                this.data = []; // Fallback to empty array
+            } else if (error.message.includes('HTTP') || error.message.includes('content type')) {
+                console.error('❌ Server error:', error.message);
+                this.error = `Server error: ${error.message}`;
+                this.data = []; // Fallback to empty array
+            } else {
+                console.error('❌ Unexpected error loading business data:', error);
+                this.error = 'Unexpected error loading data';
+                this.data = []; // Fallback to empty array
+            }
+            
+            return this.data;
         } finally {
             this.loading = false;
         }
@@ -187,36 +219,44 @@ function updateWebsiteWithETLData() {
 }
 
 function updateFinancialMetrics(financials) {
-    if (!financials) return;
+    if (!financials) {
+        console.warn('⚠️ Financial data is null or undefined');
+        return;
+    }
     
-    // Update revenue
+    // Update revenue with null safety
     const revenueElement = document.getElementById('total-revenue');
-    if (revenueElement && financials.revenue) {
-        revenueElement.textContent = formatCurrency(financials.revenue.total_revenue);
+    if (revenueElement) {
+        const totalRevenue = financials?.revenue?.total_revenue;
+        revenueElement.textContent = formatCurrency(totalRevenue);
     }
     
-    // Update annual projection
+    // Update annual projection with null safety
     const annualElement = document.getElementById('annual-projection');
-    if (annualElement && financials.revenue) {
-        annualElement.textContent = formatCurrency(financials.revenue.annual_projection);
+    if (annualElement) {
+        const annualProjection = financials?.revenue?.annual_projection;
+        annualElement.textContent = formatCurrency(annualProjection);
     }
     
-    // Update monthly average
+    // Update monthly average with null safety
     const monthlyElement = document.getElementById('monthly-average');
-    if (monthlyElement && financials.revenue) {
-        monthlyElement.textContent = formatCurrency(financials.revenue.monthly_average);
+    if (monthlyElement) {
+        const monthlyAverage = financials?.revenue?.monthly_average;
+        monthlyElement.textContent = formatCurrency(monthlyAverage);
     }
     
-    // Update EBITDA
+    // Update EBITDA with null safety
     const ebitdaElement = document.getElementById('annual-ebitda');
-    if (ebitdaElement && financials.ebitda) {
-        ebitdaElement.textContent = formatCurrency(financials.ebitda.estimated_annual);
+    if (ebitdaElement) {
+        const estimatedAnnual = financials?.ebitda?.estimated_annual;
+        ebitdaElement.textContent = formatCurrency(estimatedAnnual);
     }
     
-    // Update ROI
+    // Update ROI with null safety
     const roiElement = document.getElementById('roi-percentage');
-    if (roiElement && financials.profitability) {
-        roiElement.textContent = formatPercentage(financials.profitability.roi_percentage);
+    if (roiElement) {
+        const roiPercentage = financials?.profitability?.roi_percentage;
+        roiElement.textContent = formatPercentage(roiPercentage);
     }
 }
 
@@ -314,6 +354,9 @@ function updateMetadata(metadata) {
 
 // Utility functions
 function formatCurrency(amount) {
+    if (amount === null || amount === undefined || isNaN(amount)) {
+        return '$0';
+    }
     return new Intl.NumberFormat('en-US', {
         style: 'currency',
         currency: 'USD',
@@ -323,6 +366,9 @@ function formatCurrency(amount) {
 }
 
 function formatPercentage(value) {
+    if (value === null || value === undefined || isNaN(value)) {
+        return '0.0%';
+    }
     return `${value.toFixed(1)}%`;
 }
 
@@ -350,7 +396,7 @@ echo "🚀 Deploying ETL Pipeline Data to Website..."
 
 # Step 1: Copy latest ETL data to website
 echo "📋 Copying ETL pipeline data..."
-python3 05_ANALYSIS_TOOLS/deploy_to_website.py
+python3 deploy_to_website.py
 
 # Step 2: Deploy to Cloudflare Pages
 echo "🌐 Deploying to Cloudflare Pages..."

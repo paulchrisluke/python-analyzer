@@ -371,6 +371,55 @@ def test_sales_data_integrity():
         print(f"❌ Sales data integrity test failed: {str(e)}")
         return False
 
+def _validate_field_value(field_name, value, metric_type):
+    """
+    Validate a field value based on field-specific rules.
+    
+    Args:
+        field_name: Name of the field being validated
+        value: The value to validate
+        metric_type: Type of metric (revenue, ebitda, etc.)
+    
+    Returns:
+        tuple: (is_valid, message)
+    """
+    # Fields that can legitimately be negative or zero
+    negative_allowed_fields = {
+        'estimated_annual',  # EBITDA can be negative
+        'margin_percentage',  # Margin can be negative
+        'net_profit',  # Net profit can be negative
+        'operating_income',  # Operating income can be negative
+        'ebitda'  # EBITDA can be negative
+    }
+    
+    # Fields that must be positive
+    positive_required_fields = {
+        'total_revenue',  # Revenue should be positive
+        'monthly_average',  # Monthly average should be positive
+        'annual_projection',  # Annual projection should be positive
+        'gross_revenue',  # Gross revenue should be positive
+        'total_sales'  # Total sales should be positive
+    }
+    
+    if field_name in negative_allowed_fields:
+        # For fields that can be negative, just check they're not None/NaN
+        if value is None or (isinstance(value, float) and (value != value)):  # NaN check
+            return False, f"{field_name} is None or NaN: {value}"
+        else:
+            return True, f"✅ {field_name}: {value:,.2f}"
+    elif field_name in positive_required_fields:
+        # For fields that must be positive
+        if value > 0:
+            return True, f"✅ {field_name}: ${value:,.2f}"
+        else:
+            return False, f"❌ {field_name} must be positive but is: {value}"
+    else:
+        # Default behavior for unknown fields - allow negative but warn
+        if value is None or (isinstance(value, float) and (value != value)):  # NaN check
+            return False, f"{field_name} is None or NaN: {value}"
+        else:
+            return True, f"✅ {field_name}: {value:,.2f}"
+
 def test_business_metrics_completeness():
     """Test that all business metrics are calculated."""
     print("\nTesting business metrics completeness...")
@@ -402,10 +451,9 @@ def test_business_metrics_completeness():
             for field in required_revenue_fields:
                 if field in revenue:
                     value = revenue[field]
-                    if value > 0:
-                        print(f"✅ {field}: ${value:,.2f}")
-                    else:
-                        print(f"❌ {field} is zero or negative: {value}")
+                    is_valid, message = _validate_field_value(field, value, 'revenue')
+                    print(message)
+                    if not is_valid:
                         return False
                 else:
                     print(f"❌ Missing {field} in revenue metrics")
@@ -418,10 +466,9 @@ def test_business_metrics_completeness():
             for field in required_ebitda_fields:
                 if field in ebitda:
                     value = ebitda[field]
-                    if value > 0:
-                        print(f"✅ {field}: {value:,.2f}")
-                    else:
-                        print(f"❌ {field} is zero or negative: {value}")
+                    is_valid, message = _validate_field_value(field, value, 'ebitda')
+                    print(message)
+                    if not is_valid:
                         return False
                 else:
                     print(f"❌ Missing {field} in EBITDA metrics")

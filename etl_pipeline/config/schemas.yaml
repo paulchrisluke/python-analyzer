@@ -8,9 +8,7 @@ schemas:
       delivery_date: string
       return_date: string
       staff_name: string
-      patient_name: string
-      patient_id: string
-      patient_zip: string
+      patient_id_hash: string
       clinic_name: string
       referral_source: string
       subcategory: string
@@ -24,24 +22,24 @@ schemas:
       notes: string
       invoice_no: string
       cpt_code: string
-      gross_price: float
-      discount: float
+      gross_price: decimal
+      discount: decimal
       discount_type_1: string
-      discount_amount_1: float
+      discount_amount_1: decimal
       discount_type_2: string
-      discount_amount_2: float
+      discount_amount_2: decimal
       discount_type_3: string
-      discount_amount_3: float
-      net_price: float
-      sales_tax: float
-      total_price: float
+      discount_amount_3: decimal
+      net_price: decimal
+      sales_tax: decimal
+      total_price: decimal
       receipt_paid: string
       
   sales_normalized:
     required_fields:
       - transaction_id
       - sale_date
-      - patient_id
+      - patient_id_hash
       - product_name
       - units
       - total_price
@@ -68,14 +66,10 @@ schemas:
         type: string
         nullable: true
         description: "Name of staff member"
-      patient_id:
+      patient_id_hash:
         type: string
         validation: "non_empty"
-        description: "Unique patient identifier"
-      patient_zip:
-        type: string
-        nullable: true
-        description: "Patient ZIP code"
+        description: "Hashed patient identifier for analytics (PII-protected)"
       clinic_name:
         type: string
         nullable: true
@@ -102,25 +96,35 @@ schemas:
         nullable: true
         description: "Type of transaction"
       gross_price:
-        type: float
+        type: decimal
+        precision: 10
+        scale: 2
         validation: ">= 0"
-        description: "Gross price before discounts"
+        description: "Gross price before discounts (decimal with 2 decimal places)"
       total_discounts:
-        type: float
+        type: decimal
+        precision: 10
+        scale: 2
         validation: ">= 0"
-        description: "Total discount amount"
+        description: "Total discount amount (decimal with 2 decimal places)"
       net_price:
-        type: float
+        type: decimal
+        precision: 10
+        scale: 2
         validation: ">= 0"
-        description: "Net price after discounts"
+        description: "Net price after discounts (decimal with 2 decimal places)"
       sales_tax:
-        type: float
+        type: decimal
+        precision: 10
+        scale: 2
         validation: ">= 0"
-        description: "Sales tax amount"
+        description: "Sales tax amount (decimal with 2 decimal places)"
       total_price:
-        type: float
+        type: decimal
+        precision: 10
+        scale: 2
         validation: ">= 0"
-        description: "Final total price"
+        description: "Final total price (decimal with 2 decimal places)"
       is_paid:
         type: boolean
         description: "Whether transaction is paid"
@@ -142,7 +146,7 @@ schemas:
       source_file: string
       account_name: string
       account_type: string
-      amount: float
+      amount: decimal
       date: string
       description: string
       reference: string
@@ -151,7 +155,7 @@ schemas:
     fields:
       account_name: string
       account_type: string
-      amount: float
+      amount: decimal
       date: datetime
       period: string
       category: string
@@ -161,24 +165,24 @@ schemas:
       
   business_metrics:
     fields:
-      total_revenue: float
+      total_revenue: decimal
       total_transactions: integer
-      average_transaction: float
+      average_transaction: decimal
       revenue_by_location: dict
       revenue_by_staff: dict
       revenue_by_year: dict
       revenue_by_month: dict
       growth_rates: dict
-      ebitda: float
-      profit_margin: float
-      roi: float
+      ebitda: decimal
+      profit_margin: decimal
+      roi: decimal
       
   equipment_raw:
     fields:
       file_name: string
       equipment_name: string
       description: string
-      price: float
+      price: decimal
       category: string
       quote_date: string
       
@@ -188,6 +192,34 @@ schemas:
       name: string
       description: string
       category: string
-      price: float
+      price: decimal
       quote_date: datetime
       location: string
+      
+  # Separate access-controlled patient dimension table for PII data
+  patient_dimension:
+    access_control: "restricted"
+    encryption: "required"
+    fields:
+      patient_id_hash:
+        type: string
+        validation: "non_empty"
+        description: "Hashed patient identifier (matches sales data)"
+      patient_name:
+        type: string
+        nullable: true
+        description: "Patient name (PII - access controlled)"
+      patient_id_original:
+        type: string
+        nullable: true
+        description: "Original patient ID (PII - access controlled)"
+      patient_zip:
+        type: string
+        nullable: true
+        description: "Patient ZIP code (PII - access controlled)"
+      created_date:
+        type: datetime
+        description: "Record creation date"
+      last_updated:
+        type: datetime
+        description: "Last update date"

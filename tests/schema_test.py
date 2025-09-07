@@ -5,6 +5,7 @@ Quick test to verify the schema includes all required fields.
 
 import sys
 import json
+import pytest
 from pathlib import Path
 
 # Add the parent directory to the Python path

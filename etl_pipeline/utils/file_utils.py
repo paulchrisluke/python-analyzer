@@ -72,7 +72,7 @@ class FileUtils:
             raise
     
     @staticmethod
-    def save_json(data: Dict[str, Any], file_path: str, indent: int = 2) -> None:
+    def save_json(data: Any, file_path: str, indent: int = 2) -> None:
         """
         Save data to JSON file.
         
@@ -85,11 +85,13 @@ class FileUtils:
             # Ensure directory exists
             Path(file_path).parent.mkdir(parents=True, exist_ok=True)
             
-            with open(file_path, 'w', encoding='utf-8') as f:
+            tmp_path = f"{file_path}.tmp"
+            with open(tmp_path, 'w', encoding='utf-8') as f:
                 json.dump(data, f, indent=indent, ensure_ascii=False)
-            logger.info(f"JSON file saved: {file_path}")
-        except Exception as e:
-            logger.error(f"Error saving JSON file {file_path}: {str(e)}")
+            os.replace(tmp_path, file_path)
+            logger.info("JSON file saved: %s", file_path)
+        except Exception:
+            logger.exception("Error saving JSON file %s", file_path)
             raise
     
     @staticmethod
@@ -190,7 +192,7 @@ class FileUtils:
             raise
     
     @staticmethod
-    def get_file_size(file_path: str) -> int:
+    def get_file_size(file_path: str) -> Optional[int]:
         """
         Get file size in bytes.
         
@@ -198,16 +200,16 @@ class FileUtils:
             file_path: Path to file
             
         Returns:
-            File size in bytes
+            File size in bytes, or None if error occurs
         """
         try:
             return os.path.getsize(file_path)
-        except Exception as e:
-            logger.error(f"Error getting file size for {file_path}: {str(e)}")
-            return 0
+        except Exception:
+            logger.exception(f"Error getting file size for {file_path}")
+            return None
     
     @staticmethod
-    def backup_file(file_path: str, backup_suffix: str = ".backup") -> str:
+    def backup_file(file_path: str, backup_suffix: str = ".backup") -> Optional[str]:
         """
         Create backup of file.
         
@@ -216,7 +218,7 @@ class FileUtils:
             backup_suffix: Suffix for backup file
             
         Returns:
-            Path to backup file
+            Path to backup file, or None if no backup is created
         """
         try:
             backup_path = f"{file_path}{backup_suffix}"
@@ -227,7 +229,72 @@ class FileUtils:
                 return backup_path
             else:
                 logger.warning(f"File not found for backup: {file_path}")
-                return ""
+                return None
         except Exception as e:
-            logger.error(f"Error backing up file {file_path}: {str(e)}")
-            return ""
+            logger.exception(f"Error backing up file {file_path}: {str(e)}")
+            return None
+    
+    @staticmethod
+    def safe_path_from_config(config: Dict[str, Any], path_key: str, required: bool = True) -> Optional[Path]:
+        """
+        Safely extract and validate a path from configuration.
+        
+        This prevents empty paths from defaulting to current directory ('.') which could
+        cause unintended directory scanning.
+        
+        Args:
+            config: Configuration dictionary
+            path_key: Key to extract path from (supports nested keys like 'section.path')
+            required: Whether the path is required (raises error if missing)
+            
+        Returns:
+            Path object if valid, None if not required and missing
+            
+        Raises:
+            ValueError: If required path is missing or empty
+        """
+        try:
+            # Handle nested keys like 'financial_pnl_2023.path'
+            if '.' in path_key:
+                keys = path_key.split('.')
+                value = config
+                for key in keys:
+                    if isinstance(value, dict) and key in value:
+                        value = value[key]
+                    else:
+                        value = None
+                        break
+            else:
+                value = config.get(path_key)
+            
+            # Check if path is provided and not empty
+            if not value or (isinstance(value, str) and not value.strip()):
+                if required:
+                    raise ValueError(f"Required path configuration missing or empty: {path_key}")
+                else:
+                    logger.debug(f"Optional path configuration missing: {path_key}")
+                    return None
+            
+            path_str = str(value).strip()
+            if not path_str:
+                if required:
+                    raise ValueError(f"Required path configuration is empty: {path_key}")
+                else:
+                    logger.debug(f"Optional path configuration is empty: {path_key}")
+                    return None
+            
+            path_obj = Path(path_str)
+            
+            # Additional safety check: ensure path is not just current directory
+            if path_obj == Path('.'):
+                raise ValueError(f"Path configuration resolves to current directory, which is not allowed: {path_key}")
+            
+            return path_obj
+            
+        except Exception as e:
+            if required:
+                logger.error(f"Error validating required path configuration '{path_key}': {str(e)}")
+                raise
+            else:
+                logger.debug(f"Error validating optional path configuration '{path_key}': {str(e)}")
+                return None

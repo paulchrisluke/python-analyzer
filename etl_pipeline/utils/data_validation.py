@@ -72,8 +72,9 @@ class DataValidator:
                     self.validation_warnings.append(warning_msg)
                     logger.warning(warning_msg)
                 
-                # Check date range using data_range from business rules (root level)
-                date_range = self.business_rules.get('data_range', {})
+                # Check date range using date_range or data_range from business rules (root level)
+                # Prefer 'date_range' then fallback to 'data_range' for backward compatibility
+                date_range = self.business_rules.get('date_range', self.business_rules.get('data_range', {}))
                 
                 if 'start' in date_range:
                     start_date = pd.to_datetime(date_range['start'])

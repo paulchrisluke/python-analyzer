@@ -10,6 +10,7 @@ import logging
 from pathlib import Path
 from datetime import datetime, timezone
 import re
+from decimal import Decimal, InvalidOperation
 from .base_loader import BaseLoader
 from ..utils.file_utils import FileUtils
 
@@ -18,10 +19,10 @@ logger = logging.getLogger(__name__)
 def parse_price_value(price_raw):
     """
     Robust price parser that handles currency strings, N/A values, negatives, and parentheses.
-    Returns 0.0 on failure.
+    Returns Decimal('0.00') on failure to maintain precision for monetary values.
     """
     if price_raw is None:
-        return 0.0
+        return Decimal('0.00')
     
     try:
         # Convert to string and strip whitespace
@@ -29,7 +30,7 @@ def parse_price_value(price_raw):
         
         # Handle empty strings or N/A values
         if not price_str or price_str.upper() in ['N/A', 'NA', 'NULL', 'NONE', '']:
-            return 0.0
+            return Decimal('0.00')
         
         # Check for parentheses (negative values)
         is_negative = price_str.startswith('(') and price_str.endswith(')')
@@ -48,8 +49,8 @@ def parse_price_value(price_raw):
             numeric_str = numeric_match.group()
             # Remove commas
             numeric_str = numeric_str.replace(',', '')
-            # Convert to float
-            result = float(numeric_str)
+            # Convert to Decimal with 2 decimal places precision
+            result = Decimal(numeric_str).quantize(Decimal('0.01'))
             
             # Apply negative if parentheses or negative sign were present
             if is_negative or has_negative_sign:
@@ -57,10 +58,10 @@ def parse_price_value(price_raw):
                 
             return result
         else:
-            return 0.0
+            return Decimal('0.00')
             
-    except (ValueError, TypeError, AttributeError):
-        return 0.0
+    except (ValueError, TypeError, AttributeError, InvalidOperation):
+        return Decimal('0.00')
 
 class JsonLoader(BaseLoader):
     """Loader for saving data to JSON files."""
@@ -806,3 +807,55 @@ class JsonLoader(BaseLoader):
             transformed_items.append(transformed_item)
         
         return transformed_items
+    
+    def load_patient_dimension_data(self, patient_data: Dict[str, Any], output_path: str) -> bool:
+        """
+        Load patient dimension data with access controls.
+        
+        Args:
+            patient_data: Patient dimension data dictionary
+            output_path: Path to save patient dimension data
+            
+        Returns:
+            bool: True if successful
+        """
+        try:
+            if not patient_data:
+                logger.warning("No patient dimension data to load")
+                return True
+            
+            # Create output directory if it doesn't exist
+            output_dir = Path(output_path).parent
+            output_dir.mkdir(parents=True, exist_ok=True)
+            
+            # Convert patient data to list format for JSON serialization
+            patient_records = list(patient_data.values())
+            
+            # Add metadata for access control
+            patient_dimension_output = {
+                'metadata': {
+                    'access_control': 'restricted',
+                    'encryption_required': True,
+                    'data_type': 'patient_dimension',
+                    'pii_protected': True,
+                    'created_date': datetime.now(timezone.utc).isoformat(),
+                    'record_count': len(patient_records)
+                },
+                'data': patient_records
+            }
+            
+            # Save with restricted permissions
+            with open(output_path, 'w') as f:
+                json.dump(patient_dimension_output, f, indent=2, default=str)
+            
+            # Set restrictive file permissions (readable only by owner)
+            Path(output_path).chmod(0o600)
+            
+            logger.info(f"Loaded patient dimension data: {len(patient_records)} records to {output_path}")
+            logger.warning("Patient dimension data contains PII - access restricted to authorized personnel only")
+            
+            return True
+            
+        except Exception as e:
+            logger.error(f"Error loading patient dimension data: {str(e)}")
+            return False

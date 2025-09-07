@@ -3,6 +3,7 @@ Main ETL pipeline runner for Cranberry Hearing and Balance Center.
 """
 
 import logging
+import yaml
 from pathlib import Path
 from typing import Dict, Any, Optional
 from datetime import datetime
@@ -26,14 +27,16 @@ logger = logging.getLogger(__name__)
 class ETLPipeline:
     """Main ETL pipeline orchestrator."""
     
-    def __init__(self, config_dir: str = None):
+    def __init__(self, config_dir: str = None, early_exit_on_critical_failure: bool = True):
         """
         Initialize ETL pipeline.
         
         Args:
             config_dir: Directory containing configuration files
+            early_exit_on_critical_failure: Whether to exit early on critical failures (default: True)
         """
         self.config_dir = Path(config_dir) if config_dir else Path(__file__).parent / "config"
+        self.early_exit_on_critical_failure = early_exit_on_critical_failure
         self.data_sources_config = None
         self.business_rules = None
         self.schemas = None
@@ -56,7 +59,8 @@ class ETLPipeline:
             'start_time': None,
             'end_time': None,
             'status': 'initialized',
-            'errors': []
+            'errors': [],
+            'early_exit_enabled': early_exit_on_critical_failure
         }
     
     def initialize(self) -> bool:
@@ -100,45 +104,72 @@ class ETLPipeline:
             bool: True if pipeline completed successfully
         """
         success = True
+        critical_failures = []
         
         try:
             self.pipeline_metadata['start_time'] = datetime.now()
             self.pipeline_metadata['status'] = 'running'
             
             logger.info("Starting ETL pipeline execution...")
+            if self.early_exit_on_critical_failure:
+                logger.info("Early exit on critical failures is ENABLED")
+            else:
+                logger.warning("Early exit on critical failures is DISABLED - pipeline will continue despite failures")
             
-            # Load configuration files first
+            # Load configuration files first - CRITICAL: Exit if this fails
+            logger.info("Loading configuration files...")
             self._load_configurations()
+            logger.info("Configuration files loaded successfully")
             
-            # Initialize due diligence manager
+            # Initialize due diligence manager - CRITICAL: Exit if this fails
+            logger.info("Initializing due diligence manager...")
             self._initialize_due_diligence_manager()
+            if not self.due_diligence_manager:
+                critical_failures.append("Due diligence manager initialization failed - this is a critical component")
+                self._handle_critical_failure(
+                    "Due diligence manager initialization failed - this is a critical component",
+                    "initialization"
+                )
+            else:
+                logger.info("Due diligence manager initialized successfully")
             
-            # Initialize pipeline components
+            # Initialize pipeline components - CRITICAL: Exit if this fails
+            logger.info("Initializing pipeline components...")
             self._initialize_extractors()
             self._initialize_transformers()
             self._initialize_loaders()
+            logger.info("Pipeline components initialized successfully")
             
-            # Phase 1: Extract
+            # Phase 1: Extract - CRITICAL: Exit if this fails
             logger.info("Phase 1: Data Extraction")
             if not self._extract_data():
-                success = False
-                self.pipeline_metadata['errors'].append("Data extraction phase failed")
+                critical_failures.append("Data extraction phase failed - cannot proceed without raw data")
+                self._handle_critical_failure(
+                    "Data extraction phase failed - cannot proceed without raw data",
+                    "extraction"
+                )
             else:
                 logger.info("Phase 1: Data Extraction - SUCCESS")
             
-            # Phase 2: Transform
+            # Phase 2: Transform - CRITICAL: Exit if this fails
             logger.info("Phase 2: Data Transformation")
             if not self._transform_data():
-                success = False
-                self.pipeline_metadata['errors'].append("Data transformation phase failed")
+                critical_failures.append("Data transformation phase failed - cannot proceed without transformed data")
+                self._handle_critical_failure(
+                    "Data transformation phase failed - cannot proceed without transformed data",
+                    "transformation"
+                )
             else:
                 logger.info("Phase 2: Data Transformation - SUCCESS")
             
-            # Phase 3: Load
+            # Phase 3: Load - CRITICAL: Exit if this fails
             logger.info("Phase 3: Data Loading")
             if not self._load_data():
-                success = False
-                self.pipeline_metadata['errors'].append("Data loading phase failed")
+                critical_failures.append("Data loading phase failed - pipeline cannot complete successfully")
+                self._handle_critical_failure(
+                    "Data loading phase failed - pipeline cannot complete successfully",
+                    "loading"
+                )
             else:
                 logger.info("Phase 3: Data Loading - SUCCESS")
             
@@ -147,8 +178,18 @@ class ETLPipeline:
             error_msg = f"Pipeline execution failed: {str(e)}"
             logger.error(error_msg)
             self.pipeline_metadata['errors'].append(error_msg)
+            
+            # Log early exit information
+            if self.pipeline_metadata['start_time']:
+                duration = datetime.now() - self.pipeline_metadata['start_time']
+                logger.error(f"Pipeline failed after {duration} - early exit due to critical failure")
         
         finally:
+            # Check for critical failures even when early exit is disabled
+            if not self.early_exit_on_critical_failure and critical_failures:
+                success = False
+                logger.error(f"Pipeline completed with {len(critical_failures)} critical failures")
+            
             # Always finalize pipeline metadata
             self.pipeline_metadata['end_time'] = datetime.now()
             self.pipeline_metadata['status'] = 'completed' if success else 'failed'
@@ -164,6 +205,25 @@ class ETLPipeline:
             
             return success
     
+    def _handle_critical_failure(self, error_msg: str, phase: str = None) -> None:
+        """
+        Handle a critical failure by either raising an exception or logging a warning.
+        
+        Args:
+            error_msg: Error message describing the failure
+            phase: Optional phase name for context
+        """
+        phase_context = f" in {phase}" if phase else ""
+        full_error_msg = f"{error_msg}{phase_context}"
+        
+        logger.error(full_error_msg)
+        self.pipeline_metadata['errors'].append(full_error_msg)
+        
+        if self.early_exit_on_critical_failure:
+            raise RuntimeError(full_error_msg)
+        else:
+            logger.warning(f"Early exit disabled - continuing despite critical failure{phase_context}")
+    
     def _load_configurations(self) -> None:
         """Load configuration files."""
         logger.info("Loading configuration files...")
@@ -171,24 +231,36 @@ class ETLPipeline:
         # Load data sources configuration
         data_sources_file = self.config_dir / "data_sources.yaml"
         if data_sources_file.exists():
-            self.data_sources_config = FileUtils.load_yaml(str(data_sources_file))
-            logger.info("Data sources configuration loaded")
+            try:
+                self.data_sources_config = FileUtils.load_yaml(str(data_sources_file))
+                logger.info("Data sources configuration loaded")
+            except (yaml.YAMLError, ValueError) as err:
+                logger.error(f"Failed to parse data sources configuration: {data_sources_file} - {err}")
+                raise ValueError(f"Failed to parse {data_sources_file}: {err}") from err
         else:
             raise FileNotFoundError(f"Data sources configuration not found: {data_sources_file}")
         
         # Load business rules
         business_rules_file = self.config_dir / "business_rules.yaml"
         if business_rules_file.exists():
-            self.business_rules = FileUtils.load_yaml(str(business_rules_file))
-            logger.info("Business rules configuration loaded")
+            try:
+                self.business_rules = FileUtils.load_yaml(str(business_rules_file))
+                logger.info("Business rules configuration loaded")
+            except (yaml.YAMLError, ValueError) as err:
+                logger.error(f"Failed to parse business rules configuration: {business_rules_file} - {err}")
+                raise ValueError(f"Failed to parse {business_rules_file}: {err}") from err
         else:
             raise FileNotFoundError(f"Business rules configuration not found: {business_rules_file}")
         
         # Load schemas
         schemas_file = self.config_dir / "schemas.yaml"
         if schemas_file.exists():
-            self.schemas = FileUtils.load_yaml(str(schemas_file))
-            logger.info("Schemas configuration loaded")
+            try:
+                self.schemas = FileUtils.load_yaml(str(schemas_file))
+                logger.info("Schemas configuration loaded")
+            except (yaml.YAMLError, ValueError) as err:
+                logger.error(f"Failed to parse schemas configuration: {schemas_file} - {err}")
+                raise ValueError(f"Failed to parse {schemas_file}: {err}") from err
         else:
             raise FileNotFoundError(f"Schemas configuration not found: {schemas_file}")
     
@@ -368,6 +440,19 @@ class ETLPipeline:
                 logger.info("Loading data to JSON files...")
                 json_results = self.loaders['json'].load(load_data)
                 logger.info("JSON data loading completed")
+                
+                # Load patient dimension data separately with access controls
+                if 'patient_dimension' in self.normalized_data:
+                    logger.info("Loading patient dimension data with access controls...")
+                    patient_output_path = Path(__file__).parent.parent / "data" / "restricted" / "patient_dimension.json"
+                    patient_success = self.loaders['json'].load_patient_dimension_data(
+                        self.normalized_data['patient_dimension'], 
+                        str(patient_output_path)
+                    )
+                    if patient_success:
+                        logger.info("Patient dimension data loaded successfully")
+                    else:
+                        logger.error("Failed to load patient dimension data")
             
             # Generate reports
             if 'reports' in self.loaders:
@@ -430,12 +515,21 @@ class ETLPipeline:
             logger.info("Due diligence manager initialized successfully")
             
         except Exception as e:
-            logger.error(f"Failed to initialize due diligence manager: {str(e)}")
-            logger.warning(f"Due diligence manager initialization failed: {str(e)}")
+            error_msg = f"Failed to initialize due diligence manager: {str(e)}"
+            logger.error(error_msg)
+            # Don't raise here - let the calling method handle the None check
+            self.due_diligence_manager = None
     
     def _process_due_diligence(self) -> None:
         """Process due diligence data and generate stage exports."""
         try:
+            # Check if due diligence manager is initialized
+            if self.due_diligence_manager is None:
+                error_msg = "Due diligence manager is not initialized - cannot process due diligence data"
+                logger.error(error_msg)
+                self.pipeline_metadata['errors'].append(error_msg)
+                return
+            
             # Validate data
             validation_results = self.due_diligence_manager.validate()
             logger.info(f"Due diligence validation completed: {validation_results['status']}")
