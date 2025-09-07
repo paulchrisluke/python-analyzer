@@ -1,0 +1,7 @@
+---
+description: look at docs for better-auth and cloudflare
+globs:
+alwaysApply: true
+---
+https://better-auth.com/llms.txt
+https://developers.cloudflare.com/llms-full.txt

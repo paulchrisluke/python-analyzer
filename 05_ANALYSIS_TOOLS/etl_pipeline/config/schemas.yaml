@@ -1,0 +1,193 @@
+# Data Schemas Configuration
+# Defines the structure for each stage of the ETL pipeline
+
+schemas:
+  sales_raw:
+    fields:
+      sale_date: string
+      delivery_date: string
+      return_date: string
+      staff_name: string
+      patient_name: string
+      patient_id: string
+      patient_zip: string
+      clinic_name: string
+      referral_source: string
+      subcategory: string
+      ref_description: string
+      campaign: string
+      units: integer
+      type: string
+      product: string
+      description: string
+      serial_number: string
+      notes: string
+      invoice_no: string
+      cpt_code: string
+      gross_price: float
+      discount: float
+      discount_type_1: string
+      discount_amount_1: float
+      discount_type_2: string
+      discount_amount_2: float
+      discount_type_3: string
+      discount_amount_3: float
+      net_price: float
+      sales_tax: float
+      total_price: float
+      receipt_paid: string
+      
+  sales_normalized:
+    required_fields:
+      - transaction_id
+      - sale_date
+      - patient_id
+      - product_name
+      - units
+      - total_price
+    fields:
+      transaction_id:
+        type: string
+        validation: "non_empty"
+        description: "Unique transaction identifier"
+      sale_date:
+        type: datetime
+        format: "%Y-%m-%d %H:%M:%S"
+        description: "Date and time of sale"
+      delivery_date:
+        type: datetime
+        format: "%Y-%m-%d %H:%M:%S"
+        nullable: true
+        description: "Date of delivery"
+      return_date:
+        type: datetime
+        format: "%Y-%m-%d %H:%M:%S"
+        nullable: true
+        description: "Date of return"
+      staff_name:
+        type: string
+        nullable: true
+        description: "Name of staff member"
+      patient_id:
+        type: string
+        validation: "non_empty"
+        description: "Unique patient identifier"
+      patient_zip:
+        type: string
+        nullable: true
+        description: "Patient ZIP code"
+      clinic_name:
+        type: string
+        nullable: true
+        description: "Name of clinic"
+      referral_source:
+        type: string
+        nullable: true
+        description: "Source of referral"
+      product_category:
+        type: string
+        nullable: true
+        description: "Product category"
+      product_name:
+        type: string
+        validation: "non_empty"
+        description: "Name of product"
+      units:
+        type: integer
+        validation: ">= 0"
+        description: "Number of units sold"
+      transaction_type:
+        type: string
+        enum: ["sale", "return", "exchange", "replacement", "cancelled", "conversion"]
+        nullable: true
+        description: "Type of transaction"
+      gross_price:
+        type: float
+        validation: ">= 0"
+        description: "Gross price before discounts"
+      total_discounts:
+        type: float
+        validation: ">= 0"
+        description: "Total discount amount"
+      net_price:
+        type: float
+        validation: ">= 0"
+        description: "Net price after discounts"
+      sales_tax:
+        type: float
+        validation: ">= 0"
+        description: "Sales tax amount"
+      total_price:
+        type: float
+        validation: ">= 0"
+        description: "Final total price"
+      is_paid:
+        type: boolean
+        description: "Whether transaction is paid"
+      year:
+        type: integer
+        validation: ">= 2020"
+        description: "Year of transaction"
+      month:
+        type: integer
+        validation: ">= 1 and <= 12"
+        description: "Month of transaction"
+      quarter:
+        type: integer
+        validation: ">= 1 and <= 4"
+        description: "Quarter of transaction"
+      
+  financial_raw:
+    fields:
+      source_file: string
+      account_name: string
+      account_type: string
+      amount: float
+      date: string
+      description: string
+      reference: string
+      
+  financial_normalized:
+    fields:
+      account_name: string
+      account_type: string
+      amount: float
+      date: datetime
+      period: string
+      category: string
+      subcategory: string
+      year: integer
+      month: integer
+      
+  business_metrics:
+    fields:
+      total_revenue: float
+      total_transactions: integer
+      average_transaction: float
+      revenue_by_location: dict
+      revenue_by_staff: dict
+      revenue_by_year: dict
+      revenue_by_month: dict
+      growth_rates: dict
+      ebitda: float
+      profit_margin: float
+      roi: float
+      
+  equipment_raw:
+    fields:
+      file_name: string
+      equipment_name: string
+      description: string
+      price: float
+      category: string
+      quote_date: string
+      
+  equipment_normalized:
+    fields:
+      equipment_id: string
+      name: string
+      description: string
+      category: string
+      price: float
+      quote_date: datetime
+      location: string
