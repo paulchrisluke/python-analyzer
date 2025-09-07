@@ -5,6 +5,8 @@ Sales data transformer for ETL pipeline.
 import pandas as pd
 import re
 import hashlib
+import hmac
+import base64
 from typing import Dict, Any, List, Optional
 import logging
 from datetime import datetime, timezone
