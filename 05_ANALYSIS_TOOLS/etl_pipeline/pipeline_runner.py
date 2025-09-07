@@ -17,6 +17,7 @@ from .load.json_loader import JsonLoader
 from .load.report_generator import ReportGenerator
 from .utils.logging_config import setup_logging
 from .utils.data_coverage_analyzer import DataCoverageAnalyzer
+from .utils.due_diligence_manager import DueDiligenceManager
 from .utils.file_utils import FileUtils
 from .utils.data_validation import DataValidator
 
@@ -41,6 +42,9 @@ class ETLPipeline:
         self.extractors = {}
         self.transformers = {}
         self.loaders = {}
+        
+        # Due diligence manager
+        self.due_diligence_manager = None
         
         # Pipeline data
         self.raw_data = {}
@@ -77,6 +81,9 @@ class ETLPipeline:
             
             # Initialize loaders
             self._initialize_loaders()
+            
+            # Initialize due diligence manager
+            self._initialize_due_diligence_manager()
             
             logger.info("ETL pipeline initialized successfully")
             return True
@@ -349,6 +356,12 @@ class ETLPipeline:
                 report_results = self.loaders['reports'].load(load_data)
                 logger.info("Report generation completed")
             
+            # Process due diligence data
+            if self.due_diligence_manager:
+                logger.info("Processing due diligence data...")
+                self._process_due_diligence()
+                logger.info("Due diligence processing completed")
+            
             logger.info("Data loading phase completed")
             return True
             
@@ -377,3 +390,72 @@ class ETLPipeline:
                 'final_data_types': list(self.final_data.keys())
             }
         }
+    
+    def _initialize_due_diligence_manager(self) -> None:
+        """Initialize due diligence manager."""
+        try:
+            logger.info("Initializing due diligence manager...")
+            
+            # Set up data and docs directories
+            data_dir = Path(__file__).parent.parent / "data"
+            docs_dir = Path(__file__).parent.parent.parent / "docs"
+            
+            self.due_diligence_manager = DueDiligenceManager(
+                data_dir=str(data_dir),
+                docs_dir=str(docs_dir)
+            )
+            
+            # Load existing data
+            self.due_diligence_manager.load_existing_data()
+            
+            logger.info("Due diligence manager initialized successfully")
+            
+        except Exception as e:
+            logger.error(f"Failed to initialize due diligence manager: {str(e)}")
+            self.pipeline_metadata['warnings'].append(f"Due diligence manager initialization failed: {str(e)}")
+    
+    def _process_due_diligence(self) -> None:
+        """Process due diligence data and generate stage exports."""
+        try:
+            # Validate data
+            validation_results = self.due_diligence_manager.validate()
+            logger.info(f"Due diligence validation completed: {validation_results['status']}")
+            
+            # Calculate scores
+            scores = self.due_diligence_manager.calculate_scores()
+            logger.info(f"Due diligence scores calculated: {scores['overall_score']}% overall")
+            
+            # Export all stage data
+            self.due_diligence_manager.export_all()
+            logger.info("Due diligence stage exports completed")
+            
+        except Exception as e:
+            logger.error(f"Due diligence processing failed: {str(e)}")
+            self.pipeline_metadata['errors'].append(f"Due diligence processing error: {str(e)}")
+    
+    def run_due_diligence_only(self) -> bool:
+        """
+        Run only the due diligence processing (standalone mode).
+        
+        Returns:
+            bool: True if due diligence processing successful
+        """
+        try:
+            logger.info("Running due diligence processing in standalone mode...")
+            
+            # Initialize due diligence manager
+            self._initialize_due_diligence_manager()
+            
+            if not self.due_diligence_manager:
+                logger.error("Due diligence manager not initialized")
+                return False
+            
+            # Process due diligence
+            self._process_due_diligence()
+            
+            logger.info("Due diligence processing completed successfully")
+            return True
+            
+        except Exception as e:
+            logger.error(f"Standalone due diligence processing failed: {str(e)}")
+            return False

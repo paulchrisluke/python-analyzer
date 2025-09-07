@@ -1,0 +1,68 @@
+#!/usr/bin/env python3
+"""
+Quick test to verify the schema includes all required fields.
+"""
+
+import sys
+import json
+from pathlib import Path
+
+# Add the current directory to the Python path
+sys.path.insert(0, str(Path(__file__).parent))
+
+from etl_pipeline.utils.due_diligence_manager import DueDiligenceManager
+
+def test_schema():
+    """Test that the schema includes all required fields."""
+    print("Testing schema compliance...")
+    
+    # Initialize manager
+    data_dir = Path(__file__).parent / "data"
+    docs_dir = Path(__file__).parent.parent / "docs"
+    
+    manager = DueDiligenceManager(data_dir=str(data_dir), docs_dir=str(docs_dir))
+    
+    # Generate sample data
+    manager.generate_sample_data()
+    
+    # Get internal view (should have all fields)
+    internal_data = manager.get_stage_view("internal")
+    
+    # Check a financial document
+    if "financials" in internal_data and "documents" in internal_data["financials"]:
+        doc = internal_data["financials"]["documents"][0]
+        print(f"Sample document: {doc['name']}")
+        print(f"Required fields present:")
+        
+        required_fields = ["name", "status", "notes", "due_date", "file_type", "file_path", "file_size", "visibility"]
+        for field in required_fields:
+            if field in doc:
+                print(f"  ✅ {field}: {doc[field]}")
+            else:
+                print(f"  ❌ {field}: MISSING")
+    
+    # Export to verify
+    test_dir = Path(__file__).parent / "schema_test_output"
+    test_dir.mkdir(exist_ok=True)
+    manager.export_json("internal", str(test_dir / "internal.json"))
+    
+    # Read and verify the exported file
+    with open(test_dir / "internal.json", 'r') as f:
+        exported_data = json.load(f)
+    
+    print(f"\nExported file verification:")
+    if "financials" in exported_data and "documents" in exported_data["financials"]:
+        doc = exported_data["financials"]["documents"][0]
+        for field in required_fields:
+            if field in doc:
+                print(f"  ✅ {field}: {doc[field]}")
+            else:
+                print(f"  ❌ {field}: MISSING")
+    
+    # Clean up
+    import shutil
+    shutil.rmtree(test_dir)
+    print("\nSchema test completed!")
+
+if __name__ == "__main__":
+    test_schema()

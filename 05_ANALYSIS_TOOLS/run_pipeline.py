@@ -52,6 +52,11 @@ def main():
         action="store_true",
         help="Output pipeline summary to console"
     )
+    parser.add_argument(
+        "--due-diligence-only",
+        action="store_true",
+        help="Run only due diligence processing (standalone mode)"
+    )
     
     args = parser.parse_args()
     
@@ -67,13 +72,18 @@ def main():
         
         pipeline = ETLPipeline(config_dir=args.config_dir)
         
-        # Initialize pipeline
-        if not pipeline.initialize():
-            logger.error("Pipeline initialization failed")
-            return 1
-        
-        # Run pipeline
-        success = pipeline.run()
+        # Check if running due diligence only
+        if args.due_diligence_only:
+            logger.info("Running due diligence processing only...")
+            success = pipeline.run_due_diligence_only()
+        else:
+            # Initialize pipeline
+            if not pipeline.initialize():
+                logger.error("Pipeline initialization failed")
+                return 1
+            
+            # Run pipeline
+            success = pipeline.run()
         
         if success:
             logger.info("="*60)
