@@ -4,11 +4,17 @@
 data_sources:
   sales:
     type: csv
-    path: "../02_OPERATIONAL_DATA/Sales_Data/report-371-1755757545-sales.csv"
+    path: "../02_OPERATIONAL_DATA/Sales_Data/"
+    sales_pattern: "*sales*.csv"
+    returns_pattern: "*returns*.csv"
+    exchanges_pattern: "*exchanges*.csv"
+    replacements_pattern: "*replacements*.csv"
+    cancelled_pattern: "*cancelled*.csv"
+    conversions_pattern: "*conversions*.csv"
     encoding: utf-8
     delimiter: ","
     has_header: true
-    description: "Main sales transaction data"
+    description: "Main sales transaction data with configurable patterns"
     
   sales_returns:
     type: csv
@@ -53,7 +59,7 @@ data_sources:
   financial_pnl_2023:
     type: csv
     path: "../01_FINANCIAL_DATA/QuickBooks_Exports/fwd2023profitlossstatements"
-    pattern: "*.CSV"
+    pattern: "*.[cC][sS][vV]"
     encoding: utf-8
     delimiter: ","
     has_header: true
@@ -62,7 +68,7 @@ data_sources:
   financial_pnl_2024:
     type: csv
     path: "../01_FINANCIAL_DATA/QuickBooks_Exports/fwdplallclassesjandec2024"
-    pattern: "*.CSV"
+    pattern: "*.[cC][sS][vV]"
     encoding: utf-8
     delimiter: ","
     has_header: true
@@ -71,7 +77,7 @@ data_sources:
   financial_balance_sheets:
     type: csv
     path: "../01_FINANCIAL_DATA/QuickBooks_Exports/fwdbalancesheetbymonth2022_contents"
-    pattern: "*.CSV"
+    pattern: "*.[cC][sS][vV]"
     encoding: utf-8
     delimiter: ","
     has_header: true
@@ -80,7 +86,7 @@ data_sources:
   financial_general_ledger:
     type: csv
     path: "../01_FINANCIAL_DATA/QuickBooks_Exports/fwdgeneralledger20212025_contents"
-    pattern: "*.CSV"
+    pattern: "*.[cC][sS][vV]"
     encoding: utf-8
     delimiter: ","
     has_header: true
@@ -89,7 +95,7 @@ data_sources:
   financial_cogs:
     type: csv
     path: "../01_FINANCIAL_DATA/QuickBooks_Exports/fwdstarkeycogs20212022202320242025_contents"
-    pattern: "*.csv"
+    pattern: "*.[cC][sS][vV]"
     encoding: utf-8
     delimiter: ","
     has_header: true

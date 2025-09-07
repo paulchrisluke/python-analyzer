@@ -132,6 +132,9 @@ class ReportGenerator(BaseLoader):
         total_transactions = sales_metrics.get('total_transactions', 0)
         asking_price = valuation_metrics.get('market_analysis', {}).get('asking_price', 650000)
         
+        # Calculate safe average transaction
+        average_transaction = total_revenue / total_transactions if total_transactions > 0 else 0
+        
         html = f"""
 <!DOCTYPE html>
 <html lang="en">
@@ -181,7 +184,7 @@ class ReportGenerator(BaseLoader):
             <div class="metric-label">Total Transactions</div>
         </div>
         <div class="metric">
-            <div class="metric-value">${total_revenue/total_transactions:,.0f}</div>
+            <div class="metric-value">${average_transaction:,.0f}</div>
             <div class="metric-label">Average Transaction</div>
         </div>
     </div>

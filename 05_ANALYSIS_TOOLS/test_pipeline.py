@@ -13,8 +13,8 @@ import pandas as pd
 from pathlib import Path
 from collections import defaultdict
 
-# Add the etl_pipeline directory to the Python path
-sys.path.insert(0, str(Path(__file__).parent / "etl_pipeline"))
+# Add the parent directory to the Python path so etl_pipeline can be imported
+sys.path.insert(0, str(Path(__file__).parent))
 
 from etl_pipeline.utils.logging_config import setup_logging
 from etl_pipeline.utils.file_utils import FileUtils
@@ -495,24 +495,32 @@ def main():
     
     all_tests = basic_tests + completeness_tests
     
-    passed = 0
-    total = len(all_tests)
+    # Store test results to avoid duplicate execution
+    test_results = []
     
     print(f"\n{'='*20} BASIC PIPELINE TESTS {'='*20}")
     for test_name, test_func in basic_tests:
         print(f"\n{'='*20} {test_name} {'='*20}")
-        if test_func():
-            passed += 1
+        result = test_func()
+        test_results.append((test_name, result))
+        if result:
+            print(f"✅ {test_name} PASSED")
         else:
             print(f"❌ {test_name} FAILED")
     
     print(f"\n{'='*20} DATA COMPLETENESS TESTS {'='*20}")
     for test_name, test_func in completeness_tests:
         print(f"\n{'='*20} {test_name} {'='*20}")
-        if test_func():
-            passed += 1
+        result = test_func()
+        test_results.append((test_name, result))
+        if result:
+            print(f"✅ {test_name} PASSED")
         else:
             print(f"❌ {test_name} FAILED")
+    
+    # Count passed tests from stored results
+    passed = sum(1 for _, result in test_results if result)
+    total = len(test_results)
     
     print("\n" + "="*60)
     print("COMPREHENSIVE TEST SUMMARY")
@@ -520,9 +528,9 @@ def main():
     print(f"Tests Passed: {passed}/{total}")
     print(f"Success Rate: {(passed/total*100):.1f}%")
     
-    # Categorize results
-    basic_passed = sum(1 for _, test_func in basic_tests if test_func())
-    completeness_passed = sum(1 for _, test_func in completeness_tests if test_func())
+    # Categorize results from stored test results
+    basic_passed = sum(1 for test_name, result in test_results[:len(basic_tests)] if result)
+    completeness_passed = sum(1 for test_name, result in test_results[len(basic_tests):] if result)
     
     print(f"\nBasic Pipeline Tests: {basic_passed}/{len(basic_tests)} passed")
     print(f"Data Completeness Tests: {completeness_passed}/{len(completeness_tests)} passed")

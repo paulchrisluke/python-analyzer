@@ -4,6 +4,7 @@ JSON data loader for ETL pipeline.
 
 import json
 import pandas as pd
+import numpy as np
 from typing import Dict, Any, List, Optional
 import logging
 from pathlib import Path
@@ -38,28 +39,39 @@ class JsonLoader(BaseLoader):
         """
         logger.info("Starting JSON data loading...")
         
-        # Load raw data
-        if 'raw_data' in transformed_data:
-            self._load_raw_data(transformed_data['raw_data'])
+        # Reset per-run state
+        self.load_results = {}
+        self.start_load_session()
         
-        # Load normalized data
-        if 'normalized_data' in transformed_data:
-            self._load_normalized_data(transformed_data['normalized_data'])
-        
-        # Load final business data
-        if 'business_metrics' in transformed_data:
-            self._load_business_data(transformed_data['business_metrics'])
-        
-        # Load coverage analysis
-        if 'coverage_analysis' in transformed_data:
-            self._load_coverage_analysis(transformed_data['coverage_analysis'])
-        
-        # Load equipment data
-        if 'equipment_data' in transformed_data:
-            self._load_equipment_data(transformed_data['equipment_data'])
-        
-        logger.info("JSON data loading completed")
-        return self.load_results
+        try:
+            # Load raw data
+            if 'raw_data' in transformed_data:
+                self._load_raw_data(transformed_data['raw_data'])
+            
+            # Load normalized data
+            if 'normalized_data' in transformed_data:
+                self._load_normalized_data(transformed_data['normalized_data'])
+            
+            # Load final business data
+            if 'business_metrics' in transformed_data:
+                self._load_business_data(transformed_data['business_metrics'])
+            
+            # Load coverage analysis
+            if 'coverage_analysis' in transformed_data:
+                self._load_coverage_analysis(transformed_data['coverage_analysis'])
+            
+            # Load equipment data
+            if 'equipment_data' in transformed_data:
+                self._load_equipment_data(transformed_data['equipment_data'])
+            
+            logger.info("JSON data loading completed")
+            return self.load_results
+            
+        except Exception as e:
+            self.add_load_event('error', f'Load failed: {str(e)}')
+            raise
+        finally:
+            self.end_load_session()
     
     def _load_raw_data(self, raw_data: Dict[str, Any]) -> None:
         """Load raw data to JSON files."""
@@ -87,7 +99,22 @@ class JsonLoader(BaseLoader):
         # Save equipment raw data
         if 'equipment' in raw_data:
             equipment_file = raw_dir / "equipment_raw.json"
-            FileUtils.save_json(raw_data['equipment'], str(equipment_file))
+            # Handle equipment payload that may be a DataFrame or contain NaN/Inf/numpy types
+            equipment_data = raw_data['equipment']
+            if isinstance(equipment_data, pd.DataFrame):
+                # Convert DataFrame to JSON-serializable format
+                df = equipment_data.copy()
+                # Replace Inf/-Inf with None and NaN with None
+                df = df.replace([np.inf, -np.inf], None).where(pd.notnull(df), None)
+                # Convert to dict and ensure numpy scalars are native Python types
+                equipment_data = df.to_dict(orient='records')
+                # Post-process to ensure all values are JSON-serializable
+                equipment_data = self._sanitize_for_json(equipment_data)
+            else:
+                # Sanitize non-DataFrame equipment data
+                equipment_data = self._sanitize_for_json(equipment_data)
+            
+            FileUtils.save_json(equipment_data, str(equipment_file))
             self.load_results['equipment_raw'] = str(equipment_file)
             logger.info(f"Raw equipment data saved to: {equipment_file}")
     
@@ -117,7 +144,9 @@ class JsonLoader(BaseLoader):
         # Save equipment normalized data
         if 'equipment' in normalized_data:
             equipment_file = normalized_dir / "equipment_normalized.json"
-            FileUtils.save_json(normalized_data['equipment'], str(equipment_file))
+            # Convert to JSON-serializable structure
+            equipment_data_for_json = self._convert_equipment_to_json_serializable(normalized_data['equipment'])
+            FileUtils.save_json(equipment_data_for_json, str(equipment_file))
             self.load_results['equipment_normalized'] = str(equipment_file)
             logger.info(f"Normalized equipment data saved to: {equipment_file}")
     
@@ -150,9 +179,63 @@ class JsonLoader(BaseLoader):
         logger.info(f"Equipment analysis saved to: {equipment_file}")
     
     def _load_equipment_data(self, equipment_data: Dict[str, Any]) -> None:
-        """Load equipment data."""
-        # Equipment data is already handled in _load_business_data
-        pass
+        """Load equipment data to JSON files."""
+        try:
+            if not equipment_data:
+                self.add_load_event('warning', 'No equipment data to load')
+                return
+            
+            # Create equipment directory
+            equipment_dir = self.output_dir / "equipment"
+            equipment_dir.mkdir(exist_ok=True)
+            
+            # Validate and transform equipment data
+            validated_equipment = self._validate_equipment_data(equipment_data)
+            
+            # Save equipment data
+            equipment_file = equipment_dir / "equipment_data.json"
+            FileUtils.save_json(validated_equipment, str(equipment_file))
+            
+            # Update load results
+            self.load_results['equipment_data'] = str(equipment_file)
+            
+            # Log success
+            record_count = len(validated_equipment.get('quotes', []))
+            self.log_load_summary('equipment', record_count, str(equipment_file))
+            self.add_load_event('file_created', f'Equipment data saved: {equipment_file.name}')
+            
+        except Exception as e:
+            error_msg = f"Failed to load equipment data: {str(e)}"
+            self.add_load_event('error', error_msg)
+            logger.error(error_msg)
+            raise
+    
+    def _validate_equipment_data(self, equipment_data: Dict[str, Any]) -> Dict[str, Any]:
+        """Validate and transform equipment data to target schema."""
+        validated_data = {
+            'quotes': [],
+            'summary': equipment_data.get('summary', {}),
+            'metadata': {
+                'validated_at': datetime.now().isoformat(),
+                'source': 'ETL Pipeline'
+            }
+        }
+        
+        # Validate equipment quotes
+        quotes = equipment_data.get('quotes', [])
+        for quote in quotes:
+            if isinstance(quote, dict):
+                validated_quote = {
+                    'file_name': quote.get('file_name', 'Unknown'),
+                    'equipment_name': quote.get('equipment_name', 'Unknown'),
+                    'description': quote.get('description', 'Unknown'),
+                    'price': float(quote.get('price', 0.0)),
+                    'category': quote.get('category', 'Unknown'),
+                    'quote_date': quote.get('quote_date', 'Unknown')
+                }
+                validated_data['quotes'].append(validated_quote)
+        
+        return validated_data
     
     def _load_coverage_analysis(self, coverage_analysis: Dict[str, Any]) -> None:
         """Load coverage analysis data."""
@@ -171,18 +254,41 @@ class JsonLoader(BaseLoader):
         # Extract metrics
         sales_metrics = business_metrics.get('sales', {})
         financial_metrics = business_metrics.get('financial', {})
-        operational_metrics = business_metrics.get('operational', {})
         valuation_metrics = business_metrics.get('valuation', {})
-        performance_metrics = business_metrics.get('performance', {})
+        
+        # Compute data period and analysis period from available metrics
+        start_date = financial_metrics.get('start_date')
+        end_date = financial_metrics.get('end_date')
+        
+        if not start_date or not end_date:
+            # Compute start date by subtracting analysis period months from now
+            analysis_months = financial_metrics.get('revenue_metrics', {}).get('analysis_period_months', 30)
+            from dateutil.relativedelta import relativedelta
+            start_date = (datetime.now() - relativedelta(months=analysis_months)).date()
+            end_date = datetime.now().date()
+        
+        # Format dates as ISO strings
+        if hasattr(start_date, 'isoformat'):
+            start_date_str = start_date.isoformat()
+        else:
+            start_date_str = str(start_date)
+            
+        if hasattr(end_date, 'isoformat'):
+            end_date_str = end_date.isoformat()
+        else:
+            end_date_str = str(end_date)
+        
+        data_period = f"{start_date_str} to {end_date_str}"
+        analysis_period = f"{start_date_str} to {end_date_str}"
         
         # Create business sale data structure
         business_sale_data = {
             "metadata": {
                 "generated_at": datetime.now().isoformat(),
-                "data_period": "2023-2025 Q2",
+                "data_period": data_period,
                 "months_analyzed": financial_metrics.get('revenue_metrics', {}).get('analysis_period_months', 30),
                 "data_source": "ETL Pipeline - Real Business Data",
-                "analysis_period": "Jan 1, 2023 to June 30, 2025"
+                "analysis_period": analysis_period
             },
             "financials": {
                 "revenue": {
@@ -303,31 +409,28 @@ class JsonLoader(BaseLoader):
     def _create_equipment_analysis(self, business_metrics: Dict[str, Any]) -> Dict[str, Any]:
         """Create equipment analysis."""
         equipment_metrics = business_metrics.get('equipment', {})
+        
+        # Build items list from data-driven source
+        items = []
+        equipment_items = equipment_metrics.get('items', [])
+        
+        if equipment_items:
+            # Use data from business metrics
+            for item in equipment_items:
+                if isinstance(item, dict):
+                    items.append({
+                        "name": item.get('name', 'Unknown Equipment'),
+                        "description": item.get('description', 'Equipment description not available'),
+                        "category": item.get('category', 'Uncategorized')
+                    })
+        else:
+            # Fallback to empty list if no data available
+            items = []
+        
         return {
             "equipment_summary": {
                 "total_value": equipment_metrics.get('total_value', 0),
-                "items": [
-                    {
-                        "name": "Cello Audiometer System",
-                        "description": "Advanced hearing testing",
-                        "category": "Diagnostic Equipment"
-                    },
-                    {
-                        "name": "Trumpet REM System",
-                        "description": "Real ear measurement",
-                        "category": "Measurement Equipment"
-                    },
-                    {
-                        "name": "CL12BLP Equipment",
-                        "description": "Professional diagnostic tools",
-                        "category": "Diagnostic Equipment"
-                    },
-                    {
-                        "name": "AUD System",
-                        "description": "Complete audiology suite",
-                        "category": "Complete System"
-                    }
-                ]
+                "items": items
             },
             "generated_at": datetime.now().isoformat(),
             "data_source": "ETL Pipeline Analysis"
@@ -342,24 +445,117 @@ class JsonLoader(BaseLoader):
                 # Convert DataFrame to dictionary with proper date handling
                 df_copy = value.copy()
                 
-                # Convert datetime columns to strings
+                # Handle datetime columns with timezone awareness
                 for col in df_copy.columns:
                     if df_copy[col].dtype == 'datetime64[ns]':
-                        df_copy[col] = df_copy[col].dt.strftime('%Y-%m-%d %H:%M:%S')
+                        # Use isoformat to preserve timezone info
+                        df_copy[col] = df_copy[col].apply(
+                            lambda x: x.isoformat() if pd.notnull(x) else None
+                        )
                     elif 'datetime' in str(df_copy[col].dtype):
-                        df_copy[col] = df_copy[col].astype(str)
+                        # Handle other datetime types
+                        df_copy[col] = df_copy[col].apply(
+                            lambda x: x.isoformat() if hasattr(x, 'isoformat') and pd.notnull(x) else None
+                        )
+                
+                # Replace NaN/Infinity with JSON-safe values
+                df_copy = df_copy.replace([np.inf, -np.inf], None).where(pd.notnull(df_copy), None)
+                
+                # Convert to records and sanitize
+                records = df_copy.to_dict('records')
+                sanitized_records = self._sanitize_for_json(records)
                 
                 converted_data[key] = {
-                    'data': df_copy.to_dict('records'),
+                    'data': sanitized_records,
                     'columns': list(value.columns),
                     'shape': value.shape,
                     'dtypes': {k: str(v) for k, v in value.dtypes.to_dict().items()}
                 }
+            elif isinstance(value, list):
+                # Handle lists that may contain DataFrames
+                converted_data[key] = self._sanitize_for_json(value)
             elif isinstance(value, dict):
                 # Recursively convert nested dictionaries
                 converted_data[key] = self._convert_dataframes_to_dict(value)
             else:
-                # Keep other types as-is
-                converted_data[key] = value
+                # Sanitize other types
+                converted_data[key] = self._sanitize_for_json(value)
+        
+        return converted_data
+    
+    def _sanitize_for_json(self, obj: Any) -> Any:
+        """Sanitize any object to be JSON-serializable."""
+        if isinstance(obj, pd.DataFrame):
+            # Handle DataFrame by converting to records and sanitizing
+            df = obj.copy()
+            df = df.replace([np.inf, -np.inf], None).where(pd.notnull(df), None)
+            records = df.to_dict('records')
+            return self._sanitize_for_json(records)
+        elif isinstance(obj, list):
+            # Handle lists recursively
+            return [self._sanitize_for_json(item) for item in obj]
+        elif isinstance(obj, dict):
+            # Handle dictionaries recursively
+            return {key: self._sanitize_for_json(value) for key, value in obj.items()}
+        elif isinstance(obj, (np.integer, np.floating)):
+            # Convert numpy scalars to native Python types
+            return obj.item()
+        elif isinstance(obj, np.ndarray):
+            # Convert numpy arrays to lists
+            return obj.tolist()
+        elif hasattr(obj, 'isoformat'):
+            # Handle datetime objects
+            return obj.isoformat()
+        elif pd.isna(obj) or obj in [np.inf, -np.inf]:
+            # Handle NaN and infinity values
+            return None
+        elif isinstance(obj, (int, float, str, bool, type(None))):
+            # Already JSON-serializable
+            return obj
+        else:
+            # Convert everything else to string
+            return str(obj)
+    
+    def _convert_equipment_to_json_serializable(self, equipment_data: Dict[str, Any]) -> Dict[str, Any]:
+        """Convert equipment data to JSON-serializable structure."""
+        converted_data = {}
+        
+        for key, value in equipment_data.items():
+            if isinstance(value, pd.DataFrame):
+                # Convert DataFrame to list of dictionaries
+                converted_data[key] = {
+                    'data': value.to_dict('records'),
+                    'columns': list(value.columns),
+                    'shape': value.shape,
+                    'dtypes': {k: str(v) for k, v in value.dtypes.to_dict().items()}
+                }
+            elif isinstance(value, list):
+                # Convert list items to plain dictionaries
+                converted_data[key] = []
+                for item in value:
+                    if isinstance(item, dict):
+                        # Ensure all values are JSON-serializable
+                        serializable_item = {}
+                        for k, v in item.items():
+                            if hasattr(v, 'isoformat'):  # datetime objects
+                                serializable_item[k] = v.isoformat()
+                            elif isinstance(v, (int, float, str, bool, type(None))):
+                                serializable_item[k] = v
+                            else:
+                                serializable_item[k] = str(v)
+                        converted_data[key].append(serializable_item)
+                    else:
+                        converted_data[key].append(str(item))
+            elif isinstance(value, dict):
+                # Recursively convert nested dictionaries
+                converted_data[key] = self._convert_equipment_to_json_serializable(value)
+            else:
+                # Handle other types
+                if hasattr(value, 'isoformat'):  # datetime objects
+                    converted_data[key] = value.isoformat()
+                elif isinstance(value, (int, float, str, bool, type(None))):
+                    converted_data[key] = value
+                else:
+                    converted_data[key] = str(value)
         
         return converted_data

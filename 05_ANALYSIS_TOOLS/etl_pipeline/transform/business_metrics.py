@@ -195,7 +195,7 @@ class BusinessMetricsCalculator:
                 months_in_period = ((end_date.year - start_date.year) * 12 + 
                                   (end_date.month - start_date.month) + 1)
             else:
-                months_in_period = 30  # Default fallback
+                months_in_period = 12  # Default fallback changed from 30 to 12
             
             # Basic financial ratios
             financial_metrics['revenue_metrics'] = {
@@ -207,21 +207,20 @@ class BusinessMetricsCalculator:
             
             # EBITDA calculation - use real data if available, otherwise use margin
             if real_ebitda is not None:
-                estimated_ebitda = real_ebitda
-                ebitda_margin = estimated_ebitda / total_revenue if total_revenue > 0 else 0
-                logger.info(f"Using real EBITDA from financial data: ${estimated_ebitda:,.2f}")
+                # Real EBITDA is monthly, so calculate monthly revenue average for consistent units
+                monthly_revenue_avg = total_revenue / months_in_period if months_in_period > 0 else 0
+                ebitda_margin = real_ebitda / monthly_revenue_avg if monthly_revenue_avg > 0 else 0
+                estimated_ebitda = real_ebitda  # Keep as monthly for consistency
+                logger.info(f"Using real EBITDA from financial data: ${estimated_ebitda:,.2f} monthly")
+                logger.info(f"Monthly revenue average: ${monthly_revenue_avg:,.2f}, EBITDA margin: {ebitda_margin:.1%}")
             else:
                 ebitda_margin = self.business_rules.get('financial_metrics', {}).get('ebitda_margin_target', 0.25)
-                estimated_ebitda = total_revenue * ebitda_margin
-                logger.info(f"Using estimated EBITDA with {ebitda_margin:.1%} margin: ${estimated_ebitda:,.2f}")
+                monthly_revenue_avg = total_revenue / months_in_period if months_in_period > 0 else 0
+                estimated_ebitda = monthly_revenue_avg * ebitda_margin
+                logger.info(f"Using estimated EBITDA with {ebitda_margin:.1%} margin: ${estimated_ebitda:,.2f} monthly")
             
             # Calculate annual EBITDA projection
-            if real_ebitda is not None:
-                # Real EBITDA is already monthly average, so multiply by 12 for annual
-                annual_ebitda = estimated_ebitda * 12
-            else:
-                # Estimated EBITDA is based on revenue margin, so use the period-based calculation
-                annual_ebitda = estimated_ebitda * 12 / months_in_period
+            annual_ebitda = estimated_ebitda * 12
             
             financial_metrics['profitability'] = {
                 'estimated_ebitda': estimated_ebitda,
@@ -458,7 +457,8 @@ class BusinessMetricsCalculator:
                 avg_monthly_ebitda = sum(monthly_ebitdas) / len(monthly_ebitdas)
                 logger.info(f"Average monthly EBITDA (company-wide): ${avg_monthly_ebitda:,.2f} (from {len(monthly_ebitdas)} months)")
                 
-                # Apply location adjustment factor to get EBITDA for sale locations only
+                # Calculate location adjustment factor to get EBITDA for sale locations only
+                location_adjustment_factor = self._calculate_location_adjustment_factor(normalized_data)
                 adjusted_monthly_ebitda = avg_monthly_ebitda * location_adjustment_factor
                 logger.info(f"Adjusted monthly EBITDA (sale locations only): ${adjusted_monthly_ebitda:,.2f}")
                 
@@ -474,7 +474,7 @@ class BusinessMetricsCalculator:
                 return None
                 
         except Exception as e:
-            logger.error(f"Error calculating real EBITDA from financial data: {str(e)}")
+            logger.exception("Error calculating real EBITDA from financial data")
             return None
     
     def _calculate_performance_indicators(self) -> Dict[str, Any]:
@@ -538,7 +538,7 @@ class BusinessMetricsCalculator:
             months_in_period = ((end_date.year - start_date.year) * 12 + 
                               (end_date.month - start_date.month) + 1)
         else:
-            months_in_period = 30  # Default fallback
+            months_in_period = 12  # Default fallback changed from 30 to 12
         
         # Calculate monthly revenue average from total revenue and months
         monthly_revenue_average = total_revenue / months_in_period if total_revenue > 0 else 0
@@ -609,8 +609,8 @@ class BusinessMetricsCalculator:
             
             return adjustment_factor
             
-        except Exception as e:
-            logger.error(f"Error calculating location adjustment factor: {str(e)}")
+        except Exception:
+            logger.exception("Error calculating location adjustment factor")
             return 1.0  # Default to no adjustment
     
     def _calculate_equipment_metrics(self) -> Dict[str, Any]:

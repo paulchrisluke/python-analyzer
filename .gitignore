@@ -49,14 +49,16 @@
 website/_next/
 website/.wrangler/
 website/404/
-website/functions/
 website/js/
 website/*.html
 website/*.txt
 website/*.webmanifest
-website/package.json
-website/wrangler.toml
-website/README.md
+
+# Keep essential website files for deployment
+!website/functions/
+!website/package.json
+!website/wrangler.toml
+!website/README.md
 
 # Backup files (protect from accidental commits)
 *backup*
@@ -193,7 +195,9 @@ logs/
 
 # Cloudflare
 .wrangler/
-wrangler.toml
+
+# Keep website wrangler.toml for deployment
+!website/wrangler.toml
 
 # Vercel
 .vercel

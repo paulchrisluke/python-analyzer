@@ -17,11 +17,12 @@ Examples:
 import argparse
 import sys
 import json
+import logging
 from pathlib import Path
 from datetime import datetime
 
-# Add the etl_pipeline directory to the Python path
-sys.path.insert(0, str(Path(__file__).parent / "etl_pipeline"))
+# Add the parent directory to the Python path so etl_pipeline can be imported
+sys.path.insert(0, str(Path(__file__).parent))
 
 from etl_pipeline.pipeline_runner import ETLPipeline
 from etl_pipeline.utils.logging_config import setup_logging
@@ -55,7 +56,7 @@ def main():
     args = parser.parse_args()
     
     # Setup logging
-    logger = setup_logging(log_level=getattr(__import__('logging'), args.log_level))
+    logger = setup_logging(log_level=getattr(logging, args.log_level))
     
     try:
         # Initialize pipeline

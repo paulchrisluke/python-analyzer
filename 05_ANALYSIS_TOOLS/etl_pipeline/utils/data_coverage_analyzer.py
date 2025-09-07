@@ -36,6 +36,9 @@ class DataCoverageAnalyzer:
         """
         logger.info("Starting comprehensive data coverage analysis...")
         
+        # Reset coverage report for fresh analysis
+        self.coverage_report = {}
+        
         # Analyze sales data coverage
         sales_coverage = self._analyze_sales_coverage(raw_data.get('sales', {}))
         self.coverage_report['sales'] = sales_coverage
@@ -92,7 +95,11 @@ class DataCoverageAnalyzer:
         # Get analysis period
         analysis_period = self.business_rules.get('analysis_period', {})
         start_date = pd.to_datetime(analysis_period.get('start_date', '2021-01-01'))
+        # Clamp end_date to today to avoid penalizing future months
         end_date = pd.to_datetime(analysis_period.get('end_date', '2025-12-31'))
+        today = pd.to_datetime('today')
+        if end_date > today:
+            end_date = today
         
         # Ensure we have a DataFrame
         if not isinstance(df, pd.DataFrame):
@@ -108,8 +115,9 @@ class DataCoverageAnalyzer:
             coverage['data_quality_issues'].append('No date column found in sales data')
             return coverage
         
-        # Filter to analysis period
-        df_filtered = df[(df['sale_date'] >= start_date) & (df['sale_date'] <= end_date)]
+        # Filter to analysis period (avoid chained assignment)
+        mask = (df['sale_date'] >= start_date) & (df['sale_date'] <= end_date)
+        df_filtered = df[mask].copy()
         
         if len(df_filtered) == 0:
             coverage['status'] = 'no_data_in_period'
@@ -137,7 +145,7 @@ class DataCoverageAnalyzer:
             'missing_months': len(missing_months),
             'date_range': f"{df_filtered['sale_date'].min().date()} to {df_filtered['sale_date'].max().date()}",
             'total_transactions': len(df_filtered),
-            'total_revenue': float(df_filtered['Total Price'].sum() if 'Total Price' in df_filtered.columns else df_filtered['total_price'].sum())
+            'total_revenue': float(self._get_total_revenue(df_filtered))
         }
         
         # Determine status
@@ -401,3 +409,14 @@ class DataCoverageAnalyzer:
             recommendations.append('Data coverage is poor - significant gaps need to be addressed')
         
         return recommendations
+    
+    def _get_total_revenue(self, df: pd.DataFrame) -> float:
+        """Get total revenue from DataFrame, handling different column names."""
+        # Check for both possible column names
+        if 'Total Price' in df.columns:
+            return df['Total Price'].sum()
+        elif 'total_price' in df.columns:
+            return df['total_price'].sum()
+        else:
+            # Return 0.0 if neither column exists
+            return 0.0

@@ -12,11 +12,15 @@ from pathlib import Path
 from datetime import datetime
 
 def setup_website_data_access():
-    """Set up website to access ETL pipeline data directly."""
+    """Set up website to access ETL pipeline data by copying files to website directory."""
     print("🚀 Setting up Website Data Access...")
     
     # Define paths
     pipeline_data_dir = Path("05_ANALYSIS_TOOLS/data/final")
+    website_data_dir = Path("website/data")
+    
+    # Create website data directory
+    website_data_dir.mkdir(exist_ok=True)
     
     # Files that should be available
     expected_files = [
@@ -25,16 +29,19 @@ def setup_website_data_access():
         "equipment_analysis.json"
     ]
     
-    # Check if files exist in pipeline output
+    # Copy files from pipeline output to website directory
     for filename in expected_files:
-        file_path = pipeline_data_dir / filename
-        if file_path.exists():
-            print(f"✅ {filename} available in pipeline output")
+        source_path = pipeline_data_dir / filename
+        dest_path = website_data_dir / filename
+        
+        if source_path.exists():
+            shutil.copy2(source_path, dest_path)
+            print(f"✅ Copied {filename} to website/data/")
         else:
             print(f"⚠️  {filename} not found in pipeline output - run pipeline first")
     
-    print("ℹ️  Note: Website will read data directly from 05_ANALYSIS_TOOLS/data/final/")
-    print("ℹ️  No data duplication - single source of truth")
+    print("ℹ️  Data files copied to website/data/ for deployment")
+    print("ℹ️  Website will read from local data directory")
 
 def create_website_data_loader():
     """Create a JavaScript data loader for the website."""
@@ -58,11 +65,11 @@ class BusinessDataLoader {
         this.error = null;
         
         try {
-            // Load ETL pipeline data from analysis folder
-            const response = await fetch('../05_ANALYSIS_TOOLS/data/final/business_sale_data.json');
+            // Load ETL pipeline data from website data folder
+            const response = await fetch('./data/business_sale_data.json');
             if (response.ok) {
                 this.data = await response.json();
-                console.log('✅ Loaded ETL pipeline data from analysis folder');
+                console.log('✅ Loaded ETL pipeline data from website data folder');
                 return this.data;
             } else {
                 throw new Error('ETL data not available');
@@ -79,7 +86,7 @@ class BusinessDataLoader {
 
     async loadDueDiligenceData() {
         try {
-            const response = await fetch('../05_ANALYSIS_TOOLS/data/final/due_diligence_coverage.json');
+            const response = await fetch('./data/due_diligence_coverage.json');
             if (response.ok) {
                 return await response.json();
             }
@@ -91,7 +98,7 @@ class BusinessDataLoader {
 
     async loadEquipmentData() {
         try {
-            const response = await fetch('../05_ANALYSIS_TOOLS/data/final/equipment_analysis.json');
+            const response = await fetch('./data/equipment_analysis.json');
             if (response.ok) {
                 return await response.json();
             }
@@ -241,14 +248,33 @@ function updateLocationInfo(locations) {
     // Update location list
     const locationContainer = document.getElementById('locations-list');
     if (locationContainer) {
-        locationContainer.innerHTML = locations.map(location => `
-            <div class="location-item">
-                <h4>${location.name}</h4>
-                <p>${location.type}</p>
-                <p>Revenue: ${formatCurrency(location.estimated_revenue)}</p>
-                <p>Performance: ${location.performance}</p>
-            </div>
-        `).join('');
+        // Clear existing content
+        locationContainer.innerHTML = '';
+        
+        // Create DOM elements programmatically
+        locations.forEach(location => {
+            const locationDiv = document.createElement('div');
+            locationDiv.className = 'location-item';
+            
+            const nameH4 = document.createElement('h4');
+            nameH4.textContent = location.name;
+            
+            const typeP = document.createElement('p');
+            typeP.textContent = location.type;
+            
+            const revenueP = document.createElement('p');
+            revenueP.textContent = `Revenue: ${formatCurrency(location.estimated_revenue)}`;
+            
+            const performanceP = document.createElement('p');
+            performanceP.textContent = `Performance: ${location.performance}`;
+            
+            locationDiv.appendChild(nameH4);
+            locationDiv.appendChild(typeP);
+            locationDiv.appendChild(revenueP);
+            locationDiv.appendChild(performanceP);
+            
+            locationContainer.appendChild(locationDiv);
+        });
     }
 }
 
@@ -258,9 +284,15 @@ function updateHighlights(highlights) {
     // Update highlights list
     const highlightsContainer = document.getElementById('highlights-list');
     if (highlightsContainer) {
-        highlightsContainer.innerHTML = highlights.map(highlight => `
-            <li>${highlight}</li>
-        `).join('');
+        // Clear existing content
+        highlightsContainer.innerHTML = '';
+        
+        // Create DOM elements programmatically
+        highlights.forEach(highlight => {
+            const li = document.createElement('li');
+            li.textContent = highlight;
+            highlightsContainer.appendChild(li);
+        });
     }
 }
 

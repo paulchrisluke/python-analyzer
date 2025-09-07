@@ -3,6 +3,7 @@ Sales data transformer for ETL pipeline.
 """
 
 import pandas as pd
+import re
 from typing import Dict, Any, List, Optional
 import logging
 from datetime import datetime
@@ -37,6 +38,9 @@ class SalesTransformer(BaseTransformer):
         
         if not self.validate_business_rules():
             raise ValueError("Invalid business rules for sales transformer")
+        
+        # Initialize main_sales_normalized to avoid reference before assignment
+        main_sales_normalized = None
         
         # Transform main sales data
         if 'main_sales' in raw_data:
@@ -163,7 +167,12 @@ class SalesTransformer(BaseTransformer):
         
         # Clean boolean columns
         if 'receipt_paid' in df.columns:
-            df['receipt_paid'] = df['receipt_paid'].str.lower().isin(['yes', 'true', '1', 'y'])
+            # First coerce to strings, strip whitespace, then lowercase before checking membership
+            # Preserve original nulls by treating NaNs separately
+            df['receipt_paid'] = df['receipt_paid'].astype(str).str.strip().str.lower().isin(['yes', 'true', '1', 'y'])
+            # Set result to NaN where original value was null
+            original_nulls = df['receipt_paid'].isnull()
+            df.loc[original_nulls, 'receipt_paid'] = None
         
         return df
     
@@ -270,7 +279,9 @@ class SalesTransformer(BaseTransformer):
         
         if sale_locations:
             # Create a mask for locations that are for sale
-            location_mask = df['clinic_name'].str.lower().str.contains('|'.join([name.lower() for name in sale_locations]), na=False)
+            # Use regex-escaped join to handle names with regex metacharacters
+            pattern = '|'.join(re.escape(name) for name in sale_locations)
+            location_mask = df['clinic_name'].str.lower().str.contains(pattern, na=False, regex=True)
             df_filtered = df[location_mask]
             
             logger.info(f"Filtered to sale locations only: {len(df_filtered)} records (from {len(df)} total)")

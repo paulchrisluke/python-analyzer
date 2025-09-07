@@ -7,6 +7,51 @@ import json
 import pandas as pd
 from pathlib import Path
 from collections import defaultdict
+import re
+
+def parse_currency_value(value):
+    """
+    Robust parsing of currency values from QuickBooks-style strings.
+    Handles commas, currency symbols, parentheses (negative), and other formatting.
+    Returns 0.0 on failure.
+    """
+    if pd.isna(value) or value == 0:
+        return 0.0
+    
+    try:
+        # Convert to string and strip whitespace
+        str_value = str(value).strip()
+        
+        # Handle empty strings
+        if not str_value:
+            return 0.0
+        
+        # Check for parentheses (negative values)
+        is_negative = str_value.startswith('(') and str_value.endswith(')')
+        if is_negative:
+            str_value = str_value[1:-1]  # Remove parentheses
+        
+        # Remove currency symbols and commas
+        str_value = re.sub(r'[$,\s]', '', str_value)
+        
+        # Remove any remaining non-numeric characters except decimal point
+        str_value = re.sub(r'[^\d.-]', '', str_value)
+        
+        # Handle empty string after cleaning
+        if not str_value:
+            return 0.0
+        
+        # Convert to float
+        result = float(str_value)
+        
+        # Apply negative if parentheses were present
+        if is_negative:
+            result = -result
+            
+        return result
+        
+    except (ValueError, TypeError, AttributeError):
+        return 0.0
 
 def debug_ebitda_calculation():
     """Debug the EBITDA calculation step by step."""
@@ -53,11 +98,11 @@ def debug_ebitda_calculation():
             df = pd.DataFrame(pnl_info['data'])
             
             # Calculate revenue
-            revenue_rows = df[df['Unnamed: 0'].str.contains('Sales|Investment Income', case=False, na=False)]
+            revenue_rows = df[df['Unnamed: 0'].str.contains('Sales', case=False, na=False)]
             monthly_revenue = 0
             for _, row in revenue_rows.iterrows():
                 if pd.notna(row.get('TOTAL')) and row.get('TOTAL') != 0:
-                    monthly_revenue += float(row['TOTAL'])
+                    monthly_revenue += parse_currency_value(row['TOTAL'])
             
             # Calculate expenses
             expense_rows = df[df['Unnamed: 0'].str.contains('Salaries|Wages|Rent|Insurance|Utilities|Office|Marketing|Professional|Payroll|Employee|Equipment|Supplies|Telephone|Travel|Training|Legal|Accounting|Interest|Tax|Depreciation|Amortization|COGS|Cost|Expense', case=False, na=False)]
@@ -68,7 +113,7 @@ def debug_ebitda_calculation():
             for _, row in expense_rows.iterrows():
                 if pd.notna(row.get('TOTAL')) and row.get('TOTAL') != 0:
                     expense_name = row['Unnamed: 0']
-                    expense_amount = float(row['TOTAL'])
+                    expense_amount = parse_currency_value(row['TOTAL'])
                     
                     monthly_total_expenses += expense_amount
                     

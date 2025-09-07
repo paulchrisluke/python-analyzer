@@ -58,10 +58,27 @@ class SalesExtractor(BaseExtractor):
     def _extract_main_sales(self) -> Optional[pd.DataFrame]:
         """Extract main sales data."""
         try:
-            sales_file = Path(self.config['path'])
-            if not sales_file.exists():
-                logger.error(f"Sales file not found: {sales_file}")
-                return None
+            # Check if path is a directory (use pattern) or file (direct path)
+            path = Path(self.config['path'])
+            
+            if path.is_dir():
+                # Use pattern to find the most recent sales file
+                pattern = self.config.get('sales_pattern', '*sales*.csv')
+                matching_files = list(path.glob(pattern))
+                
+                if not matching_files:
+                    logger.error(f"No sales files found matching pattern '{pattern}' in {path}")
+                    return None
+                
+                # Get the most recent file
+                sales_file = max(matching_files, key=lambda f: f.stat().st_mtime)
+                logger.info(f"Using most recent sales file: {sales_file.name}")
+            else:
+                # Direct file path
+                sales_file = path
+                if not sales_file.exists():
+                    logger.error(f"Sales file not found: {sales_file}")
+                    return None
             
             # Load CSV with proper encoding and error handling
             df = pd.read_csv(
@@ -92,37 +109,44 @@ class SalesExtractor(BaseExtractor):
         """Extract related sales data (returns, exchanges, etc.)."""
         related_data = {}
         
-        # Define related data types
+        # Define related data types with configurable patterns
         related_types = {
-            'returns': 'report-371-1755757545-returns.csv',
-            'exchanges': 'report-371-1755757545-exchanges.csv',
-            'replacements': 'report-371-1755757545-replacements.csv',
-            'cancelled': 'report-371-1755757545-cancelled.csv',
-            'conversions': 'report-371-1755757545-conversions.csv'
+            'returns': self.config.get('returns_pattern', '*returns*.csv'),
+            'exchanges': self.config.get('exchanges_pattern', '*exchanges*.csv'),
+            'replacements': self.config.get('replacements_pattern', '*replacements*.csv'),
+            'cancelled': self.config.get('cancelled_pattern', '*cancelled*.csv'),
+            'conversions': self.config.get('conversions_pattern', '*conversions*.csv')
         }
         
         base_path = Path(self.config['path']).parent
         
-        for data_type, filename in related_types.items():
+        for data_type, pattern in related_types.items():
             try:
-                file_path = base_path / filename
-                if file_path.exists():
+                # Find files matching the pattern
+                matching_files = list(base_path.glob(pattern))
+                
+                if matching_files:
+                    # Get the most recent file
+                    latest_file = max(matching_files, key=lambda f: f.stat().st_mtime)
+                    
                     df = pd.read_csv(
-                        file_path,
+                        latest_file,
                         encoding=self.config.get('encoding', 'utf-8'),
                         low_memory=False,
                         na_values=['', 'NULL', 'null', 'N/A', 'n/a']
                     )
                     related_data[data_type] = df
-                    logger.info(f"Loaded {data_type} data: {len(df)} records")
+                    logger.info(f"Loaded {data_type} data: {len(df)} records from {latest_file.name}")
                     
                     self.metadata[data_type] = {
-                        'file_path': str(file_path),
+                        'file_path': str(latest_file),
                         'record_count': len(df),
-                        'columns': list(df.columns)
+                        'columns': list(df.columns),
+                        'pattern_used': pattern,
+                        'files_found': len(matching_files)
                     }
                 else:
-                    logger.warning(f"Related data file not found: {file_path}")
+                    logger.warning(f"No files found matching pattern '{pattern}' for {data_type} data")
                     
             except Exception as e:
                 logger.error(f"Error extracting {data_type} data: {str(e)}")

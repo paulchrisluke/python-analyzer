@@ -43,6 +43,9 @@ class FileUtils:
             file_path: Path to save file
         """
         try:
+            # Ensure parent directory exists
+            Path(file_path).parent.mkdir(parents=True, exist_ok=True)
+            
             with open(file_path, 'w', encoding='utf-8') as f:
                 yaml.dump(data, f, default_flow_style=False, indent=2)
             logger.info(f"YAML file saved: {file_path}")

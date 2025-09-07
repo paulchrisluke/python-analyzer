@@ -1,0 +1,14 @@
+{
+  "name": "cranberry-business-sale-website",
+  "version": "1.0.0",
+  "description": "Business sale overview website for Cranberry Hearing & Balance Center",
+  "main": "index.html",
+  "scripts": {
+    "dev": "python3 -m http.server 8000",
+    "build": "echo 'Static site - no build required'",
+    "deploy": "wrangler pages deploy . --project-name cranberry-business-sale"
+  },
+  "keywords": ["business-sale", "healthcare", "hearing-aids"],
+  "author": "Cranberry Hearing & Balance Center",
+  "license": "MIT"
+}

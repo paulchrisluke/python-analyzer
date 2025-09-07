@@ -93,6 +93,8 @@ class ETLPipeline:
         Returns:
             bool: True if pipeline completed successfully
         """
+        success = True
+        
         try:
             self.pipeline_metadata['start_time'] = datetime.now()
             self.pipeline_metadata['status'] = 'running'
@@ -102,33 +104,48 @@ class ETLPipeline:
             # Phase 1: Extract
             logger.info("Phase 1: Data Extraction")
             if not self._extract_data():
-                return False
+                success = False
+                self.pipeline_metadata['errors'].append("Data extraction phase failed")
+            else:
+                logger.info("Phase 1: Data Extraction - SUCCESS")
             
             # Phase 2: Transform
             logger.info("Phase 2: Data Transformation")
             if not self._transform_data():
-                return False
+                success = False
+                self.pipeline_metadata['errors'].append("Data transformation phase failed")
+            else:
+                logger.info("Phase 2: Data Transformation - SUCCESS")
             
             # Phase 3: Load
             logger.info("Phase 3: Data Loading")
             if not self._load_data():
-                return False
-            
-            # Pipeline completed successfully
-            self.pipeline_metadata['end_time'] = datetime.now()
-            self.pipeline_metadata['status'] = 'completed'
-            
-            duration = self.pipeline_metadata['end_time'] - self.pipeline_metadata['start_time']
-            logger.info(f"ETL pipeline completed successfully in {duration}")
-            
-            return True
+                success = False
+                self.pipeline_metadata['errors'].append("Data loading phase failed")
+            else:
+                logger.info("Phase 3: Data Loading - SUCCESS")
             
         except Exception as e:
-            logger.error(f"Pipeline execution failed: {str(e)}")
-            self.pipeline_metadata['errors'].append(str(e))
-            self.pipeline_metadata['status'] = 'failed'
+            success = False
+            error_msg = f"Pipeline execution failed: {str(e)}"
+            logger.error(error_msg)
+            self.pipeline_metadata['errors'].append(error_msg)
+        
+        finally:
+            # Always finalize pipeline metadata
             self.pipeline_metadata['end_time'] = datetime.now()
-            return False
+            self.pipeline_metadata['status'] = 'completed' if success else 'failed'
+            
+            # Compute and log duration
+            if self.pipeline_metadata['start_time']:
+                duration = self.pipeline_metadata['end_time'] - self.pipeline_metadata['start_time']
+                if success:
+                    logger.info(f"ETL pipeline completed successfully in {duration}")
+                else:
+                    logger.error(f"ETL pipeline failed after {duration}")
+                    logger.error(f"Errors encountered: {self.pipeline_metadata['errors']}")
+            
+            return success
     
     def _load_configurations(self) -> None:
         """Load configuration files."""
@@ -281,7 +298,7 @@ class ETLPipeline:
                 # Pass both normalized and raw data for comprehensive analysis
                 combined_data = {
                     'sales': self.normalized_data.get('sales', {}),
-                    'financial': self.raw_data.get('financial', {})
+                    'financial': self.normalized_data.get('financial', {})
                 }
                 business_metrics = self.transformers['business_metrics'].calculate_comprehensive_metrics(combined_data)
                 self.final_data['business_metrics'] = business_metrics

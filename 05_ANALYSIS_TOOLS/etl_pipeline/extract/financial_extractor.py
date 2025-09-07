@@ -59,7 +59,8 @@ class FinancialExtractor(BaseExtractor):
         summary = self._calculate_financial_summary()
         self.financial_data['summary'] = summary
         
-        total_records = sum(len(data) for data in self.financial_data.values() if isinstance(data, pd.DataFrame))
+        # Use the already computed total_records from summary
+        total_records = summary.get('total_records', 0)
         self.log_extraction_summary(total_records, "Financial CSV files")
         
         return self.financial_data
@@ -71,7 +72,7 @@ class FinancialExtractor(BaseExtractor):
         # 2023 P&L data
         pnl_2023_path = Path(self.config.get('financial_pnl_2023', {}).get('path', ''))
         if pnl_2023_path.exists():
-            pnl_2023_files = FileUtils.find_files(str(pnl_2023_path), "*.CSV")
+            pnl_2023_files = FileUtils.find_files(str(pnl_2023_path), "*.[cC][sS][vV]")
             for file_path in pnl_2023_files:
                 try:
                     # Try different encodings for QuickBooks CSV files
@@ -92,7 +93,7 @@ class FinancialExtractor(BaseExtractor):
         # 2024 P&L data
         pnl_2024_path = Path(self.config.get('financial_pnl_2024', {}).get('path', ''))
         if pnl_2024_path.exists():
-            pnl_2024_files = FileUtils.find_files(str(pnl_2024_path), "*.CSV")
+            pnl_2024_files = FileUtils.find_files(str(pnl_2024_path), "*.[cC][sS][vV]")
             for file_path in pnl_2024_files:
                 try:
                     # Try different encodings for QuickBooks CSV files
@@ -118,7 +119,7 @@ class FinancialExtractor(BaseExtractor):
         
         balance_sheet_path = Path(self.config.get('financial_balance_sheets', {}).get('path', ''))
         if balance_sheet_path.exists():
-            balance_sheet_files = FileUtils.find_files(str(balance_sheet_path), "*.CSV")
+            balance_sheet_files = FileUtils.find_files(str(balance_sheet_path), "*.[cC][sS][vV]")
             for file_path in balance_sheet_files:
                 try:
                     # Try different encodings for QuickBooks CSV files
@@ -144,7 +145,7 @@ class FinancialExtractor(BaseExtractor):
         
         general_ledger_path = Path(self.config.get('financial_general_ledger', {}).get('path', ''))
         if general_ledger_path.exists():
-            general_ledger_files = FileUtils.find_files(str(general_ledger_path), "*.CSV")
+            general_ledger_files = FileUtils.find_files(str(general_ledger_path), "*.[cC][sS][vV]")
             for file_path in general_ledger_files:
                 try:
                     # Try different encodings for QuickBooks CSV files
@@ -170,7 +171,7 @@ class FinancialExtractor(BaseExtractor):
         
         cogs_path = Path(self.config.get('financial_cogs', {}).get('path', ''))
         if cogs_path.exists():
-            cogs_files = FileUtils.find_files(str(cogs_path), "*.csv")
+            cogs_files = FileUtils.find_files(str(cogs_path), "*.[cC][sS][vV]")
             for file_path in cogs_files:
                 try:
                     df = pd.read_csv(file_path, encoding='utf-8', low_memory=False)

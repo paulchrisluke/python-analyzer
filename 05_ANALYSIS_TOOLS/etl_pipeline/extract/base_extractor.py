@@ -46,6 +46,15 @@ class BaseExtractor(ABC):
             if field not in self.config:
                 logger.error(f"Missing required configuration field: {field}")
                 return False
+        
+        # Check that the path actually exists
+        path = self.config.get('path')
+        if path:
+            path_obj = Path(path)
+            if not path_obj.exists():
+                logger.error(f"Configuration path does not exist: {path_obj.absolute()}")
+                return False
+        
         return True
     
     def get_metadata(self) -> Dict[str, Any]:

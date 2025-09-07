@@ -58,7 +58,11 @@ class EquipmentExtractor(BaseExtractor):
         # Find equipment PDF files
         base_path = Path(self.config.get('path', ''))
         if base_path.exists():
-            pdf_files = FileUtils.find_files(str(base_path), "M1566*.pdf")
+            # Get pattern from config with fallback to default
+            pattern = self.config.get('pattern', 'M1566*.pdf')
+            if not isinstance(pattern, str) or not pattern.strip():
+                pattern = 'M1566*.pdf'
+            pdf_files = FileUtils.find_files(str(base_path), pattern)
             
             for pdf_file in pdf_files:
                 try:

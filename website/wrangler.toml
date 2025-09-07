@@ -1,0 +1,7 @@
+name = "cranberry-business-sale"
+compatibility_date = "2025-01-27"
+
+[pages]
+# Static site configuration
+pages_build_output_dir = "."
+# No build command needed for static HTML

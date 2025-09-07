@@ -38,29 +38,104 @@ schemas:
       receipt_paid: string
       
   sales_normalized:
+    required_fields:
+      - transaction_id
+      - sale_date
+      - patient_id
+      - product_name
+      - units
+      - total_price
     fields:
-      transaction_id: string
-      sale_date: datetime
-      delivery_date: datetime
-      return_date: datetime
-      staff_name: string
-      patient_id: string
-      patient_zip: string
-      clinic_name: string
-      referral_source: string
-      product_category: string
-      product_name: string
-      units: integer
-      transaction_type: string
-      gross_price: float
-      total_discounts: float
-      net_price: float
-      sales_tax: float
-      total_price: float
-      is_paid: boolean
-      year: integer
-      month: integer
-      quarter: integer
+      transaction_id:
+        type: string
+        validation: "non_empty"
+        description: "Unique transaction identifier"
+      sale_date:
+        type: datetime
+        format: "%Y-%m-%d %H:%M:%S"
+        description: "Date and time of sale"
+      delivery_date:
+        type: datetime
+        format: "%Y-%m-%d %H:%M:%S"
+        nullable: true
+        description: "Date of delivery"
+      return_date:
+        type: datetime
+        format: "%Y-%m-%d %H:%M:%S"
+        nullable: true
+        description: "Date of return"
+      staff_name:
+        type: string
+        nullable: true
+        description: "Name of staff member"
+      patient_id:
+        type: string
+        validation: "non_empty"
+        description: "Unique patient identifier"
+      patient_zip:
+        type: string
+        nullable: true
+        description: "Patient ZIP code"
+      clinic_name:
+        type: string
+        nullable: true
+        description: "Name of clinic"
+      referral_source:
+        type: string
+        nullable: true
+        description: "Source of referral"
+      product_category:
+        type: string
+        nullable: true
+        description: "Product category"
+      product_name:
+        type: string
+        validation: "non_empty"
+        description: "Name of product"
+      units:
+        type: integer
+        validation: ">= 0"
+        description: "Number of units sold"
+      transaction_type:
+        type: string
+        enum: ["sale", "return", "exchange", "replacement", "cancelled", "conversion"]
+        nullable: true
+        description: "Type of transaction"
+      gross_price:
+        type: float
+        validation: ">= 0"
+        description: "Gross price before discounts"
+      total_discounts:
+        type: float
+        validation: ">= 0"
+        description: "Total discount amount"
+      net_price:
+        type: float
+        validation: ">= 0"
+        description: "Net price after discounts"
+      sales_tax:
+        type: float
+        validation: ">= 0"
+        description: "Sales tax amount"
+      total_price:
+        type: float
+        validation: ">= 0"
+        description: "Final total price"
+      is_paid:
+        type: boolean
+        description: "Whether transaction is paid"
+      year:
+        type: integer
+        validation: ">= 2020"
+        description: "Year of transaction"
+      month:
+        type: integer
+        validation: ">= 1 and <= 12"
+        description: "Month of transaction"
+      quarter:
+        type: integer
+        validation: ">= 1 and <= 4"
+        description: "Quarter of transaction"
       
   financial_raw:
     fields:
