@@ -8,7 +8,7 @@ import numpy as np
 from typing import Dict, Any, List, Optional
 import logging
 from pathlib import Path
-from datetime import datetime
+from datetime import datetime, timezone
 import re
 from .base_loader import BaseLoader
 from ..utils.file_utils import FileUtils
@@ -244,9 +244,13 @@ class JsonLoader(BaseLoader):
     
     def _validate_equipment_data(self, equipment_data: Dict[str, Any]) -> Dict[str, Any]:
         """Validate and transform equipment data to target schema."""
+        # Sanitize summary to ensure JSON safety
+        summary_raw = equipment_data.get('summary', {})
+        sanitized_summary = self._sanitize_for_json(summary_raw)
+        
         validated_data = {
             'quotes': [],
-            'summary': equipment_data.get('summary', {}),
+            'summary': sanitized_summary,
             'metadata': {
                 'validated_at': datetime.now().isoformat(),
                 'source': 'ETL Pipeline'
@@ -261,13 +265,17 @@ class JsonLoader(BaseLoader):
                 price_raw = quote.get('price', 0)
                 parsed_price = parse_price_value(price_raw)
                 
+                # Sanitize quote_date to ensure JSON safety
+                quote_date_raw = quote.get('quote_date', 'Unknown')
+                sanitized_quote_date = self._normalize_scalar_value(quote_date_raw)
+                
                 validated_quote = {
                     'file_name': quote.get('file_name', 'Unknown'),
                     'equipment_name': quote.get('equipment_name', 'Unknown'),
                     'description': quote.get('description', 'Unknown'),
                     'price': parsed_price,
                     'category': quote.get('category', 'Unknown'),
-                    'quote_date': quote.get('quote_date', 'Unknown')
+                    'quote_date': sanitized_quote_date
                 }
                 validated_data['quotes'].append(validated_quote)
         
@@ -617,7 +625,7 @@ class JsonLoader(BaseLoader):
         if hasattr(value, 'isoformat'):
             if hasattr(value, 'tzinfo') and value.tzinfo is not None:
                 # Convert to UTC then to ISO string
-                return value.astimezone().isoformat()
+                return value.astimezone(timezone.utc).isoformat()
             else:
                 return value.isoformat()
         
