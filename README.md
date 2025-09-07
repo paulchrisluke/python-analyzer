@@ -68,8 +68,8 @@ python -m pytest tests/
 
 ## 🔒 Privacy & Security
 
-- **No Real Data**: All business data anonymized/removed
-- **Real Business Data**: Processes actual business data through ETL pipeline
+- **Anonymized Data Only**: All business data in this repository is anonymized/synthetic for demonstration purposes
+- **Production Pipeline**: Real business data is processed only in a separate, secured production pipeline with proper safeguards
 - **Comprehensive Git Ignore**: Prevents accidental commits of sensitive data
 
 ## 📝 License
@@ -78,4 +78,4 @@ MIT License - see LICENSE file for details.
 
 ---
 
-**Note**: This system processes real business data through a secure ETL pipeline with proper data handling and privacy controls.
+**Note**: This system demonstrates ETL pipeline functionality using anonymized/synthetic data. Real business data is processed only in a separate, secured production pipeline with proper data handling and privacy controls.

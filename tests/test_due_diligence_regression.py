@@ -87,7 +87,11 @@ class TestDueDiligenceRegression:
         
         # Calculate differences
         revenue_diff = abs(calculated_revenue - expected_revenue) / expected_revenue if expected_revenue > 0 else 0
-        transactions_diff = abs(calculated_transactions - expected_transactions) / expected_transactions if expected_transactions > 0 else 0
+        # Special case for zero expected transactions: fail if calculated is non-zero
+        if expected_transactions == 0:
+            transactions_diff = 0 if calculated_transactions == 0 else 999999  # Large value to fail test
+        else:
+            transactions_diff = abs(calculated_transactions - expected_transactions) / expected_transactions
         
         # Print comparison for reporting
         print(f"\n=== REVENUE COMPARISON ===")
@@ -257,7 +261,11 @@ class TestDueDiligenceRegression:
             calculated = calculated_values[metric]
             
             if expected is not None:
-                diff_pct = abs(calculated - expected) / expected if expected > 0 else 0
+                # Handle zero-expected cases: use absolute difference instead of percentage
+                if expected > 0:
+                    diff_pct = abs(calculated - expected) / expected
+                else:
+                    diff_pct = abs(calculated - expected)  # Absolute difference for zero-expected
                 within_tolerance = diff_pct <= TOLERANCE
                 status = "✓ PASS" if within_tolerance else "✗ FAIL"
                 

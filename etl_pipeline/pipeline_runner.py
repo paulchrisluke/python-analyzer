@@ -110,6 +110,9 @@ class ETLPipeline:
             # Load configuration files first
             self._load_configurations()
             
+            # Initialize due diligence manager
+            self._initialize_due_diligence_manager()
+            
             # Initialize pipeline components
             self._initialize_extractors()
             self._initialize_transformers()

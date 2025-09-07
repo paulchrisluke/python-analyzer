@@ -282,8 +282,10 @@ class BusinessMetricsCalculator:
             # Use real EBITDA if calculated from P&L data
             if real_ebitda is not None:
                 estimated_ebitda = real_ebitda
-                ebitda_margin = 0.45  # Use the calculated margin from P&L data
-                logger.info(f"Using real EBITDA from P&L data: ${estimated_ebitda:,.2f} monthly")
+                # Calculate actual EBITDA margin from P&L data
+                pnl_revenue = self._estimate_revenue_from_pnl(normalized_data)
+                ebitda_margin = (real_ebitda / pnl_revenue) if pnl_revenue > 0 else self.business_rules.get('financial_metrics', {}).get('ebitda_margin_target', 0.25)
+                logger.info(f"Using real EBITDA from P&L data: ${estimated_ebitda:,.2f} monthly with {ebitda_margin:.1%} margin")
             else:
                 # Fallback to business rules
                 ebitda_margin = self.business_rules.get('financial_metrics', {}).get('ebitda_margin_target', 0.25)
@@ -320,17 +322,6 @@ class BusinessMetricsCalculator:
                 'estimated_ebitda': estimated_ebitda,
                 'ebitda_margin': ebitda_margin * 100,
                 'estimated_annual_ebitda': annual_ebitda
-            }
-            
-            # ROI calculation
-            asking_price = 650000  # From business sale data
-            roi = (annual_ebitda / asking_price) * 100 if asking_price > 0 else 0
-            
-            financial_metrics['investment_metrics'] = {
-                'asking_price': asking_price,
-                'estimated_annual_ebitda': annual_ebitda,
-                'roi_percentage': roi,
-                'payback_period_years': asking_price / annual_ebitda if annual_ebitda > 0 else 0
             }
         
         return financial_metrics

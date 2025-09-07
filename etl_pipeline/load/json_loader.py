@@ -349,7 +349,7 @@ class JsonLoader(BaseLoader):
         # Create business sale data structure compatible with DueDiligenceManager
         business_sale_data = {
             "metadata": {
-                "business_name": "Cranberry Hearing and Balance Center",
+                "business_name": financial_metrics.get('business_name') or payload.get('business_name', 'Unknown Business'),
                 "generated_at": datetime.now().isoformat(),
                 "data_period": data_period,
                 "months_analyzed": financial_metrics.get('revenue_metrics', {}).get('analysis_period_months', 30),

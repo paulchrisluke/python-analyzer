@@ -131,10 +131,22 @@ class EquipmentCalculator:
                     continue
                 
                 # Create item
+                # Safe coercion for quantity field
+                qty_raw = row.get('qty', '1')
+                try:
+                    qty_clean = str(qty_raw).strip()
+                    if qty_clean == '':
+                        quantity = 1
+                    else:
+                        # Try int first, then float if needed
+                        quantity = int(float(qty_clean))
+                except (ValueError, TypeError):
+                    quantity = 1  # Default fallback
+                
                 item = {
                     'name': row.get('description', '').strip(),
                     'part_number': row.get('part_number', '').strip(),
-                    'quantity': int(row.get('qty', 1)),
+                    'quantity': quantity,
                     'unit_price': float(row.get('unit_price', '').replace('$', '').replace(',', '') or 0),
                     'total_price': price,
                     'category': self._categorize_equipment(row.get('description', '')),
