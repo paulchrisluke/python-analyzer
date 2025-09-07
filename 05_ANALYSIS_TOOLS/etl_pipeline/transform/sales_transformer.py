@@ -287,7 +287,8 @@ class SalesTransformer(BaseTransformer):
             # Create a mask for locations that are for sale
             # Use regex-escaped join to handle names with regex metacharacters
             pattern = '|'.join(re.escape(name) for name in sale_locations)
-            location_mask = df['clinic_name'].str.lower().str.contains(pattern, na=False, regex=True)
+            # Remove .str.lower() and use flags=re.IGNORECASE for case-insensitive matching
+            location_mask = df['clinic_name'].str.contains(pattern, na=False, regex=True, flags=re.IGNORECASE)
             df_filtered = df[location_mask]
             
             logger.info(f"Filtered to sale locations only: {len(df_filtered)} records (from {len(df)} total)")

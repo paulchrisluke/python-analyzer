@@ -2,8 +2,8 @@ export async function onRequest(context) {
   const { request, next } = context;
   const url = new URL(request.url);
   
-  // Only protect the docs.html page and any files in the docs/ directory
-  if (url.pathname === '/docs.html' || url.pathname.startsWith('/docs/')) {
+  // Only protect the docs.html page, the bare /docs path, and any files in the docs/ directory
+  if (url.pathname === '/docs.html' || url.pathname === '/docs' || url.pathname.startsWith('/docs/')) {
     const auth = request.headers.get('Authorization');
 
     if (!auth) {

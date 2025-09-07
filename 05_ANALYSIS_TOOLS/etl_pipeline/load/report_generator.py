@@ -23,8 +23,9 @@ class ReportGenerator(BaseLoader):
             output_dir: Output directory for reports
         """
         super().__init__(output_dir)
-        self.reports_dir = self.output_dir / "reports"
-        self.reports_dir.mkdir(exist_ok=True)
+        # Use the provided output_dir directly instead of appending "reports"
+        self.reports_dir = self.output_dir
+        self.reports_dir.mkdir(exist_ok=True, parents=True)
         
     def load(self, transformed_data: Dict[str, Any]) -> Dict[str, Any]:
         """

@@ -8,6 +8,8 @@ import pandas as pd
 from pathlib import Path
 from collections import defaultdict
 import re
+import numpy as np
+import math
 
 def parse_currency_value(value):
     """
@@ -52,6 +54,38 @@ def parse_currency_value(value):
         
     except (ValueError, TypeError, AttributeError):
         return 0.0
+
+def sanitize_for_json(obj):
+    """
+    Sanitize any object to be JSON-serializable.
+    Prevents NaN/Inf/np types from breaking JSON serialization.
+    """
+    if isinstance(obj, (np.integer, np.floating)):
+        # Convert numpy scalars to native Python types
+        return obj.item()
+    elif isinstance(obj, np.ndarray):
+        # Convert numpy arrays to lists
+        return obj.tolist()
+    elif isinstance(obj, float):
+        # Handle NaN and infinity values
+        if math.isnan(obj) or math.isinf(obj):
+            return None
+        return obj
+    elif pd.isna(obj):
+        # Handle pandas NaN values
+        return None
+    elif isinstance(obj, (int, str, bool, type(None))):
+        # Already JSON-serializable
+        return obj
+    elif isinstance(obj, list):
+        # Handle lists recursively
+        return [sanitize_for_json(item) for item in obj]
+    elif isinstance(obj, dict):
+        # Handle dictionaries recursively
+        return {key: sanitize_for_json(value) for key, value in obj.items()}
+    else:
+        # Convert everything else to string
+        return str(obj)
 
 def debug_ebitda_calculation():
     """Debug the EBITDA calculation step by step."""
@@ -100,7 +134,9 @@ def debug_ebitda_calculation():
             # Calculate revenue - check for required columns first
             monthly_revenue = 0
             if 'Unnamed: 0' in df.columns and 'TOTAL' in df.columns:
-                revenue_rows = df[df['Unnamed: 0'].str.contains('Sales', case=False, na=False)]
+                # Use word boundary regex to match "Sales" as whole word and exclude tax entries
+                revenue_rows = df[df['Unnamed: 0'].str.contains(r'\bSales\b', case=False, na=False, regex=True) & 
+                                 ~df['Unnamed: 0'].str.contains('tax', case=False, na=False)]
                 for _, row in revenue_rows.iterrows():
                     total_value = row.get('TOTAL')
                     if pd.notna(total_value) and total_value != 0:
@@ -114,21 +150,32 @@ def debug_ebitda_calculation():
             monthly_total_expenses = 0
             
             if 'Unnamed: 0' in df.columns and 'TOTAL' in df.columns:
-                expense_rows = df[df['Unnamed: 0'].str.contains('Salaries|Wages|Rent|Insurance|Utilities|Office|Marketing|Professional|Payroll|Employee|Equipment|Supplies|Telephone|Travel|Training|Legal|Accounting|Interest|Tax|Depreciation|Amortization|COGS|Cost|Expense', case=False, na=False)]
+                # Precompile case-insensitive regex for expense keywords
+                expense_pattern = re.compile(r'Salaries|Wages|Rent|Insurance|Utilities|Office|Marketing|Professional|Payroll|Employee|Equipment|Supplies|Telephone|Travel|Training|Legal|Accounting|Interest|Tax|Depreciation|Amortization|COGS|Cost|Expense', re.IGNORECASE)
                 
-                for _, row in expense_rows.iterrows():
+                for _, row in df.iterrows():
+                    expense_name = row.get('Unnamed: 0', '')
                     total_value = row.get('TOTAL')
-                    if pd.notna(total_value) and total_value != 0:
-                        expense_name = row.get('Unnamed: 0', '')
+                    
+                    # Skip if no expense name or total value
+                    if pd.isna(expense_name) or pd.isna(total_value) or total_value == 0:
+                        continue
+                    
+                    # Check if this is an expense line using precompiled regex
+                    if expense_pattern.search(expense_name):
+                        # Skip summary/total rows
+                        expense_name_lower = expense_name.lower()
+                        if any(summary_term in expense_name_lower for summary_term in ['total', 'summary']):
+                            continue
+                        
                         expense_amount = parse_currency_value(total_value)
-                        
-                        monthly_total_expenses += expense_amount
-                        
-                        # For EBITDA: exclude Interest, Tax, Depreciation, Amortization (case-insensitive)
-                        expense_name_lower = expense_name.lower() if expense_name else ''
-                        exclude_terms = ['interest', 'tax', 'depreciation', 'amortization', 'total', 'summary']
-                        if not any(exclude_term in expense_name_lower for exclude_term in exclude_terms):
-                            monthly_operational_expenses += expense_amount
+                        if expense_amount != 0:  # Only add non-zero amounts
+                            monthly_total_expenses += expense_amount
+                            
+                            # For EBITDA: exclude Interest, Tax, Depreciation, Amortization (case-insensitive)
+                            exclude_terms = ['interest', 'tax', 'depreciation', 'amortization']
+                            if not any(exclude_term in expense_name_lower for exclude_term in exclude_terms):
+                                monthly_operational_expenses += expense_amount
             
             # Calculate monthly EBITDA
             if monthly_revenue > 0:
@@ -216,6 +263,29 @@ def debug_ebitda_calculation():
         print("4. The website might be using a different calculation method")
         print("5. We might need to filter P&L data by location too!")
         print("6. P&L data includes ALL 4 locations, but we only want 2 for sale")
+        
+        # Save sanitized results to prevent JSON serialization issues
+        results = {
+            'monthly_ebitdas': monthly_ebitdas,
+            'monthly_revenues': monthly_revenues,
+            'monthly_expenses': monthly_expenses,
+            'avg_monthly_ebitda': avg_monthly_ebitda,
+            'avg_monthly_revenue': avg_monthly_revenue,
+            'avg_monthly_expenses': avg_monthly_expenses,
+            'annual_ebitda': annual_ebitda,
+            'ebitda_margin': (avg_monthly_ebitda/avg_monthly_revenue)*100 if avg_monthly_revenue > 0 else 0
+        }
+        
+        # Sanitize all results before saving
+        sanitized_results = sanitize_for_json(results)
+        
+        # Save to file
+        output_file = Path("data/final/ebitda_debug_results.json")
+        output_file.parent.mkdir(exist_ok=True)
+        with open(output_file, 'w') as f:
+            json.dump(sanitized_results, f, indent=2)
+        
+        print(f"\n💾 Sanitized results saved to: {output_file}")
 
 if __name__ == "__main__":
     debug_ebitda_calculation()

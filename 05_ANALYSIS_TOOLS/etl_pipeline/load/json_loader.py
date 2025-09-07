@@ -9,10 +9,42 @@ from typing import Dict, Any, List, Optional
 import logging
 from pathlib import Path
 from datetime import datetime
+import re
 from .base_loader import BaseLoader
 from ..utils.file_utils import FileUtils
 
 logger = logging.getLogger(__name__)
+
+def parse_price_value(price_raw):
+    """
+    Robust price parser that handles currency strings, N/A values, and various formats.
+    Returns 0.0 on failure.
+    """
+    if price_raw is None:
+        return 0.0
+    
+    try:
+        # Convert to string and strip whitespace
+        price_str = str(price_raw).strip()
+        
+        # Handle empty strings or N/A values
+        if not price_str or price_str.upper() in ['N/A', 'NA', 'NULL', 'NONE', '']:
+            return 0.0
+        
+        # Use regex to extract the first numeric pattern
+        # This handles formats like "$1,234.56", "1,234.56", "1234.56", etc.
+        numeric_match = re.search(r'[\d,]+\.?\d*', price_str)
+        if numeric_match:
+            numeric_str = numeric_match.group()
+            # Remove commas
+            numeric_str = numeric_str.replace(',', '')
+            # Convert to float
+            return float(numeric_str)
+        else:
+            return 0.0
+            
+    except (ValueError, TypeError, AttributeError):
+        return 0.0
 
 class JsonLoader(BaseLoader):
     """Loader for saving data to JSON files."""
@@ -225,11 +257,15 @@ class JsonLoader(BaseLoader):
         quotes = equipment_data.get('quotes', [])
         for quote in quotes:
             if isinstance(quote, dict):
+                # Parse price using robust parser
+                price_raw = quote.get('price', 0)
+                parsed_price = parse_price_value(price_raw)
+                
                 validated_quote = {
                     'file_name': quote.get('file_name', 'Unknown'),
                     'equipment_name': quote.get('equipment_name', 'Unknown'),
                     'description': quote.get('description', 'Unknown'),
-                    'price': float(quote.get('price', 0.0)),
+                    'price': parsed_price,
                     'category': quote.get('category', 'Unknown'),
                     'quote_date': quote.get('quote_date', 'Unknown')
                 }
