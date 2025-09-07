@@ -160,10 +160,20 @@ class SalesTransformer(BaseTransformer):
             )
             
             # Extract unique patient data for dimension table
-            unique_patients = df[['patient_id', 'patient_name', 'patient_zip']].drop_duplicates()
+            # Check which PII columns are available to avoid KeyError
+            available_pii_columns = []
+            for col in ['patient_id', 'patient_name', 'patient_zip']:
+                if col in df.columns:
+                    available_pii_columns.append(col)
+            
+            if available_pii_columns:
+                unique_patients = df[available_pii_columns].drop_duplicates()
+            else:
+                logger.warning("No PII columns found in dataframe, skipping patient dimension data extraction")
+                return patient_data
             
             for _, row in unique_patients.iterrows():
-                if pd.notna(row['patient_id']):
+                if pd.notna(row.get('patient_id')):
                     patient_id_hash = self._hash_patient_id(str(row['patient_id']))
                     patient_data[patient_id_hash] = {
                         'patient_id_hash': patient_id_hash,

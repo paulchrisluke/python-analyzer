@@ -49,7 +49,7 @@ class BaseExtractor(ABC):
             for field in required_fields:
                 value = self.config.get(field)
                 if value is None or (isinstance(value, str) and not value.strip()):
-                    logger.error(f"Missing or empty configuration field: {field}")
+                    logger.error("Missing or empty configuration field: %s", field)
                     return False
 
             # Safely validate path configuration
@@ -65,17 +65,17 @@ class BaseExtractor(ABC):
                 # Only check local filesystem paths
                 if not is_url:
                     if not path_obj.exists():
-                        logger.error(f"Configuration path does not exist: {path_obj.absolute()}")
+                        logger.error("Configuration path does not exist: %s", path_obj.absolute())
                         return False
                 
                 return True
                 
             except ValueError as e:
-                logger.error(f"Path validation failed: {str(e)}")
+                logger.exception("Path validation failed: %s", e)
                 return False
                 
-        except Exception as e:
-            logger.error(f"Configuration validation failed: {str(e)}")
+        except (KeyError, TypeError) as e:
+            logger.exception("Configuration validation failed: %s", e)
             return False
     
     def get_metadata(self) -> Dict[str, Any]:

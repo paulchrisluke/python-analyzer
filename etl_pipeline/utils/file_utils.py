@@ -27,7 +27,19 @@ class FileUtils:
         Returns:
             True if the string appears to be a URL
         """
-        return '://' in raw or urlparse(raw).scheme in ('http', 'https', 'ftp', 'ftps')
+        if not raw or not isinstance(raw, str):
+            return False
+        
+        # Check for common URL patterns
+        if '://' in raw:
+            parsed = urlparse(raw)
+            # Support common web protocols
+            web_schemes = ('http', 'https', 'ftp', 'ftps')
+            # Support cloud storage schemes
+            cloud_schemes = ('s3', 'gs', 'gcs', 'azure', 'wasb', 'abfs', 'file')
+            return parsed.scheme in web_schemes + cloud_schemes
+        
+        return False
     
     @staticmethod
     def load_yaml(file_path: str) -> Dict[str, Any]:
@@ -102,7 +114,7 @@ class FileUtils:
             
             # Write to temporary file
             with open(tmp_path, 'w', encoding='utf-8') as f:
-                json.dump(data, f, indent=indent, ensure_ascii=False)
+                json.dump(data, f, indent=indent, ensure_ascii=False, default=str)
                 f.flush()  # Ensure data is written to disk
                 os.fsync(f.fileno())  # Force OS to flush buffers to disk
             
