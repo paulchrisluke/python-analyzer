@@ -9,6 +9,7 @@ from datetime import datetime
 import numpy as np
 from collections import defaultdict
 from decimal import Decimal, ROUND_HALF_UP
+import os
 
 logger = logging.getLogger(__name__)
 
@@ -24,6 +25,84 @@ class BusinessMetricsCalculator:
         """
         self.business_rules = business_rules
         self.metrics = {}
+        
+    def _parse_asking_price(self) -> float:
+        """
+        Parse asking price from environment variable or config with fallback.
+        
+        Returns:
+            float: Asking price value with default fallback of 650000
+        """
+        try:
+            # Try environment variable first
+            asking_price_str = os.environ.get('ASKING_PRICE')
+            if asking_price_str:
+                asking_price = float(asking_price_str)
+                logger.info(f"Using asking price from environment: ${asking_price:,.2f}")
+                return asking_price
+            
+            # Try business rules config
+            asking_price = self.business_rules.get('asking_price')
+            if asking_price is not None:
+                asking_price = float(asking_price)
+                logger.info(f"Using asking price from business rules: ${asking_price:,.2f}")
+                return asking_price
+            
+            # Try investment metrics config
+            investment_config = self.business_rules.get('investment_metrics', {})
+            asking_price = investment_config.get('asking_price')
+            if asking_price is not None:
+                asking_price = float(asking_price)
+                logger.info(f"Using asking price from investment config: ${asking_price:,.2f}")
+                return asking_price
+            
+            # Default fallback
+            default_price = 650000.0
+            logger.info(f"Using default asking price: ${default_price:,.2f}")
+            return default_price
+            
+        except (ValueError, TypeError) as e:
+            logger.warning(f"Invalid asking price value, using default: {e}")
+            return 650000.0
+    
+    def _safe_float_conversion(self, value: Any, default: float = 0.0) -> float:
+        """
+        Safely convert value to float with robust NaN/None detection.
+        
+        Args:
+            value: Value to convert
+            default: Default value if conversion fails
+            
+        Returns:
+            float: Converted value or default
+        """
+        if value is None:
+            return default
+        
+        # Handle pandas NA values
+        if pd.isna(value):
+            return default
+        
+        # Handle numpy NaN
+        if isinstance(value, (np.floating, np.integer)) and np.isnan(value):
+            return default
+        
+        # Handle Decimal NaN
+        if isinstance(value, Decimal) and value.is_nan():
+            return default
+        
+        try:
+            return float(value)
+        except (ValueError, TypeError):
+            return default
+    
+    def _format_currency(self, value: float) -> str:
+        """Format value as currency."""
+        return f"${value:,.2f}"
+    
+    def _format_percentage(self, value: float) -> str:
+        """Format value as percentage."""
+        return f"{value:.1f}%"
         
     def calculate_comprehensive_metrics(self, normalized_data: Dict[str, Any]) -> Dict[str, Any]:
         """
@@ -86,47 +165,64 @@ class BusinessMetricsCalculator:
                 logger.info(f"Filtered sales data to analysis period: {start_date.date()} to {end_date.date()} ({len(df)} records)")
             
             # Basic sales metrics
-            sales_metrics['total_revenue'] = Decimal(str(df['total_price'].sum())).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
+            total_revenue_sum = self._safe_float_conversion(df['total_price'].sum())
+            sales_metrics['total_revenue'] = Decimal(str(total_revenue_sum)).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
             sales_metrics['total_transactions'] = len(df)
-            sales_metrics['average_transaction_value'] = Decimal(str(df['total_price'].mean())).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
-            sales_metrics['median_transaction_value'] = Decimal(str(df['total_price'].median())).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
+            
+            avg_transaction = self._safe_float_conversion(df['total_price'].mean())
+            sales_metrics['average_transaction_value'] = Decimal(str(avg_transaction)).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
+            
+            median_transaction = self._safe_float_conversion(df['total_price'].median())
+            sales_metrics['median_transaction_value'] = Decimal(str(median_transaction)).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
             
             # Revenue distribution
             sales_metrics['revenue_percentiles'] = {
-                '25th': Decimal(str(df['total_price'].quantile(0.25))).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP),
-                '50th': Decimal(str(df['total_price'].quantile(0.50))).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP),
-                '75th': Decimal(str(df['total_price'].quantile(0.75))).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP),
-                '90th': Decimal(str(df['total_price'].quantile(0.90))).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP),
-                '95th': Decimal(str(df['total_price'].quantile(0.95))).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
+                '25th': Decimal(str(self._safe_float_conversion(df['total_price'].quantile(0.25)))).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP),
+                '50th': Decimal(str(self._safe_float_conversion(df['total_price'].quantile(0.50)))).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP),
+                '75th': Decimal(str(self._safe_float_conversion(df['total_price'].quantile(0.75)))).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP),
+                '90th': Decimal(str(self._safe_float_conversion(df['total_price'].quantile(0.90)))).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP),
+                '95th': Decimal(str(self._safe_float_conversion(df['total_price'].quantile(0.95)))).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
             }
             
             # Location performance
-            location_metrics = df.groupby('clinic_name').agg({
-                'total_price': ['sum', 'count', 'mean'],
-                'patient_id_hash': 'nunique'
-            }).round(2)
+            if 'clinic_name' in df.columns and not df['clinic_name'].isna().all():
+                location_metrics = df.groupby('clinic_name').agg({
+                    'total_price': ['sum', 'count', 'mean'],
+                    'patient_id_hash': 'nunique'
+                }).round(2)
+            else:
+                location_metrics = pd.DataFrame()
             
             sales_metrics['location_performance'] = {}
-            for location in location_metrics.index:
+            for location in getattr(location_metrics, 'index', []):
+                location_revenue = self._safe_float_conversion(location_metrics.loc[location, ('total_price', 'sum')])
+                location_avg = self._safe_float_conversion(location_metrics.loc[location, ('total_price', 'mean')])
+                
                 sales_metrics['location_performance'][location] = {
-                    'total_revenue': Decimal(str(location_metrics.loc[location, ('total_price', 'sum')])).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP),
+                    'total_revenue': Decimal(str(location_revenue)).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP),
                     'transaction_count': int(location_metrics.loc[location, ('total_price', 'count')]),
-                    'average_transaction': Decimal(str(location_metrics.loc[location, ('total_price', 'mean')])).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP),
+                    'average_transaction': Decimal(str(location_avg)).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP),
                     'unique_patients': int(location_metrics.loc[location, ('patient_id_hash', 'nunique')])
                 }
             
             # Staff performance
-            staff_metrics = df.groupby('staff_name').agg({
-                'total_price': ['sum', 'count', 'mean'],
-                'patient_id_hash': 'nunique'
-            }).round(2)
+            if 'staff_name' in df.columns and not df['staff_name'].isna().all():
+                staff_metrics = df.groupby('staff_name').agg({
+                    'total_price': ['sum', 'count', 'mean'],
+                    'patient_id_hash': 'nunique'
+                }).round(2)
+            else:
+                staff_metrics = pd.DataFrame()
             
             sales_metrics['staff_performance'] = {}
-            for staff in staff_metrics.index:
+            for staff in getattr(staff_metrics, 'index', []):
+                staff_revenue = self._safe_float_conversion(staff_metrics.loc[staff, ('total_price', 'sum')])
+                staff_avg = self._safe_float_conversion(staff_metrics.loc[staff, ('total_price', 'mean')])
+                
                 sales_metrics['staff_performance'][staff] = {
-                    'total_revenue': Decimal(str(staff_metrics.loc[staff, ('total_price', 'sum')])).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP),
+                    'total_revenue': Decimal(str(staff_revenue)).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP),
                     'transaction_count': int(staff_metrics.loc[staff, ('total_price', 'count')]),
-                    'average_transaction': Decimal(str(staff_metrics.loc[staff, ('total_price', 'mean')])).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP),
+                    'average_transaction': Decimal(str(staff_avg)).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP),
                     'unique_patients': int(staff_metrics.loc[staff, ('patient_id_hash', 'nunique')])
                 }
             
@@ -139,10 +235,13 @@ class BusinessMetricsCalculator:
                 
                 sales_metrics['yearly_performance'] = {}
                 for year in yearly_metrics.index:
+                    year_revenue = self._safe_float_conversion(yearly_metrics.loc[year, ('total_price', 'sum')])
+                    year_avg = self._safe_float_conversion(yearly_metrics.loc[year, ('total_price', 'mean')])
+                    
                     sales_metrics['yearly_performance'][str(year)] = {
-                        'total_revenue': Decimal(str(yearly_metrics.loc[year, ('total_price', 'sum')])).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP),
+                        'total_revenue': Decimal(str(year_revenue)).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP),
                         'transaction_count': int(yearly_metrics.loc[year, ('total_price', 'count')]),
-                        'average_transaction': Decimal(str(yearly_metrics.loc[year, ('total_price', 'mean')])).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP),
+                        'average_transaction': Decimal(str(year_avg)).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP),
                         'unique_patients': int(yearly_metrics.loc[year, ('patient_id_hash', 'nunique')])
                     }
                 
@@ -152,8 +251,8 @@ class BusinessMetricsCalculator:
                 for i in range(1, len(years)):
                     current_year = years[i]
                     previous_year = years[i-1]
-                    current_revenue = yearly_metrics.loc[current_year, ('total_price', 'sum')]
-                    previous_revenue = yearly_metrics.loc[previous_year, ('total_price', 'sum')]
+                    current_revenue = self._safe_float_conversion(yearly_metrics.loc[current_year, ('total_price', 'sum')])
+                    previous_revenue = self._safe_float_conversion(yearly_metrics.loc[previous_year, ('total_price', 'sum')])
                     
                     if previous_revenue > 0:
                         growth_rate = ((current_revenue - previous_revenue) / previous_revenue) * 100
@@ -169,10 +268,13 @@ class BusinessMetricsCalculator:
                 
                 sales_metrics['product_category_performance'] = {}
                 for category in product_metrics.index:
+                    category_revenue = self._safe_float_conversion(product_metrics.loc[category, ('total_price', 'sum')])
+                    category_avg = self._safe_float_conversion(product_metrics.loc[category, ('total_price', 'mean')])
+                    
                     sales_metrics['product_category_performance'][category] = {
-                        'total_revenue': Decimal(str(product_metrics.loc[category, ('total_price', 'sum')])).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP),
+                        'total_revenue': Decimal(str(category_revenue)).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP),
                         'transaction_count': int(product_metrics.loc[category, ('total_price', 'count')]),
-                        'average_transaction': Decimal(str(product_metrics.loc[category, ('total_price', 'mean')])).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
+                        'average_transaction': Decimal(str(category_avg)).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
                     }
         
         return sales_metrics
@@ -258,7 +360,7 @@ class BusinessMetricsCalculator:
         }
         
         # ROI calculation
-        asking_price = 650000  # From business sale data
+        asking_price = self._parse_asking_price()
         roi = (annual_ebitda / asking_price) * 100 if asking_price > 0 else 0
         
         financial_metrics['investment_metrics'] = {
@@ -349,7 +451,7 @@ class BusinessMetricsCalculator:
         profitability = financial_metrics.get('profitability', {})
         investment = financial_metrics.get('investment_metrics', {})
         
-        asking_price = investment.get('asking_price', 650000)
+        asking_price = investment.get('asking_price', self._parse_asking_price())
         annual_revenue = revenue_metrics.get('annual_revenue_projection', 0)
         annual_ebitda = profitability.get('estimated_annual_ebitda', 0)
         
@@ -408,14 +510,14 @@ class BusinessMetricsCalculator:
             # we'll calculate EBITDA based on actual sales revenue with a reasonable margin
             sales_data = normalized_data.get('sales', {})
             if 'main_sales' in sales_data:
-                df = sales_data['main_sales']
+                df = sales_data['main_sales'].copy()
                 
                 # Calculate monthly revenue from sales data (already filtered to sale locations)
                 df['sale_date'] = pd.to_datetime(df['sale_date'])
                 monthly_revenue = df.groupby(df['sale_date'].dt.to_period('M'))['total_price'].sum()
                 
                 if len(monthly_revenue) > 0:
-                    avg_monthly_revenue = monthly_revenue.mean()
+                    avg_monthly_revenue = self._safe_float_conversion(monthly_revenue.mean())
                     logger.info(f"Average monthly revenue from sales data: ${avg_monthly_revenue:,.2f}")
                     
                     # Use the EBITDA margin from business rules (website shows 25.6%)
@@ -496,14 +598,14 @@ class BusinessMetricsCalculator:
                     if 'Pennsylvania' in df.columns and pd.notna(row.get('Pennsylvania')) and row.get('Pennsylvania') != 0:
                         # 2023 data structure: Pennsylvania, Virginia, Unclassified
                         # Only use Pennsylvania column (sale locations only)
-                        revenue_amount = float(row['Pennsylvania'])
+                        revenue_amount = self._safe_float_conversion(row['Pennsylvania'])
                         monthly_revenue += revenue_amount
                         logger.info(f"  Revenue (PA sale locations only): {row['Unnamed: 0']} = ${revenue_amount:,.2f}")
                     elif 'Cranberry' in df.columns and 'West View' in df.columns:
                         # 2024/2025 data structure: Cranberry, Virginia, West View
                         # Only include Cranberry + West View (sale locations), exclude Virginia
-                        cranberry_revenue = float(row.get('Cranberry', 0)) if pd.notna(row.get('Cranberry')) else 0
-                        west_view_revenue = float(row.get('West View', 0)) if pd.notna(row.get('West View')) else 0
+                        cranberry_revenue = self._safe_float_conversion(row.get('Cranberry', 0))
+                        west_view_revenue = self._safe_float_conversion(row.get('West View', 0))
                         revenue_amount = cranberry_revenue + west_view_revenue
                         if revenue_amount != 0:
                             monthly_revenue += revenue_amount
@@ -511,7 +613,7 @@ class BusinessMetricsCalculator:
                     elif pd.notna(row.get('TOTAL')) and row.get('TOTAL') != 0:
                         # Fallback to TOTAL if neither structure is available
                         # WARNING: This includes all locations, not just sale locations
-                        revenue_amount = float(row['TOTAL'])
+                        revenue_amount = self._safe_float_conversion(row['TOTAL'])
                         monthly_revenue += revenue_amount
                         logger.warning(f"  Revenue (TOTAL fallback - includes all locations): {row['Unnamed: 0']} = ${revenue_amount:,.2f}")
                 
@@ -524,21 +626,21 @@ class BusinessMetricsCalculator:
                         # 2023 data structure: Pennsylvania, Virginia, Unclassified
                         # Only use Pennsylvania column (sale locations only)
                         expense_name = row['Unnamed: 0']
-                        expense_amount = float(row['Pennsylvania'])
+                        expense_amount = self._safe_float_conversion(row['Pennsylvania'])
                         
                         # Track all expenses by category
                         all_expense_categories[expense_name] += expense_amount
                         monthly_total_expenses += expense_amount
                         
-                        # For EBITDA: exclude Interest, Tax, Depreciation, Amortization
-                        if not any(exclude in expense_name for exclude in ['Interest', 'Tax', 'Depreciation', 'Amortization', 'Total', 'Summary']):
+                        # For EBITDA: exclude Interest, Income Tax, Corporate Tax, Depreciation, Amortization (but allow Payroll Tax)
+                        if not any(exclude in expense_name for exclude in ['Interest', 'Income Tax', 'Corporate Tax', 'Depreciation', 'Amortization', 'Total', 'Summary']):
                             monthly_operational_expenses += expense_amount
                     elif 'Cranberry' in df.columns and 'West View' in df.columns:
                         # 2024/2025 data structure: Cranberry, Virginia, West View
                         # Only include Cranberry + West View (sale locations), exclude Virginia
                         expense_name = row['Unnamed: 0']
-                        cranberry_expense = float(row.get('Cranberry', 0)) if pd.notna(row.get('Cranberry')) else 0
-                        west_view_expense = float(row.get('West View', 0)) if pd.notna(row.get('West View')) else 0
+                        cranberry_expense = self._safe_float_conversion(row.get('Cranberry', 0))
+                        west_view_expense = self._safe_float_conversion(row.get('West View', 0))
                         expense_amount = cranberry_expense + west_view_expense
                         
                         if expense_amount != 0:
@@ -553,14 +655,14 @@ class BusinessMetricsCalculator:
                         # Fallback to TOTAL if neither structure is available
                         # WARNING: This includes all locations, not just sale locations
                         expense_name = row['Unnamed: 0']
-                        expense_amount = float(row['TOTAL'])
+                        expense_amount = self._safe_float_conversion(row['TOTAL'])
                         
                         # Track all expenses by category
                         all_expense_categories[expense_name] += expense_amount
                         monthly_total_expenses += expense_amount
                         
-                        # For EBITDA: exclude Interest, Tax, Depreciation, Amortization
-                        if not any(exclude in expense_name for exclude in ['Interest', 'Tax', 'Depreciation', 'Amortization', 'Total', 'Summary']):
+                        # For EBITDA: exclude Interest, Income Tax, Corporate Tax, Depreciation, Amortization (but allow Payroll Tax)
+                        if not any(exclude in expense_name for exclude in ['Interest', 'Income Tax', 'Corporate Tax', 'Depreciation', 'Amortization', 'Total', 'Summary']):
                             monthly_operational_expenses += expense_amount
                 
                 # Calculate monthly EBITDA (operational expenses only)
@@ -576,23 +678,23 @@ class BusinessMetricsCalculator:
             if expected_months and monthly_ebitdas_dict:
                 missing_months = [month for month in expected_months if month not in found_months]
                 if missing_months:
-                    logger.warning(f"🚨 MISSING EBITDA DATA: {len(missing_months)} months missing from P&L data")
+                    logger.warning(f"MISSING EBITDA DATA: {len(missing_months)} months missing from P&L data")
                     for missing_month in missing_months:
                         logger.warning(f"  Missing EBITDA data: {missing_month}")
                     
                     # Calculate average monthly EBITDA from available data
                     avg_monthly_ebitda = sum(monthly_ebitdas_dict.values()) / len(monthly_ebitdas_dict)
-                    logger.info(f"📊 Using average monthly EBITDA (${avg_monthly_ebitda:,.2f}) for {len(missing_months)} missing months")
+                    logger.info(f"Using average monthly EBITDA (${avg_monthly_ebitda:,.2f}) for {len(missing_months)} missing months")
                     
                     # Add estimated EBITDA for missing months
                     for missing_month in missing_months:
                         monthly_ebitdas.append(avg_monthly_ebitda)
                         monthly_ebitdas_dict[missing_month] = avg_monthly_ebitda
                     
-                    logger.info(f"💰 Added estimated EBITDA: ${avg_monthly_ebitda * len(missing_months):,.2f} for missing months")
-                    logger.info(f"📈 Total EBITDA with estimates: ${sum(monthly_ebitdas):,.2f} from {len(monthly_ebitdas)} months ({len(found_months)} actual + {len(missing_months)} estimated)")
+                    logger.info(f"Added estimated EBITDA: ${avg_monthly_ebitda * len(missing_months):,.2f} for missing months")
+                    logger.info(f"Total EBITDA with estimates: ${sum(monthly_ebitdas):,.2f} from {len(monthly_ebitdas)} months ({len(found_months)} actual + {len(missing_months)} estimated)")
                 else:
-                    logger.info("✅ All expected months found in EBITDA calculation")
+                    logger.info("All expected months found in EBITDA calculation")
             
             if monthly_ebitdas:
                 # Calculate average monthly EBITDA (already filtered to sale locations only)
@@ -734,18 +836,22 @@ class BusinessMetricsCalculator:
                     if 'Pennsylvania' in df.columns and pd.notna(sales_row['Pennsylvania'].iloc[0]):
                         # 2023 data structure: Pennsylvania, Virginia, Unclassified
                         # Only use Pennsylvania column (sale locations only)
-                        monthly_revenue = Decimal(str(sales_row['Pennsylvania'].iloc[0])).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
+                        pa_revenue = self._safe_float_conversion(sales_row['Pennsylvania'].iloc[0])
+                        monthly_revenue = Decimal(str(pa_revenue)).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
                         logger.debug(f"  Using Pennsylvania column (sale locations only): ${monthly_revenue:,.2f}")
                     elif 'Cranberry' in df.columns and 'West View' in df.columns:
                         # 2024/2025 data structure: Cranberry, Virginia, West View
                         # Only include Cranberry + West View (sale locations), exclude Virginia
-                        cranberry_revenue = Decimal(str(sales_row['Cranberry'].iloc[0])).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP) if pd.notna(sales_row['Cranberry'].iloc[0]) else Decimal('0.00')
-                        west_view_revenue = Decimal(str(sales_row['West View'].iloc[0])).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP) if pd.notna(sales_row['West View'].iloc[0]) else Decimal('0.00')
+                        cranberry_revenue = self._safe_float_conversion(sales_row['Cranberry'].iloc[0])
+                        west_view_revenue = self._safe_float_conversion(sales_row['West View'].iloc[0])
+                        cranberry_revenue = Decimal(str(cranberry_revenue)).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
+                        west_view_revenue = Decimal(str(west_view_revenue)).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
                         monthly_revenue = cranberry_revenue + west_view_revenue
                         logger.debug(f"  Using Cranberry+West View (sale locations only): ${monthly_revenue:,.2f} (Cranberry: ${cranberry_revenue:,.2f}, West View: ${west_view_revenue:,.2f})")
                     else:
                         if 'TOTAL' in df.columns:
-                            monthly_revenue = Decimal(str(sales_row['TOTAL'].iloc[0])).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP) if pd.notna(sales_row['TOTAL'].iloc[0]) else Decimal('0.00')
+                            total_revenue = self._safe_float_conversion(sales_row['TOTAL'].iloc[0])
+                            monthly_revenue = Decimal(str(total_revenue)).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
                             logger.warning(f"  Using TOTAL column (includes all locations): ${monthly_revenue:,.2f}")
                         else:
                             logger.warning(f"  No suitable revenue columns found in {pnl_key}")
@@ -768,32 +874,32 @@ class BusinessMetricsCalculator:
             if expected_months:
                 missing_months = [month for month in expected_months if month not in found_months]
                 if missing_months:
-                    logger.warning(f"🚨 MISSING DATA DETECTED: {len(missing_months)} months missing from P&L data")
+                    logger.warning(f"MISSING DATA DETECTED: {len(missing_months)} months missing from P&L data")
                     for missing_month in missing_months:
                         logger.warning(f"  Missing: {missing_month}")
                     
                     # Calculate average monthly revenue from available data
                     if monthly_revenues:
                         avg_monthly_revenue = sum(monthly_revenues.values()) / len(monthly_revenues)
-                        logger.info(f"📊 Using average monthly revenue (${avg_monthly_revenue:,.2f}) for {len(missing_months)} missing months")
+                        logger.info(f"Using average monthly revenue (${avg_monthly_revenue:,.2f}) for {len(missing_months)} missing months")
                         
                         # Add estimated revenue for missing months
                         estimated_missing_revenue = avg_monthly_revenue * len(missing_months)
                         total_revenue += estimated_missing_revenue
                         month_count += len(missing_months)
                         
-                        logger.info(f"💰 Added estimated revenue: ${estimated_missing_revenue:,.2f} for missing months")
-                        logger.info(f"📈 Total revenue with estimates: ${total_revenue:,.2f} from {month_count} months ({len(found_months)} actual + {len(missing_months)} estimated)")
+                        logger.info(f"Added estimated revenue: ${estimated_missing_revenue:,.2f} for missing months")
+                        logger.info(f"Total revenue with estimates: ${total_revenue:,.2f} from {month_count} months ({len(found_months)} actual + {len(missing_months)} estimated)")
                     else:
-                        logger.error("❌ No valid revenue data found to calculate averages for missing months")
+                        logger.error("No valid revenue data found to calculate averages for missing months")
                 else:
-                    logger.info("✅ All expected months found in P&L data")
+                    logger.info("All expected months found in P&L data")
             
             # Calculate monthly average from actual data
             monthly_revenue_avg = total_revenue / month_count if month_count > 0 else 0.0
             logger.info(f"P&L monthly revenue average calculation complete: ${total_revenue:,.2f} total from {month_count} months (processed {processed_count}, skipped {skipped_count})")
             logger.info(f"Monthly revenue average: ${monthly_revenue_avg:,.2f}")
-            return monthly_revenue_avg
+            return float(monthly_revenue_avg)
             
         except Exception as e:
             logger.exception("Error estimating revenue from P&L data")
@@ -883,7 +989,7 @@ class BusinessMetricsCalculator:
         )
         
         # Calculate retention rate (patients with more than 1 month of activity)
-        retained_patients = (patient_months > 1).sum()
+        retained_patients = self._safe_float_conversion((patient_months > 1).sum())
         total_patients = len(patient_months)
         
         return (retained_patients / total_patients) * 100 if total_patients > 0 else 0
@@ -901,7 +1007,7 @@ class BusinessMetricsCalculator:
             
             # Calculate total revenue by location
             location_revenue = df.groupby('clinic_name')['total_price'].sum()
-            total_revenue = location_revenue.sum()
+            total_revenue = self._safe_float_conversion(location_revenue.sum())
             
             if total_revenue == 0:
                 logger.warning("No revenue data found for location adjustment calculation")

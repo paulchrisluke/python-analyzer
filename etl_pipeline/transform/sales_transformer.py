@@ -480,11 +480,11 @@ class SalesTransformer(BaseTransformer):
             
             # Location metrics
             if 'clinic_name' in df.columns:
-                location_revenue = df.groupby('clinic_name')['total_price'].agg(['sum', 'count', 'mean']).to_dict()
+                location_revenue = df.groupby('clinic_name')['total_price'].agg(['sum', 'count', 'mean'])
                 metrics['revenue_by_location'] = {
-                    'revenue': location_revenue['sum'],
-                    'transactions': location_revenue['count'],
-                    'average': location_revenue['mean']
+                    'revenue': {k: Decimal(str(v)).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP) for k, v in location_revenue['sum'].items()},
+                    'transactions': location_revenue['count'].to_dict(),
+                    'average': {k: Decimal(str(v)).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP) for k, v in location_revenue['mean'].items()}
                 }
             else:
                 logger.warning("'clinic_name' column not found in dataframe, setting revenue_by_location to empty structure")

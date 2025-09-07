@@ -73,12 +73,12 @@ class DataValidator:
                     logger.warning(warning_msg)
                 
                 # Check date range using date_range or data_range from business rules (root level)
-                # Prefer 'date_range' then fallback to 'data_range' for backward compatibility
-                date_range = self.business_rules.get('date_range', self.business_rules.get('data_range', {}))
-                
-                # Ensure date_range is a dict and not None to avoid TypeErrors
-                if not isinstance(date_range, dict):
-                    date_range = {}
+                # Prefer 'date_range' then fallback to 'data_range' for backward compatibility; ignore non-dict values
+                dr = self.business_rules.get('date_range')
+                dr = dr if isinstance(dr, dict) else None
+                fb = self.business_rules.get('data_range')
+                fb = fb if isinstance(fb, dict) else None
+                date_range = dr if dr is not None else (fb or {})
                 
                 if 'start' in date_range:
                     start_date = pd.to_datetime(date_range['start'])

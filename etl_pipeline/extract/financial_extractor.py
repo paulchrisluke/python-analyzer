@@ -23,6 +23,26 @@ class FinancialExtractor(BaseExtractor):
         """
         super().__init__(config)
         self.financial_data = {}
+    
+    def _read_csv_with_encodings(self, file_path: str, encodings=None):
+        """
+        Read CSV file with multiple encoding fallbacks.
+        
+        Args:
+            file_path: Path to CSV file
+            encodings: List of encodings to try (defaults to common encodings)
+            
+        Returns:
+            Tuple of (DataFrame, encoding_used) or (None, None) if all fail
+        """
+        encodings = encodings or ['utf-8', 'latin-1', 'cp1252', 'iso-8859-1']
+        for enc in encodings:
+            try:
+                df = pd.read_csv(file_path, encoding=enc, low_memory=False)
+                return df, enc
+            except UnicodeDecodeError:
+                continue
+        return None, None
         
     def extract(self) -> Dict[str, Any]:
         """
@@ -75,19 +95,14 @@ class FinancialExtractor(BaseExtractor):
             pnl_2023_files = FileUtils.find_files(str(pnl_2023_path), "*.[cC][sS][vV]")
             for file_path in pnl_2023_files:
                 try:
-                    # Try different encodings for QuickBooks CSV files
-                    for encoding in ['utf-8', 'latin-1', 'cp1252', 'iso-8859-1']:
-                        try:
-                            df = pd.read_csv(file_path, encoding=encoding, low_memory=False)
-                            filename = Path(file_path).stem
-                            pnl_data[f'pnl_2023_{filename}'] = df
-                            logger.info(f"Loaded P&L 2023 data: {filename} ({len(df)} records) with {encoding} encoding")
-                            break
-                        except UnicodeDecodeError:
-                            continue
+                    df, used = self._read_csv_with_encodings(file_path)
+                    if df is not None:
+                        filename = Path(file_path).stem
+                        pnl_data[f'pnl_2023_{filename}'] = df
+                        logger.info("Loaded P&L 2023 data: %s (%d records) with %s encoding", filename, len(df), used)
                     else:
-                        logger.error(f"Could not decode P&L 2023 file {file_path} with any encoding")
-                except Exception as e:
+                        logger.error("Could not decode P&L 2023 file %s with any encoding", file_path)
+                except Exception:
                     logger.exception("Error loading P&L 2023 file %s", file_path)
         
         # 2024 P&L data
@@ -96,19 +111,14 @@ class FinancialExtractor(BaseExtractor):
             pnl_2024_files = FileUtils.find_files(str(pnl_2024_path), "*.[cC][sS][vV]")
             for file_path in pnl_2024_files:
                 try:
-                    # Try different encodings for QuickBooks CSV files
-                    for encoding in ['utf-8', 'latin-1', 'cp1252', 'iso-8859-1']:
-                        try:
-                            df = pd.read_csv(file_path, encoding=encoding, low_memory=False)
-                            filename = Path(file_path).stem
-                            pnl_data[f'pnl_2024_{filename}'] = df
-                            logger.info(f"Loaded P&L 2024 data: {filename} ({len(df)} records) with {encoding} encoding")
-                            break
-                        except UnicodeDecodeError:
-                            continue
+                    df, used = self._read_csv_with_encodings(file_path)
+                    if df is not None:
+                        filename = Path(file_path).stem
+                        pnl_data[f'pnl_2024_{filename}'] = df
+                        logger.info("Loaded P&L 2024 data: %s (%d records) with %s encoding", filename, len(df), used)
                     else:
-                        logger.error(f"Could not decode P&L 2024 file {file_path} with any encoding")
-                except Exception as e:
+                        logger.error("Could not decode P&L 2024 file %s with any encoding", file_path)
+                except Exception:
                     logger.exception("Error loading P&L 2024 file %s", file_path)
         
         # 2025 P&L data
@@ -117,19 +127,14 @@ class FinancialExtractor(BaseExtractor):
             pnl_2025_files = FileUtils.find_files(str(pnl_2025_path), "*.[cC][sS][vV]")
             for file_path in pnl_2025_files:
                 try:
-                    # Try different encodings for QuickBooks CSV files
-                    for encoding in ['utf-8', 'latin-1', 'cp1252', 'iso-8859-1']:
-                        try:
-                            df = pd.read_csv(file_path, encoding=encoding, low_memory=False)
-                            filename = Path(file_path).stem
-                            pnl_data[f'pnl_2025_{filename}'] = df
-                            logger.info(f"Loaded P&L 2025 data: {filename} ({len(df)} records) with {encoding} encoding")
-                            break
-                        except UnicodeDecodeError:
-                            continue
+                    df, used = self._read_csv_with_encodings(file_path)
+                    if df is not None:
+                        filename = Path(file_path).stem
+                        pnl_data[f'pnl_2025_{filename}'] = df
+                        logger.info("Loaded P&L 2025 data: %s (%d records) with %s encoding", filename, len(df), used)
                     else:
-                        logger.error(f"Could not decode P&L 2025 file {file_path} with any encoding")
-                except Exception as e:
+                        logger.error("Could not decode P&L 2025 file %s with any encoding", file_path)
+                except Exception:
                     logger.exception("Error loading P&L 2025 file %s", file_path)
         
         return pnl_data if pnl_data else None
@@ -195,11 +200,14 @@ class FinancialExtractor(BaseExtractor):
             cogs_files = FileUtils.find_files(str(cogs_path), "*.[cC][sS][vV]")
             for file_path in cogs_files:
                 try:
-                    df = pd.read_csv(file_path, encoding='utf-8', low_memory=False)
-                    filename = Path(file_path).stem
-                    cogs_data[f'cogs_{filename}'] = df
-                    logger.info(f"Loaded COGS data: {filename} ({len(df)} records)")
-                except Exception as e:
+                    df, used = self._read_csv_with_encodings(file_path)
+                    if df is not None:
+                        filename = Path(file_path).stem
+                        cogs_data[f'cogs_{filename}'] = df
+                        logger.info("Loaded COGS data: %s (%d records) with %s encoding", filename, len(df), used)
+                    else:
+                        logger.error("Could not decode COGS file %s with any encoding", file_path)
+                except Exception:
                     logger.exception("Error loading COGS file %s", file_path)
         
         return cogs_data if cogs_data else None

@@ -9,11 +9,25 @@ import pandas as pd
 from pathlib import Path
 from typing import Dict, Any, List, Optional
 import logging
+from urllib.parse import urlparse
 
 logger = logging.getLogger(__name__)
 
 class FileUtils:
     """Utility class for file operations."""
+    
+    @staticmethod
+    def is_url(raw: str) -> bool:
+        """
+        Check if a string is a URL.
+        
+        Args:
+            raw: String to check
+            
+        Returns:
+            True if the string appears to be a URL
+        """
+        return '://' in raw or urlparse(raw).scheme in ('http', 'https', 'ftp', 'ftps')
     
     @staticmethod
     def load_yaml(file_path: str) -> Dict[str, Any]:
@@ -216,7 +230,7 @@ class FileUtils:
         try:
             return os.path.getsize(file_path)
         except Exception:
-            logger.exception(f"Error getting file size for {file_path}")
+            logger.exception("Error getting file size for %s", file_path)
             return None
     
     @staticmethod
@@ -286,15 +300,17 @@ class FileUtils:
                     logger.debug(f"Optional path configuration missing: {path_key}")
                     return None
             
-            path_str = str(value).strip()
-            if not path_str:
-                if required:
-                    raise ValueError(f"Required path configuration is empty: {path_key}")
-                else:
-                    logger.debug(f"Optional path configuration is empty: {path_key}")
-                    return None
-            
-            path_obj = Path(path_str)
+            if isinstance(value, Path):
+                path_obj = value
+            else:
+                path_str = str(value).strip()
+                if not path_str:
+                    if required:
+                        raise ValueError(f"Required path configuration is empty: {path_key}")
+                    else:
+                        logger.debug(f"Optional path configuration is empty: {path_key}")
+                        return None
+                path_obj = Path(path_str).expanduser()
             
             # Additional safety check: ensure path is not just current directory
             if path_obj == Path('.'):

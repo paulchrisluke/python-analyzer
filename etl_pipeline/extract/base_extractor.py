@@ -61,7 +61,7 @@ class BaseExtractor(ABC):
                 # Check that the path actually exists
                 path_str = str(path_obj)
                 # Detect URLs by known schemes or "://" pattern
-                is_url = '://' in path_str or urlparse(path_str).scheme in ('http', 'https', 'ftp', 'ftps')
+                is_url = FileUtils.is_url(path_str)
                 # Only check local filesystem paths
                 if not is_url:
                     if not path_obj.exists():
