@@ -26,7 +26,7 @@ def test_configuration_loading():
     
     try:
         # Test YAML loading
-        config_dir = Path(__file__).parent / "etl_pipeline" / "config"
+        config_dir = Path(__file__).parent.parent / "etl_pipeline" / "config"
         
         data_sources = FileUtils.load_yaml(str(config_dir / "data_sources.yaml"))
         business_rules = FileUtils.load_yaml(str(config_dir / "business_rules.yaml"))
@@ -37,18 +37,16 @@ def test_configuration_loading():
         print(f"   - Business rules: {len(business_rules)} sections")
         print(f"   - Schemas: {len(schemas.get('schemas', {}))} defined")
         
-        return True
-        
     except Exception as e:
         print(f"❌ Configuration loading failed: {str(e)}")
-        return False
+        assert False, f"Configuration loading failed: {str(e)}"
 
 def test_data_source_validation():
     """Test that data source files exist."""
     print("\nTesting data source validation...")
     
     try:
-        config_dir = Path(__file__).parent / "etl_pipeline" / "config"
+        config_dir = Path(__file__).parent.parent / "etl_pipeline" / "config"
         data_sources = FileUtils.load_yaml(str(config_dir / "data_sources.yaml"))
         
         # Check main sales file
@@ -59,7 +57,7 @@ def test_data_source_validation():
                 print(f"✅ Main sales file found: {sales_path}")
             else:
                 print(f"❌ Main sales file not found: {sales_path}")
-                return False
+                assert False, f"Main sales file not found: {sales_path}"
         
         # Check financial data directories
         financial_configs = [
@@ -92,11 +90,9 @@ def test_data_source_validation():
             else:
                 print(f"⚠️  Equipment base path not found: {base_path}")
         
-        return True
-        
     except Exception as e:
         print(f"❌ Data source validation failed: {str(e)}")
-        return False
+        assert False, f"Data source validation failed: {str(e)}"
 
 def test_pipeline_initialization():
     """Test that the pipeline can be initialized."""
@@ -114,21 +110,20 @@ def test_pipeline_initialization():
             print(f"   - Extractors: {len(pipeline.extractors)}")
             print(f"   - Transformers: {len(pipeline.transformers)}")
             print(f"   - Loaders: {len(pipeline.loaders)}")
-            return True
         else:
             print("❌ Pipeline initialization failed")
-            return False
+            assert False, "Pipeline initialization failed"
             
     except Exception as e:
         print(f"❌ Pipeline initialization test failed: {str(e)}")
-        return False
+        assert False, f"Pipeline initialization test failed: {str(e)}"
 
 def test_directory_structure():
     """Test that required directories exist or can be created."""
     print("\nTesting directory structure...")
     
     try:
-        base_dir = Path(__file__).parent
+        base_dir = Path(__file__).parent.parent
         
         # Check required directories
         required_dirs = [
@@ -146,7 +141,7 @@ def test_directory_structure():
                 print(f"✅ Directory exists: {dir_path}")
             else:
                 print(f"❌ Directory missing: {dir_path}")
-                return False
+                assert False, f"Directory missing: {dir_path}"
         
         # Test data directories can be created
         data_dirs = ["data", "data/raw", "data/normalized", "data/final", "reports", "logs"]
@@ -156,11 +151,9 @@ def test_directory_structure():
             full_path.mkdir(parents=True, exist_ok=True)
             print(f"✅ Data directory ready: {dir_path}")
         
-        return True
-        
     except Exception as e:
         print(f"❌ Directory structure test failed: {str(e)}")
-        return False
+        assert False, f"Directory structure test failed: {str(e)}"
 
 def test_data_completeness():
     """Test that all data is extracted and processed without loss."""
@@ -203,7 +196,7 @@ def test_data_completeness():
                     print(f"   - {data_type}: {type(data).__name__}")
         else:
             print("⚠️  No raw data found - run pipeline first")
-            return True  # Don't fail if no data yet
+            # Don't fail if no data yet
         
         # Test normalized data completeness
         if normalized_data:
@@ -216,7 +209,7 @@ def test_data_completeness():
                     print(f"   - {data_type}: {type(data).__name__}")
         else:
             print("⚠️  No normalized data found - run pipeline first")
-            return True  # Don't fail if no data yet
+            # Don't fail if no data yet
         
         # Test final data completeness
         if final_data:
@@ -228,13 +221,11 @@ def test_data_completeness():
                     print(f"   - {data_type}: {type(data).__name__}")
         else:
             print("⚠️  No final data found - run pipeline first")
-            return True  # Don't fail if no data yet
-        
-        return True
+            # Don't fail if no data yet
         
     except Exception as e:
         print(f"❌ Data completeness test failed: {str(e)}")
-        return False
+        assert False, f"Data completeness test failed: {str(e)}"
 
 def test_financial_data_integrity():
     """Test that all financial data columns and rows are preserved."""
@@ -246,7 +237,7 @@ def test_financial_data_integrity():
         
         if not raw_data_path.exists():
             print("⚠️  No financial raw data found - run pipeline first")
-            return True
+            return
         
         with open(raw_data_path, 'r') as f:
             financial_data = json.load(f)
@@ -272,14 +263,14 @@ def test_financial_data_integrity():
                     for col in essential_columns:
                         if col not in df.columns:
                             print(f"❌ Missing essential column '{col}' in {pnl_key}")
-                            return False
+                            assert False, f"Missing essential column '{col}' in {pnl_key}"
                     
                     # Check that no columns are completely empty
                     for col in df.columns:
                         non_null_count = df[col].notna().sum()
                         if non_null_count == 0:
                             print(f"❌ Column '{col}' in {pnl_key} is completely empty")
-                            return False
+                            assert False, f"Column '{col}' in {pnl_key} is completely empty"
                     
                     print(f"   - {pnl_key}: {rows} rows, {cols} columns")
             
@@ -315,11 +306,9 @@ def test_financial_data_integrity():
                     df = pd.DataFrame(cogs_info['data'])
                     print(f"   - {cogs_key}: {len(df)} rows, {len(df.columns)} columns")
         
-        return True
-        
     except Exception as e:
         print(f"❌ Financial data integrity test failed: {str(e)}")
-        return False
+        assert False, f"Financial data integrity test failed: {str(e)}"
 
 def test_sales_data_integrity():
     """Test that all sales data is preserved."""
@@ -331,7 +320,7 @@ def test_sales_data_integrity():
         
         if not raw_data_path.exists():
             print("⚠️  No sales raw data found - run pipeline first")
-            return True
+            return
         
         with open(raw_data_path, 'r') as f:
             sales_data = json.load(f)
@@ -365,11 +354,9 @@ def test_sales_data_integrity():
             else:
                 print("✅ No empty columns found")
         
-        return True
-        
     except Exception as e:
         print(f"❌ Sales data integrity test failed: {str(e)}")
-        return False
+        assert False, f"Sales data integrity test failed: {str(e)}"
 
 def _validate_field_value(field_name, value, metric_type):
     """
@@ -430,7 +417,7 @@ def test_business_metrics_completeness():
         
         if not final_data_path.exists():
             print("⚠️  No business sale data found - run pipeline first")
-            return True
+            return
         
         with open(final_data_path, 'r') as f:
             business_data = json.load(f)
@@ -442,7 +429,7 @@ def test_business_metrics_completeness():
                 print(f"✅ {metric} metrics calculated")
             else:
                 print(f"❌ Missing {metric} metrics")
-                return False
+                assert False, f"Missing {metric} metrics"
         
         # Check revenue metrics
         if 'revenue' in business_data:
@@ -452,12 +439,10 @@ def test_business_metrics_completeness():
                 if field in revenue:
                     value = revenue[field]
                     is_valid, message = _validate_field_value(field, value, 'revenue')
-                    print(message)
-                    if not is_valid:
-                        return False
+                    assert is_valid, message
                 else:
                     print(f"❌ Missing {field} in revenue metrics")
-                    return False
+                    assert False, f"Missing {field} in revenue metrics"
         
         # Check EBITDA metrics
         if 'ebitda' in business_data:
@@ -467,18 +452,14 @@ def test_business_metrics_completeness():
                 if field in ebitda:
                     value = ebitda[field]
                     is_valid, message = _validate_field_value(field, value, 'ebitda')
-                    print(message)
-                    if not is_valid:
-                        return False
+                    assert is_valid, message
                 else:
                     print(f"❌ Missing {field} in EBITDA metrics")
-                    return False
-        
-        return True
+                    assert False, f"Missing {field} in EBITDA metrics"
         
     except Exception as e:
         print(f"❌ Business metrics completeness test failed: {str(e)}")
-        return False
+        assert False, f"Business metrics completeness test failed: {str(e)}"
 
 def test_data_coverage_analysis():
     """Test that data coverage analysis is complete."""
@@ -490,7 +471,7 @@ def test_data_coverage_analysis():
         
         if not coverage_data_path.exists():
             print("⚠️  No coverage data found - run pipeline first")
-            return True
+            return
         
         with open(coverage_data_path, 'r') as f:
             coverage_data = json.load(f)
@@ -508,13 +489,11 @@ def test_data_coverage_analysis():
                     print(f"✅ {coverage_type}: {coverage_info}")
             else:
                 print(f"❌ Missing coverage analysis for {coverage_type}")
-                return False
-        
-        return True
+                assert False, f"Missing coverage analysis for {coverage_type}"
         
     except Exception as e:
         print(f"❌ Data coverage analysis test failed: {str(e)}")
-        return False
+        assert False, f"Data coverage analysis test failed: {str(e)}"
 
 def main():
     """Run all tests."""

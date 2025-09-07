@@ -59,9 +59,11 @@ class BaseExtractor(ABC):
                     return False
                 
                 # Check that the path actually exists
-                parsed_scheme = urlparse(str(path_obj)).scheme
+                path_str = str(path_obj)
+                # Detect URLs by known schemes or "://" pattern
+                is_url = '://' in path_str or urlparse(path_str).scheme in ('http', 'https', 'ftp', 'ftps')
                 # Only check local filesystem paths
-                if parsed_scheme in ('', 'file'):
+                if not is_url:
                     if not path_obj.exists():
                         logger.error(f"Configuration path does not exist: {path_obj.absolute()}")
                         return False

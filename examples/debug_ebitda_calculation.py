@@ -79,7 +79,7 @@ def main():
         
         annual_ebitda = profitability.get('estimated_annual_ebitda', 0)
         annual_revenue = revenue_metrics.get('annual_revenue_projection', 0)
-        ebitda_margin = profitability.get('ebitda_margin', 0) / 100  # Convert percentage to decimal
+        ebitda_margin = _normalize_percent(profitability.get('ebitda_margin', 0))
         monthly_revenue = revenue_metrics.get('monthly_revenue_average', 0)
         
         print(f"Annual EBITDA: ${annual_ebitda:,.0f}")

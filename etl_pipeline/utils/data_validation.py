@@ -76,6 +76,10 @@ class DataValidator:
                 # Prefer 'date_range' then fallback to 'data_range' for backward compatibility
                 date_range = self.business_rules.get('date_range', self.business_rules.get('data_range', {}))
                 
+                # Ensure date_range is a dict and not None to avoid TypeErrors
+                if not isinstance(date_range, dict):
+                    date_range = {}
+                
                 if 'start' in date_range:
                     start_date = pd.to_datetime(date_range['start'])
                     invalid_dates = parsed_dates[parsed_dates < start_date]

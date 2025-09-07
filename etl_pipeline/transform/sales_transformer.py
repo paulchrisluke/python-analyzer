@@ -7,7 +7,7 @@ import re
 import hashlib
 from typing import Dict, Any, List, Optional
 import logging
-from datetime import datetime
+from datetime import datetime, timezone
 from decimal import Decimal, ROUND_HALF_UP
 from .base_transformer import BaseTransformer
 
@@ -168,10 +168,9 @@ class SalesTransformer(BaseTransformer):
                     patient_data[patient_id_hash] = {
                         'patient_id_hash': patient_id_hash,
                         'patient_name': row.get('patient_name') if pd.notna(row.get('patient_name')) else None,
-                        'patient_id_original': row['patient_id'],
                         'patient_zip': row.get('patient_zip') if pd.notna(row.get('patient_zip')) else None,
-                        'created_date': datetime.now(),
-                        'last_updated': datetime.now()
+                        'created_date': datetime.now(timezone.utc).isoformat(),
+                        'last_updated': datetime.now(timezone.utc).isoformat()
                     }
         
         return patient_data

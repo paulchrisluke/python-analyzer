@@ -92,17 +92,18 @@ class BusinessDataLoader {
             
         } catch (error) {
             // Handle network/fetch errors vs JSON parse errors
-            if (error.name === 'TypeError' && error.message.includes('fetch')) {
+            if (error instanceof TypeError) {
                 console.error('❌ Network error: Failed to fetch business data:', error.message);
                 this.error = 'Network error: Unable to connect to data source';
                 this.data = []; // Fallback to empty array
-            } else if (error.message.includes('Malformed JSON')) {
+            } else if (error instanceof SyntaxError) {
                 console.error('❌ JSON parse error: Invalid data format:', error.message);
                 this.error = 'Data format error: Invalid JSON response';
                 this.data = []; // Fallback to empty array
-            } else if (error.message.includes('HTTP') || error.message.includes('content type')) {
-                console.error('❌ Server error:', error.message);
-                this.error = `Server error: ${error.message}`;
+            } else if (error.status || error.statusCode || error.isHttpError) {
+                const status = error.status || error.statusCode || 'Unknown';
+                console.error('❌ Server error:', error.message, `(Status: ${status})`);
+                this.error = `Server error: ${error.message} (Status: ${status})`;
                 this.data = []; // Fallback to empty array
             } else {
                 console.error('❌ Unexpected error loading business data:', error);

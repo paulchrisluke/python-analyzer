@@ -37,6 +37,11 @@ class EquipmentExtractor(BaseExtractor):
         """
         logger.info("Starting equipment data extraction...")
         
+        # Check if path is empty and skip extraction if so
+        if not self.config.get('path', '').strip():
+            logger.info("Equipment extractor: no path configured; skipping extraction.")
+            return {}
+        
         # Validate configuration before extraction
         if not self._validate_config():
             raise ValueError("Equipment extractor configuration validation failed")
@@ -66,8 +71,8 @@ class EquipmentExtractor(BaseExtractor):
             # Check if path is configured and exists
             path = self.config.get('path', '')
             if not path:
-                logger.error("Equipment extractor: 'path' not configured")
-                return False
+                # Empty path is valid for skipping extraction
+                return True
             
             path_obj = Path(path)
             if not path_obj.exists():

@@ -28,8 +28,7 @@ def test_schema():
     if test_data_path.exists():
         manager.load_existing_data(business_data_path=str(test_data_path))
     else:
-        print("Test data not found - run ETL pipeline first")
-        return
+        pytest.skip("Test data not found - run ETL pipeline first")
     
     # Get internal view (should have all fields)
     internal_data = manager.get_stage_view("internal")

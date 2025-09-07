@@ -8,11 +8,15 @@ import jsonschema
 from pathlib import Path
 import sys
 
-# Add the parent directory to the Python path
+# Add the parent directory and tests directory to the Python path
 sys.path.insert(0, str(Path(__file__).parent.parent))
+sys.path.insert(0, str(Path(__file__).parent))
 
-# Import the schema from the test file
-from test_due_diligence_verification import MASTER_SCHEMA
+# Import the schema from the test file with fallback
+try:
+    from tests.test_due_diligence_verification import MASTER_SCHEMA
+except ImportError:
+    from test_due_diligence_verification import MASTER_SCHEMA
 
 def has_file_paths(cat_data):
     """Check if category data contains any non-None file paths in documents or equipment items."""
@@ -68,16 +72,18 @@ def verify_final_exports():
             if filename == "public.json":
                 # Public should not have file paths
                 has_file_paths = False
-                for category, cat_data in data.items():
+                for _category, cat_data in data.items():
                     if isinstance(cat_data, dict):
                         # Check documents
-                        for doc in cat_data["documents"]:
-                            if doc["file_path"] is not None:
+                        for doc in cat_data.get("documents", []):
+                            if doc.get("file_path") is not None:
                                 has_file_paths = True
                                 break
+                        if has_file_paths:
+                            break
                         # Check equipment items
-                        for item in cat_data["equipment"]["items"]:
-                            if item["file_path"] is not None:
+                        for equip_item in cat_data.get("equipment", {}).get("items", []):
+                            if equip_item.get("file_path") is not None:
                                 has_file_paths = True
                                 break
                         if has_file_paths:
@@ -92,16 +98,18 @@ def verify_final_exports():
             elif filename == "internal.json":
                 # Internal should have file paths
                 has_file_paths = False
-                for category, cat_data in data.items():
+                for _, cat_data in data.items():
                     if isinstance(cat_data, dict):
                         # Check documents
-                        for doc in cat_data["documents"]:
-                            if doc["file_path"] is not None:
+                        for doc in cat_data.get("documents", []):
+                            if doc.get("file_path") is not None:
                                 has_file_paths = True
                                 break
+                        if has_file_paths:
+                            break
                         # Check equipment items
-                        for item in cat_data["equipment"]["items"]:
-                            if item["file_path"] is not None:
+                        for equip_item in cat_data.get("equipment", {}).get("items", []):
+                            if equip_item.get("file_path") is not None:
                                 has_file_paths = True
                                 break
                         if has_file_paths:
@@ -116,10 +124,10 @@ def verify_final_exports():
             # Check document and item counts
             total_docs = 0
             total_items = 0
-            for category, cat_data in data.items():
+            for _category, cat_data in data.items():
                 if isinstance(cat_data, dict):
-                    total_docs += len(cat_data["documents"])
-                    total_items += len(cat_data["equipment"]["items"])
+                    total_docs += len(cat_data.get("documents", []))
+                    total_items += len(cat_data.get("equipment", {}).get("items", []))
             
             print(f"✅ {filename} contains {total_docs} documents and {total_items} equipment items")
             

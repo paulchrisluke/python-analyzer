@@ -81,17 +81,28 @@ class FileUtils:
             file_path: Path to save file
             indent: JSON indentation
         """
+        tmp_path = f"{file_path}.tmp"
         try:
             # Ensure directory exists
             Path(file_path).parent.mkdir(parents=True, exist_ok=True)
             
-            tmp_path = f"{file_path}.tmp"
+            # Write to temporary file
             with open(tmp_path, 'w', encoding='utf-8') as f:
                 json.dump(data, f, indent=indent, ensure_ascii=False)
+                f.flush()  # Ensure data is written to disk
+                os.fsync(f.fileno())  # Force OS to flush buffers to disk
+            
+            # Atomic replace
             os.replace(tmp_path, file_path)
             logger.info("JSON file saved: %s", file_path)
         except Exception:
             logger.exception("Error saving JSON file %s", file_path)
+            # Clean up temporary file on failure
+            try:
+                if os.path.exists(tmp_path):
+                    os.remove(tmp_path)
+            except OSError:
+                pass  # Ignore cleanup errors
             raise
     
     @staticmethod

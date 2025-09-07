@@ -70,8 +70,8 @@ class FinancialExtractor(BaseExtractor):
         pnl_data = {}
         
         # 2023 P&L data
-        pnl_2023_path = Path(self.config.get('financial_pnl_2023', {}).get('path', ''))
-        if pnl_2023_path.exists():
+        pnl_2023_path = FileUtils.safe_path_from_config(self.config, 'financial_pnl_2023.path', required=False)
+        if pnl_2023_path and pnl_2023_path.exists():
             pnl_2023_files = FileUtils.find_files(str(pnl_2023_path), "*.[cC][sS][vV]")
             for file_path in pnl_2023_files:
                 try:
@@ -91,8 +91,8 @@ class FinancialExtractor(BaseExtractor):
                     logger.exception("Error loading P&L 2023 file %s", file_path)
         
         # 2024 P&L data
-        pnl_2024_path = Path(self.config.get('financial_pnl_2024', {}).get('path', ''))
-        if pnl_2024_path.exists():
+        pnl_2024_path = FileUtils.safe_path_from_config(self.config, 'financial_pnl_2024.path', required=False)
+        if pnl_2024_path and pnl_2024_path.exists():
             pnl_2024_files = FileUtils.find_files(str(pnl_2024_path), "*.[cC][sS][vV]")
             for file_path in pnl_2024_files:
                 try:
@@ -112,8 +112,8 @@ class FinancialExtractor(BaseExtractor):
                     logger.exception("Error loading P&L 2024 file %s", file_path)
         
         # 2025 P&L data
-        pnl_2025_path = Path(self.config.get('financial_pnl_2025', {}).get('path', ''))
-        if pnl_2025_path.exists():
+        pnl_2025_path = FileUtils.safe_path_from_config(self.config, 'financial_pnl_2025.path', required=False)
+        if pnl_2025_path and pnl_2025_path.exists():
             pnl_2025_files = FileUtils.find_files(str(pnl_2025_path), "*.[cC][sS][vV]")
             for file_path in pnl_2025_files:
                 try:
@@ -138,8 +138,8 @@ class FinancialExtractor(BaseExtractor):
         """Extract balance sheet data."""
         balance_sheet_data = {}
         
-        balance_sheet_path = Path(self.config.get('financial_balance_sheets', {}).get('path', ''))
-        if balance_sheet_path.exists():
+        balance_sheet_path = FileUtils.safe_path_from_config(self.config, 'financial_balance_sheets.path', required=False)
+        if balance_sheet_path and balance_sheet_path.exists():
             balance_sheet_files = FileUtils.find_files(str(balance_sheet_path), "*.[cC][sS][vV]")
             for file_path in balance_sheet_files:
                 try:
@@ -164,8 +164,8 @@ class FinancialExtractor(BaseExtractor):
         """Extract general ledger data."""
         general_ledger_data = {}
         
-        general_ledger_path = Path(self.config.get('financial_general_ledger', {}).get('path', ''))
-        if general_ledger_path.exists():
+        general_ledger_path = FileUtils.safe_path_from_config(self.config, 'financial_general_ledger.path', required=False)
+        if general_ledger_path and general_ledger_path.exists():
             general_ledger_files = FileUtils.find_files(str(general_ledger_path), "*.[cC][sS][vV]")
             for file_path in general_ledger_files:
                 try:
@@ -190,8 +190,8 @@ class FinancialExtractor(BaseExtractor):
         """Extract Cost of Goods Sold data."""
         cogs_data = {}
         
-        cogs_path = Path(self.config.get('financial_cogs', {}).get('path', ''))
-        if cogs_path.exists():
+        cogs_path = FileUtils.safe_path_from_config(self.config, 'financial_cogs.path', required=False)
+        if cogs_path and cogs_path.exists():
             cogs_files = FileUtils.find_files(str(cogs_path), "*.[cC][sS][vV]")
             for file_path in cogs_files:
                 try:

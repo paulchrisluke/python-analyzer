@@ -38,7 +38,7 @@ class EquipmentCalculator:
             Dictionary containing equipment metrics
         """
         equipment_metrics = {
-            'total_value': 0.0,
+            'total_value': Decimal('0.00'),
             'items': [],
             'categories': {},
             'source_files': [],
@@ -55,12 +55,12 @@ class EquipmentCalculator:
         
         # Use the correct totals from the PDFs (as verified by user's calculator)
         correct_totals = {
-            '2019-11-06_Celloaudiometer_Cosmetichearingsolutions.csv': 18892.50,
-            '2019-11-08_Celloaudiometer_Trumpetrem_Cranberryhearing.csv': 22082.50,
-            '2019-11-11_Trumpetrem_Audiometercombo_Cranberryhearing.csv': 20752.50
+            '2019-11-06_Celloaudiometer_Cosmetichearingsolutions.csv': Decimal('18892.50'),
+            '2019-11-08_Celloaudiometer_Trumpetrem_Cranberryhearing.csv': Decimal('22082.50'),
+            '2019-11-11_Trumpetrem_Audiometercombo_Cranberryhearing.csv': Decimal('20752.50')
         }
         
-        total_value = 0.0
+        total_value = Decimal('0.00')
         all_items = []
         categories = {}
         
@@ -103,7 +103,7 @@ class EquipmentCalculator:
         
         return equipment_metrics
     
-    def _process_csv_file(self, csv_file: Path) -> tuple[List[Dict[str, Any]], float]:
+    def _process_csv_file(self, csv_file: Path) -> tuple[List[Dict[str, Any]], Decimal]:
         """
         Process a single CSV file and extract equipment data.
         
@@ -114,7 +114,7 @@ class EquipmentCalculator:
             Tuple of (items_list, total_value)
         """
         items = []
-        total_value = 0.0
+        total_value = Decimal('0.00')
         
         with open(csv_file, 'r', encoding='utf-8') as f:
             reader = csv.DictReader(f)
@@ -148,7 +148,7 @@ class EquipmentCalculator:
                     'name': row.get('description', '').strip(),
                     'part_number': row.get('part_number', '').strip(),
                     'quantity': quantity,
-                    'unit_price': Decimal(str(row.get('unit_price', '').replace('$', '').replace(',', '') or 0)).quantize(Decimal('0.01')),
+                    'unit_price': self._parse_unit_price(row.get('unit_price')),
                     'total_price': price,
                     'category': self._categorize_equipment(row.get('description', '')),
                     'source_file': csv_file.name
@@ -158,6 +158,36 @@ class EquipmentCalculator:
                 total_value += price
         
         return items, total_value
+    
+    def _parse_unit_price(self, unit_price_raw) -> Decimal:
+        """
+        Parse unit price with None-safe handling.
+        
+        Args:
+            unit_price_raw: Raw unit price value (can be None, string, or number)
+            
+        Returns:
+            Decimal value with 2 decimal places precision
+        """
+        if unit_price_raw is None:
+            return Decimal('0.00')
+        
+        try:
+            # Coerce to string and clean
+            price_str = str(unit_price_raw).strip()
+            if not price_str:
+                return Decimal('0.00')
+            
+            # Remove $ and , symbols
+            cleaned_price = price_str.replace('$', '').replace(',', '').strip()
+            if not cleaned_price:
+                return Decimal('0.00')
+            
+            # Convert to Decimal with 2 decimal places precision
+            return Decimal(cleaned_price).quantize(Decimal('0.01'))
+            
+        except (ValueError, TypeError, InvalidOperation):
+            return Decimal('0.00')
     
     def _categorize_equipment(self, description: str) -> str:
         """

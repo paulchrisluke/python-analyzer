@@ -78,7 +78,7 @@ class TestPathValidation:
         
         # Test with empty path (should raise error for required)
         config = {'path': ''}
-        with pytest.raises(ValueError, match="Required path configuration is empty"):
+        with pytest.raises(ValueError, match="Required path configuration missing or empty"):
             FileUtils.safe_path_from_config(config, 'path', required=True)
         
         # Test with empty path (should return None for optional)
@@ -108,7 +108,7 @@ class TestPathValidation:
         
         # Test with nested empty path
         config = {'financial_pnl_2023': {'path': ''}}
-        with pytest.raises(ValueError, match="Required path configuration is empty"):
+        with pytest.raises(ValueError, match="Required path configuration missing or empty"):
             FileUtils.safe_path_from_config(config, 'financial_pnl_2023.path', required=True)
     
     def test_base_extractor_validation(self):
@@ -156,7 +156,7 @@ class TestPathValidation:
         """Test that paths with only whitespace are treated as empty."""
         config = {'path': '   '}  # Only whitespace
         
-        with pytest.raises(ValueError, match="Required path configuration is empty"):
+        with pytest.raises(ValueError, match="Required path configuration missing or empty"):
             FileUtils.safe_path_from_config(config, 'path', required=True)
         
         # Should return None for optional

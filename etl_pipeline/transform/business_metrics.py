@@ -112,7 +112,7 @@ class BusinessMetricsCalculator:
                     'total_revenue': Decimal(str(location_metrics.loc[location, ('total_price', 'sum')])).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP),
                     'transaction_count': int(location_metrics.loc[location, ('total_price', 'count')]),
                     'average_transaction': Decimal(str(location_metrics.loc[location, ('total_price', 'mean')])).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP),
-                    'unique_patients': int(location_metrics.loc[location, ('patient_id', 'nunique')])
+                    'unique_patients': int(location_metrics.loc[location, ('patient_id_hash', 'nunique')])
                 }
             
             # Staff performance
@@ -127,7 +127,7 @@ class BusinessMetricsCalculator:
                     'total_revenue': Decimal(str(staff_metrics.loc[staff, ('total_price', 'sum')])).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP),
                     'transaction_count': int(staff_metrics.loc[staff, ('total_price', 'count')]),
                     'average_transaction': Decimal(str(staff_metrics.loc[staff, ('total_price', 'mean')])).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP),
-                    'unique_patients': int(staff_metrics.loc[staff, ('patient_id', 'nunique')])
+                    'unique_patients': int(staff_metrics.loc[staff, ('patient_id_hash', 'nunique')])
                 }
             
             # Time-based analysis
@@ -143,7 +143,7 @@ class BusinessMetricsCalculator:
                         'total_revenue': Decimal(str(yearly_metrics.loc[year, ('total_price', 'sum')])).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP),
                         'transaction_count': int(yearly_metrics.loc[year, ('total_price', 'count')]),
                         'average_transaction': Decimal(str(yearly_metrics.loc[year, ('total_price', 'mean')])).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP),
-                        'unique_patients': int(yearly_metrics.loc[year, ('patient_id', 'nunique')])
+                        'unique_patients': int(yearly_metrics.loc[year, ('patient_id_hash', 'nunique')])
                     }
                 
                 # Calculate growth rates

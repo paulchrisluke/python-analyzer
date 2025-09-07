@@ -122,7 +122,10 @@ class TestDueDiligenceRegression:
         expected_ebitda = KNOWN_GOOD_VALUES["financials"]["estimated_annual_ebitda"]
         
         # Calculate difference
-        ebitda_diff = abs(calculated_ebitda - expected_ebitda) / expected_ebitda
+        if expected_ebitda == 0:
+            ebitda_diff = 0.0 if calculated_ebitda == 0 else float('inf')
+        else:
+            ebitda_diff = abs(calculated_ebitda - expected_ebitda) / expected_ebitda
         
         # Print comparison for reporting
         print(f"\n=== EBITDA COMPARISON ===")
@@ -146,7 +149,10 @@ class TestDueDiligenceRegression:
         expected_roi = KNOWN_GOOD_VALUES["financials"]["roi_percentage"]
         
         # Calculate difference
-        roi_diff = abs(calculated_roi - expected_roi) / expected_roi
+        if expected_roi == 0:
+            roi_diff = 0.0 if calculated_roi == 0 else float('inf')
+        else:
+            roi_diff = abs(calculated_roi - expected_roi) / expected_roi
         
         # Print comparison for reporting
         print(f"\n=== ROI COMPARISON ===")
@@ -178,13 +184,19 @@ class TestDueDiligenceRegression:
             source = "Known-good fallback"
         
         # Calculate difference
-        equipment_diff = abs(calculated_equipment_value - expected_equipment_value) / expected_equipment_value
+        if expected_equipment_value == 0:
+            equipment_diff = 0.0 if calculated_equipment_value == 0 else float('inf')
+        else:
+            # Convert both to float for consistent arithmetic
+            calculated_float = float(calculated_equipment_value)
+            expected_float = float(expected_equipment_value)
+            equipment_diff = abs(calculated_float - expected_float) / expected_float
         
         # Print comparison for reporting
         print(f"\n=== EQUIPMENT VALUE COMPARISON ===")
         print(f"Expected Equipment Value ({source}): ${expected_equipment_value:,.2f}")
         print(f"Calculated Equipment Value: ${calculated_equipment_value:,.2f}")
-        print(f"Difference: ${abs(calculated_equipment_value - expected_equipment_value):,.2f}")
+        print(f"Difference: ${abs(calculated_float - expected_float):,.2f}")
         print(f"Percentage Difference: {equipment_diff:.4%}")
         print(f"Tolerance: {TOLERANCE:.4%}")
         print(f"Within Tolerance: {equipment_diff <= TOLERANCE}")
