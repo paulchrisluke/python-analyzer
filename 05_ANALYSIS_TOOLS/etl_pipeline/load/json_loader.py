@@ -626,15 +626,13 @@ class JsonLoader(BaseLoader):
         """Normalize scalar values to be JSON-safe."""
         import math
         
-        # Handle numpy scalars
+        # First convert NumPy types to Python equivalents
         if isinstance(value, (np.integer, np.floating)):
-            return value.item()
-        
-        # Handle numpy arrays
-        if isinstance(value, np.ndarray):
+            value = value.item()
+        elif isinstance(value, np.ndarray):
             return value.tolist()
         
-        # Handle NaN/Inf values
+        # Now apply NaN/Inf guard on the converted value
         if pd.isna(value) or (isinstance(value, float) and not math.isfinite(value)):
             return None
         
