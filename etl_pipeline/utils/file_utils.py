@@ -30,16 +30,22 @@ class FileUtils:
         if not raw or not isinstance(raw, str):
             return False
         
-        # Check for common URL patterns
-        if '://' in raw:
+        try:
             parsed = urlparse(raw)
             # Support common web protocols
             web_schemes = ('http', 'https', 'ftp', 'ftps')
-            # Support cloud storage schemes
-            cloud_schemes = ('s3', 'gs', 'gcs', 'azure', 'wasb', 'abfs', 'file')
-            return parsed.scheme in web_schemes + cloud_schemes
-        
-        return False
+            # Support cloud storage schemes (including variants)
+            cloud_schemes = ('s3', 's3a', 's3n', 'gs', 'gcs', 'azure', 'wasb', 'abfs', 'file')
+            # Combine all supported schemes
+            all_schemes = web_schemes + cloud_schemes
+            
+            # Return True only if scheme is in allowed set and has length > 1
+            # (to avoid single-letter Windows drive-letter false positives like 'c:')
+            return parsed.scheme in all_schemes and len(parsed.scheme) > 1
+            
+        except Exception:
+            # If urlparse fails, it's not a valid URL
+            return False
     
     @staticmethod
     def load_yaml(file_path: str) -> Dict[str, Any]:

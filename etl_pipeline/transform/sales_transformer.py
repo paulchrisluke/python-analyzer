@@ -39,6 +39,10 @@ class SalesTransformer(BaseTransformer):
         """
         logger.info("Starting sales data transformation...")
         
+        # Reset instance attributes to prevent stale data from previous runs
+        self.normalized_sales = {}
+        self.patient_dimension_data = {}
+        
         if not self.validate_business_rules():
             raise ValueError("Invalid business rules for sales transformer")
         
@@ -77,32 +81,39 @@ class SalesTransformer(BaseTransformer):
             if df is None or df.empty:
                 logger.warning("No main sales data to transform")
                 return None, {}
-            
-            # Create a copy to avoid modifying original
-            df_transformed = df.copy()
-            
-            # Standardize column names
-            df_transformed = self._standardize_column_names(df_transformed)
-            
-            # Extract and hash PII data before cleaning
-            patient_data = self._extract_and_hash_pii(df_transformed)
-            
-            # Clean and normalize data (PII fields will be removed/hashed)
-            df_transformed = self._clean_sales_data(df_transformed)
-            
-            # Add derived fields
-            df_transformed = self._add_derived_fields(df_transformed)
-            
-            # Apply business rules
-            df_transformed = self._apply_business_rules(df_transformed)
-            
-            logger.info(f"Transformed main sales data: {len(df_transformed)} records")
-            logger.info(f"Extracted patient dimension data: {len(patient_data)} unique patients")
-            return df_transformed, patient_data
-            
-        except Exception as e:
-            logger.error(f"Error transforming main sales data: {str(e)}")
+        except (AttributeError, TypeError) as e:
+            logger.exception("Invalid input data type for main sales transformation: %s", type(df).__name__)
             return None, {}
+        else:
+            try:
+                # Create a copy to avoid modifying original
+                df_transformed = df.copy()
+                
+                # Standardize column names
+                df_transformed = self._standardize_column_names(df_transformed)
+                
+                # Extract and hash PII data before cleaning
+                patient_data = self._extract_and_hash_pii(df_transformed)
+                
+                # Clean and normalize data (PII fields will be removed/hashed)
+                df_transformed = self._clean_sales_data(df_transformed)
+                
+                # Add derived fields
+                df_transformed = self._add_derived_fields(df_transformed)
+                
+                # Apply business rules
+                df_transformed = self._apply_business_rules(df_transformed)
+                
+                logger.info("Transformed main sales data: %d records", len(df_transformed))
+                logger.info("Extracted patient dimension data: %d unique patients", len(patient_data))
+                return df_transformed, patient_data
+                
+            except (KeyError, ValueError, pd.errors.DataError) as e:
+                logger.exception("Data processing error in main sales transformation: %s", str(e))
+                return None, {}
+            except Exception as e:
+                logger.exception("Unexpected error in main sales transformation: %s", str(e))
+                return None, {}
     
     def _standardize_column_names(self, df: pd.DataFrame) -> pd.DataFrame:
         """Standardize column names."""
@@ -159,15 +170,26 @@ class SalesTransformer(BaseTransformer):
                 lambda x: self._hash_patient_id(str(x)) if pd.notna(x) else None
             )
             
-            # Extract unique patient data for dimension table
-            # Check which PII columns are available to avoid KeyError
-            available_pii_columns = []
-            for col in ['patient_id', 'patient_name', 'patient_zip']:
-                if col in df.columns:
-                    available_pii_columns.append(col)
+            # Get privacy allowlist from business rules
+            allowed_fields = self.business_rules.get('privacy', {}).get('patient_dimension_fields', [])
             
-            if available_pii_columns:
-                unique_patients = df[available_pii_columns].drop_duplicates()
+            # Extract unique patient data for dimension table
+            # Always include patient_id for hashing, but only include other PII if explicitly allowed
+            required_columns = ['patient_id']
+            optional_pii_columns = ['patient_name', 'patient_zip']
+            
+            # Build list of columns to extract based on availability and privacy rules
+            columns_to_extract = []
+            for col in required_columns:
+                if col in df.columns:
+                    columns_to_extract.append(col)
+            
+            for col in optional_pii_columns:
+                if col in df.columns and col in allowed_fields:
+                    columns_to_extract.append(col)
+            
+            if columns_to_extract:
+                unique_patients = df[columns_to_extract].drop_duplicates()
             else:
                 logger.warning("No PII columns found in dataframe, skipping patient dimension data extraction")
                 return patient_data
@@ -175,13 +197,22 @@ class SalesTransformer(BaseTransformer):
             for _, row in unique_patients.iterrows():
                 if pd.notna(row.get('patient_id')):
                     patient_id_hash = self._hash_patient_id(str(row['patient_id']))
-                    patient_data[patient_id_hash] = {
+                    
+                    # Start with required fields
+                    patient_record = {
                         'patient_id_hash': patient_id_hash,
-                        'patient_name': row.get('patient_name') if pd.notna(row.get('patient_name')) else None,
-                        'patient_zip': row.get('patient_zip') if pd.notna(row.get('patient_zip')) else None,
                         'created_date': datetime.now(timezone.utc).isoformat(),
                         'last_updated': datetime.now(timezone.utc).isoformat()
                     }
+                    
+                    # Add allowed PII fields only if explicitly permitted
+                    if 'patient_name' in allowed_fields and 'patient_name' in row:
+                        patient_record['patient_name'] = row.get('patient_name') if pd.notna(row.get('patient_name')) else None
+                    
+                    if 'patient_zip' in allowed_fields and 'patient_zip' in row:
+                        patient_record['patient_zip'] = row.get('patient_zip') if pd.notna(row.get('patient_zip')) else None
+                    
+                    patient_data[patient_id_hash] = patient_record
         
         return patient_data
     
@@ -250,8 +281,12 @@ class SalesTransformer(BaseTransformer):
             
             return converted_dates
             
+        except (KeyError, AttributeError) as e:
+            logger.exception("Column access error converting date column '%s': %s", column_name, str(e))
+            # Fallback to basic conversion
+            return pd.to_datetime(df[column_name], errors='coerce')
         except Exception as e:
-            logger.error(f"Unexpected error converting date column '{column_name}': {str(e)}")
+            logger.exception("Unexpected error converting date column '%s': %s", column_name, str(e))
             # Fallback to basic conversion
             return pd.to_datetime(df[column_name], errors='coerce')
     
@@ -468,8 +503,10 @@ class SalesTransformer(BaseTransformer):
                         
                         related_data[data_type] = df_transformed
                         logger.info(f"Transformed {data_type} data: {len(df_transformed)} records")
+                except (KeyError, ValueError, pd.errors.DataError) as e:
+                    logger.exception("Data processing error transforming %s data: %s", data_type, str(e))
                 except Exception as e:
-                    logger.error(f"Error transforming {data_type} data: {str(e)}")
+                    logger.exception("Unexpected error transforming %s data: %s", data_type, str(e))
         
         return related_data
     
