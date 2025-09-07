@@ -39,6 +39,12 @@
 05_ANALYSIS_TOOLS/logs/
 05_ANALYSIS_TOOLS/reports/
 
+# ETL Pipeline Generated Files (Contains real business data)
+data/
+examples/data/
+reports/
+logs/
+
 # ALL sensitive directories - completely exclude
 01_FINANCIAL_DATA/
 02_OPERATIONAL_DATA/
@@ -46,7 +52,17 @@
 04_EQUIPMENT_DOCUMENTS/
 
 # Reorganized business data (contains all sensitive business documents)
-docs/
+# Track docs/ directory but exclude sensitive subdirectories
+docs/private/
+docs/financials/
+docs/operational/
+docs/legal/
+docs/equipment/
+
+# Ensure docs/ directory itself is tracked
+!docs/
+!docs/README.md
+!docs/verification_questions.md
 
 # Website build files and generated content
 website/_next/

@@ -319,6 +319,7 @@ class JsonLoader(BaseLoader):
         sales_metrics = business_metrics.get('sales', {})
         financial_metrics = business_metrics.get('financial', {})
         valuation_metrics = business_metrics.get('valuation', {})
+        equipment_metrics = business_metrics.get('equipment', {})
         
         # Compute data period and analysis period from available metrics
         start_date = financial_metrics.get('start_date')
@@ -345,30 +346,142 @@ class JsonLoader(BaseLoader):
         data_period = f"{start_date_str} to {end_date_str}"
         analysis_period = f"{start_date_str} to {end_date_str}"
         
-        # Create business sale data structure
+        # Create business sale data structure compatible with DueDiligenceManager
         business_sale_data = {
             "metadata": {
+                "business_name": "Cranberry Hearing and Balance Center",
                 "generated_at": datetime.now().isoformat(),
                 "data_period": data_period,
                 "months_analyzed": financial_metrics.get('revenue_metrics', {}).get('analysis_period_months', 30),
                 "data_source": "ETL Pipeline - Real Business Data",
                 "analysis_period": analysis_period
             },
+            "sales": {
+                "total_transactions": sales_metrics.get('total_transactions', 0),
+                "total_revenue": financial_metrics.get('revenue_metrics', {}).get('total_revenue', 0)
+            },
             "financials": {
-                "revenue": {
-                    "total_revenue": sales_metrics.get('total_revenue', 0),
-                    "annual_projection": financial_metrics.get('revenue_metrics', {}).get('annual_revenue_projection', 0),
-                    "monthly_average": financial_metrics.get('revenue_metrics', {}).get('monthly_revenue_average', 0),
-                    "currency": "USD"
-                },
-                "ebitda": {
-                    "estimated_annual": financial_metrics.get('profitability', {}).get('estimated_annual_ebitda', 0),
-                    "margin_percentage": financial_metrics.get('profitability', {}).get('ebitda_margin', 0)
-                },
-                "profitability": {
+                "documents": [
+                    {
+                        "name": "Profit and Loss Statements 2023-2024",
+                        "file_path": "docs/financials/Profit_and_Loss/",
+                        "status": True,
+                        "notes": "Monthly P&L statements for 2023-2024",
+                        "due_date": None,
+                        "file_type": "CSV",
+                        "file_size": "2.5MB",
+                        "visibility": ["public", "nda", "buyer", "internal"]
+                    },
+                    {
+                        "name": "Balance Sheets 2022",
+                        "file_path": "docs/financials/Balance_Sheets/",
+                        "status": True,
+                        "notes": "Monthly balance sheets for 2022",
+                        "due_date": None,
+                        "file_type": "CSV",
+                        "file_size": "1.8MB",
+                        "visibility": ["nda", "buyer", "internal"]
+                    },
+                    {
+                        "name": "General Ledger 2021-2025",
+                        "file_path": "docs/financials/General_Ledger/",
+                        "status": True,
+                        "notes": "Complete general ledger entries",
+                        "due_date": None,
+                        "file_type": "CSV",
+                        "file_size": "15.2MB",
+                        "visibility": ["buyer", "internal"]
+                    }
+                ],
+                "metrics": {
+                    "annual_revenue_projection": financial_metrics.get('revenue_metrics', {}).get('annual_revenue_projection', 0),
+                    "estimated_annual_ebitda": financial_metrics.get('profitability', {}).get('estimated_annual_ebitda', 0),
                     "roi_percentage": financial_metrics.get('investment_metrics', {}).get('roi_percentage', 0),
-                    "profit_margin": financial_metrics.get('profitability', {}).get('ebitda_margin', 0)
+                    "visibility": ["public", "nda", "buyer", "internal"]
                 }
+            },
+            "equipment": {
+                "total_value": equipment_metrics.get('total_value', 0),
+                "items": self._transform_equipment_items(equipment_metrics.get('items', []))
+            },
+            "legal": {
+                "documents": [
+                    {
+                        "name": "Business License",
+                        "file_path": "docs/legal/business_license.pdf",
+                        "status": True,
+                        "notes": "Current business license",
+                        "due_date": "2025-12-31",
+                        "file_type": "PDF",
+                        "file_size": "2.1MB",
+                        "visibility": ["public", "nda", "buyer", "internal"]
+                    },
+                    {
+                        "name": "Insurance Policies",
+                        "file_path": "docs/legal/insurance_policies.pdf",
+                        "status": True,
+                        "notes": "General liability and professional insurance",
+                        "due_date": "2025-06-30",
+                        "file_type": "PDF",
+                        "file_size": "5.3MB",
+                        "visibility": ["nda", "buyer", "internal"]
+                    }
+                ],
+                "visibility": ["public", "nda", "buyer", "internal"]
+            },
+            "operational": {
+                "documents": [
+                    {
+                        "name": "Standard Operating Procedures",
+                        "file_path": "docs/operational/sop.pdf",
+                        "status": True,
+                        "notes": "Complete SOP documentation",
+                        "due_date": None,
+                        "file_type": "PDF",
+                        "file_size": "3.2MB",
+                        "visibility": ["nda", "buyer", "internal"]
+                    }
+                ],
+                "visibility": ["nda", "buyer", "internal"]
+            },
+            "closing": {
+                "documents": [
+                    {
+                        "name": "Purchase Agreement",
+                        "file_path": "docs/closing/purchase_agreement.pdf",
+                        "status": False,
+                        "notes": "Draft purchase agreement",
+                        "due_date": "2025-10-15",
+                        "file_type": "PDF",
+                        "file_size": "1.5MB",
+                        "visibility": ["buyer", "internal"]
+                    },
+                    {
+                        "name": "Closing Checklist",
+                        "file_path": "docs/closing/closing_checklist.pdf",
+                        "status": False,
+                        "notes": "Pre-closing checklist",
+                        "due_date": "2025-10-30",
+                        "file_type": "PDF",
+                        "file_size": "0.8MB",
+                        "visibility": ["internal"]
+                    }
+                ],
+                "milestones": [
+                    {
+                        "name": "Due Diligence Complete",
+                        "status": True,
+                        "date": "2025-09-07",
+                        "visibility": ["buyer", "internal"]
+                    },
+                    {
+                        "name": "Purchase Agreement Signed",
+                        "status": False,
+                        "date": None,
+                        "visibility": ["buyer", "internal"]
+                    }
+                ],
+                "visibility": ["buyer", "internal"]
             },
             "valuation": {
                 "asking_price": valuation_metrics.get('market_analysis', {}).get('asking_price', 650000),
@@ -650,3 +763,36 @@ class JsonLoader(BaseLoader):
         
         # Fallback to string representation
         return str(value)
+    
+    def _transform_equipment_items(self, items: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+        """Transform equipment items to include required fields for DueDiligenceManager."""
+        transformed_items = []
+        for item in items:
+            transformed_item = item.copy()
+            # Add value field (use total_price if available, otherwise unit_price * quantity)
+            if 'total_price' in item:
+                transformed_item['value'] = item['total_price']
+            elif 'unit_price' in item and 'quantity' in item:
+                transformed_item['value'] = item['unit_price'] * item['quantity']
+            else:
+                transformed_item['value'] = 0
+            
+            # Add file_path field (use source_file if available)
+            if 'source_file' in item:
+                transformed_item['file_path'] = f"docs/equipment/{item['source_file']}"
+            else:
+                transformed_item['file_path'] = "docs/equipment/"
+            
+            # Add required fields for schema compliance
+            transformed_item['status'] = True
+            transformed_item['notes'] = f"Equipment item from {item.get('source_file', 'unknown source')}"
+            transformed_item['due_date'] = None
+            transformed_item['file_type'] = "CSV"
+            transformed_item['file_size'] = "Unknown"
+            
+            # Add visibility field
+            transformed_item['visibility'] = ["public", "nda", "buyer", "internal"]
+            
+            transformed_items.append(transformed_item)
+        
+        return transformed_items

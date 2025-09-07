@@ -35,11 +35,11 @@ financial_metrics:
   revenue_growth_target: 0.10  # 10% target annual growth
   transaction_volume_target: 1000  # Monthly transaction target
   
-# Configurable equipment value (based on PDF documentation)
+# Equipment configuration (fallback values - actual values calculated dynamically from CSV files)
 equipment:
-  total_value: 61728  # Total equipment value from PDF documentation
-  description: "Professional audiology equipment including Cello Audiometer, Trumpet REM System, CL12BLP Equipment, AUD System"
-  source: "PDF documentation - manually verified"
+  total_value: 61727  # Fallback value if CSV calculation fails
+  description: "Professional audiology equipment including Cello Audiometer, Trumpet REM System, CL12BLP Equipment, Test Booths"
+  source: "Fallback from business rules - actual values calculated dynamically from CSV files"
   
 valuation_multipliers:
   revenue_multiple_min: 0.8

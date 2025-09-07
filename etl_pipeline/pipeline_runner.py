@@ -56,8 +56,7 @@ class ETLPipeline:
             'start_time': None,
             'end_time': None,
             'status': 'initialized',
-            'errors': [],
-            'warnings': []
+            'errors': []
         }
     
     def initialize(self) -> bool:
@@ -383,7 +382,6 @@ class ETLPipeline:
             'end_time': self.pipeline_metadata['end_time'].isoformat() if self.pipeline_metadata['end_time'] else None,
             'duration': str(self.pipeline_metadata['end_time'] - self.pipeline_metadata['start_time']) if self.pipeline_metadata['start_time'] and self.pipeline_metadata['end_time'] else None,
             'errors': self.pipeline_metadata['errors'],
-            'warnings': self.pipeline_metadata['warnings'],
             'data_summary': {
                 'raw_data_sources': list(self.raw_data.keys()),
                 'normalized_data_types': list(self.normalized_data.keys()),
@@ -398,11 +396,12 @@ class ETLPipeline:
             
             # Set up data and docs directories
             data_dir = Path(__file__).parent.parent / "data"
-            docs_dir = Path(__file__).parent.parent.parent / "docs"
+            docs_dir = Path(__file__).parent.parent / "docs"
             
             self.due_diligence_manager = DueDiligenceManager(
                 data_dir=str(data_dir),
-                docs_dir=str(docs_dir)
+                docs_dir=str(docs_dir),
+                config_dir=str(self.config_dir)
             )
             
             # Load existing data
@@ -412,7 +411,7 @@ class ETLPipeline:
             
         except Exception as e:
             logger.error(f"Failed to initialize due diligence manager: {str(e)}")
-            self.pipeline_metadata['warnings'].append(f"Due diligence manager initialization failed: {str(e)}")
+            logger.warning(f"Due diligence manager initialization failed: {str(e)}")
     
     def _process_due_diligence(self) -> None:
         """Process due diligence data and generate stage exports."""
@@ -440,22 +439,50 @@ class ETLPipeline:
         Returns:
             bool: True if due diligence processing successful
         """
+        # Set pipeline metadata for due diligence run
+        self.pipeline_metadata['status'] = 'running'
+        self.pipeline_metadata['start_time'] = datetime.now()
+        
         try:
-            logger.info("Running due diligence processing in standalone mode...")
+            logger.info(f"Running due diligence processing in standalone mode...")
             
             # Initialize due diligence manager
             self._initialize_due_diligence_manager()
             
             if not self.due_diligence_manager:
                 logger.error("Due diligence manager not initialized")
+                self.pipeline_metadata['status'] = 'failed'
+                self.pipeline_metadata['end_time'] = datetime.now()
                 return False
             
             # Process due diligence
             self._process_due_diligence()
             
-            logger.info("Due diligence processing completed successfully")
+            # Set success metadata
+            self.pipeline_metadata['status'] = 'success'
+            self.pipeline_metadata['end_time'] = datetime.now()
+            
+            # Create concise summary
+            duration = self.pipeline_metadata['end_time'] - self.pipeline_metadata['start_time']
+            summary = {
+                'status': self.pipeline_metadata['status'],
+                'start_time': self.pipeline_metadata['start_time'].isoformat(),
+                'end_time': self.pipeline_metadata['end_time'].isoformat(),
+                'duration_seconds': duration.total_seconds(),
+                'result_counts': {
+                    'errors': len(self.pipeline_metadata['errors'])
+                }
+            }
+            self.pipeline_metadata['summary'] = summary
+            
+            logger.info(f"Due diligence processing completed successfully (duration: {duration})")
             return True
             
         except Exception as e:
-            logger.error(f"Standalone due diligence processing failed: {str(e)}")
+            # Set failure metadata
+            self.pipeline_metadata['status'] = 'failed'
+            self.pipeline_metadata['end_time'] = datetime.now()
+            
+            # Log full exception info for diagnostics
+            logger.exception(f"Standalone due diligence processing failed: {str(e)}")
             return False

@@ -93,7 +93,12 @@ class TestEdgeCases:
         """Test export to a directory that doesn't exist."""
         data_dir, docs_dir = temp_dirs
         manager = DueDiligenceManager(data_dir=str(data_dir), docs_dir=str(docs_dir))
-        manager.generate_sample_data()
+        # Load test data from examples directory
+        test_data_path = Path(__file__).parent.parent / "data" / "final" / "business_sale_data.json"
+        if test_data_path.exists():
+            manager.load_existing_data(business_data_path=str(test_data_path))
+        else:
+            pytest.skip("Test data not found - run ETL pipeline first")
         
         # Should create directory if it doesn't exist
         nonexistent_dir = data_dir / "nonexistent" / "subdir"
@@ -107,7 +112,12 @@ class TestEdgeCases:
         """Test exporting individual stages."""
         data_dir, docs_dir = temp_dirs
         manager = DueDiligenceManager(data_dir=str(data_dir), docs_dir=str(docs_dir))
-        manager.generate_sample_data()
+        # Load test data from examples directory
+        test_data_path = Path(__file__).parent.parent / "data" / "final" / "business_sale_data.json"
+        if test_data_path.exists():
+            manager.load_existing_data(business_data_path=str(test_data_path))
+        else:
+            pytest.skip("Test data not found - run ETL pipeline first")
         
         # Export individual stage
         test_file = data_dir / "test_public.json"
@@ -125,7 +135,12 @@ class TestEdgeCases:
         """Test handling of very large files."""
         data_dir, docs_dir = temp_dirs
         manager = DueDiligenceManager(data_dir=str(data_dir), docs_dir=str(docs_dir))
-        manager.generate_sample_data()
+        # Load test data from examples directory
+        test_data_path = Path(__file__).parent.parent / "data" / "final" / "business_sale_data.json"
+        if test_data_path.exists():
+            manager.load_existing_data(business_data_path=str(test_data_path))
+        else:
+            pytest.skip("Test data not found - run ETL pipeline first")
         
         # Create a large file (1MB)
         large_file = docs_dir / "financials" / "large_file.pdf"
@@ -147,7 +162,12 @@ class TestEdgeCases:
         """Test handling of unicode file names."""
         data_dir, docs_dir = temp_dirs
         manager = DueDiligenceManager(data_dir=str(data_dir), docs_dir=str(docs_dir))
-        manager.generate_sample_data()
+        # Load test data from examples directory
+        test_data_path = Path(__file__).parent.parent / "data" / "final" / "business_sale_data.json"
+        if test_data_path.exists():
+            manager.load_existing_data(business_data_path=str(test_data_path))
+        else:
+            pytest.skip("Test data not found - run ETL pipeline first")
         
         # Create file with unicode name
         unicode_file = docs_dir / "financials" / "résumé_2024.pdf"
@@ -164,7 +184,12 @@ class TestEdgeCases:
         """Test visibility filtering edge cases."""
         data_dir, docs_dir = temp_dirs
         manager = DueDiligenceManager(data_dir=str(data_dir), docs_dir=str(docs_dir))
-        manager.generate_sample_data()
+        # Load test data from examples directory
+        test_data_path = Path(__file__).parent.parent / "data" / "final" / "business_sale_data.json"
+        if test_data_path.exists():
+            manager.load_existing_data(business_data_path=str(test_data_path))
+        else:
+            pytest.skip("Test data not found - run ETL pipeline first")
         
         # Add document with empty visibility
         manager.data.financials["documents"].append({
@@ -189,7 +214,12 @@ class TestEdgeCases:
         """Test handling of malformed file paths."""
         data_dir, docs_dir = temp_dirs
         manager = DueDiligenceManager(data_dir=str(data_dir), docs_dir=str(docs_dir))
-        manager.generate_sample_data()
+        # Load test data from examples directory
+        test_data_path = Path(__file__).parent.parent / "data" / "final" / "business_sale_data.json"
+        if test_data_path.exists():
+            manager.load_existing_data(business_data_path=str(test_data_path))
+        else:
+            pytest.skip("Test data not found - run ETL pipeline first")
         
         # Add document with malformed path
         manager.data.financials["documents"].append({

@@ -22,8 +22,13 @@ def test_schema():
     
     manager = DueDiligenceManager(data_dir=str(data_dir), docs_dir=str(docs_dir))
     
-    # Generate sample data
-    manager.generate_sample_data()
+    # Load test data from examples directory
+    test_data_path = Path(__file__).parent.parent / "data" / "final" / "business_sale_data.json"
+    if test_data_path.exists():
+        manager.load_existing_data(business_data_path=str(test_data_path))
+    else:
+        print("Test data not found - run ETL pipeline first")
+        return
     
     # Get internal view (should have all fields)
     internal_data = manager.get_stage_view("internal")

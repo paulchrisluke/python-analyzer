@@ -184,18 +184,18 @@ class BusinessMetricsCalculator:
         # Try to calculate real EBITDA from financial data if available
         real_ebitda = self._calculate_real_ebitda_from_financial_data(normalized_data)
         
+        # Calculate months in analysis period
+        analysis_period = self.business_rules.get('analysis_period', {})
+        if analysis_period:
+            start_date = pd.to_datetime(analysis_period.get('start_date', '2021-01-01'))
+            end_date = pd.to_datetime(analysis_period.get('end_date', '2025-12-31'))
+            months_in_period = ((end_date.year - start_date.year) * 12 + 
+                              (end_date.month - start_date.month) + 1)
+        else:
+            months_in_period = 24  # Default fallback for P&L data (2023-2024)
+        
         if sales_metrics:
             total_revenue = sales_metrics.get('total_revenue', 0)
-            
-            # Calculate months in analysis period
-            analysis_period = self.business_rules.get('analysis_period', {})
-            if analysis_period:
-                start_date = pd.to_datetime(analysis_period.get('start_date', '2021-01-01'))
-                end_date = pd.to_datetime(analysis_period.get('end_date', '2025-12-31'))
-                months_in_period = ((end_date.year - start_date.year) * 12 + 
-                                  (end_date.month - start_date.month) + 1)
-            else:
-                months_in_period = 12  # Default fallback changed from 30 to 12
             
             # Basic financial ratios
             financial_metrics['revenue_metrics'] = {
@@ -221,6 +221,52 @@ class BusinessMetricsCalculator:
             
             # Calculate annual EBITDA projection
             annual_ebitda = estimated_ebitda * 12
+            
+            financial_metrics['profitability'] = {
+                'estimated_ebitda': estimated_ebitda,
+                'ebitda_margin': ebitda_margin * 100,
+                'estimated_annual_ebitda': annual_ebitda
+            }
+            
+            # ROI calculation
+            asking_price = 650000  # From business sale data
+            roi = (annual_ebitda / asking_price) * 100 if asking_price > 0 else 0
+            
+            financial_metrics['investment_metrics'] = {
+                'asking_price': asking_price,
+                'estimated_annual_ebitda': annual_ebitda,
+                'roi_percentage': roi,
+                'payback_period_years': asking_price / annual_ebitda if annual_ebitda > 0 else 0
+            }
+        else:
+            # No sales data available, use P&L data for financial metrics
+            logger.info("No sales data available, calculating financial metrics from P&L data only")
+            
+            # Use real EBITDA if calculated from P&L data
+            if real_ebitda is not None:
+                estimated_ebitda = real_ebitda
+                ebitda_margin = 0.45  # Use the calculated margin from P&L data
+                logger.info(f"Using real EBITDA from P&L data: ${estimated_ebitda:,.2f} monthly")
+            else:
+                # Fallback to business rules
+                ebitda_margin = self.business_rules.get('financial_metrics', {}).get('ebitda_margin_target', 0.25)
+                # Estimate revenue from P&L data if available
+                total_revenue = self._estimate_revenue_from_pnl(normalized_data)
+                monthly_revenue_avg = total_revenue / months_in_period if months_in_period > 0 else 0
+                estimated_ebitda = monthly_revenue_avg * ebitda_margin
+                logger.info(f"Using estimated EBITDA with {ebitda_margin:.1%} margin: ${estimated_ebitda:,.2f} monthly")
+            
+            # Calculate annual projections
+            annual_ebitda = estimated_ebitda * 12
+            annual_revenue = (estimated_ebitda / ebitda_margin) * 12 if ebitda_margin > 0 else 0
+            
+            # Basic financial ratios
+            financial_metrics['revenue_metrics'] = {
+                'total_revenue': annual_revenue / 12,  # Monthly average
+                'annual_revenue_projection': annual_revenue,
+                'monthly_revenue_average': annual_revenue / 12,
+                'analysis_period_months': months_in_period
+            }
             
             financial_metrics['profitability'] = {
                 'estimated_ebitda': estimated_ebitda,
@@ -404,6 +450,15 @@ class BusinessMetricsCalculator:
             monthly_ebitdas = []
             all_expense_categories = defaultdict(float)
             
+            # Get analysis period for filtering P&L data
+            analysis_period = self.business_rules.get('analysis_period', {})
+            start_date = None
+            end_date = None
+            if analysis_period:
+                start_date = pd.to_datetime(analysis_period.get('start_date', '2021-01-01'))
+                end_date = pd.to_datetime(analysis_period.get('end_date', '2025-12-31'))
+                logger.info(f"Filtering P&L data to analysis period: {start_date.date()} to {end_date.date()}")
+            
             # Process each P&L statement
             for pnl_key, pnl_df in pnl_data.items():
                 logger.info(f"Processing P&L: {pnl_key}")
@@ -416,6 +471,25 @@ class BusinessMetricsCalculator:
                 else:
                     logger.warning(f"Unexpected P&L data format: {type(pnl_df)}")
                     continue
+                
+                # Filter P&L data by analysis period if specified
+                if start_date and end_date:
+                    # Extract date from P&L key (format: pnl_2023_2023-07-01_to_2023-07-31_ProfitAndLoss_CranberryHearing)
+                    try:
+                        # Extract the date from the key (index 2 is the start date)
+                        date_part = pnl_key.split('_')[2]  # e.g., "2023-07-01"
+                        pnl_start_date = pd.to_datetime(date_part)
+                        
+                        # Check if this P&L statement falls within our analysis period
+                        if pnl_start_date < start_date or pnl_start_date > end_date:
+                            logger.info(f"  Skipping P&L {pnl_key} - outside analysis period")
+                            continue
+                        else:
+                            logger.info(f"  Including P&L {pnl_key} - within analysis period")
+                    except (IndexError, ValueError) as e:
+                        logger.warning(f"  Could not parse date from P&L key {pnl_key}: {e}")
+                        # Include it if we can't parse the date
+                        pass
                 
                 # Calculate monthly revenue and expenses
                 monthly_revenue = 0
@@ -476,6 +550,72 @@ class BusinessMetricsCalculator:
         except Exception as e:
             logger.exception("Error calculating real EBITDA from financial data")
             return None
+    
+    def _estimate_revenue_from_pnl(self, normalized_data: Dict[str, Any]) -> float:
+        """Estimate total revenue from P&L data."""
+        try:
+            financial_data = normalized_data.get('financial', {})
+            pnl_data = financial_data.get('profit_loss', {})
+            
+            if not pnl_data:
+                return 0.0
+            
+            # Get analysis period for filtering P&L data
+            analysis_period = self.business_rules.get('analysis_period', {})
+            start_date = None
+            end_date = None
+            if analysis_period:
+                start_date = pd.to_datetime(analysis_period.get('start_date', '2021-01-01'))
+                end_date = pd.to_datetime(analysis_period.get('end_date', '2025-12-31'))
+            
+            total_revenue = 0.0
+            month_count = 0
+            
+            # Process each P&L statement
+            for pnl_key, pnl_df in pnl_data.items():
+                # Filter P&L data by analysis period if specified
+                if start_date and end_date:
+                    try:
+                        # Extract the date from the key (index 2 is the start date)
+                        date_part = pnl_key.split('_')[2]  # e.g., "2023-07-01"
+                        pnl_start_date = pd.to_datetime(date_part)
+                        
+                        # Check if this P&L statement falls within our analysis period
+                        if pnl_start_date < start_date or pnl_start_date > end_date:
+                            continue  # Skip this P&L statement
+                    except (IndexError, ValueError):
+                        # Include it if we can't parse the date
+                        pass
+                
+                if isinstance(pnl_df, pd.DataFrame):
+                    df = pnl_df
+                elif isinstance(pnl_df, dict) and 'data' in pnl_df:
+                    df = pd.DataFrame(pnl_df['data'])
+                else:
+                    continue
+                
+                # Find revenue categories (only Sales, not Investment Income)
+                # Look for "Total 5017 · Sales" first, then fall back to "5017 · Sales"
+                total_sales_row = df[df['Unnamed: 0'].str.contains('Total 5017 · Sales', case=False, na=False)]
+                if not total_sales_row.empty:
+                    monthly_revenue = float(total_sales_row['TOTAL'].iloc[0]) if pd.notna(total_sales_row['TOTAL'].iloc[0]) else 0
+                else:
+                    # Fall back to "5017 · Sales" if "Total 5017 · Sales" doesn't exist
+                    sales_row = df[df['Unnamed: 0'].str.contains('^5017 · Sales$', case=False, na=False, regex=True)]
+                    if not sales_row.empty:
+                        monthly_revenue = float(sales_row['TOTAL'].iloc[0]) if pd.notna(sales_row['TOTAL'].iloc[0]) else 0
+                    else:
+                        monthly_revenue = 0
+                
+                if monthly_revenue > 0:
+                    total_revenue += monthly_revenue
+                    month_count += 1
+            
+            return total_revenue if month_count > 0 else 0.0
+            
+        except Exception as e:
+            logger.exception("Error estimating revenue from P&L data")
+            return 0.0
     
     def _calculate_performance_indicators(self) -> Dict[str, Any]:
         """Calculate key performance indicators."""
@@ -614,24 +754,30 @@ class BusinessMetricsCalculator:
             return 1.0  # Default to no adjustment
     
     def _calculate_equipment_metrics(self) -> Dict[str, Any]:
-        """Calculate equipment metrics from business rules."""
-        equipment_metrics = {}
-        
-        # Get equipment configuration from business rules
-        equipment_config = self.business_rules.get('equipment', {})
-        
-        if equipment_config:
-            equipment_metrics['total_value'] = equipment_config.get('total_value', 0)
-            equipment_metrics['description'] = equipment_config.get('description', '')
-            equipment_metrics['source'] = equipment_config.get('source', '')
+        """Calculate equipment metrics dynamically from CSV files."""
+        try:
+            # Import here to avoid circular imports
+            from ..utils.equipment_calculator import get_equipment_metrics
             
-            logger.info(f"Equipment value from business rules: ${equipment_metrics['total_value']:,.2f}")
-        else:
-            # Fallback to default value
-            equipment_metrics['total_value'] = 0
-            equipment_metrics['description'] = 'No equipment data available'
-            equipment_metrics['source'] = 'Default fallback'
+            # Calculate equipment value from CSV files
+            equipment_metrics = get_equipment_metrics()
             
-            logger.warning("No equipment configuration found in business rules")
+            logger.info(f"Equipment value calculated from CSV files: ${equipment_metrics['total_value']:,.2f}")
+            logger.info(f"Equipment items: {len(equipment_metrics['items'])}")
+            
+        except Exception as e:
+            logger.error(f"Error calculating equipment metrics from CSV files: {e}")
+            
+            # Fallback to business rules if CSV calculation fails
+            equipment_config = self.business_rules.get('equipment', {})
+            equipment_metrics = {
+                'total_value': equipment_config.get('total_value', 0),
+                'description': equipment_config.get('description', 'No equipment data available'),
+                'source': 'Fallback from business rules',
+                'items': [],
+                'categories': {}
+            }
+            
+            logger.warning("Using fallback equipment value from business rules")
         
         return equipment_metrics

@@ -52,11 +52,19 @@ def verify_final_exports():
                 # Public should not have file paths
                 has_file_paths = False
                 for category, cat_data in data.items():
-                    if isinstance(cat_data, dict) and "documents" in cat_data:
+                    if isinstance(cat_data, dict):
+                        # Check documents
                         for doc in cat_data["documents"]:
-                            if doc.get("file_path") is not None:
+                            if doc["file_path"] is not None:
                                 has_file_paths = True
                                 break
+                        # Check equipment items
+                        for item in cat_data["equipment"]["items"]:
+                            if item["file_path"] is not None:
+                                has_file_paths = True
+                                break
+                        if has_file_paths:
+                            break
                 
                 if has_file_paths:
                     print(f"❌ {filename} contains file paths (should be hidden)")
@@ -68,11 +76,19 @@ def verify_final_exports():
                 # Internal should have file paths
                 has_file_paths = False
                 for category, cat_data in data.items():
-                    if isinstance(cat_data, dict) and "documents" in cat_data:
+                    if isinstance(cat_data, dict):
+                        # Check documents
                         for doc in cat_data["documents"]:
-                            if doc.get("file_path") is not None:
+                            if doc["file_path"] is not None:
                                 has_file_paths = True
                                 break
+                        # Check equipment items
+                        for item in cat_data["equipment"]["items"]:
+                            if item["file_path"] is not None:
+                                has_file_paths = True
+                                break
+                        if has_file_paths:
+                            break
                 
                 if has_file_paths:
                     print(f"✅ {filename} correctly exposes file paths")
@@ -80,13 +96,15 @@ def verify_final_exports():
                     print(f"❌ {filename} missing file paths (should expose them)")
                     all_valid = False
             
-            # Check document counts
+            # Check document and item counts
             total_docs = 0
+            total_items = 0
             for category, cat_data in data.items():
-                if isinstance(cat_data, dict) and "documents" in cat_data:
+                if isinstance(cat_data, dict):
                     total_docs += len(cat_data["documents"])
+                    total_items += len(cat_data["equipment"]["items"])
             
-            print(f"✅ {filename} contains {total_docs} documents")
+            print(f"✅ {filename} contains {total_docs} documents and {total_items} equipment items")
             
         except json.JSONDecodeError as e:
             print(f"❌ {filename} is not valid JSON: {e}")

@@ -217,7 +217,12 @@ class TestDueDiligenceManager:
         """Create a DueDiligenceManager instance for testing."""
         data_dir, docs_dir = temp_dirs
         manager = DueDiligenceManager(data_dir=str(data_dir), docs_dir=str(docs_dir))
-        manager.generate_sample_data()
+        # Load test data from examples directory
+        test_data_path = Path(__file__).parent.parent / "data" / "final" / "business_sale_data.json"
+        if test_data_path.exists():
+            manager.load_existing_data(business_data_path=str(test_data_path))
+        else:
+            pytest.skip("Test data not found - run ETL pipeline first")
         return manager
     
     def test_schema_compliance_all_documents(self, manager):
@@ -240,10 +245,10 @@ class TestDueDiligenceManager:
                     assert isinstance(doc["visibility"], list)
         
         # Separate pass for equipment-specific validation
-        if "equipment" in internal_data and "documents" in internal_data["equipment"]:
-            for doc in internal_data["equipment"]["documents"]:
-                assert "value" in doc, f"Missing 'value' field in equipment item: {doc['name']}"
-                assert isinstance(doc["value"], (int, float, type(None))), f"Equipment value must be number or None, got {type(doc['value'])}"
+        if "equipment" in internal_data and "items" in internal_data["equipment"]:
+            for item in internal_data["equipment"]["items"]:
+                assert "value" in item, f"Missing 'value' field in equipment item: {item.get('name')}"
+                assert isinstance(item["value"], (int, float, type(None))), f"Equipment value must be number or None, got {type(item['value'])}"
     
     def test_stage_filtering_public(self, manager):
         """Test that public stage hides file paths and only shows high-level stats."""
@@ -253,17 +258,25 @@ class TestDueDiligenceManager:
         assert "meta" in public_data
         assert "financials" in public_data
         
-        # Should not have file paths in any documents
+        # Should not have file paths in any documents or items
         for category, data in public_data.items():
-            if isinstance(data, dict) and "documents" in data:
-                for doc in data["documents"]:
-                    assert doc.get("file_path") is None, f"Public stage should not expose file paths: {doc['name']}"
+            if isinstance(data, dict):
+                # Check documents
+                for doc in data.get("documents", []):
+                    assert doc["file_path"] is None, f"Public stage should not expose file paths: {doc['name']}"
+                # Check items (equipment)
+                for item in data.get("items", []):
+                    assert item["file_path"] is None, f"Public stage should not expose file paths: {item['name']}"
         
         # Should only show public visibility items
         for category, data in public_data.items():
-            if isinstance(data, dict) and "documents" in data:
-                for doc in data["documents"]:
-                    assert "public" in doc.get("visibility", []), f"Non-public document in public stage: {doc['name']}"
+            if isinstance(data, dict):
+                # Check documents
+                for doc in data.get("documents", []):
+                    assert "public" in doc["visibility"], f"Non-public document in public stage: {doc['name']}"
+                # Check items (equipment)
+                for item in data.get("items", []):
+                    assert "public" in item["visibility"], f"Non-public item in public stage: {item['name']}"
     
     def test_stage_filtering_nda(self, manager):
         """Test that NDA stage shows category completeness but hides file paths."""
@@ -271,10 +284,15 @@ class TestDueDiligenceManager:
         
         # Should have categories but no file paths
         for category, data in nda_data.items():
-            if isinstance(data, dict) and "documents" in data:
-                for doc in data["documents"]:
-                    assert doc.get("file_path") is None, f"NDA stage should not expose file paths: {doc['name']}"
-                    assert "nda" in doc.get("visibility", []), f"Non-NDA document in NDA stage: {doc['name']}"
+            if isinstance(data, dict):
+                # Check documents
+                for doc in data.get("documents", []):
+                    assert doc["file_path"] is None, f"NDA stage should not expose file paths: {doc['name']}"
+                    assert "nda" in doc["visibility"], f"Non-NDA document in NDA stage: {doc['name']}"
+                # Check equipment items
+                for item in data.get("items", []):
+                    assert item["file_path"] is None, f"NDA stage should not expose file paths: {item['name']}"
+                    assert "nda" in item["visibility"], f"Non-NDA item in NDA stage: {item['name']}"
     
     def test_stage_filtering_buyer(self, manager):
         """Test that buyer stage shows doc availability but hides file paths."""
@@ -282,10 +300,15 @@ class TestDueDiligenceManager:
         
         # Should have document availability but no file paths
         for category, data in buyer_data.items():
-            if isinstance(data, dict) and "documents" in data:
-                for doc in data["documents"]:
-                    assert doc.get("file_path") is None, f"Buyer stage should not expose file paths: {doc['name']}"
-                    assert "buyer" in doc.get("visibility", []), f"Non-buyer document in buyer stage: {doc['name']}"
+            if isinstance(data, dict):
+                # Check documents
+                for doc in data.get("documents", []):
+                    assert doc["file_path"] is None, f"Buyer stage should not expose file paths: {doc['name']}"
+                    assert "buyer" in doc["visibility"], f"Non-buyer document in buyer stage: {doc['name']}"
+                # Check equipment items
+                for item in data.get("items", []):
+                    assert item["file_path"] is None, f"Buyer stage should not expose file paths: {item['name']}"
+                    assert "buyer" in item["visibility"], f"Non-buyer item in buyer stage: {item['name']}"
     
     def test_stage_filtering_closing(self, manager):
         """Test that closing stage only shows milestones."""
@@ -305,12 +328,17 @@ class TestDueDiligenceManager:
         """Test that internal stage exposes everything including file paths."""
         internal_data = manager.get_stage_view("internal")
         
-        # Should have file paths for all documents
+        # Should have file paths for all documents and items
         for category, data in internal_data.items():
-            if isinstance(data, dict) and "documents" in data:
-                for doc in data["documents"]:
-                    assert doc.get("file_path") is not None, f"Internal stage should expose file paths: {doc['name']}"
-                    assert "internal" in doc.get("visibility", []), f"Non-internal document in internal stage: {doc['name']}"
+            if isinstance(data, dict):
+                # Check documents
+                for doc in data.get("documents", []):
+                    assert doc["file_path"] is not None, f"Internal stage should expose file paths: {doc['name']}"
+                    assert "internal" in doc["visibility"], f"Non-internal document in internal stage: {doc['name']}"
+                # Check items (equipment)
+                for item in data.get("items", []):
+                    assert item["file_path"] is not None, f"Internal stage should expose file paths: {item['name']}"
+                    assert "internal" in item["visibility"], f"Non-internal item in internal stage: {item['name']}"
     
     def test_invalid_stage_name(self, manager):
         """Test that invalid stage names raise appropriate errors."""

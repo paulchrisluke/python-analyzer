@@ -7,6 +7,7 @@ filtering, scoring, validation, and export capabilities.
 
 import json
 import logging
+import yaml
 from dataclasses import dataclass, field
 from datetime import datetime, date
 from pathlib import Path
@@ -46,16 +47,21 @@ class DueDiligenceManager:
     scoring, validation, and export capabilities.
     """
     
-    def __init__(self, data_dir: str = None, docs_dir: str = None):
+    def __init__(self, data_dir: str = None, docs_dir: str = None, config_dir: str = None):
         """
         Initialize Due Diligence Manager.
         
         Args:
             data_dir: Directory containing structured data files
             docs_dir: Directory containing human-readable documents (PDFs, etc.)
+            config_dir: Directory containing configuration files
         """
         self.data_dir = Path(data_dir) if data_dir else Path(__file__).parent.parent.parent / "data"
         self.docs_dir = Path(docs_dir) if docs_dir else Path(__file__).parent.parent.parent / "docs"
+        self.config_dir = Path(config_dir) if config_dir else Path(__file__).parent.parent / "config"
+        
+        # Load business rules configuration
+        self.business_rules = self._load_business_rules()
         
         # Ensure directories exist
         self.docs_dir.mkdir(exist_ok=True)
@@ -71,6 +77,17 @@ class DueDiligenceManager:
         self.validation_results = {}
         
         logger.info(f"DueDiligenceManager initialized with data_dir: {self.data_dir}, docs_dir: {self.docs_dir}")
+        logger.info(f"Loaded business rules from: {self.config_dir / 'business_rules.yaml'}")
+    
+    def _load_business_rules(self) -> Dict[str, Any]:
+        """Load business rules from configuration file."""
+        business_rules_path = self.config_dir / "business_rules.yaml"
+        if business_rules_path.exists():
+            with open(business_rules_path, 'r') as f:
+                return yaml.safe_load(f)
+        else:
+            logger.warning(f"Business rules file not found: {business_rules_path}")
+            return {}
     
     def load_existing_data(self, business_data_path: str = None, coverage_data_path: str = None) -> None:
         """
@@ -101,10 +118,9 @@ class DueDiligenceManager:
                 self._integrate_coverage_data(coverage_data)
                 logger.info("Loaded due diligence coverage data")
             
-            # If no documents exist, generate sample data to ensure we have a complete structure
+            # If no documents exist, log warning but don't generate sample data
             if not self._has_any_documents():
-                logger.info("No documents found, generating sample data for complete structure")
-                self.generate_sample_data()
+                logger.warning("No documents found in data directory. Run ETL pipeline first to generate business data.")
                 
         except Exception as e:
             logger.error(f"Error loading existing data: {e}")
@@ -127,10 +143,48 @@ class DueDiligenceManager:
     
     def _integrate_business_data(self, business_data: Dict[str, Any]) -> None:
         """Integrate business sale data into due diligence structure."""
+        # Check if this is already processed due diligence data or raw business data
+        if "meta" in business_data and "financials" in business_data and "documents" in business_data["financials"]:
+            # This is already processed due diligence data - load it directly
+            self.data.meta = business_data["meta"]
+            self.data.sales = business_data.get("sales", {})
+            self.data.financials = business_data.get("financials", {})
+            self.data.equipment = business_data.get("equipment", {})
+            self.data.legal = business_data.get("legal", {})
+            self.data.corporate = business_data.get("corporate", {})
+            self.data.other = business_data.get("other", {})
+            self.data.closing = business_data.get("closing", {})
+            return
+        
+        # Check if this is business_sale_data.json with document arrays (new format)
+        if "metadata" in business_data and "financials" in business_data and "documents" in business_data["financials"]:
+            # This is business_sale_data.json with document arrays - load it directly
+            self.data.meta = business_data["metadata"]
+            
+            # Transform sales data to match schema
+            sales_data = business_data.get("sales", {})
+            self.data.sales = {
+                "monthly": {},
+                "totals": {
+                    "transactions": sales_data.get("total_transactions", 0),
+                    "revenue": sales_data.get("total_revenue", 0),
+                    "visibility": ["public", "nda", "buyer", "internal"]
+                }
+            }
+            
+            self.data.financials = business_data.get("financials", {})
+            self.data.equipment = business_data.get("equipment", {})
+            self.data.legal = business_data.get("legal", {})
+            self.data.corporate = business_data.get("corporate", {})
+            self.data.other = business_data.get("other", {})
+            self.data.closing = business_data.get("closing", {})
+            return
+        
+        # This is raw business data from ETL pipeline - process it
         # Set metadata
         self.data.meta = {
             "business_name": "Cranberry Hearing & Balance Center",
-            "analysis_period": business_data.get("metadata", {}).get("analysis_period", "2023-01 to 2025-06"),
+            "analysis_period": business_data.get("metadata", {}).get("analysis_period", business_data.get("meta", {}).get("analysis_period", "2023-01 to 2025-06")),
             "generated_at": datetime.now().isoformat()
         }
         
@@ -162,9 +216,11 @@ class DueDiligenceManager:
         # Integrate equipment data
         if "equipment" in business_data:
             equipment = business_data["equipment"]
+            # Use equipment value from business rules if available
+            equipment_value = self.business_rules.get("equipment", {}).get("total_value", equipment.get("total_value", 0))
             self.data.equipment = {
                 "items": [],
-                "total_value": equipment.get("total_value", 0),
+                "total_value": equipment_value,
                 "visibility": ["public", "nda", "buyer", "internal"]
             }
     
@@ -187,7 +243,11 @@ class DueDiligenceManager:
         """Update document status in a category."""
         if category == "financials" and "documents" in self.data.financials:
             for doc in self.data.financials["documents"]:
-                if doc["name"] == doc_name:
+                # Use case-insensitive containment check for financials/documents
+                doc_name_lower = doc_name.lower()
+                stored_name_lower = doc["name"].lower()
+                if (doc_name_lower in stored_name_lower or 
+                    stored_name_lower.startswith(doc_name_lower)):
                     doc["status"] = status
                     break
     
@@ -746,225 +806,6 @@ class DueDiligenceManager:
         
         return warnings
     
-    def generate_sample_data(self) -> None:
-        """Generate realistic sample data for testing and frontend development."""
-        logger.info("Generating sample due diligence data...")
-        
-        # Set metadata
-        self.data.meta = {
-            "business_name": "Cranberry Hearing & Balance Center",
-            "analysis_period": "2023-01 to 2025-06",
-            "generated_at": datetime.now().isoformat()
-        }
-        
-        # Generate sales data
-        self.data.sales = {
-            "monthly": {
-                "2023-01": {"transactions": 400, "revenue": 75000, "status": True},
-                "2023-02": {"transactions": 380, "revenue": 72000, "status": True},
-                "2023-03": {"transactions": 420, "revenue": 78000, "status": True},
-                "2023-04": {"transactions": 450, "revenue": 82000, "status": True},
-                "2023-05": {"transactions": 480, "revenue": 85000, "status": True},
-                "2023-06": {"transactions": 460, "revenue": 83000, "status": True}
-            },
-            "totals": {
-                "transactions": 12900,
-                "revenue": 3948425.87,
-                "visibility": ["public", "nda", "buyer", "internal"]
-            }
-        }
-        
-        # Generate financials data
-        self.data.financials = {
-            "documents": [
-                {
-                    "name": "Profit & Loss 2023",
-                    "status": True,
-                    "notes": "Annual profit and loss statement",
-                    "due_date": "2024-03-15",
-                    "file_type": "pdf",
-                    "file_path": "docs/financials/pnl_2023.pdf",
-                    "file_size": "2.3 MB",
-                    "visibility": ["internal", "nda", "buyer"]
-                },
-                {
-                    "name": "Balance Sheet 2024",
-                    "status": True,
-                    "notes": "Current balance sheet as of year-end",
-                    "due_date": "2024-01-31",
-                    "file_type": "pdf",
-                    "file_path": "docs/financials/balance_sheet_2024.pdf",
-                    "file_size": "1.2 MB",
-                    "visibility": ["nda", "buyer", "internal"]
-                },
-                {
-                    "name": "Tax Return 2023",
-                    "status": False,
-                    "notes": "Corporate tax return for 2023",
-                    "due_date": "2024-03-15",
-                    "file_type": "pdf",
-                    "file_path": "docs/financials/tax_return_2023.pdf",
-                    "file_size": None,
-                    "visibility": ["buyer", "internal"]
-                },
-                {
-                    "name": "General Ledger 2023-2024",
-                    "status": True,
-                    "notes": "Complete general ledger from QuickBooks",
-                    "due_date": "2024-12-31",
-                    "file_type": "csv",
-                    "file_path": "01_FINANCIAL_DATA/QuickBooks_Exports/General Ledger 2023 updated.CSV",
-                    "file_size": "5.8 MB",
-                    "visibility": ["internal"]
-                }
-            ],
-            "metrics": {
-                "annual_revenue_projection": 955924.34,
-                "estimated_annual_ebitda": 248138.61,
-                "roi_percentage": 38.17,
-                "visibility": ["public", "nda", "buyer", "internal"]
-            }
-        }
-        
-        # Generate equipment data
-        self.data.equipment = {
-            "items": [
-                {
-                    "name": "Cello Audiometer System",
-                    "status": True,
-                    "notes": "Primary diagnostic audiometer",
-                    "due_date": "2024-06-30",
-                    "file_type": "pdf",
-                    "file_path": "docs/equipment/cello_audiometer_quote.pdf",
-                    "file_size": "500 KB",
-                    "value": 15000,
-                    "visibility": ["buyer", "internal"]
-                },
-                {
-                    "name": "Hearing Aid Programmer",
-                    "status": True,
-                    "notes": "Digital hearing aid programming device",
-                    "due_date": "2024-06-30",
-                    "file_type": "pdf",
-                    "file_path": "docs/equipment/hearing_aid_programmer.pdf",
-                    "file_size": "300 KB",
-                    "value": 8500,
-                    "visibility": ["buyer", "internal"]
-                },
-                {
-                    "name": "Diagnostic Equipment Suite",
-                    "status": False,
-                    "notes": "Complete diagnostic equipment package",
-                    "due_date": "2024-06-30",
-                    "file_type": "pdf",
-                    "file_path": "docs/equipment/diagnostic_suite.pdf",
-                    "file_size": None,
-                    "value": 25000,
-                    "visibility": ["internal"]
-                }
-            ],
-            "total_value": 48500,
-            "visibility": ["public", "nda", "buyer", "internal"]
-        }
-        
-        # Generate legal data
-        self.data.legal = {
-            "documents": [
-                {
-                    "name": "Lease Agreements",
-                    "status": True,
-                    "notes": "Current lease agreements for all locations",
-                    "due_date": "2025-12-31",
-                    "file_type": "pdf",
-                    "file_path": "docs/legal/lease_agreement_2025.pdf",
-                    "file_size": "2.3 MB",
-                    "visibility": ["buyer", "internal"]
-                },
-                {
-                    "name": "Insurance Policies",
-                    "status": True,
-                    "notes": "Current insurance coverage documentation",
-                    "due_date": "2024-12-31",
-                    "file_type": "pdf",
-                    "file_path": "docs/legal/insurance_policies.pdf",
-                    "file_size": "1.8 MB",
-                    "visibility": ["buyer", "internal"]
-                },
-                {
-                    "name": "NDA Template",
-                    "status": True,
-                    "notes": "Standard non-disclosure agreement template",
-                    "due_date": "2024-01-01",
-                    "file_type": "pdf",
-                    "file_path": "docs/legal/nda_template.pdf",
-                    "file_size": "120 KB",
-                    "visibility": ["nda", "buyer", "internal"]
-                }
-            ]
-        }
-        
-        # Generate corporate data
-        self.data.corporate = {
-            "documents": [
-                {
-                    "name": "Articles of Incorporation",
-                    "status": True,
-                    "notes": "Original articles of incorporation",
-                    "due_date": "2024-01-01",
-                    "file_type": "pdf",
-                    "file_path": "docs/corporate/articles_incorporation.pdf",
-                    "file_size": "300 KB",
-                    "visibility": ["buyer", "internal"]
-                },
-                {
-                    "name": "Shareholder Minutes",
-                    "status": False,
-                    "notes": "Recent shareholder meeting minutes",
-                    "due_date": "2024-12-31",
-                    "file_type": "pdf",
-                    "file_path": "docs/corporate/shareholder_minutes.pdf",
-                    "file_size": None,
-                    "visibility": ["internal"]
-                }
-            ]
-        }
-        
-        # Generate other data
-        self.data.other = {
-            "documents": [
-                {
-                    "name": "Executive Summary",
-                    "status": True,
-                    "notes": "Business overview and key metrics",
-                    "due_date": "2024-01-01",
-                    "file_type": "pdf",
-                    "file_path": "docs/other/executive_summary.pdf",
-                    "file_size": "80 KB",
-                    "visibility": ["public", "nda", "buyer", "internal"]
-                },
-                {
-                    "name": "Growth Opportunities List",
-                    "status": True,
-                    "notes": "Identified growth opportunities and expansion plans",
-                    "due_date": "2024-06-30",
-                    "file_type": "pdf",
-                    "file_path": "docs/other/growth_opportunities.pdf",
-                    "file_size": "55 KB",
-                    "visibility": ["nda", "buyer", "internal"]
-                }
-            ]
-        }
-        
-        # Generate closing data
-        self.data.closing = {
-            "milestones": [
-                {"name": "Offer Received", "status": False, "visibility": ["closing", "internal"]},
-                {"name": "LOI Signed", "status": False, "visibility": ["closing", "internal"]},
-                {"name": "Final Contract Executed", "status": False, "visibility": ["closing", "internal"]}
-            ]
-        }
-        
-        logger.info("Sample data generation completed")
     
     def export_json(self, stage: str, path: str) -> None:
         """

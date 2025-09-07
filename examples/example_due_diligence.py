@@ -29,9 +29,8 @@ def main():
     print("\n1. Loading existing business data...")
     manager.load_existing_data()
     
-    # Only generate sample data if no existing data was loaded
-    # (load_existing_data() will generate sample data internally if needed)
-    print("\n2. Sample data generation handled by load_existing_data() if needed")
+    # Data loading is handled by load_existing_data()
+    print("\n2. Data loading completed")
     
     # Get a specific stage view
     print("\n3. Getting public stage view...")
