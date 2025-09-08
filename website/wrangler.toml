@@ -10,9 +10,9 @@ database_name = "cranberry-auth-db"
 database_id = "6e3eab94-840f-484f-900f-a2ddd78196d7"
 migrations_dir = "db/migrations"
 
-# Environment variables for default environment
+# Environment variables for default environment (dev/preview)
 [vars]
-BETTER_AUTH_URL = "https://cranberry-auth-worker.paulchrisluke.workers.dev"
+BETTER_AUTH_URL = "http://localhost:8787"
 
 # Production environment configuration
 [env.production]
