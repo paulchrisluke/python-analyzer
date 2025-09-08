@@ -5,16 +5,19 @@ export interface Env {
   NODE_ENV?: string;
 }
 
-export function createAuth(env: Env) {
-  // Lazy import to avoid Edge Runtime dynamic code evaluation issues
-  // eslint-disable-next-line @typescript-eslint/no-require-imports
-  const { betterAuth } = require("better-auth");
-  // eslint-disable-next-line @typescript-eslint/no-require-imports
-  const { drizzleAdapter } = require("better-auth/adapters/drizzle");
-  // eslint-disable-next-line @typescript-eslint/no-require-imports
-  const { drizzle } = require("drizzle-orm/d1");
-  // eslint-disable-next-line @typescript-eslint/no-require-imports
-  const { schema } = require("../db/schema");
+export async function createAuth(env: Env) {
+  // Dynamic ESM imports to avoid Edge Runtime issues
+  const [
+    { betterAuth },
+    { drizzleAdapter },
+    { drizzle },
+    { schema }
+  ] = await Promise.all([
+    import("better-auth"),
+    import("better-auth/adapters/drizzle"),
+    import("drizzle-orm/d1"),
+    import("../db/schema")
+  ]);
   
   // Create Drizzle instance with D1 database and schema
   const db = drizzle(env.cranberry_auth_db, { schema });

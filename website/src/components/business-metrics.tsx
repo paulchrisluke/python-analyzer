@@ -100,7 +100,7 @@ export function BusinessMetrics({ data }: BusinessMetricsProps) {
                       const safeMultiple = (Number.isFinite(data.askingPrice) && Number.isFinite(data.annualRevenue) && data.annualRevenue !== 0) 
                         ? (data.askingPrice / data.annualRevenue) 
                         : null;
-                      return safeMultiple ? `${safeMultiple.toFixed(1)}x` : '-';
+                      return safeMultiple != null ? `${safeMultiple.toFixed(1)}x` : '-';
                     })()}
                   </CardTitle>
                   <CardDescription className="text-lg font-semibold">Revenue Multiple</CardDescription>
@@ -123,7 +123,7 @@ export function BusinessMetrics({ data }: BusinessMetricsProps) {
                       const safeMultiple = (Number.isFinite(data.askingPrice) && Number.isFinite(annualEbitda) && annualEbitda !== 0) 
                         ? (data.askingPrice / annualEbitda) 
                         : null;
-                      return safeMultiple ? `${safeMultiple.toFixed(1)}x` : '-';
+                      return safeMultiple != null ? `${safeMultiple.toFixed(1)}x` : '-';
                     })()}
                   </CardTitle>
                   <CardDescription className="text-lg font-semibold">EBITDA Multiple</CardDescription>

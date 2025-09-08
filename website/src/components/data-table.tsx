@@ -452,12 +452,36 @@ export function DataTable({
     const { active, over } = event
     if (active && over && active.id !== over.id) {
       setData((data) => {
-        // Find indices in the backing data array by ID
-        const activeDataIndex = data.findIndex(item => item.id === active.id)
-        const overDataIndex = data.findIndex(item => item.id === over.id)
+        // Check for duplicate IDs in the data array
+        const idCounts = new Map<number, number>()
+        data.forEach((item, index) => {
+          const count = idCounts.get(item.id) || 0
+          idCounts.set(item.id, count + 1)
+        })
         
-        if (activeDataIndex === -1 || overDataIndex === -1) {
-          return data // Return unchanged if IDs not found in backing data
+        const hasDuplicates = Array.from(idCounts.values()).some(count => count > 1)
+        
+        let activeDataIndex: number
+        let overDataIndex: number
+        
+        if (hasDuplicates) {
+          // Log warning about duplicates
+          console.warn('Duplicate IDs detected in data array. Using positional indices from drag event.')
+          
+          // Use positional indices from drag event as fallback
+          activeDataIndex = active.data?.current?.index ?? -1
+          overDataIndex = over.data?.current?.index ?? -1
+        } else {
+          // Use ID-based lookup when IDs are unique
+          activeDataIndex = data.findIndex(item => item.id === active.id)
+          overDataIndex = data.findIndex(item => item.id === over.id)
+        }
+        
+        // Guard against invalid indices
+        if (activeDataIndex === -1 || overDataIndex === -1 || 
+            activeDataIndex >= data.length || overDataIndex >= data.length) {
+          console.warn('Invalid indices detected in drag operation. Returning original data.')
+          return data // Return unchanged if indices are invalid
         }
         
         // Create new data array and move the item
@@ -585,7 +609,7 @@ export function DataTable({
                   </TableRow>
                 ))}
               </TableHeader>
-              <TableBody className="[&[data-slot='table-cell']:first-child]:w-8">
+              <TableBody className="[&>tr>td:first-child]:w-8">
                 {table.getRowModel().rows?.length ? (
                   <SortableContext
                     items={table.getRowModel().rows.map(r => r.id)}
