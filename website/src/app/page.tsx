@@ -165,7 +165,17 @@ export default async function HomePage() {
                         {formatCurrency(etlData.businessMetrics.askingPrice)}
                       </div>
                       <div className="text-lg font-semibold mb-4">All-Inclusive Price</div>
-                      <div className="text-sm text-muted-foreground mb-6">29% Below Market Value</div>
+                      <div className="text-sm text-muted-foreground mb-6">
+                        {(() => {
+                          const { askingPrice, marketValue } = etlData.businessMetrics;
+                          if (!marketValue || marketValue === 0) {
+                            return "—";
+                          }
+                          const percent = ((marketValue - askingPrice) / marketValue) * 100;
+                          const formattedPercent = percent % 1 === 0 ? percent.toFixed(0) : percent.toFixed(1);
+                          return `${formattedPercent}% Below Market Value`;
+                        })()}
+                      </div>
                       <Button size="lg" className="w-full md:w-auto">
                         View Due Diligence Documents
                       </Button>

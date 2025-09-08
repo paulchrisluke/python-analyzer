@@ -718,8 +718,14 @@ class DueDiligenceManager:
         # Check equipment value reasonableness
         if self.data.equipment:
             equipment_value = self.data.equipment.get("total_value", 0)
-            if equipment_value > 0 and equipment_value < 10000:  # Less than $10k seems low
-                cross_checks["equipment_value_reasonable"] = False
+            # Convert to float to handle string values from JSON
+            try:
+                equipment_value_float = float(equipment_value)
+                if equipment_value_float > 0 and equipment_value_float < 10000:  # Less than $10k seems low
+                    cross_checks["equipment_value_reasonable"] = False
+            except (ValueError, TypeError):
+                # If we can't convert to float, skip this check
+                pass
         
         return cross_checks
     
