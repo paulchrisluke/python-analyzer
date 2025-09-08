@@ -1,99 +1,124 @@
-import { TrendingDownIcon, TrendingUpIcon } from "lucide-react"
+import { IconTrendingDown, IconTrendingUp, IconCurrencyDollar, IconCash, IconChartLine, IconTrendingUp2, IconPackage, IconShield, IconBuilding, IconTarget } from "@tabler/icons-react"
 
 import { Badge } from "@/components/ui/badge"
 import {
   Card,
+  CardAction,
   CardDescription,
   CardFooter,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
+// Client-safe formatting functions
+function formatCurrency(amount: number): string {
+  return new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency: 'USD',
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0,
+  }).format(amount);
+}
 
-export function SectionCards() {
+function formatPercentage(value: number): string {
+  return `${value.toFixed(1)}%`;
+}
+
+interface SectionCardsProps {
+  data?: {
+    businessMetrics: {
+      askingPrice: number;
+      annualEbitda: number;
+      annualRevenue: number;
+      ebitdaMargin: number;
+    };
+  };
+}
+
+export function SectionCards({ data }: SectionCardsProps) {
   return (
-    <div className="grid grid-cols-1 gap-4 px-4 lg:px-6 @xl/main:grid-cols-2 @5xl/main:grid-cols-4">
-      <Card>
-        <CardHeader className="relative">
-          <CardDescription>Total Revenue</CardDescription>
-          <CardTitle className="text-2xl font-semibold tabular-nums">
-            $1,250.00
+    <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+      <Card className="@container/card bg-gradient-to-t from-primary/5 to-card shadow-xs">
+        <CardHeader>
+          <CardDescription>Asking Price</CardDescription>
+          <CardTitle className="text-2xl font-semibold tabular-nums @[250px]/card:text-3xl">
+            {data ? formatCurrency(data.businessMetrics.askingPrice) : "$650,000"}
           </CardTitle>
-          <div className="absolute right-4 top-4">
-            <Badge variant="outline" className="flex gap-1 rounded-lg text-xs">
-              <TrendingUpIcon className="size-3" />
-              +12.5%
+          <CardAction>
+            <Badge variant="outline" className="text-xs">
+              <IconTrendingUp className="h-3 w-3 mr-1" />
+              Below Market
             </Badge>
-          </div>
+          </CardAction>
         </CardHeader>
-        <CardFooter className="flex-col items-start gap-1 text-sm">
+        <CardFooter className="flex-col items-start gap-1.5 text-sm">
           <div className="line-clamp-1 flex gap-2 font-medium">
-            Trending up this month <TrendingUpIcon className="size-4" />
+            All-inclusive price <IconPackage className="size-4" />
           </div>
           <div className="text-muted-foreground">
-            Visitors for the last 6 months
+            Equipment & locations included
           </div>
         </CardFooter>
       </Card>
-      <Card>
-        <CardHeader className="relative">
-          <CardDescription>New Customers</CardDescription>
-          <CardTitle className="text-2xl font-semibold tabular-nums">
-            1,234
+      <Card className="@container/card bg-gradient-to-t from-primary/5 to-card shadow-xs">
+        <CardHeader>
+          <CardDescription>Cash Flow (SDE)</CardDescription>
+          <CardTitle className="text-2xl font-semibold tabular-nums @[250px]/card:text-3xl">
+            {data ? formatCurrency(data.businessMetrics.annualEbitda) : "$260,403"}
           </CardTitle>
-          <div className="absolute right-4 top-4">
-            <Badge variant="outline" className="flex gap-1 rounded-lg text-xs">
-              <TrendingDownIcon className="size-3" />
-              -20%
+          <CardAction>
+            <Badge variant="outline" className="text-xs">
+              <IconTrendingUp className="h-3 w-3 mr-1" />
+              Strong
             </Badge>
-          </div>
+          </CardAction>
         </CardHeader>
-        <CardFooter className="flex-col items-start gap-1 text-sm">
+        <CardFooter className="flex-col items-start gap-1.5 text-sm">
           <div className="line-clamp-1 flex gap-2 font-medium">
-            Down 20% this period <TrendingDownIcon className="size-4" />
+            Consistent cash flow <IconShield className="size-4" />
           </div>
           <div className="text-muted-foreground">
-            Acquisition needs attention
+            Insurance-based revenue
           </div>
         </CardFooter>
       </Card>
-      <Card>
-        <CardHeader className="relative">
-          <CardDescription>Active Accounts</CardDescription>
-          <CardTitle className="text-2xl font-semibold tabular-nums">
-            45,678
+      <Card className="@container/card bg-gradient-to-t from-primary/5 to-card shadow-xs">
+        <CardHeader>
+          <CardDescription>Gross Revenue</CardDescription>
+          <CardTitle className="text-2xl font-semibold tabular-nums @[250px]/card:text-3xl">
+            {data ? formatCurrency(data.businessMetrics.annualRevenue) : "$932,533"}
           </CardTitle>
-          <div className="absolute right-4 top-4">
-            <Badge variant="outline" className="flex gap-1 rounded-lg text-xs">
-              <TrendingUpIcon className="size-3" />
-              +12.5%
+          <CardAction>
+            <Badge variant="outline" className="text-xs">
+              <IconTrendingUp className="h-3 w-3 mr-1" />
+              Growing
             </Badge>
-          </div>
+          </CardAction>
         </CardHeader>
-        <CardFooter className="flex-col items-start gap-1 text-sm">
+        <CardFooter className="flex-col items-start gap-1.5 text-sm">
           <div className="line-clamp-1 flex gap-2 font-medium">
-            Strong user retention <TrendingUpIcon className="size-4" />
+            Annual revenue <IconBuilding className="size-4" />
           </div>
-          <div className="text-muted-foreground">Engagement exceeds targets</div>
+          <div className="text-muted-foreground">30-month track record</div>
         </CardFooter>
       </Card>
-      <Card>
-        <CardHeader className="relative">
-          <CardDescription>Growth Rate</CardDescription>
-          <CardTitle className="text-2xl font-semibold tabular-nums">
-            4.5%
+      <Card className="@container/card bg-gradient-to-t from-primary/5 to-card shadow-xs">
+        <CardHeader>
+          <CardDescription>EBITDA</CardDescription>
+          <CardTitle className="text-2xl font-semibold tabular-nums @[250px]/card:text-3xl">
+            {data ? formatCurrency(data.businessMetrics.annualEbitda) : "$260,403"}
           </CardTitle>
-          <div className="absolute right-4 top-4">
-            <Badge variant="outline" className="flex gap-1 rounded-lg text-xs">
-              <TrendingUpIcon className="size-3" />
-              +4.5%
+          <CardAction>
+            <Badge variant="outline" className="text-xs">
+              <IconTrendingUp className="h-3 w-3 mr-1" />
+              {data ? formatPercentage(data.businessMetrics.ebitdaMargin) : "27.9%"}
             </Badge>
-          </div>
+          </CardAction>
         </CardHeader>
-        <CardFooter className="flex-col items-start gap-1 text-sm">
+        <CardFooter className="flex-col items-start gap-1.5 text-sm">
           <div className="line-clamp-1 flex gap-2 font-medium">
-            Steady performance <TrendingUpIcon className="size-4" />
+            Strong profitability <IconTarget className="size-4" />
           </div>
-          <div className="text-muted-foreground">Meets growth projections</div>
+          <div className="text-muted-foreground">Industry-leading margins</div>
         </CardFooter>
       </Card>
     </div>
