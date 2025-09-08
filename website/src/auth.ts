@@ -1,16 +1,35 @@
-import { betterAuth } from "better-auth";
-import { drizzleAdapter } from "better-auth/adapters/drizzle";
-import { drizzle } from "drizzle-orm/d1";
-import { schema } from "../db/schema";
+// Cloudflare Workers types - minimal definition for build compatibility
+declare global {
+  interface D1Database {
+    prepare(query: string): any;
+    exec(query: string): Promise<any>;
+    batch(statements: any[]): Promise<any[]>;
+  }
+}
 
 export interface Env {
   cranberry_auth_db: D1Database;
   BETTER_AUTH_SECRET: string;
   BETTER_AUTH_URL: string;
+  COOKIE_DOMAIN?: string;
   NODE_ENV?: string;
+  ALLOWED_ORIGINS?: string;
 }
 
-export function createAuth(env: Env) {
+export async function createAuth(env: Env) {
+  // Dynamic ESM imports to avoid Edge Runtime issues
+  const [
+    { betterAuth },
+    { drizzleAdapter },
+    { drizzle },
+    { schema }
+  ] = await Promise.all([
+    import("better-auth"),
+    import("better-auth/adapters/drizzle"),
+    import("drizzle-orm/d1"),
+    import("../db/schema")
+  ]);
+  
   // Create Drizzle instance with D1 database and schema
   const db = drizzle(env.cranberry_auth_db, { schema });
   
@@ -31,6 +50,20 @@ export function createAuth(env: Env) {
     session: {
       expiresIn: 60 * 60 * 24 * 7, // 7 days
       updateAge: 60 * 60 * 24, // 1 day
+      cookieCache: {
+        enabled: true,
+        maxAge: 60 * 5, // 5 minutes
+      },
+    },
+    cookies: {
+      sessionToken: {
+        name: "better-auth.session_token",
+        httpOnly: true,
+        secure: env.NODE_ENV === "production", // Only secure in production
+        sameSite: env.NODE_ENV === "production" ? "none" : "lax", // Allow cross-domain in production, lax in development
+        domain: env.NODE_ENV === "production" ? (env.COOKIE_DOMAIN || ".paulchrisluke.workers.dev") : undefined, // Set domain in production only
+        path: "/",
+      },
     },
     user: {
       additionalFields: {

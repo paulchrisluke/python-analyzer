@@ -45,6 +45,9 @@ examples/data/
 reports/
 logs/
 
+# Exception: Allow website data directory (contains public business listing data)
+!website/src/data/
+
 # ALL sensitive directories - completely exclude
 01_FINANCIAL_DATA/
 02_OPERATIONAL_DATA/
@@ -79,10 +82,23 @@ website/out/
 website/dist/
 website/build/
 
+# OpenNext build artifacts (Cloudflare Workers deployment)
+website/.open-next/
+
 # Test results and reports
 website/test-results/
 website/playwright-report/
 website/coverage/
+
+# Playwright test artifacts and screenshots
+.playwright-mcp/
+**/test-results/
+**/playwright-report/
+**/playwright/.cache/
+**/playwright/.local/
+**/screenshots/
+**/videos/
+**/traces/
 
 # Node.js dependencies
 website/node_modules/
@@ -139,6 +155,9 @@ wheels/
 .installed.cfg
 *.egg
 MANIFEST
+
+# Exception: Allow website src/lib directory (contains auth utilities)
+!website/src/lib/
 
 # Virtual Environment
 venv/

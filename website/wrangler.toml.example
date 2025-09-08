@@ -9,6 +9,16 @@ binding = "cranberry_auth_db"
 database_name = "cranberry-auth-db"
 database_id = "your-database-id-here"
 
+# R2 Bucket for OpenNext incremental cache
+[[r2_buckets]]
+binding = "NEXT_INC_CACHE_R2_BUCKET"
+bucket_name = "your-nextjs-cache-bucket"
+
+# KV Namespace for OpenNext incremental cache (optional)
+[[kv_namespaces]]
+binding = "NEXT_INC_CACHE_KV"
+id = "your-kv-namespace-id-here"
+
 # Environment variables
 [vars]
 BETTER_AUTH_URL = "https://your-worker.your-subdomain.workers.dev"

@@ -1,138 +1,171 @@
 import { BusinessMetrics as BusinessMetricsType, formatCurrency, formatPercentage } from "@/lib/etl-data";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { TrendingUp, DollarSign, Target, Wrench } from "lucide-react";
 
 interface BusinessMetricsProps {
   data: BusinessMetricsType;
 }
 
 export function BusinessMetrics({ data }: BusinessMetricsProps) {
+  console.log("📈 BusinessMetrics rendering");
+  
   const metrics = [
     {
       title: "Total Revenue",
       value: formatCurrency(data.annualRevenue * 2.5), // 30 months of data (2.5×)
       description: "2023-2025 Q2 Performance",
-      icon: "📊"
+      icon: TrendingUp
     },
     {
       title: "Annual EBITDA",
       value: formatCurrency(data.annualRevenue * (data.ebitdaMargin / 100)),
       description: "Projected Annual",
-      icon: "💰"
+      icon: DollarSign
     },
     {
       title: "ROI",
       value: formatPercentage(data.roi),
       description: "Annual Return",
-      icon: "📈"
+      icon: Target
     },
     {
       title: "Equipment Value",
       value: formatCurrency(data.equipmentValue),
       description: "Included in Sale",
-      icon: "🔧"
+      icon: Wrench
     }
   ];
 
   return (
-    <div className="bg-white py-16">
+    <div className="py-16">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center mb-12">
-          <h2 className="text-3xl font-bold text-gray-900 mb-4">
-            📊 Verified Financial Performance
-          </h2>
-          <p className="text-lg text-gray-600">
-            30 Months of Verified Financial Data
-          </p>
-          <p className="text-sm text-gray-500 mt-2">
-            Recession-Resistant Healthcare Business
-          </p>
-          <p className="text-sm text-red-600 font-semibold">
-            {formatCurrency(data.marketValue - data.askingPrice)} Below Market Value
-          </p>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {metrics.map((metric, index) => (
-            <div key={index} className="bg-gray-50 rounded-lg p-6 text-center">
-              <div className="text-3xl mb-3">{metric.icon}</div>
-              <div className="text-2xl font-bold text-gray-900 mb-2">
-                {metric.value}
-              </div>
-              <div className="text-sm font-semibold text-gray-700 mb-1">
-                {metric.title}
-              </div>
-              <div className="text-xs text-gray-600">
-                {metric.description}
-              </div>
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-3xl font-bold">
+              Verified Financial Performance
+            </CardTitle>
+            <CardDescription className="text-lg">
+              30 Months of Verified Financial Data
+            </CardDescription>
+            <CardDescription className="text-sm">
+              Recession-Resistant Healthcare Business
+            </CardDescription>
+            <CardDescription className="text-sm text-destructive font-semibold">
+              {formatCurrency(data.marketValue - data.askingPrice)} Below Market Value
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              {metrics.map((metric, index) => {
+                const IconComponent = metric.icon;
+                return (
+                  <Card key={index}>
+                    <CardHeader>
+                      <IconComponent className="h-8 w-8 text-primary mb-3" />
+                      <CardTitle className="text-2xl font-bold">
+                        {metric.value}
+                      </CardTitle>
+                      <CardDescription className="text-sm font-semibold">
+                        {metric.title}
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <p className="text-xs text-muted-foreground">
+                        {metric.description}
+                      </p>
+                    </CardContent>
+                  </Card>
+                );
+              })}
             </div>
-          ))}
-        </div>
+          </CardContent>
+        </Card>
 
         {/* Valuation Multiples */}
-        <div className="mt-16 bg-gray-50 rounded-lg p-8">
-          <h3 className="text-2xl font-bold text-gray-900 mb-6 text-center">
-            📊 Valuation Multiples
-          </h3>
-          <p className="text-center text-gray-600 mb-8">
-            Industry-standard valuation metrics for audiology practices
-          </p>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            <div className="text-center">
-              <div className="text-3xl font-bold text-blue-600 mb-2">
-                {(() => {
-                  const safeMultiple = (Number.isFinite(data.askingPrice) && Number.isFinite(data.annualRevenue) && data.annualRevenue !== 0) 
-                    ? (data.askingPrice / data.annualRevenue) 
-                    : null;
-                  return safeMultiple ? `${safeMultiple.toFixed(1)}x` : '-';
-                })()}
-              </div>
-              <div className="text-lg font-semibold text-gray-900 mb-2">Revenue Multiple</div>
-              <div className="text-sm text-gray-600 mb-1">
-                {formatCurrency(data.askingPrice)} ÷ {formatCurrency(data.annualRevenue)}
-              </div>
-              <div className="text-xs text-gray-500">
-                Industry range: 0.8x - 1.2x annual revenue
-              </div>
+        <Card className="mt-16">
+          <CardHeader>
+            <CardTitle className="text-2xl font-bold">
+              Valuation Multiples
+            </CardTitle>
+            <CardDescription>
+              Industry-standard valuation metrics for audiology practices
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-3xl font-bold text-primary">
+                    {(() => {
+                      const safeMultiple = (Number.isFinite(data.askingPrice) && Number.isFinite(data.annualRevenue) && data.annualRevenue !== 0) 
+                        ? (data.askingPrice / data.annualRevenue) 
+                        : null;
+                      return safeMultiple != null ? `${safeMultiple.toFixed(1)}x` : '-';
+                    })()}
+                  </CardTitle>
+                  <CardDescription className="text-lg font-semibold">Revenue Multiple</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-sm text-muted-foreground mb-1">
+                    {formatCurrency(data.askingPrice)} ÷ {formatCurrency(data.annualRevenue)}
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    Industry range: 0.8x - 1.2x annual revenue
+                  </p>
+                </CardContent>
+              </Card>
+              
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-3xl font-bold text-primary">
+                    {(() => {
+                      const annualEbitda = data.annualRevenue * (data.ebitdaMargin / 100);
+                      const safeMultiple = (Number.isFinite(data.askingPrice) && Number.isFinite(annualEbitda) && annualEbitda !== 0) 
+                        ? (data.askingPrice / annualEbitda) 
+                        : null;
+                      return safeMultiple != null ? `${safeMultiple.toFixed(1)}x` : '-';
+                    })()}
+                  </CardTitle>
+                  <CardDescription className="text-lg font-semibold">EBITDA Multiple</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-sm text-muted-foreground mb-1">
+                    {formatCurrency(data.askingPrice)} ÷ {formatCurrency(data.annualRevenue * (data.ebitdaMargin / 100))}
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    Industry range: 3.0x - 5.0x annual EBITDA
+                  </p>
+                </CardContent>
+              </Card>
             </div>
-            
-            <div className="text-center">
-              <div className="text-3xl font-bold text-green-600 mb-2">
-                {(() => {
-                  const annualEbitda = data.annualRevenue * (data.ebitdaMargin / 100);
-                  const safeMultiple = (Number.isFinite(data.askingPrice) && Number.isFinite(annualEbitda) && annualEbitda !== 0) 
-                    ? (data.askingPrice / annualEbitda) 
-                    : null;
-                  return safeMultiple ? `${safeMultiple.toFixed(1)}x` : '-';
-                })()}
-              </div>
-              <div className="text-lg font-semibold text-gray-900 mb-2">EBITDA Multiple</div>
-              <div className="text-sm text-gray-600 mb-1">
-                {formatCurrency(data.askingPrice)} ÷ {formatCurrency(data.annualRevenue * (data.ebitdaMargin / 100))}
-              </div>
-              <div className="text-xs text-gray-500">
-                Industry range: 3.0x - 5.0x annual EBITDA
-              </div>
-            </div>
-          </div>
 
-          <div className="mt-8 grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="bg-white rounded-lg p-4 text-center">
-              <div className="text-lg font-semibold text-gray-900 mb-1">Our Price</div>
-              <div className="text-2xl font-bold text-green-600">
-                {formatCurrency(data.askingPrice)}
-              </div>
-              <div className="text-sm text-gray-600">All-inclusive package</div>
+            <div className="mt-8 grid grid-cols-1 md:grid-cols-2 gap-4">
+              <Card>
+                <CardHeader>
+                  <CardDescription className="text-lg font-semibold">Our Price</CardDescription>
+                  <CardTitle className="text-2xl font-bold text-primary">
+                    {formatCurrency(data.askingPrice)}
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-sm text-muted-foreground">All-inclusive package</p>
+                </CardContent>
+              </Card>
+              
+              <Card>
+                <CardHeader>
+                  <CardDescription className="text-lg font-semibold">Market Value</CardDescription>
+                  <CardTitle className="text-2xl font-bold text-primary">
+                    {formatCurrency(data.marketValue)}
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-sm text-muted-foreground">Industry standard</p>
+                </CardContent>
+              </Card>
             </div>
-            
-            <div className="bg-white rounded-lg p-4 text-center">
-              <div className="text-lg font-semibold text-gray-900 mb-1">Market Value</div>
-              <div className="text-2xl font-bold text-blue-600">
-                {formatCurrency(data.marketValue)}
-              </div>
-              <div className="text-sm text-gray-600">Industry standard</div>
-            </div>
-          </div>
-        </div>
+          </CardContent>
+        </Card>
       </div>
     </div>
   );

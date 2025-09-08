@@ -2,106 +2,217 @@ import { loadETLData, formatCurrency, formatPercentage } from "@/lib/etl-data";
 import { BusinessMetrics } from "@/components/business-metrics";
 import { EquipmentShowcase } from "@/components/equipment-showcase";
 import { InvestmentHighlights } from "@/components/investment-highlights";
-import { CallToAction } from "@/components/call-to-action";
+// import { CallToAction } from "@/components/call-to-action";
+import { FinancialChart } from "@/components/financial-chart";
+import { BusinessDetails } from "@/components/business-details";
+import { DocumentsTable } from "@/components/documents-table";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { TrendingUpIcon, Building2Icon } from "lucide-react";
+import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
+import { AppSidebar } from "@/components/app-sidebar";
 
 export default async function HomePage() {
   const etlData = await loadETLData();
   
+  console.log("🏠 HomePage rendering - etlData:", etlData);
+  console.log("🏠 HomePage rendering - components being rendered");
+  
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Hero Section */}
-      <div className="bg-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-          <div className="text-center">
-            <h1 className="text-4xl md:text-6xl font-bold text-gray-900 mb-4">
-              Cranberry
-              <br />
-              <span className="text-blue-600">Hearing & Balance</span>
-            </h1>
-            <p className="text-xl md:text-2xl text-gray-600 mb-8">
-              Multi-Location Audiology Practice
-            </p>
-            <div className="bg-red-50 border border-red-200 rounded-lg p-6 mb-8">
-              <h2 className="text-2xl md:text-3xl font-bold text-red-800 mb-4">
-                Exclusive Business Sale Opportunity
-              </h2>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-center">
-                <div className="bg-white rounded-lg p-4">
-                  <div className="text-2xl font-bold text-gray-900">🏆</div>
-                  <div className="text-sm font-semibold text-gray-700">Established 2003</div>
-                  <div className="text-xs text-gray-600">22 Years in Business</div>
-                </div>
-                <div className="bg-white rounded-lg p-4">
-                  <div className="text-2xl font-bold text-gray-900">📍</div>
-                  <div className="text-sm font-semibold text-gray-700">Two Strategic</div>
-                  <div className="text-xs text-gray-600">Locations</div>
-                </div>
-                <div className="bg-white rounded-lg p-4">
-                  <div className="text-2xl font-bold text-gray-900">💰</div>
-                  <div className="text-sm font-semibold text-gray-700">{formatCurrency(etlData.businessMetrics.monthlyRevenue)}</div>
-                  <div className="text-xs text-gray-600">Monthly Revenue Average</div>
+    <SidebarProvider>
+      <AppSidebar />
+      <SidebarInset>
+        {/* Header matching dashboard */}
+        <header className="group-has-data-[collapsible=icon]/sidebar-wrapper:h-12 flex h-12 shrink-0 items-center gap-2 border-b transition-[width,height] ease-linear">
+          <div className="flex w-full items-center justify-between gap-1 px-4 lg:gap-2 lg:px-6">
+            <h1 className="text-base font-medium">Business Sale Dashboard</h1>
+            <div className="flex items-center gap-2">
+              <Button size="sm" variant="outline">
+                <TrendingUpIcon className="h-4 w-4 mr-1" />
+                Quick Create
+              </Button>
+            </div>
+          </div>
+        </header>
+
+        {/* Main Content matching dashboard structure */}
+        <div className="flex flex-1 flex-col">
+          <div className="@container/main flex flex-1 flex-col gap-2">
+            <div className="flex flex-col gap-4 py-4 md:gap-6 md:py-6">
+              
+              {/* Hero Section */}
+              <div className="px-4 lg:px-6">
+                <div className="text-center mb-8">
+                  <h1 className="text-3xl md:text-4xl font-bold mb-2">
+                    Exclusive Business Sale Opportunity
+                  </h1>
+                  <p className="text-muted-foreground text-lg">
+                    Established Multi-Location Audiology Practice
+                  </p>
                 </div>
               </div>
+
+              {/* Key Metrics Cards - exact same styling as dashboard */}
+              <div className="*:data-[slot=card]:shadow-xs @xl/main:grid-cols-2 @5xl/main:grid-cols-4 grid grid-cols-1 gap-4 px-4 *:data-[slot=card]:bg-gradient-to-t *:data-[slot=card]:from-primary/5 *:data-[slot=card]:to-card dark:*:data-[slot=card]:bg-card lg:px-6">
+                <Card className="@container/card">
+                  <CardHeader className="relative">
+                    <CardDescription>Annual Revenue</CardDescription>
+                    <CardTitle className="@[250px]/card:text-3xl text-2xl font-semibold tabular-nums">
+                      {formatCurrency(etlData.businessMetrics.annualRevenue)}
+                    </CardTitle>
+                    <div className="absolute right-4 top-4">
+                      <Badge variant="outline" className="flex gap-1 rounded-lg text-xs">
+                        <TrendingUpIcon className="size-3" />
+                        +45%
+                      </Badge>
+                    </div>
+                  </CardHeader>
+                  <CardFooter className="flex-col items-start gap-1 text-sm">
+                    <div className="line-clamp-1 flex gap-2 font-medium">
+                      Strong revenue growth <TrendingUpIcon className="size-4" />
+                    </div>
+                    <div className="text-muted-foreground">
+                      30-month track record
+                    </div>
+                  </CardFooter>
+                </Card>
+
+                <Card className="@container/card">
+                  <CardHeader className="relative">
+                    <CardDescription>EBITDA Margin</CardDescription>
+                    <CardTitle className="@[250px]/card:text-3xl text-2xl font-semibold tabular-nums">
+                      {formatPercentage(etlData.businessMetrics.ebitdaMargin)}
+                    </CardTitle>
+                    <div className="absolute right-4 top-4">
+                      <Badge variant="outline" className="flex gap-1 rounded-lg text-xs">
+                        <TrendingUpIcon className="size-3" />
+                        Excellent
+                      </Badge>
+                    </div>
+                  </CardHeader>
+                  <CardFooter className="flex-col items-start gap-1 text-sm">
+                    <div className="line-clamp-1 flex gap-2 font-medium">
+                      Industry-leading margins <TrendingUpIcon className="size-4" />
+                    </div>
+                    <div className="text-muted-foreground">
+                      Strong profitability
+                    </div>
+                  </CardFooter>
+                </Card>
+
+                <Card className="@container/card">
+                  <CardHeader className="relative">
+                    <CardDescription>ROI Potential</CardDescription>
+                    <CardTitle className="@[250px]/card:text-3xl text-2xl font-semibold tabular-nums">
+                      {formatPercentage(etlData.businessMetrics.roi)}
+                    </CardTitle>
+                    <div className="absolute right-4 top-4">
+                      <Badge variant="outline" className="flex gap-1 rounded-lg text-xs">
+                        <TrendingUpIcon className="size-3" />
+                        High ROI
+                      </Badge>
+                    </div>
+                  </CardHeader>
+                  <CardFooter className="flex-col items-start gap-1 text-sm">
+                    <div className="line-clamp-1 flex gap-2 font-medium">
+                      Exceptional return potential <TrendingUpIcon className="size-4" />
+                    </div>
+                    <div className="text-muted-foreground">
+                      Fast payback period
+                    </div>
+                  </CardFooter>
+                </Card>
+
+                <Card className="@container/card">
+                  <CardHeader className="relative">
+                    <CardDescription>Equipment Value</CardDescription>
+                    <CardTitle className="@[250px]/card:text-3xl text-2xl font-semibold tabular-nums">
+                      {formatCurrency(etlData.businessMetrics.equipmentValue)}
+                    </CardTitle>
+                    <div className="absolute right-4 top-4">
+                      <Badge variant="outline" className="flex gap-1 rounded-lg text-xs">
+                        <Building2Icon className="size-3" />
+                        Included
+                      </Badge>
+                    </div>
+                  </CardHeader>
+                  <CardFooter className="flex-col items-start gap-1 text-sm">
+                    <div className="line-clamp-1 flex gap-2 font-medium">
+                      Professional equipment included <Building2Icon className="size-4" />
+                    </div>
+                    <div className="text-muted-foreground">
+                      Turnkey operation
+                    </div>
+                  </CardFooter>
+                </Card>
+              </div>
+
+              {/* Financial Performance Chart */}
+              <div className="px-4 lg:px-6">
+                <FinancialChart />
+              </div>
+
+              {/* Investment Opportunity Card */}
+              <div className="px-4 lg:px-6">
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-2xl">Limited Time Opportunity</CardTitle>
+                    <CardDescription className="text-lg">
+                      Established business with {formatCurrency(etlData.businessMetrics.annualRevenue)} annual revenue + {formatCurrency(etlData.businessMetrics.equipmentValue)} equipment
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-center">
+                      <div className="text-4xl font-bold mb-2">
+                        {formatCurrency(etlData.businessMetrics.askingPrice)}
+                      </div>
+                      <div className="text-lg font-semibold mb-4">All-Inclusive Price</div>
+                      <div className="text-sm text-muted-foreground mb-6">
+                        {(() => {
+                          const { askingPrice, marketValue } = etlData.businessMetrics;
+                          if (!marketValue || marketValue === 0) {
+                            return "—";
+                          }
+                          const percent = ((marketValue - askingPrice) / marketValue) * 100;
+                          const formattedPercent = percent % 1 === 0 ? percent.toFixed(0) : percent.toFixed(1);
+                          return `${formattedPercent}% Below Market Value`;
+                        })()}
+                      </div>
+                      <Button size="lg" className="w-full md:w-auto">
+                        View Due Diligence Documents
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* Business Details */}
+              <div className="px-4 lg:px-6">
+                <BusinessDetails data={etlData} />
+              </div>
+
+              {/* Business Metrics */}
+              <BusinessMetrics data={etlData.businessMetrics} />
+
+              {/* Investment Highlights */}
+              <InvestmentHighlights highlights={etlData.investmentHighlights} />
+
+              {/* Equipment Showcase */}
+              <EquipmentShowcase equipment={etlData.equipmentCategories} />
+
+              {/* Documents Table */}
+              <div className="px-4 lg:px-6">
+                <DocumentsTable />
+              </div>
+
+              {/* Call to Action - Temporarily removed */}
+              {/* <CallToAction askingPrice={etlData.businessMetrics.askingPrice} /> */}
             </div>
           </div>
         </div>
-      </div>
-
-      {/* Business Description */}
-      <div className="bg-white py-16">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h2 className="text-3xl font-bold text-gray-900 mb-6 text-center">
-            A Legacy of Excellence in Hearing Care
-          </h2>
-          <div className="prose prose-lg text-gray-600 max-w-none">
-            <p className="mb-6">
-              For over two decades, Cranberry Hearing & Balance Center has been the trusted name in audiology care across Pittsburgh. What started as a single practice in 2003 has grown into a thriving multi-location operation, serving thousands of patients with cutting-edge hearing solutions and compassionate care.
-            </p>
-            <p className="mb-6">
-              Now, after 22 years of building relationships, perfecting processes, and establishing market dominance, the current owner is ready to pass the torch to the next generation. This isn't just a business sale—it's an opportunity to inherit a proven system, established patient base, and the reputation that comes with two decades of excellence.
-            </p>
-            <p className="text-xl font-semibold text-gray-900 text-center">
-              The question isn't whether this is a good investment—it's whether you're ready to step into a legacy of success.
-            </p>
-          </div>
-        </div>
-      </div>
-
-      {/* Limited Time Opportunity */}
-      <div className="bg-red-600 text-white py-16">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h2 className="text-3xl md:text-4xl font-bold mb-4">
-            🔥 LIMITED TIME OPPORTUNITY
-          </h2>
-          <p className="text-xl mb-8">
-            Established {formatCurrency(etlData.businessMetrics.annualRevenue)} Annual Revenue Business + {formatCurrency(etlData.businessMetrics.equipmentValue)} Equipment - 29% Below Market Value
-          </p>
-          <p className="text-lg font-semibold mb-8">
-            🔥 Qualified buyer already interested - act quickly!
-          </p>
-          
-          <div className="bg-white text-gray-900 rounded-lg p-8 max-w-2xl mx-auto">
-            <div className="text-4xl font-bold text-red-600 mb-2">
-              {formatCurrency(etlData.businessMetrics.askingPrice)}
-            </div>
-            <div className="text-lg font-semibold mb-4">All-Inclusive Price</div>
-            <div className="text-sm text-gray-600">29% Below Market Value</div>
-          </div>
-        </div>
-      </div>
-
-      {/* Business Metrics */}
-      <BusinessMetrics data={etlData.businessMetrics} />
-
-      {/* Investment Highlights */}
-      <InvestmentHighlights highlights={etlData.investmentHighlights} />
-
-      {/* Equipment Showcase */}
-      <EquipmentShowcase equipment={etlData.equipmentCategories} />
-
-      {/* Call to Action */}
-      <CallToAction askingPrice={etlData.businessMetrics.askingPrice} />
-    </div>
+      </SidebarInset>
+    </SidebarProvider>
   );
 }
 

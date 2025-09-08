@@ -8,6 +8,7 @@ filtering, scoring, validation, and export capabilities.
 import json
 import logging
 import yaml
+import re
 from dataclasses import dataclass, field
 from datetime import datetime, date
 from pathlib import Path
@@ -15,6 +16,47 @@ from typing import Dict, Any, List, Optional, Union
 import os
 
 logger = logging.getLogger(__name__)
+
+def parse_currency_value(value: Union[str, int, float]) -> Optional[float]:
+    """
+    Parse currency value from various formats.
+    
+    Handles formats like:
+    - "$61,727.50"
+    - "61,727.50"
+    - 61727.50
+    - "61727"
+    - "$1,000"
+    
+    Args:
+        value: Currency value in various formats
+        
+    Returns:
+        Parsed float value or None if parsing fails
+    """
+    if value is None:
+        return None
+    
+    # If already a number, return it
+    if isinstance(value, (int, float)):
+        return float(value)
+    
+    # Convert to string and clean
+    value_str = str(value).strip()
+    
+    # Remove currency symbols and whitespace
+    value_str = re.sub(r'[$£€¥]', '', value_str)
+    value_str = value_str.strip()
+    
+    # Remove commas
+    value_str = value_str.replace(',', '')
+    
+    # Try to parse as float
+    try:
+        return float(value_str)
+    except (ValueError, TypeError):
+        logger.warning(f"Could not parse currency value: {value}")
+        return None
 
 @dataclass
 class DocumentItem:
@@ -718,7 +760,27 @@ class DueDiligenceManager:
         # Check equipment value reasonableness
         if self.data.equipment:
             equipment_value = self.data.equipment.get("total_value", 0)
-            if equipment_value > 0 and equipment_value < 10000:  # Less than $10k seems low
+            
+            # Parse currency value using utility function
+            equipment_value_float = parse_currency_value(equipment_value)
+            
+            if equipment_value_float is not None:
+                # Get minimum threshold from business rules and parse it safely
+                min_threshold_raw = self.business_rules.get("equipment", {}).get("validation", {}).get("minimum_reasonable_value", 10000)
+                min_threshold = parse_currency_value(min_threshold_raw)
+                
+                # Fall back to default if parsing fails
+                if min_threshold is None:
+                    min_threshold = 10000
+                
+                # Flag non-positive values as unreasonable
+                if equipment_value_float <= 0:
+                    cross_checks["equipment_value_reasonable"] = False
+                # Flag values below threshold as potentially unreasonable
+                elif equipment_value_float < min_threshold:
+                    cross_checks["equipment_value_reasonable"] = False
+            else:
+                # If we can't parse the value, consider it unreasonable
                 cross_checks["equipment_value_reasonable"] = False
         
         return cross_checks
