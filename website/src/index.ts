@@ -1,6 +1,9 @@
 /// <reference types="@cloudflare/workers-types" />
 import { createAuth, Env } from "./auth";
 
+// Centralized allowed origin configuration
+const ALLOWED_ORIGIN = 'https://cranberry-hearing-balance-workers.paulchrisluke.workers.dev';
+
 const handler = {
   async fetch(request: Request, env: Env): Promise<Response> {
     const url = new URL(request.url);
@@ -10,9 +13,9 @@ const handler = {
       return new Response(null, {
         status: 200,
         headers: {
-          'Access-Control-Allow-Origin': 'https://cranberry-hearing-balance-workers.paulchrisluke.workers.dev',
+          'Access-Control-Allow-Origin': ALLOWED_ORIGIN,
           'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
-          'Access-Control-Allow-Headers': 'Content-Type, Authorization, Cookie',
+          'Access-Control-Allow-Headers': 'Content-Type, Authorization',
           'Access-Control-Allow-Credentials': 'true',
         },
       });
@@ -26,18 +29,27 @@ const handler = {
         
         // Add CORS headers to the response
         const corsHeaders = {
-          'Access-Control-Allow-Origin': 'https://cranberry-hearing-balance-workers.paulchrisluke.workers.dev',
+          'Access-Control-Allow-Origin': ALLOWED_ORIGIN,
           'Access-Control-Allow-Credentials': 'true',
         };
         
-        // Clone the response and add CORS headers
+        // Clone the response and add CORS headers while preserving duplicate headers
+        const headers = new Headers(response.headers);
+        
+        // Add CORS headers using set/append to preserve duplicates
+        Object.entries(corsHeaders).forEach(([key, value]) => {
+          // Use append for headers that may have multiple values, set for single-value headers
+          if (key.toLowerCase() === 'set-cookie') {
+            headers.append(key, value);
+          } else {
+            headers.set(key, value);
+          }
+        });
+        
         const newResponse = new Response(response.body, {
           status: response.status,
           statusText: response.statusText,
-          headers: {
-            ...Object.fromEntries(response.headers.entries()),
-            ...corsHeaders,
-          },
+          headers: headers,
         });
         
         return newResponse;
@@ -51,7 +63,7 @@ const handler = {
           status: 500,
           headers: { 
             'Content-Type': 'application/json',
-            'Access-Control-Allow-Origin': 'https://cranberry-hearing-balance-workers.paulchrisluke.workers.dev',
+            'Access-Control-Allow-Origin': ALLOWED_ORIGIN,
             'Access-Control-Allow-Credentials': 'true',
           }
         });
@@ -63,7 +75,7 @@ const handler = {
       status: 404,
       headers: { 
         'Content-Type': 'text/plain',
-        'Access-Control-Allow-Origin': 'https://cranberry-hearing-balance-workers.paulchrisluke.workers.dev',
+        'Access-Control-Allow-Origin': ALLOWED_ORIGIN,
         'Access-Control-Allow-Credentials': 'true',
       }
     });

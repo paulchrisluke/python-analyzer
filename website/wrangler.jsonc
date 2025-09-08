@@ -1,29 +1,19 @@
 {
 	"$schema": "node_modules/wrangler/config-schema.json",
-	"main": ".open-next/worker.js",
 	"name": "cranberry-hearing-balance-workers",
 	"compatibility_date": "2025-01-27",
 	"compatibility_flags": [
 		"nodejs_compat"
 	],
-	"assets": {
-		"directory": ".open-next/assets",
-		"binding": "ASSETS"
-	},
 	"vars": {
 		"BETTER_AUTH_URL": "https://cranberry-auth-worker.paulchrisluke.workers.dev",
 		"NEXT_PUBLIC_BETTER_AUTH_URL": "https://cranberry-auth-worker.paulchrisluke.workers.dev"
 	},
-	"r2_buckets": [
+	"d1_databases": [
 		{
-			"bucket_name": "cranberry-nextjs-cache",
-			"binding": "cranberry_nextjs_cache"
-		}
-	],
-	"kv_namespaces": [
-		{
-			"binding": "NEXT_INC_CACHE_KV",
-			"id": "1b838f6f51914d8db9ae6c836c374f4e"
+			"binding": "DB",
+			"database_name": "cranberry-auth-db",
+			"database_id": "1b838f6f51914d8db9ae6c836c374f4e"
 		}
 	]
 }

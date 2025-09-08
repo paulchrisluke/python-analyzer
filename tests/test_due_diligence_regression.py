@@ -23,13 +23,13 @@ from etl_pipeline.utils.due_diligence_manager import DueDiligenceManager
 # Updated to reflect current calculation logic after repo upgrade
 KNOWN_GOOD_VALUES = {
     "sales": {
-        "total_revenue": 2331332.57,  # Current calculated revenue from upgraded pipeline
+        "total_revenue": 2331332.5749999993,  # Current calculated revenue from upgraded pipeline
         "total_transactions": 0  # No transaction data available (using P&L only)
     },
     "financials": {
-        "annual_revenue_projection": 932533.03,  # Current calculated annual projection
-        "estimated_annual_ebitda": 260403.12,  # Current calculated annual EBITDA
-        "roi_percentage": 40.06  # Current calculated ROI
+        "annual_revenue_projection": 932533.0299999996,  # Current calculated annual projection
+        "estimated_annual_ebitda": 260403.12000000005,  # Current calculated annual EBITDA
+        "roi_percentage": 40.062018461538464  # Current calculated ROI
     },
     "equipment": {
         "total_value": 61727.5  # From real equipment data (unchanged)

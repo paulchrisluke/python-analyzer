@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createAuth, Env } from './auth'
 
 // Protected routes that require authentication
 const protectedRoutes = ['/dashboard', '/docs']
@@ -12,31 +11,32 @@ function matchesRoute(pathname: string, route: string): boolean {
   return pathname === route || pathname.startsWith(route + '/')
 }
 
-// Server-side authentication check
+// Server-side authentication check using auth worker session endpoint
 async function isAuthenticated(req: NextRequest): Promise<boolean> {
   try {
-    // Get the auth instance - we need to create it with environment variables
-    // For Cloudflare Workers, we need to get the environment from the request
-    const env = {
-      cranberry_auth_db: (req as { env?: { cranberry_auth_db?: D1Database } }).env?.cranberry_auth_db,
-      BETTER_AUTH_SECRET: process.env.BETTER_AUTH_SECRET || '',
-      BETTER_AUTH_URL: process.env.BETTER_AUTH_URL || process.env.NEXT_PUBLIC_BETTER_AUTH_URL || '',
-      NODE_ENV: process.env.NODE_ENV
-    }
-
-    if (!env.cranberry_auth_db || !env.BETTER_AUTH_SECRET) {
-      console.warn('Missing required environment variables for auth check')
+    const authWorkerUrl = process.env.BETTER_AUTH_URL || process.env.NEXT_PUBLIC_BETTER_AUTH_URL
+    
+    if (!authWorkerUrl) {
+      console.warn('Missing BETTER_AUTH_URL for authentication check')
       return false
     }
 
-    const auth = createAuth(env as Env)
-    
-    // Get the session from the request cookies
-    const session = await auth.api.getSession({
-      headers: req.headers
+    // Call the auth worker's session endpoint
+    const sessionResponse = await fetch(`${authWorkerUrl}/api/auth/session`, {
+      method: 'GET',
+      headers: {
+        'Cookie': req.headers.get('cookie') || '',
+        'User-Agent': req.headers.get('user-agent') || '',
+        'Accept': 'application/json',
+      },
     })
 
-    return !!session?.user
+    if (!sessionResponse.ok) {
+      return false
+    }
+
+    const sessionData = await sessionResponse.json()
+    return !!sessionData?.user
   } catch (error) {
     console.error('Authentication check failed:', error)
     return false

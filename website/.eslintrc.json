@@ -2,5 +2,19 @@
   "extends": [
     "next/core-web-vitals",
     "next/typescript"
+  ],
+  "overrides": [
+    {
+      "files": [
+        "tests/**/*.spec.ts",
+        "e2e/**/*.spec.ts"
+      ],
+      "extends": [
+        "plugin:playwright/playwright-test"
+      ],
+      "env": {
+        "playwright/test": true
+      }
+    }
   ]
 }

@@ -96,11 +96,22 @@ MASTER_SCHEMA = {
                             "file_path": {"type": ["string", "null"]},
                             "file_size": {"type": ["string", "null"]},
                             "visibility": {"type": "array", "items": {"type": "string"}},
-                            "value": {"type": ["number", "string", "null"]}
+                            "value": {
+                                "oneOf": [
+                                    {"type": "number"},
+                                    {"type": "null"},
+                                    {"type": "string", "pattern": "^-?\\d+(?:\\.\\d+)?(?:[eE][+-]?\\d+)?$"}
+                                ]
+                            }
                         }
                     }
                 },
-                "total_value": {"type": ["number", "string"]},
+                "total_value": {
+                    "oneOf": [
+                        {"type": "number"},
+                        {"type": "string", "pattern": "^-?\\d+(?:\\.\\d+)?$"}
+                    ]
+                },
                 "visibility": {"type": "array", "items": {"type": "string"}}
             }
         },
