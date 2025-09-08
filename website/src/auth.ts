@@ -1,3 +1,12 @@
+// Cloudflare Workers types - minimal definition for build compatibility
+declare global {
+  interface D1Database {
+    prepare(query: string): any;
+    exec(query: string): Promise<any>;
+    batch(statements: any[]): Promise<any[]>;
+  }
+}
+
 export interface Env {
   cranberry_auth_db: D1Database;
   BETTER_AUTH_SECRET: string;
