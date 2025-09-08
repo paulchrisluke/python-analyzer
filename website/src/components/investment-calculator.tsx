@@ -108,10 +108,13 @@ export function InvestmentCalculator({ data }: InvestmentCalculatorProps) {
                 </label>
                 <input
                   type="number"
+                  min="0"
+                  max="100"
+                  step="0.1"
                   value={customEbitdaMargin}
                   onChange={(e) => {
                     const value = Number(e.target.value);
-                    setCustomEbitdaMargin(Number.isFinite(value) && value >= 0 && value <= 100 ? value : 0);
+                    setCustomEbitdaMargin(Number.isFinite(value) ? Math.min(100, Math.max(0, value)) : 0);
                   }}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />

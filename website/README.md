@@ -97,7 +97,6 @@ This project uses GitHub Actions for automated CI/CD. See [DEPLOYMENT.md](./DEPL
 2. **Set Worker Secrets:**
    ```bash
    wrangler secret put BETTER_AUTH_SECRET --name cranberry-auth-worker
-   wrangler secret put CLOUDFLARE_API_TOKEN --name cranberry-auth-worker
    ```
 
 3. **Configure Environment Variables:**
@@ -121,11 +120,16 @@ This project uses GitHub Actions for automated CI/CD. See [DEPLOYMENT.md](./DEPL
 
 #### D1 HTTP Driver Configuration (for migrations and database operations)
 
-For local development and database migrations, you'll need to set these environment variables:
+For local development and database migrations, you'll need to set these environment variables in your `.env` file:
 
 - **CLOUDFLARE_ACCOUNT_ID**: Your Cloudflare account ID
 - **CLOUDFLARE_D1_DATABASE_ID**: Your D1 database ID (found in wrangler.toml)
 - **CLOUDFLARE_API_TOKEN**: Your Cloudflare API token with D1 permissions
+
+⚠️ **Security Note**: `CLOUDFLARE_API_TOKEN` should only be stored in:
+- GitHub Secrets (for CI/CD)
+- Local `.env` file (for development)
+- **Never** as a Worker secret (account-scoped token)
 
 Create a `.env` file in the project root with these values:
 
