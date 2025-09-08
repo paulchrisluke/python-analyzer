@@ -234,6 +234,9 @@ class JsonLoader(BaseLoader):
         FileUtils.save_json(landing_page_data, str(landing_page_file))
         self.load_results['landing_page_data'] = str(landing_page_file)
         logger.info(f"Landing page data saved to: {landing_page_file}")
+        
+        # Copy essential files to website directory for Next.js integration
+        self._copy_files_to_website(final_dir)
     
     def _load_equipment_data(self, equipment_data: Dict[str, Any]) -> None:
         """Load equipment data to JSON files."""
@@ -709,6 +712,44 @@ class JsonLoader(BaseLoader):
         
         logger.info("Landing page data structure created successfully")
         return landing_page_data
+    
+    def _copy_files_to_website(self, final_dir: Path) -> None:
+        """Copy essential JSON files to website directory for Next.js integration."""
+        try:
+            import shutil
+            
+            # Define website data directory
+            website_data_dir = Path("website/src/data")
+            website_data_dir.mkdir(parents=True, exist_ok=True)
+            
+            # Files to copy to website
+            files_to_copy = [
+                "landing_page_data.json",
+                "financial_summary.json", 
+                "equipment_analysis.json",
+                "business_sale_data.json"
+            ]
+            
+            copied_files = []
+            for filename in files_to_copy:
+                source_file = final_dir / filename
+                if source_file.exists():
+                    dest_file = website_data_dir / filename
+                    shutil.copy2(source_file, dest_file)
+                    copied_files.append(filename)
+                    logger.info(f"Copied {filename} to website directory: {dest_file}")
+                else:
+                    logger.warning(f"Source file not found: {source_file}")
+            
+            if copied_files:
+                logger.info(f"Successfully copied {len(copied_files)} files to website directory")
+                self.load_results['website_files_copied'] = copied_files
+            else:
+                logger.warning("No files were copied to website directory")
+                
+        except Exception as e:
+            logger.error(f"Failed to copy files to website directory: {e}")
+            # Don't raise the exception - this is not critical for the main pipeline
     
     def _convert_dataframes_to_dict(self, data: Dict[str, Any]) -> Dict[str, Any]:
         """Convert DataFrames to dictionaries for JSON serialization."""
