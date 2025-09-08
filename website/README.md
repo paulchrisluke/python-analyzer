@@ -29,7 +29,6 @@ website/
 
 1. **Run the ETL Pipeline**:
    ```bash
-   cd 05_ANALYSIS_TOOLS
    python run_pipeline.py
    ```
 
@@ -42,7 +41,7 @@ website/
 
 1. **Copy ETL Data**:
    ```bash
-   python 05_ANALYSIS_TOOLS/deploy_to_website.py
+   python deploy_to_website.py
    ```
 
 2. **Deploy to Cloudflare**:
@@ -235,7 +234,7 @@ wrangler pages deployment list --project-name cranberry-business-sale
 
 ### Support
 
-- **ETL Pipeline Issues**: Check `05_ANALYSIS_TOOLS/logs/`
+- **ETL Pipeline Issues**: Check `logs/`
 - **Website Issues**: Check browser console
 - **Deployment Issues**: Check Cloudflare Pages dashboard
 

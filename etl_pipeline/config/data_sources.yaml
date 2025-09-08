@@ -1,0 +1,65 @@
+# Data Sources Configuration
+# Defines all data sources for the ETL pipeline
+
+data_sources:
+    
+    
+  financial_pnl_2023:
+    type: csv
+    path: "docs/financials/Profit_and_Loss/2023_Profit_and_Loss/"
+    pattern: "*.[cC][sS][vV]"
+    encoding: utf-8
+    delimiter: ","
+    has_header: true
+    description: "2023 Profit & Loss statements"
+    
+  financial_pnl_2024:
+    type: csv
+    path: "docs/financials/Profit_and_Loss/2024_Profit_and_Loss/"
+    pattern: "*.[cC][sS][vV]"
+    encoding: utf-8
+    delimiter: ","
+    has_header: true
+    description: "2024 Profit & Loss statements"
+    
+  financial_pnl_2025:
+    type: csv
+    path: "docs/financials/Profit_and_Loss/2025_Profit_and_Loss/"
+    pattern: "*.[cC][sS][vV]"
+    encoding: utf-8
+    delimiter: ","
+    has_header: true
+    description: "2025 Profit & Loss statements"
+    
+  financial_balance_sheets:
+    type: csv
+    path: "docs/financials/Balance_Sheets/2022_Balance_Sheets/"
+    pattern: "*.[cC][sS][vV]"
+    encoding: utf-8
+    delimiter: ","
+    has_header: true
+    description: "Balance sheet data"
+    
+  financial_general_ledger:
+    type: csv
+    path: "docs/financials/General_Ledger/"
+    pattern: "*.[cC][sS][vV]"
+    encoding: utf-8
+    delimiter: ","
+    has_header: true
+    description: "General ledger data"
+    
+  financial_cogs:
+    type: csv
+    path: "docs/financials/COGS/"
+    pattern: "*.[cC][sS][vV]"
+    encoding: utf-8
+    delimiter: ","
+    has_header: true
+    description: "Cost of Goods Sold data"
+    
+  equipment_quotes:
+    type: pdf
+    path: "docs/equipment/"
+    pattern: "*.pdf"
+    description: "Equipment quote PDFs"

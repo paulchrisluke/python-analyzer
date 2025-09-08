@@ -1,0 +1,73 @@
+# Business Rules Configuration
+# Defines business logic and calculation rules
+
+locations:
+  # Sale locations (Pennsylvania state)
+  pennsylvania:
+    names: ["Pennsylvania", "Pittsburgh", "West View", "Cranberry", "Cranberry Hearing & Balance Center"]
+    state: "Pennsylvania"
+    primary: true
+    for_sale: true
+    description: "Pennsylvania locations for sale (Pittsburgh/West View + Cranberry)"
+  # Non-sale locations (Virginia state)  
+  virginia:
+    names: ["Virginia", "Annandale", "Alexandria"]
+    state: "Virginia"
+    primary: false
+    for_sale: false  # NOT FOR SALE
+    description: "Virginia locations not for sale (Annandale + Alexandria)"
+    
+staff_categories:
+  audiologists: ["Jenna Wickham", "Jordan Zdinak", "Hima Bindu Dasari"]
+  technicians: ["Barbara Beck", "Jessica Cooper"]
+  support: ["Kristen McCabe", "Richard Hoben"]
+  
+product_categories:
+  hearing_aids: ["Hearing Aid", "HA", "Hearing Device"]
+  accessories: ["Accessory", "Battery", "Ear Mold"]
+  services: ["Service", "Fee", "Consultation"]
+  repairs: ["Repair", "Warranty", "Replacement"]
+  
+financial_metrics:
+  ebitda_margin_target: 0.256  # 25.6% target EBITDA margin (from website analysis)
+  revenue_growth_target: 0.10  # 10% target annual growth
+  transaction_volume_target: 1000  # Monthly transaction target
+  
+# Equipment configuration (fallback values - actual values calculated dynamically from CSV files)
+equipment:
+  total_value: 61727  # Fallback value if CSV calculation fails
+  description: "Professional audiology equipment including Cello Audiometer, Trumpet REM System, CL12BLP Equipment, Test Booths"
+  source: "Fallback from business rules - actual values calculated dynamically from CSV files"
+  
+valuation_multipliers:
+  revenue_multiple_min: 0.8
+  revenue_multiple_max: 1.2
+  ebitda_multiple_min: 3.0
+  ebitda_multiple_max: 5.0
+  
+data_quality:
+  min_transaction_amount: 0.01
+  max_transaction_amount: 50000.00
+  required_fields: ["sale_date", "total_price", "clinic_name", "staff_name"]
+  
+# Configurable date range for analysis
+analysis_period:
+  start_date: "2023-01-01"
+  end_date: "2025-06-30"  # End of Q2 2025
+  description: "Website analysis period: Jan 1, 2023 to end of Q2 2025"
+  # Annual projection calculation: (Total Revenue ÷ Months in Period) × 12
+  # This ensures consistent monthly averages based on the specified date range
+
+# P&L data filtering rules
+pnl_filtering:
+  # Filter P&L data to only include sale locations (Pennsylvania state)
+  include_states: ["Pennsylvania"]
+  exclude_states: ["Virginia"]
+  description: "P&L data is broken down by state - only include Pennsylvania revenue for sale locations"
+  # This ensures we only count revenue from the 2 locations for sale (Pittsburgh/West View + Cranberry)
+  # and exclude the 2 locations not for sale (Annandale + Alexandria)
+  
+# Full data range available
+data_range:
+  start: "2021-01-01"
+  end: "2025-12-31"
