@@ -91,6 +91,15 @@ website/*.webmanifest
 # DEVELOPMENT FILES
 # =============================================================================
 
+# Node.js
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.npm
+.yarn-integrity
+package-lock.json
+
 # Python
 __pycache__/
 *.py[cod]
