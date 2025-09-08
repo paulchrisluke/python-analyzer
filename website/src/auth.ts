@@ -50,9 +50,9 @@ export async function createAuth(env: Env) {
       sessionToken: {
         name: "better-auth.session_token",
         httpOnly: true,
-        secure: true, // Required for cross-domain cookies
-        sameSite: "none", // Allow cross-domain cookies
-        domain: env.COOKIE_DOMAIN || ".paulchrisluke.workers.dev", // Set for parent domain to work across subdomains
+        secure: env.NODE_ENV === "production", // Only secure in production
+        sameSite: env.NODE_ENV === "production" ? "none" : "lax", // Allow cross-domain in production, lax in development
+        domain: env.NODE_ENV === "production" ? (env.COOKIE_DOMAIN || ".paulchrisluke.workers.dev") : undefined, // Set domain in production only
         path: "/",
       },
     },

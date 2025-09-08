@@ -21,9 +21,9 @@ async function isAuthenticated(req: NextRequest): Promise<boolean> {
       return false
     }
 
-    // Skip auth check if the auth worker URL is localhost (test environment)
+    // Skip auth check if the auth worker URL is localhost (development/test environment)
     if (authWorkerUrl.includes('localhost') || authWorkerUrl.includes('127.0.0.1')) {
-      return false
+      return true
     }
 
     // Sanitize the auth worker URL by trimming trailing slashes to prevent double slashes
