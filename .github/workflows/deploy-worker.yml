@@ -81,19 +81,18 @@ jobs:
         echo "Verifying downloaded artifacts..."
         ls -la
         echo "Checking if data files were downloaded correctly..."
-        if [ -d "data/final" ]; then
-          echo "data/final directory exists"
-          ls -la data/final/
-        else
-          echo "data/final directory not found"
+        if [ ! -d "data/final" ]; then
+          echo "ERROR: data/final directory not found"
+          exit 1
         fi
-        if [ -d "src/data" ]; then
-          echo "src/data directory exists"
-          ls -la src/data/
-        else
-          echo "src/data directory not found"
+        echo "data/final directory exists"
+        ls -la data/final/
+        if [ ! -d "src/data" ]; then
+          echo "ERROR: src/data directory not found"
+          exit 1
         fi
-    
+        echo "src/data directory exists"
+        ls -la src/data/
     - name: Setup Node.js
       uses: actions/setup-node@v4
       with:
@@ -114,15 +113,15 @@ jobs:
     - name: Build website
       env:
         BETTER_AUTH_URL: ${{ secrets.BETTER_AUTH_URL }}
-        BETTER_AUTH_SECRET: ${{ secrets.BETTER_AUTH_SECRET }}
       run: |
+        set -euo pipefail
         echo "Current working directory: $(pwd)"
         echo "Listing website directory contents:"
         ls -la
         echo "Listing src directory contents:"
         ls -la src/
         echo "Listing lib directory contents:"
-        ls -la src/lib/
+        ls -la src/lib/ || true
         echo "Running build..."
         npm run build
     
