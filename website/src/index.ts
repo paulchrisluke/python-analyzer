@@ -1,4 +1,3 @@
-/// <reference types="@cloudflare/workers-types" />
 import { createAuth, Env } from "./auth";
 
 // Default allowed origins for fallback
