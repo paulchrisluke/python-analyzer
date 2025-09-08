@@ -87,6 +87,11 @@ const isValidColor = (color: string): boolean => {
   if (/^var\(--[a-zA-Z0-9-_]+\)$/.test(color)) {
     return true
   }
+  // Allow color functions with CSS custom properties (e.g., hsl(var(--chart-1)))
+  // Supports rgb/rgba/hsl/hsla with var() values and optional slash-alpha syntax
+  if (/^(rgb|rgba|hsl|hsla)\(\s*var\(--[a-zA-Z0-9-_]+\)(?:\s*\/\s*[\d.]+)?\s*\)$/.test(color)) {
+    return true
+  }
   // Allow named colors (basic set)
   const namedColors = [
     'transparent', 'currentColor', 'inherit', 'initial', 'unset',

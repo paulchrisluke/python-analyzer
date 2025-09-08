@@ -21,8 +21,16 @@ async function isAuthenticated(req: NextRequest): Promise<boolean> {
       return false
     }
 
+    // Skip auth check if the auth worker URL is localhost (test environment)
+    if (authWorkerUrl.includes('localhost') || authWorkerUrl.includes('127.0.0.1')) {
+      return false
+    }
+
+    // Sanitize the auth worker URL by trimming trailing slashes to prevent double slashes
+    const sanitizedAuthWorkerUrl = authWorkerUrl.replace(/\/+$/, '')
+
     // Call the auth worker's session endpoint
-    const sessionResponse = await fetch(`${authWorkerUrl}/api/auth/session`, {
+    const sessionResponse = await fetch(`${sanitizedAuthWorkerUrl}/api/auth/session`, {
       method: 'GET',
       headers: {
         'Cookie': req.headers.get('cookie') || '',

@@ -57,10 +57,16 @@ test.describe('Auth Flow', () => {
     // Test signup form input functionality
     await page.goto('/signup');
     
-    // Fill form fields
-    await page.fill('input[id="name"]', testName);
-    await page.fill('input[id="email"]', testEmail);
-    await page.fill('input[id="password"]', testPassword);
+    // Wait for the form to be ready
+    await page.waitForSelector('input[id="name"]', { state: 'visible' });
+    
+    // Fill form fields with more robust approach for WebKit
+    await page.locator('input[id="name"]').fill(testName);
+    await page.locator('input[id="email"]').fill(testEmail);
+    await page.locator('input[id="password"]').fill(testPassword);
+    
+    // Wait a bit for the values to be set, especially for WebKit
+    await page.waitForTimeout(100);
     
     // Verify form fields have the correct values
     await expect(page.locator('input[id="name"]')).toHaveValue(testName);
