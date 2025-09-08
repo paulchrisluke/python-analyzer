@@ -63,6 +63,13 @@ Configure business rules and data sources in `etl_pipeline/config/`:
 - `business_rules.yaml` - Business logic and analysis parameters
 - `data_sources.yaml` - Data source paths and processing options
 
+### Environment Variables
+
+- **WEBSITE_DATA_DIR** (optional): Path to website data directory for automatic file copying
+  - When set: ETL pipeline copies JSON files to the specified directory for website integration
+  - When not set: Pipeline skips website file publishing (safe for CI/non-monorepo deployments)
+  - Example: `export WEBSITE_DATA_DIR="website/src/data"`
+
 ## 📊 Output
 
 The pipeline generates:
