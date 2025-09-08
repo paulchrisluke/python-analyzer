@@ -3,6 +3,7 @@ JSON data loader for ETL pipeline.
 """
 
 import json
+import os
 import pandas as pd
 import numpy as np
 from typing import Dict, Any, List, Optional
@@ -718,8 +719,15 @@ class JsonLoader(BaseLoader):
         try:
             import shutil
             
-            # Define website data directory
-            website_data_dir = Path("website/src/data")
+            # Check if website data directory is configured via environment variable
+            website_data_dir_path = os.environ.get("WEBSITE_DATA_DIR")
+            if not website_data_dir_path:
+                logger.info("WEBSITE_DATA_DIR environment variable not set - skipping website file publishing")
+                self.load_results['website_publish_skipped'] = True
+                return
+            
+            # Define website data directory from environment variable
+            website_data_dir = Path(website_data_dir_path)
             website_data_dir.mkdir(parents=True, exist_ok=True)
             
             # Files to copy to website

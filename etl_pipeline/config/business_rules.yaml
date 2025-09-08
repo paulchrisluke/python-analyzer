@@ -12,6 +12,7 @@ locations:
     
     # Detailed location information for sale locations
     cranberry_location:
+      location_id: "cranberry_pa"
       name: "Cranberry Hearing & Balance"
       address: "20820 Route 19, Suite A"
       city: "Cranberry Twp"
@@ -19,18 +20,19 @@ locations:
       zip_code: "16066"
       phone: "724-779-4444"
       google_maps_url: "https://www.google.com/maps/place/20820%20Route%2019+Cranberry%20Twp+PA+16066"
-      location_type: "Primary Location"
+      location_type: "primary"
       for_sale: true
       
     west_view_location:
-      name: "Cranberry Hearing & Balance"
+      location_id: "west_view_pa"
+      name: "Cranberry Hearing & Balance - West View"
       address: "999 West View Park Drive"
       city: "Pittsburgh"
       state: "PA"
       zip_code: "15229"
       phone: "412-931-9290"
       google_maps_url: "https://www.google.com/maps/place/999%20West%20View%20Park%20Drive+Pittsburgh+PA+15229"
-      location_type: "Secondary Location"
+      location_type: "satellite"
       for_sale: true
       
   # Non-sale locations (Virginia state)  
@@ -98,10 +100,11 @@ data_range:
 
 # Business sale information
 sale_details:
-  reason_for_sale: "Absentee owner seeking retirement and lifestyle change"
+  reason_for_sale: "Owner retirement and lifestyle change"  # Must match standard_reasons
+  secondary_reason: "Absentee owner seeking to focus on other ventures"  # Optional additional reason
   sale_type: "Owner retirement and lifestyle transition"
-  urgency: "Standard timeline - no rush"
-  owner_involvement: "Absentee owner - minimal day-to-day involvement"
+  urgency: "standard"  # Enum: "standard" | "urgent"
+  owner_involvement: "absentee"  # Enum: "absentee" | "active" | "partial"
   transition_support: "Available for smooth transition and training period"
   
 # Professional reasons for sale (standard business language)

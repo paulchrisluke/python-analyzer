@@ -1260,16 +1260,74 @@ class BusinessMetricsCalculator:
         return landing_page_metrics
     
     def _get_location_information(self) -> Dict[str, Any]:
-        """Extract location information from business rules."""
+        """Extract location information from business rules configuration."""
         locations_config = self.business_rules.get('locations', {})
-        pennsylvania_config = locations_config.get('pennsylvania', {})
+        
+        # Derive location information dynamically from config
+        total_locations = 0
+        sale_locations = []
+        non_sale_locations = []
+        states = set()
+        
+        for location_key, location_data in locations_config.items():
+            if isinstance(location_data, dict) and 'state' in location_data:
+                # This is a state-level configuration
+                state = location_data.get('state', '')
+                states.add(state)
+                
+                # Count detailed locations within this state
+                for detail_key, detail_data in location_data.items():
+                    if (isinstance(detail_data, dict) and 
+                        'name' in detail_data and 
+                        'address' in detail_data):
+                        # This is a detailed location
+                        total_locations += 1
+                        
+                        if location_data.get('for_sale', False):
+                            sale_locations.append(detail_data)
+                        else:
+                            non_sale_locations.append(detail_data)
+        
+        # Determine primary and secondary locations from sale locations
+        primary_location = None
+        secondary_location = None
+        
+        if sale_locations:
+            # Find primary location (location_type = "primary")
+            for location in sale_locations:
+                if location.get('location_type') == 'primary':
+                    primary_location = location
+                    break
+            
+            # Find secondary/satellite location (location_type = "satellite")
+            for location in sale_locations:
+                if location.get('location_type') == 'satellite':
+                    secondary_location = location
+                    break
+            
+            # Fallback: if no location_type specified, use first two locations
+            if not primary_location and len(sale_locations) >= 1:
+                primary_location = sale_locations[0]
+            if not secondary_location and len(sale_locations) >= 2:
+                secondary_location = sale_locations[1]
+        
+        # Determine if any locations are for sale
+        for_sale = any(
+            location_data.get('for_sale', False) 
+            for location_data in locations_config.values() 
+            if isinstance(location_data, dict)
+        )
         
         location_info = {
-            'primary_location': pennsylvania_config.get('cranberry_location', {}),
-            'secondary_location': pennsylvania_config.get('west_view_location', {}),
-            'total_locations': 2,
-            'state': 'Pennsylvania',
-            'for_sale': True
+            'primary_location': primary_location,
+            'secondary_location': secondary_location,
+            'total_locations': total_locations,
+            'sale_locations': sale_locations,
+            'non_sale_locations': non_sale_locations,
+            'states': list(states),
+            'for_sale': for_sale
         }
+        
+        logger.info(f"Location information derived from config: {total_locations} total locations, {len(sale_locations)} for sale, states: {list(states)}")
         
         return location_info
