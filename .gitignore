@@ -153,6 +153,9 @@ wheels/
 *.egg
 MANIFEST
 
+# Exception: Allow website src/lib directory (contains auth utilities)
+!website/src/lib/
+
 # Virtual Environment
 venv/
 env/
