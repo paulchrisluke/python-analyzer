@@ -40,7 +40,6 @@ This document outlines the required updates to our ETL pipeline to generate comp
 ❌ **Still Missing:**
 - Square footage details
 - Employee count specifics
-- Business hours details
 - Some market research data
 
 ## Required Fields Analysis

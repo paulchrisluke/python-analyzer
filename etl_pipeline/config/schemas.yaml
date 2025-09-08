@@ -196,6 +196,39 @@ schemas:
       quote_date: datetime
       location: string
       
+  # Business sale details schema
+  sale_details:
+    required_fields:
+      - reason_for_sale
+      - urgency
+      - owner_involvement
+    fields:
+      reason_for_sale:
+        type: string
+        validation: "must_match_standard_reasons"
+        description: "Primary reason for sale - must match one of the standard_reasons"
+      secondary_reason:
+        type: string
+        nullable: true
+        validation: "must_match_standard_reasons"
+        description: "Optional secondary reason for sale - must match one of the standard_reasons"
+      sale_type:
+        type: string
+        nullable: true
+        description: "Type of sale transaction"
+      urgency:
+        type: string
+        enum: ["standard", "urgent"]
+        description: "Sale urgency level"
+      owner_involvement:
+        type: string
+        enum: ["absentee", "active", "partial"]
+        description: "Level of owner involvement in business operations"
+      transition_support:
+        type: string
+        nullable: true
+        description: "Available transition support details"
+      
   # Separate access-controlled patient dimension table for PII data
   patient_dimension:
     access_control: "restricted"
