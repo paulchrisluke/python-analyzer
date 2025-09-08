@@ -1,7 +1,7 @@
 {
     "$schema": "node_modules/wrangler/config-schema.json",
     "main": ".open-next/worker.js",
-    "name": "cranberry-hearing-balance-pages",
+    "name": "cranberry-hearing-balance-workers",
     "compatibility_date": "2025-01-27",
     "compatibility_flags": [
         "nodejs_compat"
@@ -11,6 +11,6 @@
         "binding": "ASSETS"
     },
     "vars": {
-        "BETTER_AUTH_URL": "https://cranberry-hearing-balance-pages.pages.dev"
+        "BETTER_AUTH_URL": "https://cranberry-hearing-balance-workers.paulchrisluke.workers.dev"
     }
 }
