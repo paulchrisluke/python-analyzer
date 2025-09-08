@@ -24,7 +24,7 @@ const handler = {
     // Handle Better Auth API routes
     if (url.pathname.startsWith('/api/auth/')) {
       try {
-        const auth = createAuth(env);
+        const auth = await createAuth(env);
         const response = await auth.handler(request);
         
         // Add CORS headers to the response

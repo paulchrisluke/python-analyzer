@@ -35,7 +35,7 @@ async function isAuthenticated(req: NextRequest): Promise<boolean> {
       return false
     }
 
-    const sessionData = await sessionResponse.json()
+    const sessionData = await sessionResponse.json() as { user?: any }
     return !!sessionData?.user
   } catch (error) {
     console.error('Authentication check failed:', error)
@@ -88,5 +88,4 @@ export const config = {
      */
     '/((?!api|_next/static|_next/image|favicon.ico).*)',
   ],
-  runtime: 'nodejs', // Use Node.js runtime instead of Edge Runtime
 }

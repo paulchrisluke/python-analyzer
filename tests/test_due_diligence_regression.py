@@ -183,14 +183,15 @@ class TestDueDiligenceRegression:
             expected_equipment_value = KNOWN_GOOD_VALUES["equipment"]["total_value"]
             source = "Known-good fallback"
         
+        # Convert both to float for consistent arithmetic
+        # Handle case where calculated_equipment_value might be a string from JSON
+        calculated_float = float(calculated_equipment_value)
+        expected_float = float(expected_equipment_value)
+        
         # Calculate difference
-        if expected_equipment_value == 0:
-            equipment_diff = 0.0 if calculated_equipment_value == 0 else float('inf')
+        if expected_float == 0:
+            equipment_diff = 0.0 if calculated_float == 0 else float('inf')
         else:
-            # Convert both to float for consistent arithmetic
-            # Handle case where calculated_equipment_value might be a string from JSON
-            calculated_float = float(calculated_equipment_value)
-            expected_float = float(expected_equipment_value)
             equipment_diff = abs(calculated_float - expected_float) / expected_float
         
         # Print comparison for reporting

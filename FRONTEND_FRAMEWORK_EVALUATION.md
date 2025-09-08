@@ -428,6 +428,7 @@ const equipmentCategories = [
 ```typescript
 // src/lib/etl-data.ts (server-only)
 import 'server-only'
+import 'server-only'
 import landingPageData from '../data/landing_page_data.json'
 import financialSummary from '../data/financial_summary.json'
 import equipmentAnalysis from '../data/equipment_analysis.json'
@@ -435,16 +436,33 @@ import equipmentAnalysis from '../data/equipment_analysis.json'
 export async function loadETLData() {
   // Direct JSON imports - no API calls needed
   const financialHighlights = landingPageData.financial_highlights
-  
+
+  // Normalize numbers possibly stored as "$1,234" strings
+  const toNumber = (v: string | number | null | undefined) =>
+    typeof v === 'number'
+      ? v
+      : Number(String(v ?? '').replace(/[^\d.-]/g, '')) || 0
+
+  const askingPrice =
+    toNumber(financialHighlights?.asking_price) ||
+    toNumber(landingPageData?.listing_details?.asking_price)
+
   // Business metrics from financial highlights
   const businessMetrics = {
-    annualRevenue: financialHighlights.annual_revenue,
-    ebitdaMargin: financialHighlights.ebitda_margin,
-    roi: financialHighlights.roi,
-    equipmentValue: parseFloat(equipmentAnalysis.equipment_summary.total_value),
-    askingPrice: financialHighlights.asking_price,
-    marketValue: landingPageData.listing_details.asking_price * 1.5,
-    paybackPeriod: financialHighlights.payback_period,
+    annualRevenue: toNumber(financialHighlights.annual_revenue),
+    ebitdaMargin: toNumber(financialHighlights.ebitda_margin),
+    roi: toNumber(financialHighlights.roi),
+    equipmentValue: toNumber(
+      equipmentAnalysis.equipment_summary.total_value
+    ),
+    askingPrice,
+    marketValue: Math.round(askingPrice * 1.5),
+    paybackPeriod: toNumber(financialHighlights.payback_period),
+    monthlyRevenue: toNumber(financialHighlights.monthly_cash_flow),
+  }
+
+  // …rest of the function…
+}
     monthlyRevenue: financialHighlights.monthly_cash_flow
   }
   

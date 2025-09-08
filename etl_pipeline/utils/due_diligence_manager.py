@@ -765,8 +765,13 @@ class DueDiligenceManager:
             equipment_value_float = parse_currency_value(equipment_value)
             
             if equipment_value_float is not None:
-                # Get minimum threshold from business rules
-                min_threshold = self.business_rules.get("equipment", {}).get("validation", {}).get("minimum_reasonable_value", 10000)
+                # Get minimum threshold from business rules and parse it safely
+                min_threshold_raw = self.business_rules.get("equipment", {}).get("validation", {}).get("minimum_reasonable_value", 10000)
+                min_threshold = parse_currency_value(min_threshold_raw)
+                
+                # Fall back to default if parsing fails
+                if min_threshold is None:
+                    min_threshold = 10000
                 
                 # Flag non-positive values as unreasonable
                 if equipment_value_float <= 0:
