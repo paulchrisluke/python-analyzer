@@ -64,6 +64,9 @@ equipment:
   total_value: 61727  # Fallback value if CSV calculation fails
   description: "Professional audiology equipment including Cello Audiometer, Trumpet REM System, CL12BLP Equipment, Test Booths"
   source: "Fallback from business rules - actual values calculated dynamically from CSV files"
+  validation:
+    minimum_reasonable_value: 10000  # Minimum reasonable equipment value in dollars
+    description: "Equipment values below this threshold are flagged as potentially unreasonable"
   
 valuation_multipliers:
   revenue_multiple_min: 0.8

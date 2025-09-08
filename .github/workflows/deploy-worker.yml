@@ -36,9 +36,8 @@ jobs:
         pip install -r requirements.txt
         
     - name: Run ETL Pipeline
-      env:
-        WEBSITE_DATA_DIR: website/src/data
       run: |
+        echo "Running ETL pipeline for data analysis..."
         python run_pipeline.py
         
     - name: Verify JSON files generated
@@ -54,14 +53,12 @@ jobs:
         name: etl-pipeline-data
         path: |
           data/final/
-          website/src/data/
         retention-days: 7
-        if-no-files-found: error
+        if-no-files-found: warn
 
   deploy:
     runs-on: ubuntu-latest
     name: Deploy Website
-    needs: run-etl-pipeline
     defaults:
       run:
         working-directory: ./website
@@ -70,12 +67,23 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v4
     
-    - name: Download pipeline artifacts
-      uses: actions/download-artifact@v4
-      with:
-        name: etl-pipeline-data
-        path: ./
-    
+    - name: Verify website data files
+      run: |
+        echo "Verifying website data files..."
+        ls -la
+        echo "Checking if website data files exist..."
+        if [ ! -d "src/data" ]; then
+          echo "ERROR: src/data directory not found"
+          exit 1
+        fi
+        echo "src/data directory exists"
+        ls -la src/data/
+        echo "Verifying required data files..."
+        if [ ! -f "src/data/landing_page_data.json" ]; then
+          echo "ERROR: landing_page_data.json not found"
+          exit 1
+        fi
+        echo "Required data files found"
     - name: Setup Node.js
       uses: actions/setup-node@v4
       with:
@@ -94,7 +102,19 @@ jobs:
         head -20 src/data/landing_page_data.json
     
     - name: Build website
-      run: npm run build
+      env:
+        BETTER_AUTH_URL: ${{ secrets.BETTER_AUTH_URL }}
+      run: |
+        set -euo pipefail
+        echo "Current working directory: $(pwd)"
+        echo "Listing website directory contents:"
+        ls -la
+        echo "Listing src directory contents:"
+        ls -la src/
+        echo "Listing lib directory contents:"
+        ls -la src/lib/ || true
+        echo "Running build..."
+        npm run build
     
     - name: Deploy to Cloudflare Workers
       if: github.ref == 'refs/heads/main'

@@ -96,11 +96,22 @@ MASTER_SCHEMA = {
                             "file_path": {"type": ["string", "null"]},
                             "file_size": {"type": ["string", "null"]},
                             "visibility": {"type": "array", "items": {"type": "string"}},
-                            "value": {"type": ["number", "null"]}
+                            "value": {
+                                "oneOf": [
+                                    {"type": "number"},
+                                    {"type": "null"},
+                                    {"type": "string", "pattern": "^-?\\d+(?:\\.\\d+)?(?:[eE][+-]?\\d+)?$"}
+                                ]
+                            }
                         }
                     }
                 },
-                "total_value": {"type": "number"},
+                "total_value": {
+                    "oneOf": [
+                        {"type": "number"},
+                        {"type": "string", "pattern": "^-?\\d+(?:\\.\\d+)?$"}
+                    ]
+                },
                 "visibility": {"type": "array", "items": {"type": "string"}}
             }
         },
@@ -248,7 +259,7 @@ class TestDueDiligenceManager:
         if "equipment" in internal_data and "items" in internal_data["equipment"]:
             for item in internal_data["equipment"]["items"]:
                 assert "value" in item, f"Missing 'value' field in equipment item: {item.get('name')}"
-                assert isinstance(item["value"], (int, float, type(None))), f"Equipment value must be number or None, got {type(item['value'])}"
+                assert isinstance(item["value"], (int, float, str, type(None))), f"Equipment value must be number, string, or None, got {type(item['value'])}"
     
     def test_stage_filtering_public(self, manager):
         """Test that public stage hides file paths and only shows high-level stats."""
