@@ -20,6 +20,7 @@ import {
   UsersIcon,
 } from "lucide-react"
 import { useSession } from "@/lib/auth-client"
+import { getAnchorUrl, ANCHORS } from "@/lib/anchors"
 
 import { NavDocuments } from "@/components/nav-documents"
 import { NavMain } from "@/components/nav-main"
@@ -49,43 +50,43 @@ const getNavData = (user: { name?: string; email?: string; image?: string | null
     },
     {
       title: "Investment Highlights",
-      url: "/#investment-highlights",
+      url: getAnchorUrl("INVESTMENT_HIGHLIGHTS"),
       icon: BarChartIcon,
     },
     {
       title: "Business Details",
-      url: "/#business-details",
+      url: getAnchorUrl("BUSINESS_DETAILS"),
       icon: Building2Icon,
     },
     {
       title: "Location Information",
-      url: "/#location-information",
+      url: getAnchorUrl("LOCATION_INFORMATION"),
       icon: MapPinIcon,
     },
     {
       title: "Due Diligence",
-      url: "/#due-diligence",
+      url: getAnchorUrl("DUE_DILIGENCE_DOCUMENTS"),
       icon: FolderIcon,
     },
   ] : [
     {
       title: "Investment Highlights",
-      url: "/#investment-highlights",
+      url: getAnchorUrl("INVESTMENT_HIGHLIGHTS"),
       icon: BarChartIcon,
     },
     {
       title: "Business Details",
-      url: "/#business-details",
+      url: getAnchorUrl("BUSINESS_DETAILS"),
       icon: Building2Icon,
     },
     {
       title: "Location Information",
-      url: "/#location-information",
+      url: getAnchorUrl("LOCATION_INFORMATION"),
       icon: MapPinIcon,
     },
     {
       title: "Due Diligence",
-      url: "/#due-diligence",
+      url: getAnchorUrl("DUE_DILIGENCE"),
       icon: FolderIcon,
     },
   ],

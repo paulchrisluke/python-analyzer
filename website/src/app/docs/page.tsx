@@ -3,6 +3,8 @@ import { DocumentsTable } from "@/components/documents-table"
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar"
 import { AppSidebar } from "@/components/app-sidebar"
 import { SiteHeader } from "@/components/site-header"
+import { Button } from "@/components/ui/button"
+import Link from "next/link"
 
 export default function DocsPage() {
   return (
@@ -38,23 +40,29 @@ export default function DocsPage() {
                     <div className="border rounded-lg p-6">
                       <h2 className="text-xl font-semibold mb-3">Financial Reports</h2>
                       <p className="text-muted-foreground mb-4">Access to financial statements, tax documents, and revenue analysis.</p>
-                      <button className="bg-primary text-primary-foreground px-4 py-2 rounded hover:bg-primary/90">
-                        View Reports
-                      </button>
+                      <Button asChild className="bg-primary text-primary-foreground px-4 py-2 rounded hover:bg-primary/90">
+                        <Link href="/docs">
+                          View Reports
+                        </Link>
+                      </Button>
                     </div>
                     <div className="border rounded-lg p-6">
                       <h2 className="text-xl font-semibold mb-3">Equipment Analysis</h2>
                       <p className="text-muted-foreground mb-4">Detailed equipment inventory and valuation reports.</p>
-                      <button className="bg-primary text-primary-foreground px-4 py-2 rounded hover:bg-primary/90">
-                        View Equipment
-                      </button>
+                      <Button asChild className="bg-primary text-primary-foreground px-4 py-2 rounded hover:bg-primary/90">
+                        <Link href="/docs">
+                          View Equipment
+                        </Link>
+                      </Button>
                     </div>
                     <div className="border rounded-lg p-6">
                       <h2 className="text-xl font-semibold mb-3">Legal Documents</h2>
                       <p className="text-muted-foreground mb-4">Leases, insurance contracts, and legal agreements.</p>
-                      <button className="bg-primary text-primary-foreground px-4 py-2 rounded hover:bg-primary/90">
-                        View Documents
-                      </button>
+                      <Button asChild className="bg-primary text-primary-foreground px-4 py-2 rounded hover:bg-primary/90">
+                        <Link href="/docs">
+                          View Documents
+                        </Link>
+                      </Button>
                     </div>
                   </div>
                 </div>

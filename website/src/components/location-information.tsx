@@ -92,13 +92,15 @@ export function LocationInformation({ data }: LocationInformationProps) {
                     />
                   </div>
                   {primaryLocation.google_maps_url && (
-                    <Button 
-                      variant="outline" 
-                      size="sm" 
-                      onClick={() => window.open(primaryLocation.google_maps_url, '_blank')}
-                    >
-                      <ExternalLinkIcon className="h-3 w-3 mr-1" />
-                      Open in Google Maps
+                    <Button asChild variant="outline" size="sm">
+                      <a 
+                        href={primaryLocation.google_maps_url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        <ExternalLinkIcon className="h-3 w-3 mr-1" />
+                        Open in Google Maps
+                      </a>
                     </Button>
                   )}
                 </div>
@@ -131,13 +133,15 @@ export function LocationInformation({ data }: LocationInformationProps) {
                     />
                   </div>
                   {secondaryLocation.google_maps_url && (
-                    <Button 
-                      variant="outline" 
-                      size="sm" 
-                      onClick={() => window.open(secondaryLocation.google_maps_url, '_blank')}
-                    >
-                      <ExternalLinkIcon className="h-3 w-3 mr-1" />
-                      Open in Google Maps
+                    <Button asChild variant="outline" size="sm">
+                      <a 
+                        href={secondaryLocation.google_maps_url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        <ExternalLinkIcon className="h-3 w-3 mr-1" />
+                        Open in Google Maps
+                      </a>
                     </Button>
                   )}
                 </div>

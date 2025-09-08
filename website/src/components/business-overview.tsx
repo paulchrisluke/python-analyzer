@@ -106,13 +106,23 @@ export function BusinessOverview({ data }: BusinessOverviewProps) {
 
   // Helper function to format percentage
   const formatPercentage = (value: number): string => {
-    return `${value.toFixed(1)}%`;
+    // Guard against non-finite inputs
+    if (!isFinite(value) || value === null || value === undefined) {
+      return "0.0%";
+    }
+    
+    // Detect if the value is a ratio (0-1 range) and convert to percentage
+    const normalizedValue = value <= 1 && value >= 0 ? value * 100 : value;
+    
+    return `${normalizedValue.toFixed(1)}%`;
   };
 
-  // Calculate years in business
+  // Calculate years in business with proper guards
   const currentYear = new Date().getFullYear();
   const establishedYear = parseInt(data.listing_details?.established || '0');
-  const yearsInBusiness = currentYear - establishedYear;
+  const yearsInBusiness = establishedYear > 0 && establishedYear <= currentYear 
+    ? currentYear - establishedYear 
+    : 0;
 
   return (
     <Card>
@@ -146,7 +156,10 @@ export function BusinessOverview({ data }: BusinessOverviewProps) {
             <div className="flex items-center gap-2">
               <CalendarIcon className="h-4 w-4 text-muted-foreground" />
               <span className="font-medium">Established:</span>
-              <span>{data.listing_details?.established || 'N/A'} ({yearsInBusiness} years)</span>
+              <span>
+                {data.listing_details?.established || 'N/A'}
+                {yearsInBusiness > 0 && ` (${yearsInBusiness} years)`}
+              </span>
             </div>
           </div>
           <div className="space-y-3">
@@ -190,7 +203,7 @@ export function BusinessOverview({ data }: BusinessOverviewProps) {
             <div>
               <span className="font-medium">Reason for Sale:</span>
               <p className="text-sm text-muted-foreground mt-1">
-                Owner is retiring after {yearsInBusiness} successful years in business. This well-established practice is ready for a new owner to continue serving the community with the same high-quality audiological care.
+                Owner is retiring after {yearsInBusiness > 0 ? yearsInBusiness : 'many'} successful years in business. This well-established practice is ready for a new owner to continue serving the community with the same high-quality audiological care.
               </p>
             </div>
           </div>
