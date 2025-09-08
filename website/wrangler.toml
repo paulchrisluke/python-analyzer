@@ -1,13 +1,17 @@
-name = "cranberry-business-sale"
+name = "cranberry-auth-worker"
+main = "src/index.ts"
 compatibility_date = "2025-01-27"
+compatibility_flags = ["nodejs_compat"]
 
-[pages]
-# Static site configuration
-pages_build_output_dir = "."
-# No build command needed for static HTML
+# D1 Database configuration
+[[d1_databases]]
+binding = "cranberry_auth_db"
+database_name = "cranberry-auth-db"
+database_id = "6e3eab94-840f-484f-900f-a2ddd78196d7"
 
-# Environment variables for authentication
-# Set these using: wrangler secret put AUTH_USERNAME
-# Set these using: wrangler secret put AUTH_PASSWORD
-# Example: wrangler secret put AUTH_USERNAME --env production
-# Example: wrangler secret put AUTH_PASSWORD --env production
+# Environment variables
+[vars]
+BETTER_AUTH_URL = "https://cranberry-auth-worker.paulchrisluke.workers.dev"
+
+# Secrets (set using: wrangler secret put BETTER_AUTH_SECRET)
+# BETTER_AUTH_SECRET - Required for Better Auth
