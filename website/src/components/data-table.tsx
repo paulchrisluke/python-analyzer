@@ -116,11 +116,7 @@ export const schema = z.object({
 })
 
 // Create a separate component for the drag handle
-function DragHandle({ id }: { id: number }) {
-  const { attributes, listeners } = useSortable({
-    id,
-  })
-
+function DragHandle({ attributes, listeners }: { attributes: any; listeners: any }) {
   return (
     <Button
       {...attributes}
@@ -139,7 +135,7 @@ const columns: ColumnDef<z.infer<typeof schema>>[] = [
   {
     id: "drag",
     header: () => null,
-    cell: ({ row }) => <DragHandle id={row.original.id} />,
+    cell: () => null, // This will be handled by DraggableRow
   },
   {
     id: "select",
@@ -207,7 +203,7 @@ const columns: ColumnDef<z.infer<typeof schema>>[] = [
     accessorKey: "target",
     header: () => <div className="w-full text-right">Target</div>,
     cell: ({ row, table }) => {
-      const saveRowData = (table.options.meta as { saveRowData?: (id: string, field: string, value: string) => Promise<unknown> })?.saveRowData
+      const saveRowData = (table.options.meta as { saveRowData?: (id: number, field: string, value: string) => Promise<unknown> })?.saveRowData
       return (
         <form
           onSubmit={async (e) => {
@@ -217,7 +213,7 @@ const columns: ColumnDef<z.infer<typeof schema>>[] = [
             
             if (saveRowData) {
               toast.promise(
-                saveRowData(String(row.original.id), 'target', newValue),
+                saveRowData(row.original.id, 'target', newValue),
                 {
                   loading: `Saving ${row.original.header}`,
                   success: "Target updated successfully",
@@ -244,7 +240,7 @@ const columns: ColumnDef<z.infer<typeof schema>>[] = [
     accessorKey: "limit",
     header: () => <div className="w-full text-right">Limit</div>,
     cell: ({ row, table }) => {
-      const saveRowData = (table.options.meta as { saveRowData?: (id: string, field: string, value: string) => Promise<unknown> })?.saveRowData
+      const saveRowData = (table.options.meta as { saveRowData?: (id: number, field: string, value: string) => Promise<unknown> })?.saveRowData
       return (
         <form
           onSubmit={async (e) => {
@@ -254,7 +250,7 @@ const columns: ColumnDef<z.infer<typeof schema>>[] = [
             
             if (saveRowData) {
               toast.promise(
-                saveRowData(String(row.original.id), 'limit', newValue),
+                saveRowData(row.original.id, 'limit', newValue),
                 {
                   loading: `Saving ${row.original.header}`,
                   success: "Limit updated successfully",
@@ -282,7 +278,7 @@ const columns: ColumnDef<z.infer<typeof schema>>[] = [
     header: "Reviewer",
     cell: ({ row, table }) => {
       const isAssigned = row.original.reviewer !== "Assign reviewer"
-      const saveRowData = (table.options.meta as { saveRowData?: (id: string, field: string, value: string) => Promise<unknown> })?.saveRowData
+      const saveRowData = (table.options.meta as { saveRowData?: (id: number, field: string, value: string) => Promise<unknown> })?.saveRowData
 
       if (isAssigned) {
         return row.original.reviewer
@@ -297,7 +293,7 @@ const columns: ColumnDef<z.infer<typeof schema>>[] = [
             onValueChange={(value) => {
               if (saveRowData) {
                 toast.promise(
-                  saveRowData(String(row.original.id), 'reviewer', value),
+                  saveRowData(row.original.id, 'reviewer', value),
                   {
                     loading: `Assigning reviewer for ${row.original.header}`,
                     success: "Reviewer assigned successfully",
@@ -351,7 +347,7 @@ const columns: ColumnDef<z.infer<typeof schema>>[] = [
 ]
 
 function DraggableRow({ row }: { row: Row<z.infer<typeof schema>> }) {
-  const { transform, transition, setNodeRef, isDragging } = useSortable({
+  const { transform, transition, setNodeRef, isDragging, attributes, listeners } = useSortable({
     id: row.original.id,
   })
 
@@ -368,7 +364,11 @@ function DraggableRow({ row }: { row: Row<z.infer<typeof schema>> }) {
     >
       {row.getVisibleCells().map((cell) => (
         <TableCell key={cell.id}>
-          {flexRender(cell.column.columnDef.cell, cell.getContext())}
+          {cell.column.id === "drag" ? (
+            <DragHandle attributes={attributes} listeners={listeners} />
+          ) : (
+            flexRender(cell.column.columnDef.cell, cell.getContext())
+          )}
         </TableCell>
       ))}
     </TableRow>
@@ -392,7 +392,6 @@ export function DataTable({
     pageIndex: 0,
     pageSize: 10,
   })
-  const sortableId = React.useId()
   const sensors = useSensors(
     useSensor(MouseSensor, {}),
     useSensor(TouchSensor, {}),
@@ -400,14 +399,14 @@ export function DataTable({
   )
 
   // TODO: Replace with actual API call when backend persistence is available
-  const saveRowData = async (rowId: number, field: 'target' | 'limit' | 'reviewer', value: string): Promise<void> => {
+  const saveRowData = async (id: number, field: string, value: string): Promise<unknown> => {
     // Simulate API call delay
     await new Promise(resolve => setTimeout(resolve, 500))
     
     // Optimistically update local state
     setData(prevData => 
       prevData.map(row => 
-        row.id === rowId 
+        row.id === id 
           ? { ...row, [field]: value }
           : row
       )
@@ -415,12 +414,11 @@ export function DataTable({
     
     // TODO: Implement actual API persistence here
     // Example: await api.updateRowData(rowId, { [field]: value })
+    
+    return { success: true }
   }
 
-  const dataIds = React.useMemo<UniqueIdentifier[]>(
-    () => data?.map(({ id }) => id) || [],
-    [data]
-  )
+  // Remove dataIds since we'll use rendered row IDs instead
 
   const table = useReactTable({
     data,
@@ -454,21 +452,18 @@ export function DataTable({
     const { active, over } = event
     if (active && over && active.id !== over.id) {
       setData((data) => {
-        // Get the current visual row order from the table
-        const currentRows = table.getRowModel().rows
+        // Find indices in the backing data array by ID
+        const activeDataIndex = data.findIndex(item => item.id === active.id)
+        const overDataIndex = data.findIndex(item => item.id === over.id)
         
-        // Find the visual indices of the dragged items
-        const activeRowIndex = currentRows.findIndex(row => row.original.id === active.id)
-        const overRowIndex = currentRows.findIndex(row => row.original.id === over.id)
-        
-        if (activeRowIndex === -1 || overRowIndex === -1) {
-          return data // Return unchanged if indices not found
+        if (activeDataIndex === -1 || overDataIndex === -1) {
+          return data // Return unchanged if IDs not found in backing data
         }
         
-        // Create new data array based on visual order
+        // Create new data array and move the item
         const newData = [...data]
-        const [movedItem] = newData.splice(activeRowIndex, 1)
-        newData.splice(overRowIndex, 0, movedItem)
+        const [movedItem] = newData.splice(activeDataIndex, 1)
+        newData.splice(overDataIndex, 0, movedItem)
         
         return newData
       })
@@ -570,7 +565,6 @@ export function DataTable({
             modifiers={[restrictToVerticalAxis]}
             onDragEnd={handleDragEnd}
             sensors={sensors}
-            id={sortableId}
           >
             <Table>
               <TableHeader className="sticky top-0 z-10 bg-muted">
@@ -591,10 +585,10 @@ export function DataTable({
                   </TableRow>
                 ))}
               </TableHeader>
-              <TableBody className="data-[slot=table-cell]:first:w-8">
+              <TableBody className="[&[data-slot='table-cell']:first-child]:w-8">
                 {table.getRowModel().rows?.length ? (
                   <SortableContext
-                    items={dataIds}
+                    items={table.getRowModel().rows.map(r => r.id)}
                     strategy={verticalListSortingStrategy}
                   >
                     {table.getRowModel().rows.map((row) => (
@@ -734,6 +728,11 @@ const chartConfig = {
 
 function TableCellViewer({ item }: { item: z.infer<typeof schema> }) {
   const isMobile = useIsMobile()
+  
+  // Local state for controlled Select components
+  const [type, setType] = React.useState(item.type)
+  const [status, setStatus] = React.useState(item.status)
+  const [reviewer, setReviewer] = React.useState(item.reviewer)
 
   return (
     <Sheet>
@@ -814,13 +813,19 @@ function TableCellViewer({ item }: { item: z.infer<typeof schema> }) {
               e.preventDefault()
               const formData = new FormData(e.currentTarget)
               
+              // Validate required fields
+              if (!type || !status || !reviewer) {
+                toast.error("Please fill in all required fields")
+                return
+              }
+              
               const updatedData = {
                 header: formData.get('header') as string,
-                type: formData.get('type') as string,
-                status: formData.get('status') as string,
+                type: type,
+                status: status,
                 target: formData.get('target') as string,
                 limit: formData.get('limit') as string,
-                reviewer: formData.get('reviewer') as string,
+                reviewer: reviewer,
               }
               
               // TODO: Implement actual API call to save form data
@@ -846,7 +851,7 @@ function TableCellViewer({ item }: { item: z.infer<typeof schema> }) {
             <div className="grid grid-cols-2 gap-4">
               <div className="flex flex-col gap-3">
                 <Label htmlFor="type">Type</Label>
-                <Select name="type" defaultValue={item.type}>
+                <Select value={type} onValueChange={setType}>
                   <SelectTrigger id="type" className="w-full">
                     <SelectValue placeholder="Select a type" />
                   </SelectTrigger>
@@ -869,10 +874,11 @@ function TableCellViewer({ item }: { item: z.infer<typeof schema> }) {
                     <SelectItem value="Cover Page">Cover Page</SelectItem>
                   </SelectContent>
                 </Select>
+                <input type="hidden" name="type" value={type} />
               </div>
               <div className="flex flex-col gap-3">
                 <Label htmlFor="status">Status</Label>
-                <Select name="status" defaultValue={item.status}>
+                <Select value={status} onValueChange={setStatus}>
                   <SelectTrigger id="status" className="w-full">
                     <SelectValue placeholder="Select a status" />
                   </SelectTrigger>
@@ -882,6 +888,7 @@ function TableCellViewer({ item }: { item: z.infer<typeof schema> }) {
                     <SelectItem value="Not Started">Not Started</SelectItem>
                   </SelectContent>
                 </Select>
+                <input type="hidden" name="status" value={status} />
               </div>
             </div>
             <div className="grid grid-cols-2 gap-4">
@@ -896,7 +903,7 @@ function TableCellViewer({ item }: { item: z.infer<typeof schema> }) {
             </div>
             <div className="flex flex-col gap-3">
               <Label htmlFor="reviewer">Reviewer</Label>
-              <Select name="reviewer" defaultValue={item.reviewer}>
+              <Select value={reviewer} onValueChange={setReviewer}>
                 <SelectTrigger id="reviewer" className="w-full">
                   <SelectValue placeholder="Select a reviewer" />
                 </SelectTrigger>
@@ -908,6 +915,7 @@ function TableCellViewer({ item }: { item: z.infer<typeof schema> }) {
                   <SelectItem value="Emily Whalen">Emily Whalen</SelectItem>
                 </SelectContent>
               </Select>
+              <input type="hidden" name="reviewer" value={reviewer} />
             </div>
           </form>
         </div>

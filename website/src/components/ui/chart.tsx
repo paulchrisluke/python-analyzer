@@ -100,6 +100,11 @@ const isValidColor = (color: string): boolean => {
   return false
 }
 
+// Sanitize color variable keys to prevent CSS injection
+const sanitizeColorKey = (key: string): string => {
+  return key.toLowerCase().replace(/[^a-z0-9-_]/g, '-')
+}
+
 const ChartStyle = ({ id, config }: { id: string; config: ChartConfig }) => {
   const colorConfig = Object.entries(config).filter(
     ([, config]) => config.theme || config.color
@@ -109,29 +114,29 @@ const ChartStyle = ({ id, config }: { id: string; config: ChartConfig }) => {
     return null
   }
 
-  return (
-    <style
-      dangerouslySetInnerHTML={{
-        __html: Object.entries(THEMES)
-          .map(
-            ([theme, prefix]) => `
-${prefix} [data-chart="${id}"] {
-${colorConfig
-  .map(([key, itemConfig]) => {
-    const color =
-      itemConfig.theme?.[theme as keyof typeof itemConfig.theme] ||
-      itemConfig.color
-    // Only inject color if it passes validation
-    return color && isValidColor(color) ? `  --color-${key}: ${color};` : null
-  })
-  .join("\n")}
-}
-`
-          )
-          .join("\n"),
-      }}
-    />
-  )
+  // Build CSS string safely without dangerouslySetInnerHTML
+  const cssString = Object.entries(THEMES)
+    .map(([theme, prefix]) => {
+      const colorLines = colorConfig
+        .map(([key, itemConfig]) => {
+          const color =
+            itemConfig.theme?.[theme as keyof typeof itemConfig.theme] ||
+            itemConfig.color
+          // Only include lines for colors that pass validation
+          if (color && isValidColor(color)) {
+            const sanitizedKey = sanitizeColorKey(key)
+            return `  --color-${sanitizedKey}: ${color};`
+          }
+          return null
+        })
+        .filter(Boolean) // Remove null entries
+        .join('\n')
+      
+      return `${prefix} [data-chart="${id}"] {\n${colorLines}\n}`
+    })
+    .join('\n')
+
+  return <style>{cssString}</style>
 }
 
 const ChartTooltip = RechartsPrimitive.Tooltip

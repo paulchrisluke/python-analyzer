@@ -71,7 +71,7 @@ npm run test
 ### 2. Set up Next.js Configuration
 ```bash
 # Create Next.js config
-echo 'module.exports = { experimental: { serverComponentsExternalPackages: ["drizzle-orm"] } }' > next.config.js
+echo 'export default { experimental: { serverComponentsExternalPackages: ["drizzle-orm"] } }' > next.config.mjs
 
 # Create Next.js app directory structure
 mkdir -p src/app
@@ -231,7 +231,7 @@ npx shadcn@latest add toast
 
 ### Step 3: Core Configuration Files
 
-#### next.config.js
+#### next.config.mjs
 ```javascript
 /** @type {import('next').NextConfig} */
 const nextConfig = {
@@ -256,7 +256,7 @@ const nextConfig = {
   },
 }
 
-module.exports = nextConfig
+export default nextConfig
 ```
 
 #### ETL Data Integration (Direct JSON Imports)

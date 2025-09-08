@@ -4,14 +4,9 @@
   "description": "Authentication service for Cranberry Hearing & Balance Center business sale",
   "type": "module",
   "scripts": {
-    "dev": "wrangler dev",
-    "dev:next": "next dev",
+    "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "deploy": "wrangler deploy",
-    "build:workers": "opennextjs-cloudflare build",
-    "preview:workers": "opennextjs-cloudflare preview",
-    "deploy:workers": "opennextjs-cloudflare build && opennextjs-cloudflare deploy",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "wrangler d1 execute cranberry-auth-db --file=./db/migrations/0000_sharp_guardsmen.sql",
     "db:migrate:remote": "wrangler d1 execute cranberry-auth-db --file=./db/migrations/0000_sharp_guardsmen.sql --remote",
@@ -68,19 +63,16 @@
     "zod": "^4.1.5"
   },
   "devDependencies": {
-    "@cloudflare/workers-types": "^4.20250906.0",
-    "@opennextjs/cloudflare": "^1.8.0",
     "@playwright/test": "^1.55.0",
     "@types/node": "^20.0.0",
-    "@types/react": "^19.1.12",
-    "@types/react-dom": "^19.1.9",
+    "@types/react": "19.1.12",
     "autoprefixer": "^10.0.1",
     "drizzle-kit": "^0.31.4",
+    "eslint-plugin-playwright": "^2.2.2",
     "postcss": "^8.0.0",
     "tailwindcss": "^3.4.0",
     "tailwindcss-animate": "^1.0.7",
     "typescript": "^5.0.0",
-    "wait-on": "^8.0.4",
-    "wrangler": "^4.34.0"
+    "wait-on": "^8.0.4"
   }
 }

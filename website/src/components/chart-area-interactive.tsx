@@ -139,6 +139,10 @@ const chartConfig = {
 export function ChartAreaInteractive() {
   const isMobile = useIsMobile()
   const [timeRange, setTimeRange] = React.useState("30d")
+  
+  // Generate unique IDs for SVG gradients to prevent collisions
+  const desktopGradientId = React.useId()
+  const mobileGradientId = React.useId()
 
   React.useEffect(() => {
     if (isMobile) {
@@ -229,7 +233,7 @@ export function ChartAreaInteractive() {
         >
           <AreaChart data={filteredData}>
             <defs>
-              <linearGradient id="fillDesktop" x1="0" y1="0" x2="0" y2="1">
+              <linearGradient id={desktopGradientId} x1="0" y1="0" x2="0" y2="1">
                 <stop
                   offset="5%"
                   stopColor="var(--color-desktop)"
@@ -241,7 +245,7 @@ export function ChartAreaInteractive() {
                   stopOpacity={0.1}
                 />
               </linearGradient>
-              <linearGradient id="fillMobile" x1="0" y1="0" x2="0" y2="1">
+              <linearGradient id={mobileGradientId} x1="0" y1="0" x2="0" y2="1">
                 <stop
                   offset="5%"
                   stopColor="var(--color-mobile)"
@@ -286,14 +290,14 @@ export function ChartAreaInteractive() {
             <Area
               dataKey="mobile"
               type="natural"
-              fill="url(#fillMobile)"
+              fill={`url(#${mobileGradientId})`}
               stroke="var(--color-mobile)"
               stackId="a"
             />
             <Area
               dataKey="desktop"
               type="natural"
-              fill="url(#fillDesktop)"
+              fill={`url(#${desktopGradientId})`}
               stroke="var(--color-desktop)"
               stackId="a"
             />
