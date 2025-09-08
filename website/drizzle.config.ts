@@ -6,7 +6,6 @@ export default defineConfig({
   dialect: "sqlite",
   driver: "d1-http",
   dbCredentials: {
-    wranglerConfigPath: "./wrangler.toml",
-    dbName: "cranberry-auth-db",
+    url: "https://cranberry-auth-db.paulchrisluke.workers.dev",
   },
 });
