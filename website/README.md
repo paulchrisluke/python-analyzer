@@ -94,20 +94,45 @@ This project uses GitHub Actions for automated CI/CD. See [DEPLOYMENT.md](./DEPL
    - `CLOUDFLARE_API_TOKEN`
    - `CLOUDFLARE_ACCOUNT_ID`
 
-2. **Set Worker Secret:**
+2. **Set Worker Secrets:**
    ```bash
    wrangler secret put BETTER_AUTH_SECRET --name cranberry-auth-worker
+   wrangler secret put CLOUDFLARE_API_TOKEN --name cranberry-auth-worker
    ```
 
-3. **Deploy:**
+3. **Configure Environment Variables:**
+   ```bash
+   # Copy environment template
+   cp env.example .env
+   # Edit .env with your Cloudflare credentials
+   ```
+
+4. **Deploy:**
    - Push to `main` branch → automatic deployment
    - Tests run on all pull requests
 
 ### Environment Configuration
 
+#### Required Environment Variables
+
 - **BETTER_AUTH_SECRET**: Set using `wrangler secret put BETTER_AUTH_SECRET`
 - **BETTER_AUTH_URL**: Configured in `wrangler.toml`
 - **D1 Database**: Automatically bound as `cranberry_auth_db` (database name: `cranberry-auth-db`)
+
+#### D1 HTTP Driver Configuration (for migrations and database operations)
+
+For local development and database migrations, you'll need to set these environment variables:
+
+- **CLOUDFLARE_ACCOUNT_ID**: Your Cloudflare account ID
+- **CLOUDFLARE_D1_DATABASE_ID**: Your D1 database ID (found in wrangler.toml)
+- **CLOUDFLARE_API_TOKEN**: Your Cloudflare API token with D1 permissions
+
+Create a `.env` file in the project root with these values:
+
+```bash
+# Copy from env.example and fill in your values
+cp env.example .env
+```
 
 **Note**: For production deployments, copy `wrangler.toml.example` to `wrangler.toml` and update the `database_id` with your actual D1 database ID.
 

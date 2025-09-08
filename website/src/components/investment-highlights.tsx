@@ -62,3 +62,4 @@ export function InvestmentHighlights({ highlights }: InvestmentHighlightsProps) 
     </div>
   );
 }
+

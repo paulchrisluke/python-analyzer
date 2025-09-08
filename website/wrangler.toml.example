@@ -12,6 +12,9 @@ database_id = "your-database-id-here"
 # Environment variables
 [vars]
 BETTER_AUTH_URL = "https://your-worker.your-subdomain.workers.dev"
+CLOUDFLARE_ACCOUNT_ID = "your-cloudflare-account-id"
+CLOUDFLARE_D1_DATABASE_ID = "your-d1-database-id"
 
-# Secrets (set using: wrangler secret put BETTER_AUTH_SECRET)
+# Secrets (set using: wrangler secret put SECRET_NAME)
 # BETTER_AUTH_SECRET - Required for Better Auth
+# CLOUDFLARE_API_TOKEN - Required for D1 HTTP driver operations
