@@ -100,6 +100,150 @@ class BusinessMetricsCalculator:
         """Format value as currency."""
         return f"${value:,.2f}"
     
+    def calculate_sde(self, ebitda: float, owner_salary: float = 0) -> float:
+        """
+        Calculate Seller's Discretionary Earnings (SDE).
+        SDE = EBITDA + Owner's Salary/Compensation
+        
+        Args:
+            ebitda: EBITDA value
+            owner_salary: Owner's salary/compensation (default: 0)
+            
+        Returns:
+            float: SDE value
+        """
+        sde = ebitda + owner_salary
+        logger.info(f"Calculated SDE: EBITDA ${ebitda:,.2f} + Owner Salary ${owner_salary:,.2f} = ${sde:,.2f}")
+        return sde
+    
+    def calculate_monthly_cash_flow(self, annual_ebitda: float) -> float:
+        """
+        Calculate monthly cash flow from annual EBITDA.
+        
+        Args:
+            annual_ebitda: Annual EBITDA value
+            
+        Returns:
+            float: Monthly cash flow
+        """
+        monthly_cash_flow = annual_ebitda / 12
+        logger.info(f"Calculated monthly cash flow: ${annual_ebitda:,.2f} ÷ 12 = ${monthly_cash_flow:,.2f}")
+        return monthly_cash_flow
+    
+    def calculate_working_capital(self, current_assets: float, current_liabilities: float) -> float:
+        """
+        Calculate working capital.
+        Working Capital = Current Assets - Current Liabilities
+        
+        Args:
+            current_assets: Current assets value
+            current_liabilities: Current liabilities value
+            
+        Returns:
+            float: Working capital
+        """
+        working_capital = current_assets - current_liabilities
+        logger.info(f"Calculated working capital: ${current_assets:,.2f} - ${current_liabilities:,.2f} = ${working_capital:,.2f}")
+        return working_capital
+    
+    def calculate_debt_service_coverage_ratio(self, annual_ebitda: float, annual_debt_service: float) -> float:
+        """
+        Calculate debt service coverage ratio.
+        DSCR = EBITDA / Annual Debt Service
+        
+        Args:
+            annual_ebitda: Annual EBITDA
+            annual_debt_service: Annual debt service payments
+            
+        Returns:
+            float: Debt service coverage ratio
+        """
+        if annual_debt_service == 0:
+            logger.warning("Annual debt service is 0, cannot calculate DSCR")
+            return float('inf')
+        
+        dscr = annual_ebitda / annual_debt_service
+        logger.info(f"Calculated DSCR: ${annual_ebitda:,.2f} ÷ ${annual_debt_service:,.2f} = {dscr:.2f}")
+        return dscr
+    
+    def calculate_lease_cost_analysis(self, monthly_rent: float, cam_fee: float = 0) -> Dict[str, float]:
+        """
+        Calculate lease cost analysis including CAM fees.
+        
+        Args:
+            monthly_rent: Monthly rent amount
+            cam_fee: Annual CAM fee (default: 0)
+            
+        Returns:
+            Dict containing lease cost breakdown
+        """
+        annual_rent = monthly_rent * 12
+        monthly_cam = cam_fee / 12 if cam_fee > 0 else 0
+        total_monthly_cost = monthly_rent + monthly_cam
+        total_annual_cost = annual_rent + cam_fee
+        
+        lease_analysis = {
+            'monthly_rent': monthly_rent,
+            'annual_rent': annual_rent,
+            'monthly_cam': monthly_cam,
+            'annual_cam': cam_fee,
+            'total_monthly_cost': total_monthly_cost,
+            'total_annual_cost': total_annual_cost,
+            'cam_percentage': (cam_fee / annual_rent * 100) if annual_rent > 0 else 0
+        }
+        
+        logger.info(f"Lease cost analysis: Monthly ${total_monthly_cost:,.2f}, Annual ${total_annual_cost:,.2f}")
+        return lease_analysis
+    
+    def calculate_insurance_coverage_metrics(self) -> Dict[str, Any]:
+        """
+        Calculate insurance coverage metrics from business rules.
+        
+        Returns:
+            Dict containing insurance coverage analysis
+        """
+        insurance_config = self.business_rules.get('insurance_coverage', {})
+        primary_insurers = insurance_config.get('primary_insurers', [])
+        
+        # Calculate years of coverage for each insurer
+        current_year = datetime.now().year
+        insurance_metrics = {
+            'total_insurers': len(primary_insurers),
+            'insurers': [],
+            'total_years_coverage': 0,
+            'average_years_per_insurer': 0,
+            'coverage_stability_score': 0
+        }
+        
+        total_years = 0
+        for insurer in primary_insurers:
+            contract_date = insurer.get('contract_date', '')
+            if contract_date:
+                try:
+                    contract_year = int(contract_date.split('-')[0])
+                    years_active = current_year - contract_year
+                    total_years += years_active
+                    
+                    insurer_info = {
+                        'name': insurer.get('name', ''),
+                        'years_active': years_active,
+                        'contract_date': contract_date,
+                        'status': insurer.get('status', ''),
+                        'coverage_type': insurer.get('coverage_type', '')
+                    }
+                    insurance_metrics['insurers'].append(insurer_info)
+                except (ValueError, IndexError):
+                    logger.warning(f"Invalid contract date format: {contract_date}")
+        
+        insurance_metrics['total_years_coverage'] = total_years
+        if len(primary_insurers) > 0:
+            insurance_metrics['average_years_per_insurer'] = total_years / len(primary_insurers)
+            # Stability score: higher is better (more years = more stable)
+            insurance_metrics['coverage_stability_score'] = min(100, (total_years / len(primary_insurers)) * 10)
+        
+        logger.info(f"Insurance coverage analysis: {len(primary_insurers)} insurers, {total_years} total years coverage")
+        return insurance_metrics
+    
     def _format_percentage(self, value: float) -> str:
         """Format value as percentage."""
         return f"{value:.1f}%"
@@ -141,6 +285,10 @@ class BusinessMetricsCalculator:
         # Calculate equipment metrics
         equipment_metrics = self._calculate_equipment_metrics()
         self.metrics['equipment'] = equipment_metrics
+        
+        # Calculate new landing page metrics
+        landing_page_metrics = self._calculate_landing_page_metrics()
+        self.metrics['landing_page'] = landing_page_metrics
         
         logger.info("Business metrics calculation completed")
         return self.metrics
@@ -861,6 +1009,9 @@ class BusinessMetricsCalculator:
                     monthly_revenue = 0
                 
                 if monthly_revenue > 0:
+                    # Convert Decimal to float if needed
+                    if isinstance(monthly_revenue, Decimal):
+                        monthly_revenue = float(monthly_revenue)
                     total_revenue += monthly_revenue
                     month_count += 1
                     if month_key:
@@ -1069,3 +1220,114 @@ class BusinessMetricsCalculator:
             logger.warning("Using fallback equipment value from business rules")
         
         return equipment_metrics
+    
+    def _calculate_landing_page_metrics(self) -> Dict[str, Any]:
+        """Calculate landing page specific metrics."""
+        logger.info("Calculating landing page metrics...")
+        
+        landing_page_metrics = {}
+        
+        # Get financial data for calculations
+        financial_metrics = self.metrics.get('financial', {})
+        annual_ebitda = financial_metrics.get('profitability', {}).get('estimated_annual_ebitda', 0)
+        monthly_ebitda = financial_metrics.get('profitability', {}).get('estimated_ebitda', 0)
+        
+        # Calculate SDE (assuming no owner salary for now)
+        sde = self.calculate_sde(annual_ebitda, 0)
+        landing_page_metrics['sde'] = sde
+        
+        # Calculate monthly cash flow
+        monthly_cash_flow = self.calculate_monthly_cash_flow(annual_ebitda)
+        landing_page_metrics['monthly_cash_flow'] = monthly_cash_flow
+        
+        # Calculate lease cost analysis (using current lease terms)
+        lease_analysis = self.calculate_lease_cost_analysis(2500, 1200)  # Current rent + CAM
+        landing_page_metrics['lease_analysis'] = lease_analysis
+        
+        # Calculate insurance coverage metrics
+        insurance_metrics = self.calculate_insurance_coverage_metrics()
+        landing_page_metrics['insurance_coverage'] = insurance_metrics
+        
+        # Get location information from business rules
+        location_info = self._get_location_information()
+        landing_page_metrics['location_info'] = location_info
+        
+        # Get sale details from business rules
+        sale_details = self.business_rules.get('sale_details', {})
+        landing_page_metrics['sale_details'] = sale_details
+        
+        logger.info("Landing page metrics calculation completed")
+        return landing_page_metrics
+    
+    def _get_location_information(self) -> Dict[str, Any]:
+        """Extract location information from business rules configuration."""
+        locations_config = self.business_rules.get('locations', {})
+        
+        # Derive location information dynamically from config
+        total_locations = 0
+        sale_locations = []
+        non_sale_locations = []
+        states = set()
+        
+        for location_key, location_data in locations_config.items():
+            if isinstance(location_data, dict) and 'state' in location_data:
+                # This is a state-level configuration
+                state = location_data.get('state', '')
+                states.add(state)
+                
+                # Count detailed locations within this state
+                for detail_key, detail_data in location_data.items():
+                    if (isinstance(detail_data, dict) and 
+                        'name' in detail_data and 
+                        'address' in detail_data):
+                        # This is a detailed location
+                        total_locations += 1
+                        
+                        if location_data.get('for_sale', False):
+                            sale_locations.append(detail_data)
+                        else:
+                            non_sale_locations.append(detail_data)
+        
+        # Determine primary and secondary locations from sale locations
+        primary_location = None
+        secondary_location = None
+        
+        if sale_locations:
+            # Find primary location (location_type = "primary")
+            for location in sale_locations:
+                if location.get('location_type') == 'primary':
+                    primary_location = location
+                    break
+            
+            # Find secondary/satellite location (location_type = "satellite")
+            for location in sale_locations:
+                if location.get('location_type') == 'satellite':
+                    secondary_location = location
+                    break
+            
+            # Fallback: if no location_type specified, use first two locations
+            if not primary_location and len(sale_locations) >= 1:
+                primary_location = sale_locations[0]
+            if not secondary_location and len(sale_locations) >= 2:
+                secondary_location = sale_locations[1]
+        
+        # Determine if any locations are for sale
+        for_sale = any(
+            location_data.get('for_sale', False) 
+            for location_data in locations_config.values() 
+            if isinstance(location_data, dict)
+        )
+        
+        location_info = {
+            'primary_location': primary_location,
+            'secondary_location': secondary_location,
+            'total_locations': total_locations,
+            'sale_locations': sale_locations,
+            'non_sale_locations': non_sale_locations,
+            'states': list(states),
+            'for_sale': for_sale
+        }
+        
+        logger.info(f"Location information derived from config: {total_locations} total locations, {len(sale_locations)} for sale, states: {list(states)}")
+        
+        return location_info

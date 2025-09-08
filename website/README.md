@@ -8,6 +8,7 @@ A secure authentication service for the Cranberry Hearing & Balance Center busin
 - **Session Management**: Secure session handling with proper expiration
 - **Database Integration**: D1 database with Drizzle ORM
 - **Protected Routes**: Authentication-required document access
+- **ETL Data Integration**: Real-time business metrics from ETL pipeline
 - **Modern UI**: Clean, responsive design with Tailwind CSS
 - **Testing**: Comprehensive Playwright test suite
 
@@ -17,7 +18,13 @@ A secure authentication service for the Cranberry Hearing & Balance Center busin
 website/
 ├── src/
 │   ├── index.ts          # Main Workers entry point
-│   └── auth.ts           # Better Auth configuration
+│   ├── auth.ts           # Better Auth configuration
+│   ├── lib/
+│   │   └── etl-data.ts   # ETL pipeline data integration
+│   └── data/             # ETL-generated JSON data files
+│       ├── landing_page_data.json
+│       ├── financial_summary.json
+│       └── equipment_analysis.json
 ├── db/
 │   ├── schema.ts         # Database schema
 │   └── migrations/       # Database migrations
@@ -70,6 +77,16 @@ npm run dev
 ```
 
 The application will be available at `http://localhost:8787`
+
+### ETL Data Integration
+
+The website automatically integrates with the ETL pipeline data:
+
+1. **Data Files**: JSON files are copied from the ETL pipeline to `src/data/` during CI/CD
+2. **Data Loading**: The `src/lib/etl-data.ts` module loads and processes the data
+3. **Real-time Metrics**: Business metrics, financial data, and equipment information are displayed dynamically
+
+**Note**: For local development, ensure the ETL pipeline has run and copied data files to `src/data/`, or the build will fail due to missing JSON imports.
 
 ### Testing
 

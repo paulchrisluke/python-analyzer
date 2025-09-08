@@ -1,6 +1,5 @@
 import { loadETLData, formatCurrency, formatPercentage } from "@/lib/etl-data";
 import { BusinessMetrics } from "@/components/business-metrics";
-import { InvestmentCalculator } from "@/components/investment-calculator";
 import { EquipmentShowcase } from "@/components/equipment-showcase";
 import { InvestmentHighlights } from "@/components/investment-highlights";
 import { CallToAction } from "@/components/call-to-action";
@@ -99,9 +98,6 @@ export default async function HomePage() {
 
       {/* Equipment Showcase */}
       <EquipmentShowcase equipment={etlData.equipmentCategories} />
-
-      {/* Investment Calculator */}
-      <InvestmentCalculator data={etlData.businessMetrics} />
 
       {/* Call to Action */}
       <CallToAction askingPrice={etlData.businessMetrics.askingPrice} />
