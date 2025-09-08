@@ -1,0 +1,17 @@
+name = "cranberry-auth-worker"
+main = "src/index.ts"
+compatibility_date = "2025-01-27"
+compatibility_flags = ["nodejs_compat"]
+
+# D1 Database configuration
+[[d1_databases]]
+binding = "cranberry_auth_db"
+database_name = "cranberry-auth-db"
+database_id = "your-database-id-here"
+
+# Environment variables
+[vars]
+BETTER_AUTH_URL = "https://your-worker.your-subdomain.workers.dev"
+
+# Secrets (set using: wrangler secret put BETTER_AUTH_SECRET)
+# BETTER_AUTH_SECRET - Required for Better Auth

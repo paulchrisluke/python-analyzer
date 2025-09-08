@@ -64,20 +64,22 @@ docs/equipment/
 !docs/README.md
 !docs/verification_questions.md
 
-# Website build files and generated content
+# Website build files and generated content (legacy Pages files)
 website/_next/
-website/.wrangler/
 website/404/
 website/js/
 website/*.html
 website/*.txt
 website/*.webmanifest
 
-# Keep essential website files for deployment
-!website/functions/
+# Keep essential Workers files
+!website/src/
+!website/db/
+!website/tests/
 !website/package.json
-!website/wrangler.toml
 !website/README.md
+!website/playwright.config.ts
+!website/drizzle.config.ts
 
 # Backup files (protect from accidental commits)
 *backup*
@@ -215,8 +217,15 @@ logs/
 # Cloudflare
 .wrangler/
 
-# Keep website wrangler.toml for deployment
-!website/wrangler.toml
+# Cloudflare Workers - ignore actual config, keep example
+website/wrangler.toml
+!website/wrangler.toml.example
+
+# Workers development files
+website/.wrangler/
+website/dist/
+website/worker.js
+website/worker.js.map
 
 # Vercel
 .vercel
