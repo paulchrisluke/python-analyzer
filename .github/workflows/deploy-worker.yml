@@ -3,14 +3,62 @@ name: Deploy Cranberry Auth Worker
 on:
   push:
     branches: [ main, master ]
-    paths: [ 'website/**' ]
+    paths: [ 'website/**', 'etl_pipeline/**', 'data/**', 'docs/**' ]
   pull_request:
     branches: [ main, master ]
-    paths: [ 'website/**' ]
+    paths: [ 'website/**', 'etl_pipeline/**', 'data/**', 'docs/**' ]
 
 jobs:
+  run-etl-pipeline:
+    runs-on: ubuntu-latest
+    name: Run ETL Pipeline
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+        
+    - name: Cache pip dependencies
+      uses: actions/cache@v3
+      with:
+        path: ~/.cache/pip
+        key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+        restore-keys: |
+          ${{ runner.os }}-pip-
+          
+    - name: Install Python dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        
+    - name: Run ETL Pipeline
+      run: |
+        python run_pipeline.py
+        
+    - name: Verify JSON files generated
+      run: |
+        echo "Checking generated files..."
+        ls -la data/final/
+        echo "Checking website data directory..."
+        ls -la website/src/data/
+        
+    - name: Upload pipeline artifacts
+      uses: actions/upload-artifact@v3
+      with:
+        name: etl-pipeline-data
+        path: |
+          data/final/
+          website/src/data/
+        retention-days: 7
+
   deploy:
     runs-on: ubuntu-latest
+    name: Deploy Website
+    needs: run-etl-pipeline
     defaults:
       run:
         working-directory: ./website
@@ -19,17 +67,34 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v4
     
+    - name: Download pipeline artifacts
+      uses: actions/download-artifact@v3
+      with:
+        name: etl-pipeline-data
+        path: ./
+    
     - name: Setup Node.js
       uses: actions/setup-node@v4
       with:
-        node-version: '18'
+        node-version: '20'
         cache: 'npm'
         cache-dependency-path: website/package-lock.json
     
     - name: Install dependencies
       run: npm ci
     
+    - name: Verify data files
+      run: |
+        echo "Verifying data files are available..."
+        ls -la src/data/
+        echo "Data files content:"
+        head -20 src/data/landing_page_data.json
+    
+    - name: Build website
+      run: npm run build
+    
     - name: Deploy to Cloudflare Workers
+      if: github.ref == 'refs/heads/main'
       uses: cloudflare/wrangler-action@v3
       with:
         apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
