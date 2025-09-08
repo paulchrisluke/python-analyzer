@@ -87,6 +87,16 @@ website/test-results/
 website/playwright-report/
 website/coverage/
 
+# Playwright test artifacts and screenshots
+.playwright-mcp/
+**/test-results/
+**/playwright-report/
+**/playwright/.cache/
+**/playwright/.local/
+**/screenshots/
+**/videos/
+**/traces/
+
 # Node.js dependencies
 website/node_modules/
 website/.npm/

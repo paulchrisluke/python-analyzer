@@ -49,7 +49,7 @@ export function SignupForm({
           router.push("/login")
         }, 2000)
       }
-    } catch (err) {
+    } catch {
       setError("An unexpected error occurred")
     } finally {
       setIsLoading(false)

@@ -15,7 +15,6 @@ import {
 import { restrictToVerticalAxis } from "@dnd-kit/modifiers"
 import {
   SortableContext,
-  arrayMove,
   useSortable,
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable"
@@ -37,7 +36,6 @@ import {
 } from "@tanstack/react-table"
 import {
   CheckCircle2Icon,
-  CheckCircleIcon,
   ChevronDownIcon,
   ChevronLeftIcon,
   ChevronRightIcon,
@@ -209,7 +207,7 @@ const columns: ColumnDef<z.infer<typeof schema>>[] = [
     accessorKey: "target",
     header: () => <div className="w-full text-right">Target</div>,
     cell: ({ row, table }) => {
-      const saveRowData = (table.options.meta as any)?.saveRowData
+      const saveRowData = (table.options.meta as { saveRowData?: (id: string, field: string, value: string) => Promise<unknown> })?.saveRowData
       return (
         <form
           onSubmit={async (e) => {
@@ -219,7 +217,7 @@ const columns: ColumnDef<z.infer<typeof schema>>[] = [
             
             if (saveRowData) {
               toast.promise(
-                saveRowData(row.original.id, 'target', newValue),
+                saveRowData(String(row.original.id), 'target', newValue),
                 {
                   loading: `Saving ${row.original.header}`,
                   success: "Target updated successfully",
@@ -246,7 +244,7 @@ const columns: ColumnDef<z.infer<typeof schema>>[] = [
     accessorKey: "limit",
     header: () => <div className="w-full text-right">Limit</div>,
     cell: ({ row, table }) => {
-      const saveRowData = (table.options.meta as any)?.saveRowData
+      const saveRowData = (table.options.meta as { saveRowData?: (id: string, field: string, value: string) => Promise<unknown> })?.saveRowData
       return (
         <form
           onSubmit={async (e) => {
@@ -256,7 +254,7 @@ const columns: ColumnDef<z.infer<typeof schema>>[] = [
             
             if (saveRowData) {
               toast.promise(
-                saveRowData(row.original.id, 'limit', newValue),
+                saveRowData(String(row.original.id), 'limit', newValue),
                 {
                   loading: `Saving ${row.original.header}`,
                   success: "Limit updated successfully",
@@ -284,7 +282,7 @@ const columns: ColumnDef<z.infer<typeof schema>>[] = [
     header: "Reviewer",
     cell: ({ row, table }) => {
       const isAssigned = row.original.reviewer !== "Assign reviewer"
-      const saveRowData = (table.options.meta as any)?.saveRowData
+      const saveRowData = (table.options.meta as { saveRowData?: (id: string, field: string, value: string) => Promise<unknown> })?.saveRowData
 
       if (isAssigned) {
         return row.original.reviewer
@@ -299,7 +297,7 @@ const columns: ColumnDef<z.infer<typeof schema>>[] = [
             onValueChange={(value) => {
               if (saveRowData) {
                 toast.promise(
-                  saveRowData(row.original.id, 'reviewer', value),
+                  saveRowData(String(row.original.id), 'reviewer', value),
                   {
                     loading: `Assigning reviewer for ${row.original.header}`,
                     success: "Reviewer assigned successfully",

@@ -1,8 +1,3 @@
-import { betterAuth } from "better-auth";
-import { drizzleAdapter } from "better-auth/adapters/drizzle";
-import { drizzle } from "drizzle-orm/d1";
-import { schema } from "../db/schema";
-
 export interface Env {
   cranberry_auth_db: D1Database;
   BETTER_AUTH_SECRET: string;
@@ -11,6 +6,16 @@ export interface Env {
 }
 
 export function createAuth(env: Env) {
+  // Lazy import to avoid Edge Runtime dynamic code evaluation issues
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  const { betterAuth } = require("better-auth");
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  const { drizzleAdapter } = require("better-auth/adapters/drizzle");
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  const { drizzle } = require("drizzle-orm/d1");
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  const { schema } = require("../db/schema");
+  
   // Create Drizzle instance with D1 database and schema
   const db = drizzle(env.cranberry_auth_db, { schema });
   
