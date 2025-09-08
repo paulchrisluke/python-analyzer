@@ -8,6 +8,7 @@ import equipmentAnalysis from '../data/equipment_analysis.json';
 
 export interface BusinessMetrics {
   annualRevenue: number;
+  annualEbitda: number;
   ebitdaMargin: number;
   roi: number;
   equipmentValue: number;
@@ -40,6 +41,7 @@ export async function loadETLData() {
     
     const businessMetrics: BusinessMetrics = {
       annualRevenue: financialHighlights.annual_revenue,
+      annualEbitda: financialHighlights.annual_ebitda,
       ebitdaMargin: financialHighlights.ebitda_margin,
       roi: financialHighlights.roi,
       equipmentValue: parseFloat(equipmentData.equipment_summary.total_value),
