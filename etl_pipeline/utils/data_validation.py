@@ -175,6 +175,82 @@ class DataValidator:
         
         return validation_passed
     
+    def validate_sale_details(self, sale_details: Dict[str, Any]) -> bool:
+        """
+        Validate sale details against business rules and schema.
+        
+        Args:
+            sale_details: Sale details dictionary
+            
+        Returns:
+            bool: True if validation passes
+        """
+        logger.info("Starting sale details validation...")
+        
+        # Baseline current error/warning counts to avoid state leakage
+        initial_error_count = len(self.validation_errors)
+        initial_warning_count = len(self.validation_warnings)
+        
+        # Get standard reasons for validation
+        standard_reasons = self.business_rules.get('standard_reasons', [])
+        
+        # Validate reason_for_sale
+        if 'reason_for_sale' not in sale_details:
+            error_msg = "Missing required field: reason_for_sale"
+            self.validation_errors.append(error_msg)
+            logger.error(error_msg)
+        else:
+            reason = sale_details['reason_for_sale']
+            if reason not in standard_reasons:
+                error_msg = f"reason_for_sale '{reason}' not in standard_reasons: {standard_reasons}"
+                self.validation_errors.append(error_msg)
+                logger.error(error_msg)
+        
+        # Validate secondary_reason if present
+        if 'secondary_reason' in sale_details and sale_details['secondary_reason']:
+            secondary_reason = sale_details['secondary_reason']
+            if secondary_reason not in standard_reasons:
+                error_msg = f"secondary_reason '{secondary_reason}' not in standard_reasons: {standard_reasons}"
+                self.validation_errors.append(error_msg)
+                logger.error(error_msg)
+        
+        # Validate urgency enum
+        if 'urgency' not in sale_details:
+            error_msg = "Missing required field: urgency"
+            self.validation_errors.append(error_msg)
+            logger.error(error_msg)
+        else:
+            urgency = sale_details['urgency']
+            valid_urgency_values = ['standard', 'urgent']
+            if urgency not in valid_urgency_values:
+                error_msg = f"urgency '{urgency}' not in valid values: {valid_urgency_values}"
+                self.validation_errors.append(error_msg)
+                logger.error(error_msg)
+        
+        # Validate owner_involvement enum
+        if 'owner_involvement' not in sale_details:
+            error_msg = "Missing required field: owner_involvement"
+            self.validation_errors.append(error_msg)
+            logger.error(error_msg)
+        else:
+            involvement = sale_details['owner_involvement']
+            valid_involvement_values = ['absentee', 'active', 'partial']
+            if involvement not in valid_involvement_values:
+                error_msg = f"owner_involvement '{involvement}' not in valid values: {valid_involvement_values}"
+                self.validation_errors.append(error_msg)
+                logger.error(error_msg)
+        
+        # Check if new errors were added during this validation call
+        new_errors = len(self.validation_errors) - initial_error_count
+        validation_passed = new_errors == 0
+        
+        if validation_passed:
+            logger.info("Sale details validation passed")
+        else:
+            logger.error(f"Sale details validation failed with {new_errors} new errors")
+        
+        return validation_passed
+    
     def get_validation_summary(self) -> Dict[str, Any]:
         """Get validation summary."""
         return {

@@ -72,6 +72,23 @@ website/*.html
 website/*.txt
 website/*.webmanifest
 
+
+# Next.js build artifacts
+website/.next/
+website/out/
+website/dist/
+website/build/
+
+# Test results and reports
+website/test-results/
+website/playwright-report/
+website/coverage/
+
+# Node.js dependencies
+website/node_modules/
+website/.npm/
+website/.yarn/
+
 # Keep essential Workers files
 !website/src/
 !website/db/
@@ -235,6 +252,18 @@ website/.wrangler/
 website/dist/
 website/worker.js
 website/worker.js.map
+
+# Environment variables and secrets
+website/.dev.vars
+website/.env*
+*.env
+.env*
+.env.local
+.env.development
+.env.production
+.env.test
+.env.staging
+
 
 # Vercel
 .vercel
