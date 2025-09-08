@@ -79,7 +79,12 @@ export function BusinessMetrics({ data }: BusinessMetricsProps) {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             <div className="text-center">
               <div className="text-3xl font-bold text-blue-600 mb-2">
-                {(data.askingPrice / data.annualRevenue).toFixed(1)}x
+                {(() => {
+                  const safeMultiple = (Number.isFinite(data.askingPrice) && Number.isFinite(data.annualRevenue) && data.annualRevenue !== 0) 
+                    ? (data.askingPrice / data.annualRevenue) 
+                    : null;
+                  return safeMultiple ? `${safeMultiple.toFixed(1)}x` : '-';
+                })()}
               </div>
               <div className="text-lg font-semibold text-gray-900 mb-2">Revenue Multiple</div>
               <div className="text-sm text-gray-600 mb-1">
@@ -92,7 +97,13 @@ export function BusinessMetrics({ data }: BusinessMetricsProps) {
             
             <div className="text-center">
               <div className="text-3xl font-bold text-green-600 mb-2">
-                {(data.askingPrice / (data.annualRevenue * (data.ebitdaMargin / 100))).toFixed(1)}x
+                {(() => {
+                  const annualEbitda = data.annualRevenue * (data.ebitdaMargin / 100);
+                  const safeMultiple = (Number.isFinite(data.askingPrice) && Number.isFinite(annualEbitda) && annualEbitda !== 0) 
+                    ? (data.askingPrice / annualEbitda) 
+                    : null;
+                  return safeMultiple ? `${safeMultiple.toFixed(1)}x` : '-';
+                })()}
               </div>
               <div className="text-lg font-semibold text-gray-900 mb-2">EBITDA Multiple</div>
               <div className="text-sm text-gray-600 mb-1">

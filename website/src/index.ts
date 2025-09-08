@@ -11,10 +11,11 @@ export default {
         const auth = createAuth(env);
         return auth.handler(request);
       } catch (error) {
-        console.error('Auth handler error:', error);
+        const errorId = Math.random().toString(36).substring(2, 15);
+        console.error(`Auth handler error [${errorId}]:`, error);
         return new Response(JSON.stringify({ 
-          error: 'Internal server error', 
-          details: error instanceof Error ? error.message : 'Unknown error'
+          error: 'Internal server error',
+          errorId: errorId
         }), {
           status: 500,
           headers: { 'Content-Type': 'application/json' }
