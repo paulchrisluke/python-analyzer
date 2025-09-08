@@ -72,6 +72,7 @@ website/*.html
 website/*.txt
 website/*.webmanifest
 
+
 # Next.js build artifacts
 website/.next/
 website/out/
@@ -262,6 +263,7 @@ website/.env*
 .env.production
 .env.test
 .env.staging
+
 
 # Vercel
 .vercel
