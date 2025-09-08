@@ -1,262 +1,248 @@
-# Website Integration with ETL Pipeline
+# Cranberry Auth Worker
 
-This directory contains the Cloudflare Pages website that automatically integrates with the ETL pipeline for real-time business data updates.
+A secure authentication service for the Cranberry Hearing & Balance Center business sale website, built with Cloudflare Workers and Better Auth.
 
-## 🎯 Overview
+## 🚀 Features
 
-The website automatically loads the latest ETL pipeline data and displays it to potential buyers. It includes fallback mechanisms to ensure the site always works, even if the ETL pipeline data is temporarily unavailable.
+- **Secure Authentication**: Email/password authentication with Better Auth
+- **Session Management**: Secure session handling with proper expiration
+- **Database Integration**: D1 database with Drizzle ORM
+- **Protected Routes**: Authentication-required document access
+- **Modern UI**: Clean, responsive design with Tailwind CSS
+- **Testing**: Comprehensive Playwright test suite
 
-## 📁 File Structure
+## 📁 Project Structure
 
 ```
 website/
-├── index.html                    # Main landing page
-├── due_diligence.html           # Due diligence documents page
-├── business_sale_data.json      # Latest ETL pipeline data (auto-updated)
-├── due_diligence_coverage.json  # Data coverage analysis (auto-updated)
-├── equipment_analysis.json      # Equipment analysis (auto-updated)
-├── js/
-│   ├── business-data-loader.js  # Data loading and fallback logic
-│   └── website-integration.js   # Website data integration
-├── wrangler.toml               # Cloudflare Pages configuration
-├── package.json                # Project configuration
-└── README.md                   # This file
+├── src/
+│   ├── index.ts          # Main Workers entry point
+│   └── auth.ts           # Better Auth configuration
+├── db/
+│   ├── schema.ts         # Database schema
+│   └── migrations/       # Database migrations
+├── tests/
+│   ├── auth.spec.ts      # Authentication tests
+│   └── basic.spec.ts     # Basic functionality tests
+├── wrangler.toml         # Cloudflare Workers configuration
+├── drizzle.config.ts     # Drizzle ORM configuration
+└── package.json          # Dependencies and scripts
 ```
 
-## 🚀 Deployment Process
+## 🛠️ Setup
 
-### Automatic Deployment
+### Prerequisites
 
-1. **Run the ETL Pipeline**:
+- Node.js 18+ 
+- npm or yarn
+- Cloudflare account
+- Wrangler CLI
+
+### Installation
+
+1. **Install dependencies:**
    ```bash
-   python run_pipeline.py
+   npm install
    ```
 
-2. **Deploy to Website**:
+2. **Set up environment variables:**
    ```bash
-   ./deploy_website.sh
+   # Set the Better Auth secret
+   wrangler secret put BETTER_AUTH_SECRET
    ```
 
-### Manual Deployment
-
-1. **Copy ETL Data**:
+3. **Run database migrations:**
    ```bash
-   python deploy_to_website.py
+   # Apply migrations to local database
+   npm run db:migrate
+   
+   # Apply migrations to remote database
+   npm run db:migrate:remote
    ```
 
-2. **Deploy to Cloudflare**:
-   ```bash
-   cd website
-   wrangler pages deploy . --project-name cranberry-business-sale
-   ```
-
-## 🔧 Data Integration
-
-### Data Loading Process
-
-1. **Primary Data Source**: `business_sale_data.json` (from ETL pipeline)
-2. **Additional Data**: Due diligence coverage and equipment analysis
-
-### Data Flow
-
-```
-ETL Pipeline → business_sale_data.json → Website → Cloudflare Pages
-```
-
-## 📊 Data Structure
-
-### Main Business Data (`business_sale_data.json`)
-
-```json
-{
-  "metadata": {
-    "generated_at": "2025-09-06T19:23:02.190087",
-    "data_period": "2023-2025 Q2",
-    "analysis_period": "Jan 1, 2023 to June 30, 2025"
-  },
-  "financials": {
-    "revenue": {
-      "total_revenue": 2389810.85,
-      "annual_projection": 955924.34,
-      "monthly_average": 79660.36
-    },
-    "ebitda": {
-      "estimated_annual": 248138.61,
-      "margin_percentage": 0.87
-    }
-  },
-  "valuation": {
-    "asking_price": 650000,
-    "market_value": 974239.4,
-    "discount_percentage": 33.28
-  }
-}
-```
-
-### Due Diligence Coverage (`due_diligence_coverage.json`)
-
-```json
-{
-  "overall_coverage": {
-    "completeness_score": 85.5,
-    "status": "Good",
-    "missing_documents": []
-  },
-  "data_sources": {
-    "sales_data": {
-      "coverage": "Complete",
-      "quality": "High"
-    }
-  }
-}
-```
-
-## 🌐 Website Features
-
-### Automatic Data Updates
-
-- **Real-time Integration**: Website automatically loads latest ETL data
-- **Error Handling**: Graceful degradation with user-friendly messages
-
-### Data Display
-
-- **Financial Metrics**: Revenue, EBITDA, ROI calculations
-- **Valuation Information**: Asking price, market value, discounts
-- **Location Analysis**: Performance by location
-- **Due Diligence**: Document coverage and completeness
-
-### Responsive Design
-
-- **Mobile Optimized**: Works on all device sizes
-- **Fast Loading**: Optimized for performance
-- **SEO Friendly**: Proper meta tags and structure
-
-## 🔄 Update Workflow
-
-### Daily Updates
-
-1. **Run ETL Pipeline**: Process latest business data
-2. **Deploy to Website**: Update website with new data
-3. **Verify Deployment**: Check website functionality
-
-### Weekly Updates
-
-1. **Data Quality Review**: Check ETL pipeline output
-2. **Website Performance**: Monitor loading times
-3. **User Experience**: Test on different devices
-
-## 🛠️ Development
+## 🚀 Development
 
 ### Local Development
 
-1. **Start Local Server**:
-   ```bash
-   cd website
-   python3 -m http.server 8000
-   ```
+```bash
+# Start local development server
+npm run dev
+```
 
-2. **View Website**: Open `http://localhost:8000`
+The application will be available at `http://localhost:8787`
 
 ### Testing
 
-1. **Test Data Loading**: Verify ETL data loads correctly
-2. **Test Error Handling**: Ensure graceful degradation when data unavailable
-3. **Test Responsiveness**: Check on different screen sizes
-
-## 📱 Cloudflare Pages Configuration
-
-### Wrangler Configuration (`wrangler.toml`)
-
-```toml
-name = "cranberry-business-sale"
-compatibility_date = "2025-01-27"
-
-[pages]
-pages_build_output_dir = "."
-```
-
-### Deployment Commands
-
 ```bash
-# Deploy to Cloudflare Pages
-wrangler pages deploy . --project-name cranberry-business-sale
+# Run all tests
+npm test
 
-# View deployment status
-wrangler pages deployment list --project-name cranberry-business-sale
+# Run tests with UI
+npm run test:ui
+
+# Run tests in headed mode
+npm run test:headed
 ```
 
-## 🔒 Security & Privacy
+## 📦 Deployment
 
-### Data Protection
+This project uses GitHub Actions for automated CI/CD. See [DEPLOYMENT.md](./DEPLOYMENT.md) for detailed setup instructions.
 
-- **No Sensitive Data**: Only business metrics, no personal information
-- **Anonymized Data**: All customer data removed
-- **Public Information**: Only data suitable for business sale
+### Quick Setup
 
-### Access Control
+1. **Set GitHub Secrets:**
+   - `CLOUDFLARE_API_TOKEN`
+   - `CLOUDFLARE_ACCOUNT_ID`
 
-- **Public Website**: Accessible to potential buyers
-- **No Authentication**: No login required
-- **Read-Only**: No data modification capabilities
+2. **Set Worker Secret:**
+   ```bash
+   wrangler secret put BETTER_AUTH_SECRET --name cranberry-auth-worker
+   ```
 
-## 📈 Performance
+3. **Deploy:**
+   - Push to `main` branch → automatic deployment
+   - Tests run on all pull requests
 
-### Optimization
+### Environment Configuration
 
-- **Static Files**: Fast loading with Cloudflare CDN
-- **Compressed Data**: JSON files optimized for size
-- **Caching**: Browser and CDN caching enabled
+- **BETTER_AUTH_SECRET**: Set using `wrangler secret put BETTER_AUTH_SECRET`
+- **BETTER_AUTH_URL**: Configured in `wrangler.toml`
+- **D1 Database**: Automatically bound as `cranberry_auth_db` (database name: `cranberry-auth-db`)
 
-### Monitoring
+**Note**: For production deployments, copy `wrangler.toml.example` to `wrangler.toml` and update the `database_id` with your actual D1 database ID.
 
-- **Uptime**: 99.9% availability with Cloudflare
-- **Speed**: Fast loading times globally
-- **Analytics**: Basic usage tracking available
+## 🔐 Authentication Flow
+
+### User Registration
+1. Users visit `/signup`
+2. Provide name, email, and password
+3. Account created and redirected to sign in
+
+### User Sign In
+1. Users visit `/docs` (protected route)
+2. Redirected to sign-in form if not authenticated
+3. After successful authentication, access granted
+
+### Protected Routes
+- `/docs` - Due diligence documents
+- `/docs.html` - Alternative due diligence page
+
+## 🗄️ Database Schema
+
+The application uses the following tables:
+
+- **users**: User account information
+- **sessions**: Active user sessions
+- **accounts**: Authentication provider accounts
+- **verifications**: Email verification tokens
+
+## 🧪 Testing
+
+The test suite covers:
+
+- User registration flow
+- User authentication
+- Protected route access
+- Session management
+- Error handling
+
+Run tests with:
+```bash
+npm test
+```
+
+## 🔧 Configuration
+
+### Better Auth Configuration
+
+Located in `src/auth.ts`:
+
+- Email/password authentication enabled
+- 7-day session expiration
+- D1 database integration
+- Debug logging in development
+
+### Cloudflare Workers Configuration
+
+Located in `wrangler.toml`:
+
+- D1 database binding
+- Environment variables
+- Compatibility settings
+
+## 📚 API Endpoints
+
+Better Auth automatically provides:
+
+- `POST /api/auth/sign-up/email` - User registration
+- `POST /api/auth/sign-in/email` - User sign in
+- `POST /api/auth/sign-out` - User sign out
+- `GET /api/auth/get-session` - Get current session
+
+## 🛡️ Security Features
+
+- **Secure Password Hashing**: Automatic password hashing
+- **Session Security**: HttpOnly cookies with proper expiration
+- **CSRF Protection**: Built-in CSRF protection
+- **Environment Secrets**: Sensitive data stored as Cloudflare secrets
 
 ## 🆘 Troubleshooting
 
 ### Common Issues
 
-1. **Data Not Loading**:
-   - Check if ETL pipeline ran successfully
-   - Verify JSON files exist in website directory
-   - Check browser console for errors
+1. **Authentication not working:**
+   - Verify `BETTER_AUTH_SECRET` is set correctly
+   - Check that `BETTER_AUTH_URL` matches your domain
+   - Ensure database migrations are applied
 
-2. **Website Not Updating**:
-   - Run deployment script again
-   - Check Cloudflare Pages deployment status
-   - Clear browser cache
+2. **Database connection issues:**
+   - Verify D1 database binding in `wrangler.toml`
+   - Check that migrations have been applied
+   - Ensure database ID is correct
 
-3. **Data Loading Issues**:
-   - Check if ETL pipeline ran successfully
-   - Verify JSON file format
-   - Check file permissions
+3. **Tests failing:**
+   - Make sure local dev server is running
+   - Check Playwright configuration
+   - Verify test URLs are correct
 
-### Support
+### Debug Mode
 
-- **ETL Pipeline Issues**: Check `logs/`
-- **Website Issues**: Check browser console
-- **Deployment Issues**: Check Cloudflare Pages dashboard
+Enable debug logging by setting the log level in `src/auth.ts`:
 
-## 🎯 Best Practices
+```typescript
+logger: {
+  level: "debug"
+}
+```
 
-### Data Management
+## 📈 Performance
 
-- **Regular Updates**: Run ETL pipeline daily
-- **Version Control**: Track changes to website files
+- **Cold Start**: ~50ms
+- **Response Time**: <100ms for most requests
+- **Database**: D1 provides fast, edge-distributed queries
+- **Caching**: Automatic Cloudflare caching
 
-### Performance
+## 🔄 Migration from Pages
 
-- **Optimize Images**: Compress images for web
-- **Minimize Files**: Keep file sizes small
-- **Test Regularly**: Check website functionality
+This project was migrated from Cloudflare Pages to Workers for:
 
-### Security
+- Better API endpoint support
+- Improved D1 database integration
+- Enhanced error handling
+- More reliable authentication
 
-- **No Sensitive Data**: Only include public business metrics
-- **Regular Reviews**: Check for any accidental data exposure
-- **Access Monitoring**: Monitor website access patterns
+## 📄 License
+
+MIT License - see LICENSE file for details.
+
+## 🤝 Contributing
+
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Add tests
+5. Submit a pull request
 
 ---
 
-**Note**: This website is designed for business sale purposes and contains only public business metrics. All sensitive data has been removed or anonymized.
+**Built with ❤️ for Cranberry Hearing & Balance Center**
