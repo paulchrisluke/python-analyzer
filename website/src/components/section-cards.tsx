@@ -20,7 +20,15 @@ function formatCurrency(amount: number): string {
 }
 
 function formatPercentage(value: number): string {
-  return `${value.toFixed(1)}%`;
+  // Guard against non-finite inputs
+  if (!isFinite(value) || value === null || value === undefined) {
+    return "0.0%";
+  }
+  
+  // Detect if the value is a ratio (0-1 range) and convert to percentage
+  const normalizedValue = value <= 1 && value >= 0 ? value * 100 : value;
+  
+  return `${normalizedValue.toFixed(1)}%`;
 }
 
 interface SectionCardsProps {
@@ -61,7 +69,7 @@ export function SectionCards({ data }: SectionCardsProps) {
       </Card>
       <Card className="@container/card bg-gradient-to-t from-primary/5 to-card shadow-xs">
         <CardHeader>
-          <CardDescription>Cash Flow (SDE)</CardDescription>
+          <CardDescription>Cash Flow (EBITDA)</CardDescription>
           <CardTitle className="text-2xl font-semibold tabular-nums @[250px]/card:text-3xl">
             {data ? formatCurrency(data.businessMetrics.annualEbitda) : "$260,403"}
           </CardTitle>

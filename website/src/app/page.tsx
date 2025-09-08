@@ -1,4 +1,5 @@
 import { loadETLData, formatCurrency, formatPercentage } from "@/lib/etl-data";
+import { ANCHORS } from "@/lib/anchors";
 import { BusinessMetrics } from "@/components/business-metrics";
 import { InvestmentHighlights } from "@/components/investment-highlights";
 // import { CallToAction } from "@/components/call-to-action";
@@ -44,22 +45,27 @@ export default async function HomePage() {
               />
 
               {/* Investment Highlights */}
-              <div id="investment-highlights" className="px-4 lg:px-6">
+              <div id={ANCHORS.INVESTMENT_HIGHLIGHTS} className="px-4 lg:px-6">
                 <InvestmentHighlights />
               </div>
 
               {/* Business Details */}
-              <div id="business-details" className="px-4 lg:px-6">
+              <div id={ANCHORS.BUSINESS_DETAILS} className="px-4 lg:px-6">
                 <BusinessDetails data={etlData} />
               </div>
 
+              {/* Due Diligence */}
+              <div id={ANCHORS.DUE_DILIGENCE} className="px-4 lg:px-6">
+                <DueDiligenceDocuments />
+              </div>
+
               {/* Due Diligence Documents */}
-              <div id="due-diligence-documents" className="px-4 lg:px-6">
+              <div id={ANCHORS.DUE_DILIGENCE_DOCUMENTS} className="px-4 lg:px-6">
                 <DueDiligenceDocuments />
               </div>
 
               {/* Location Information */}
-              <div id="location-information" className="px-4 lg:px-6">
+              <div id={ANCHORS.LOCATION_INFORMATION} className="px-4 lg:px-6">
                 <LocationInformation data={etlData} />
               </div>
 
