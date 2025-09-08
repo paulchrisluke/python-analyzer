@@ -14,7 +14,7 @@ export default {
         console.error('Auth handler error:', error);
         return new Response(JSON.stringify({ 
           error: 'Internal server error', 
-          details: error.message 
+          details: error instanceof Error ? error.message : 'Unknown error'
         }), {
           status: 500,
           headers: { 'Content-Type': 'application/json' }
