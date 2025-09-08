@@ -236,6 +236,12 @@ website/dist/
 website/worker.js
 website/worker.js.map
 
+# Environment variables and secrets
+website/.dev.vars
+website/.env*
+*.env
+.env*
+
 # Vercel
 .vercel
 
