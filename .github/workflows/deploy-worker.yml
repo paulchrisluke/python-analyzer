@@ -36,64 +36,9 @@ jobs:
         pip install -r requirements.txt
         
     - name: Run ETL Pipeline
-      env:
-        WEBSITE_DATA_DIR: website/src/data
       run: |
-        # Check if required data files exist, if not create minimal fallback data
-        if [ ! -d "docs/financials" ] || [ ! -d "docs/equipment" ]; then
-          echo "Sensitive business data not available in CI environment"
-          echo "Creating minimal fallback data for build process..."
-          
-          # Create minimal data directories and files
-          mkdir -p data/final
-          mkdir -p website/src/data
-          
-          # Create minimal business sale data
-          cat > data/final/business_sale_data.json << 'EOF'
-        {
-          "business_name": "Cranberry Hearing and Balance Center",
-          "business_type": "Audiology Practice",
-          "asking_price": 650000,
-          "annual_revenue": 932533,
-          "ebitda": 260403,
-          "monthly_cash_flow": 21700,
-          "roi": 40.06,
-          "payback_period": 2.5,
-          "ebitda_margin": 27.92
-        }
-        EOF
-          
-          # Create minimal landing page data
-          cat > data/final/landing_page_data.json << 'EOF'
-        {
-          "listing_details": {
-            "business_name": "Cranberry Hearing and Balance Center",
-            "business_type": "Audiology Practice",
-            "asking_price": 650000,
-            "established": "2010",
-            "locations": 2,
-            "state": "Pennsylvania"
-          },
-          "financial_highlights": {
-            "asking_price": 650000,
-            "annual_revenue": 932533,
-            "annual_ebitda": 260403,
-            "monthly_cash_flow": 21700,
-            "roi": 40.06,
-            "payback_period": 2.5,
-            "ebitda_margin": 27.92
-          }
-        }
-        EOF
-          
-          # Copy to website data directory
-          cp data/final/*.json website/src/data/
-          
-          echo "Fallback data created successfully"
-        else
-          echo "Running full ETL pipeline with business data..."
-          python run_pipeline.py
-        fi
+        echo "Running ETL pipeline for data analysis..."
+        python run_pipeline.py
         
     - name: Verify JSON files generated
       run: |
@@ -108,14 +53,12 @@ jobs:
         name: etl-pipeline-data
         path: |
           data/final/
-          website/src/data/
         retention-days: 7
-        if-no-files-found: error
+        if-no-files-found: warn
 
   deploy:
     runs-on: ubuntu-latest
     name: Deploy Website
-    needs: run-etl-pipeline
     defaults:
       run:
         working-directory: ./website
@@ -124,29 +67,23 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v4
     
-    - name: Download pipeline artifacts
-      uses: actions/download-artifact@v4
-      with:
-        name: etl-pipeline-data
-        path: ./
-    
-    - name: Verify artifact download
+    - name: Verify website data files
       run: |
-        echo "Verifying downloaded artifacts..."
+        echo "Verifying website data files..."
         ls -la
-        echo "Checking if data files were downloaded correctly..."
-        if [ ! -d "data/final" ]; then
-          echo "ERROR: data/final directory not found"
-          exit 1
-        fi
-        echo "data/final directory exists"
-        ls -la data/final/
+        echo "Checking if website data files exist..."
         if [ ! -d "src/data" ]; then
           echo "ERROR: src/data directory not found"
           exit 1
         fi
         echo "src/data directory exists"
         ls -la src/data/
+        echo "Verifying required data files..."
+        if [ ! -f "src/data/landing_page_data.json" ]; then
+          echo "ERROR: landing_page_data.json not found"
+          exit 1
+        fi
+        echo "Required data files found"
     - name: Setup Node.js
       uses: actions/setup-node@v4
       with:
