@@ -8,7 +8,7 @@ export default defineConfig({
   workers: process.env.CI ? 1 : undefined,
   reporter: 'html',
   use: {
-    baseURL: 'http://localhost:8787',
+    baseURL: process.env.CI ? 'https://cranberry-auth-worker.paulchrisluke.workers.dev' : 'http://localhost:8787',
     trace: 'on-first-retry',
   },
 
