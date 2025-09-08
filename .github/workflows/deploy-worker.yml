@@ -36,6 +36,8 @@ jobs:
         pip install -r requirements.txt
         
     - name: Run ETL Pipeline
+      env:
+        WEBSITE_DATA_DIR: website/src/data
       run: |
         python run_pipeline.py
         
