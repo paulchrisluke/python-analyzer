@@ -227,6 +227,13 @@ class JsonLoader(BaseLoader):
         FileUtils.save_json(equipment_analysis, str(equipment_file))
         self.load_results['equipment_analysis'] = str(equipment_file)
         logger.info(f"Equipment analysis saved to: {equipment_file}")
+        
+        # Save landing page data
+        landing_page_data = self._create_landing_page_data(business_metrics)
+        landing_page_file = final_dir / "landing_page_data.json"
+        FileUtils.save_json(landing_page_data, str(landing_page_file))
+        self.load_results['landing_page_data'] = str(landing_page_file)
+        logger.info(f"Landing page data saved to: {landing_page_file}")
     
     def _load_equipment_data(self, equipment_data: Dict[str, Any]) -> None:
         """Load equipment data to JSON files."""
@@ -350,7 +357,7 @@ class JsonLoader(BaseLoader):
         # Create business sale data structure compatible with DueDiligenceManager
         business_sale_data = {
             "metadata": {
-                "business_name": financial_metrics.get('business_name') or payload.get('business_name', 'Unknown Business'),
+                "business_name": financial_metrics.get('business_name') or 'Cranberry Hearing and Balance Center',
                 "generated_at": datetime.now().isoformat(),
                 "data_period": data_period,
                 "months_analyzed": financial_metrics.get('revenue_metrics', {}).get('analysis_period_months', 30),
@@ -623,6 +630,85 @@ class JsonLoader(BaseLoader):
             "generated_at": datetime.now().isoformat(),
             "data_source": "ETL Pipeline Analysis"
         }
+    
+    def _create_landing_page_data(self, business_metrics: Dict[str, Any]) -> Dict[str, Any]:
+        """Create comprehensive landing page data structure."""
+        logger.info("Creating landing page data structure...")
+        
+        # Extract metrics
+        financial_metrics = business_metrics.get('financial', {})
+        landing_page_metrics = business_metrics.get('landing_page', {})
+        equipment_metrics = business_metrics.get('equipment', {})
+        
+        # Get revenue and profitability data
+        revenue_metrics = financial_metrics.get('revenue_metrics', {})
+        profitability = financial_metrics.get('profitability', {})
+        investment_metrics = financial_metrics.get('investment_metrics', {})
+        
+        # Create landing page data structure
+        landing_page_data = {
+            "listing_details": {
+                "business_name": "Cranberry Hearing and Balance Center",
+                "business_type": "Audiology Practice",
+                "asking_price": investment_metrics.get('asking_price', 650000),
+                "established": "2010",  # TODO: Get actual founding date
+                "locations": 2,
+                "state": "Pennsylvania"
+            },
+            "financial_highlights": {
+                "asking_price": investment_metrics.get('asking_price', 650000),
+                "annual_revenue": revenue_metrics.get('annual_revenue_projection', 0),
+                "annual_ebitda": profitability.get('estimated_annual_ebitda', 0),
+                "sde": landing_page_metrics.get('sde', 0),
+                "monthly_cash_flow": landing_page_metrics.get('monthly_cash_flow', 0),
+                "roi": investment_metrics.get('roi_percentage', 0),
+                "payback_period": investment_metrics.get('payback_period_years', 0),
+                "ebitda_margin": profitability.get('ebitda_margin', 0)
+            },
+            "property_details": {
+                "primary_location": landing_page_metrics.get('location_info', {}).get('primary_location', {}),
+                "secondary_location": landing_page_metrics.get('location_info', {}).get('secondary_location', {}),
+                "lease_analysis": landing_page_metrics.get('lease_analysis', {}),
+                "total_locations": 2,
+                "property_type": "Leased"
+            },
+            "business_operations": {
+                "services": ["Hearing Tests", "Hearing Aid Sales", "Balance Testing", "Tinnitus Treatment"],
+                "insurance_coverage": landing_page_metrics.get('insurance_coverage', {}),
+                "payment_methods": ["Insurance billing (UPMC, Aetna)", "Private pay", "Cash payments"],
+                "equipment_value": equipment_metrics.get('total_value', 0),
+                "business_hours": "Monday-Friday 9AM-5PM"  # TODO: Get actual hours
+            },
+            "market_opportunity": {
+                "local_market": "Cranberry Township & Pittsburgh Metro Area",
+                "competition": "Limited local competition",
+                "growth_potential": "High - aging population demographics",
+                "market_advantage": "Established insurance relationships"
+            },
+            "transaction_terms": {
+                "financing_available": True,
+                "seller_financing": "20% down, seller carryback available",
+                "training_period": "30 days",
+                "reason_for_sale": landing_page_metrics.get('sale_details', {}).get('reason_for_sale', 'Owner retirement'),
+                "transition_support": "Available for smooth transition"
+            },
+            "key_benefits": [
+                "Established insurance relationships (UPMC since 2006, Aetna since 2015)",
+                "Two prime locations in growing markets",
+                "Professional audiology equipment included",
+                "Steady cash flow from insurance payments",
+                "Absentee owner opportunity",
+                "Strong EBITDA margins"
+            ],
+            "metadata": {
+                "generated_at": datetime.now().isoformat(),
+                "data_source": "ETL Pipeline Analysis",
+                "version": "1.0"
+            }
+        }
+        
+        logger.info("Landing page data structure created successfully")
+        return landing_page_data
     
     def _convert_dataframes_to_dict(self, data: Dict[str, Any]) -> Dict[str, Any]:
         """Convert DataFrames to dictionaries for JSON serialization."""

@@ -270,8 +270,11 @@ class EquipmentExtractor(BaseExtractor):
             summary['total_equipment_items'] = len(quotes)
             
             for quote in quotes:
-                # Add to total value
-                summary['total_estimated_value'] += quote.get('price', 0.0)
+                # Add to total value (convert Decimal to float if needed)
+                price = quote.get('price', 0.0)
+                if isinstance(price, Decimal):
+                    price = float(price)
+                summary['total_estimated_value'] += price
                 
                 # Count by category
                 category = quote.get('category', 'Unknown')

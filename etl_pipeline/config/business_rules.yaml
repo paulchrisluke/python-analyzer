@@ -9,6 +9,30 @@ locations:
     primary: true
     for_sale: true
     description: "Pennsylvania locations for sale (Pittsburgh/West View + Cranberry)"
+    
+    # Detailed location information for sale locations
+    cranberry_location:
+      name: "Cranberry Hearing & Balance"
+      address: "20820 Route 19, Suite A"
+      city: "Cranberry Twp"
+      state: "PA"
+      zip_code: "16066"
+      phone: "724-779-4444"
+      google_maps_url: "https://www.google.com/maps/place/20820%20Route%2019+Cranberry%20Twp+PA+16066"
+      location_type: "Primary Location"
+      for_sale: true
+      
+    west_view_location:
+      name: "Cranberry Hearing & Balance"
+      address: "999 West View Park Drive"
+      city: "Pittsburgh"
+      state: "PA"
+      zip_code: "15229"
+      phone: "412-931-9290"
+      google_maps_url: "https://www.google.com/maps/place/999%20West%20View%20Park%20Drive+Pittsburgh+PA+15229"
+      location_type: "Secondary Location"
+      for_sale: true
+      
   # Non-sale locations (Virginia state)  
   virginia:
     names: ["Virginia", "Annandale", "Alexandria"]
@@ -71,3 +95,49 @@ pnl_filtering:
 data_range:
   start: "2021-01-01"
   end: "2025-12-31"
+
+# Business sale information
+sale_details:
+  reason_for_sale: "Absentee owner seeking retirement and lifestyle change"
+  sale_type: "Owner retirement and lifestyle transition"
+  urgency: "Standard timeline - no rush"
+  owner_involvement: "Absentee owner - minimal day-to-day involvement"
+  transition_support: "Available for smooth transition and training period"
+  
+# Professional reasons for sale (standard business language)
+standard_reasons:
+  - "Owner retirement and lifestyle change"
+  - "Absentee owner seeking to focus on other ventures"
+  - "Owner pursuing new opportunities"
+  - "Family circumstances requiring sale"
+  - "Strategic business decision"
+  - "Owner relocation"
+
+# Insurance and payment information
+insurance_coverage:
+  primary_insurers:
+    - name: "UPMC"
+      contract_date: "2006-08-31"
+      contract_type: "Ancillary Provider Agreement"
+      status: "Active"
+      coverage_type: "Primary Insurance"
+      
+    - name: "Aetna"
+      contract_date: "2015-09-28"
+      contract_type: "Provider Agreement"
+      status: "Active"
+      coverage_type: "Primary Insurance"
+      
+  payment_methods:
+    - "Insurance billing (UPMC, Aetna)"
+    - "Private pay"
+    - "Cash payments"
+    - "Payment plans available"
+    
+  billing_system:
+    description: "Established insurance billing relationships"
+    benefits:
+      - "Steady cash flow from insurance payments"
+      - "Reduced collection risk"
+      - "Professional billing relationships"
+      - "Established provider network status"
