@@ -1,6 +1,6 @@
 # ETL Pipeline for Business Analysis
 
-A comprehensive Extract, Transform, Load (ETL) pipeline for business analysis and valuation, with specialized features for audiology practice due diligence.
+A comprehensive Extract, Transform, Load (ETL) pipeline for business analysis and valuation, with specialized features for due diligence data management.
 
 ## 🚀 Quick Start
 
@@ -11,7 +11,6 @@ A comprehensive Extract, Transform, Load (ETL) pipeline for business analysis an
 
 2. **Run the pipeline**:
    ```bash
-   cd 05_ANALYSIS_TOOLS
    python run_pipeline.py
    ```
 
@@ -23,9 +22,29 @@ A comprehensive Extract, Transform, Load (ETL) pipeline for business analysis an
 ## 📁 Repository Structure
 
 ```
-├── 05_ANALYSIS_TOOLS/           # ETL pipeline and analysis tools
+├── etl_pipeline/                # Core ETL pipeline modules
+│   ├── config/                  # Configuration files
+│   ├── extract/                 # Data extraction modules
+│   ├── transform/               # Data transformation modules
+│   ├── load/                    # Data loading modules
+│   ├── utils/                   # Utility functions
+│   └── pipeline_runner.py       # Internal pipeline runner
+├── data/                        # Data storage and processing
+│   ├── final/                   # Processed output data
+│   ├── normalized/              # Normalized data files
+│   ├── raw/                     # Raw input data
+│   └── pipeline_summary.json    # Pipeline execution summary
+├── reports/                     # Generated analysis reports
+├── logs/                        # Pipeline execution logs
+├── tests/                       # Test suite
+├── examples/                    # Example scripts and usage
+├── docs/                        # Documentation
 ├── website/                     # Cloudflare Pages website
-├── .gitignore                   # Privacy protection
+├── run_pipeline.py              # Main pipeline runner
+├── deploy_to_website.py         # Website deployment script
+├── deploy_website.sh            # Website deployment shell script
+├── requirements.txt             # Python dependencies
+├── ETL_PIPELINE_TECHNICAL_DOCUMENTATION.md  # Technical documentation
 └── README.md                    # This file
 ```
 
@@ -39,7 +58,7 @@ A comprehensive Extract, Transform, Load (ETL) pipeline for business analysis an
 
 ## 🔧 Configuration
 
-Configure business rules and data sources in `05_ANALYSIS_TOOLS/etl_pipeline/config/`:
+Configure business rules and data sources in `etl_pipeline/config/`:
 
 - `business_rules.yaml` - Business logic and analysis parameters
 - `data_sources.yaml` - Data source paths and processing options
@@ -54,14 +73,13 @@ The pipeline generates:
 ## 🧪 Testing
 
 ```bash
-cd 05_ANALYSIS_TOOLS
-python test_pipeline.py
+python -m pytest tests/
 ```
 
 ## 🔒 Privacy & Security
 
-- **No Real Data**: All business data anonymized/removed
-- **Sample Data Only**: Includes anonymized data for testing
+- **Anonymized Data Only**: All business data in this repository is anonymized/synthetic for demonstration purposes
+- **Production Pipeline**: Real business data is processed only in a separate, secured production pipeline with proper safeguards
 - **Comprehensive Git Ignore**: Prevents accidental commits of sensitive data
 
 ## 📝 License
@@ -70,4 +88,4 @@ MIT License - see LICENSE file for details.
 
 ---
 
-**Note**: This is an open source version with all sensitive business data removed and replaced with sample data for demonstration purposes.
+**Note**: This system demonstrates ETL pipeline functionality using anonymized/synthetic data. Real business data is processed only in a separate, secured production pipeline with proper data handling and privacy controls.

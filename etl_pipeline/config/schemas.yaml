@@ -1,0 +1,225 @@
+# Data Schemas Configuration
+# Defines the structure for each stage of the ETL pipeline
+
+schemas:
+  sales_raw:
+    fields:
+      sale_date: string
+      delivery_date: string
+      return_date: string
+      staff_name: string
+      patient_id_hash: string
+      clinic_name: string
+      referral_source: string
+      subcategory: string
+      ref_description: string
+      campaign: string
+      units: integer
+      type: string
+      product: string
+      description: string
+      serial_number: string
+      notes: string
+      invoice_no: string
+      cpt_code: string
+      gross_price: decimal
+      discount: decimal
+      discount_type_1: string
+      discount_amount_1: decimal
+      discount_type_2: string
+      discount_amount_2: decimal
+      discount_type_3: string
+      discount_amount_3: decimal
+      net_price: decimal
+      sales_tax: decimal
+      total_price: decimal
+      receipt_paid: string
+      
+  sales_normalized:
+    required_fields:
+      - transaction_id
+      - sale_date
+      - patient_id_hash
+      - product_name
+      - units
+      - total_price
+    fields:
+      transaction_id:
+        type: string
+        validation: "non_empty"
+        description: "Unique transaction identifier"
+      sale_date:
+        type: datetime
+        format: "%Y-%m-%d %H:%M:%S"
+        description: "Date and time of sale"
+      delivery_date:
+        type: datetime
+        format: "%Y-%m-%d %H:%M:%S"
+        nullable: true
+        description: "Date of delivery"
+      return_date:
+        type: datetime
+        format: "%Y-%m-%d %H:%M:%S"
+        nullable: true
+        description: "Date of return"
+      staff_name:
+        type: string
+        nullable: true
+        description: "Name of staff member"
+      patient_id_hash:
+        type: string
+        validation: "non_empty"
+        description: "Hashed patient identifier for analytics (PII-protected)"
+      clinic_name:
+        type: string
+        nullable: true
+        description: "Name of clinic"
+      referral_source:
+        type: string
+        nullable: true
+        description: "Source of referral"
+      product_category:
+        type: string
+        nullable: true
+        description: "Product category"
+      product_name:
+        type: string
+        validation: "non_empty"
+        description: "Name of product"
+      units:
+        type: integer
+        validation: ">= 0"
+        description: "Number of units sold"
+      transaction_type:
+        type: string
+        enum: ["sale", "return", "exchange", "replacement", "cancelled", "conversion"]
+        nullable: true
+        description: "Type of transaction"
+      gross_price:
+        type: decimal
+        precision: 10
+        scale: 2
+        validation: ">= 0"
+        description: "Gross price before discounts (decimal with 2 decimal places)"
+      total_discounts:
+        type: decimal
+        precision: 10
+        scale: 2
+        validation: ">= 0"
+        description: "Total discount amount (decimal with 2 decimal places)"
+      net_price:
+        type: decimal
+        precision: 10
+        scale: 2
+        validation: ">= 0"
+        description: "Net price after discounts (decimal with 2 decimal places)"
+      sales_tax:
+        type: decimal
+        precision: 10
+        scale: 2
+        validation: ">= 0"
+        description: "Sales tax amount (decimal with 2 decimal places)"
+      total_price:
+        type: decimal
+        precision: 10
+        scale: 2
+        validation: ">= 0"
+        description: "Final total price (decimal with 2 decimal places)"
+      is_paid:
+        type: boolean
+        description: "Whether transaction is paid"
+      year:
+        type: integer
+        validation: ">= 2020"
+        description: "Year of transaction"
+      month:
+        type: integer
+        validation: ">= 1 and <= 12"
+        description: "Month of transaction"
+      quarter:
+        type: integer
+        validation: ">= 1 and <= 4"
+        description: "Quarter of transaction"
+      
+  financial_raw:
+    fields:
+      source_file: string
+      account_name: string
+      account_type: string
+      amount: decimal
+      date: string
+      description: string
+      reference: string
+      
+  financial_normalized:
+    fields:
+      account_name: string
+      account_type: string
+      amount: decimal
+      date: datetime
+      period: string
+      category: string
+      subcategory: string
+      year: integer
+      month: integer
+      
+  business_metrics:
+    fields:
+      total_revenue: decimal
+      total_transactions: integer
+      average_transaction: decimal
+      revenue_by_location: dict
+      revenue_by_staff: dict
+      revenue_by_year: dict
+      revenue_by_month: dict
+      growth_rates: dict
+      ebitda: decimal
+      profit_margin: decimal
+      roi: decimal
+      
+  equipment_raw:
+    fields:
+      file_name: string
+      equipment_name: string
+      description: string
+      price: decimal
+      category: string
+      quote_date: string
+      
+  equipment_normalized:
+    fields:
+      equipment_id: string
+      name: string
+      description: string
+      category: string
+      price: decimal
+      quote_date: datetime
+      location: string
+      
+  # Separate access-controlled patient dimension table for PII data
+  patient_dimension:
+    access_control: "restricted"
+    encryption: "required"
+    fields:
+      patient_id_hash:
+        type: string
+        validation: "non_empty"
+        description: "Hashed patient identifier (matches sales data)"
+      patient_name:
+        type: string
+        nullable: true
+        description: "Patient name (PII - access controlled)"
+      patient_id_original:
+        type: string
+        nullable: true
+        description: "Original patient ID (PII - access controlled)"
+      patient_zip:
+        type: string
+        nullable: true
+        description: "Patient ZIP code (PII - access controlled)"
+      created_date:
+        type: datetime
+        description: "Record creation date"
+      last_updated:
+        type: datetime
+        description: "Last update date"
