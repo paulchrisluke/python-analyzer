@@ -7,6 +7,7 @@ export interface Env {
   cranberry_auth_db: D1Database;
   BETTER_AUTH_SECRET: string;
   BETTER_AUTH_URL: string;
+  NODE_ENV?: string;
 }
 
 export function createAuth(env: Env) {
@@ -25,7 +26,7 @@ export function createAuth(env: Env) {
     secret: env.BETTER_AUTH_SECRET,
     baseURL: env.BETTER_AUTH_URL,
     logger: {
-      level: process.env.NODE_ENV === "development" ? "debug" : "info"
+      level: (env?.NODE_ENV ?? "production") === "development" ? "debug" : "info"
     },
     session: {
       expiresIn: 60 * 60 * 24 * 7, // 7 days

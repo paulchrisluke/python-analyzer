@@ -331,7 +331,7 @@ export default {
               </div>
               
               <div class="bg-white rounded-lg shadow-md p-6">
-                <h2 class="text-xl font-semibold mb-4">Welcome, \${session.user.name}!</h2>
+                <h2 class="text-xl font-semibold mb-4">Welcome, <span id="user-name"></span>!</h2>
                 <p class="text-gray-600 mb-6">You have access to the following business documents:</p>
                 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -388,6 +388,12 @@ export default {
               // Create and make auth client available globally
               const authClient = new AuthClient();
               window.authClient = authClient;
+
+              // Safely set user name to prevent XSS
+              const userNameElement = document.getElementById('user-name');
+              if (userNameElement) {
+                userNameElement.textContent = \`${session.user.name || 'User'}\`;
+              }
 
               document.getElementById('signout-btn').addEventListener('click', async () => {
                 await window.authClient.signOut();

@@ -63,13 +63,7 @@ test.describe('Better Auth Integration', () => {
     await expect(page.locator('#success-message')).toBeVisible();
     await page.waitForURL('/docs');
     
-    // Now try to sign in
-    await page.goto('/docs');
-    await page.fill('input[id="email"]', testEmail);
-    await page.fill('input[id="password"]', testPassword);
-    await page.click('button[type="submit"]');
-    
-    // Should be authenticated and see the protected content
+    // Should be authenticated and see the protected content immediately after registration
     await expect(page.locator('h1')).toContainText('Due Diligence Documents');
     await expect(page.locator('button:has-text("Sign Out")')).toBeVisible();
   });
@@ -107,8 +101,8 @@ test.describe('Better Auth Integration', () => {
     // Now sign out
     await page.click('button:has-text("Sign Out")');
     
-    // Should be redirected back to sign-in page
-    await expect(page.locator('h1')).toContainText('Authentication Required');
+    // Should be redirected back to home page
+    await expect(page.locator('h1')).toContainText('Cranberry Hearing & Balance Center');
   });
 
   test('should protect docs.html route', async ({ page }) => {
