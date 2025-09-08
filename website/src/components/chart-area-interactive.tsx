@@ -148,7 +148,20 @@ export function ChartAreaInteractive() {
 
   const filteredData = chartData.filter((item) => {
     const date = new Date(item.date)
-    const referenceDate = new Date("2024-06-30")
+    
+    // Use the last date in chartData as reference, with fallback to current date
+    let referenceDate: Date
+    if (chartData.length > 0) {
+      const lastDateString = chartData[chartData.length - 1].date
+      referenceDate = new Date(lastDateString)
+      // Guard against invalid dates
+      if (isNaN(referenceDate.getTime())) {
+        referenceDate = new Date()
+      }
+    } else {
+      referenceDate = new Date()
+    }
+    
     let daysToSubtract = 90
     if (timeRange === "30d") {
       daysToSubtract = 30

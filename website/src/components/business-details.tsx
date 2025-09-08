@@ -12,6 +12,7 @@ import {
   FileTextIcon,
   CheckCircleIcon
 } from "lucide-react";
+import DOMPurify from "dompurify";
 
 // Business data interfaces based on the actual ETL data structure
 interface Location {
@@ -249,7 +250,16 @@ export function BusinessDetails({ data }: BusinessDetailsProps) {
         </CardHeader>
         <CardContent className="prose prose-sm max-w-none">
           {data.business_description ? (
-            <div className="mb-4" dangerouslySetInnerHTML={{ __html: data.business_description }} />
+            // Sanitize HTML content to prevent XSS attacks - using DOMPurify with safe whitelist
+            <div 
+              className="mb-4" 
+              dangerouslySetInnerHTML={{ 
+                __html: DOMPurify.sanitize(data.business_description || '', {
+                  ALLOWED_TAGS: ['p', 'br', 'strong', 'em', 'u', 'b', 'i', 'ul', 'ol', 'li', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'blockquote', 'a'],
+                  ALLOWED_ATTR: ['href', 'target', 'rel']
+                })
+              }} 
+            />
           ) : (
             <>
               <p className="mb-4">

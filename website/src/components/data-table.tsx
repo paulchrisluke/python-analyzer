@@ -208,58 +208,83 @@ const columns: ColumnDef<z.infer<typeof schema>>[] = [
   {
     accessorKey: "target",
     header: () => <div className="w-full text-right">Target</div>,
-    cell: ({ row }) => (
-      <form
-        onSubmit={(e) => {
-          e.preventDefault()
-          toast.promise(new Promise((resolve) => setTimeout(resolve, 1000)), {
-            loading: `Saving ${row.original.header}`,
-            success: "Done",
-            error: "Error",
-          })
-        }}
-      >
-        <Label htmlFor={`${row.original.id}-target`} className="sr-only">
-          Target
-        </Label>
-        <Input
-          className="h-8 w-16 border-transparent bg-transparent text-right shadow-none hover:bg-input/30 focus-visible:border focus-visible:bg-background"
-          defaultValue={row.original.target}
-          id={`${row.original.id}-target`}
-        />
-      </form>
-    ),
+    cell: ({ row, table }) => {
+      const saveRowData = (table.options.meta as any)?.saveRowData
+      return (
+        <form
+          onSubmit={async (e) => {
+            e.preventDefault()
+            const formData = new FormData(e.currentTarget)
+            const newValue = formData.get(`${row.original.id}-target`) as string
+            
+            if (saveRowData) {
+              toast.promise(
+                saveRowData(row.original.id, 'target', newValue),
+                {
+                  loading: `Saving ${row.original.header}`,
+                  success: "Target updated successfully",
+                  error: "Failed to update target",
+                }
+              )
+            }
+          }}
+        >
+          <Label htmlFor={`${row.original.id}-target`} className="sr-only">
+            Target
+          </Label>
+          <Input
+            className="h-8 w-16 border-transparent bg-transparent text-right shadow-none hover:bg-input/30 focus-visible:border focus-visible:bg-background"
+            defaultValue={row.original.target}
+            id={`${row.original.id}-target`}
+            name={`${row.original.id}-target`}
+          />
+        </form>
+      )
+    },
   },
   {
     accessorKey: "limit",
     header: () => <div className="w-full text-right">Limit</div>,
-    cell: ({ row }) => (
-      <form
-        onSubmit={(e) => {
-          e.preventDefault()
-          toast.promise(new Promise((resolve) => setTimeout(resolve, 1000)), {
-            loading: `Saving ${row.original.header}`,
-            success: "Done",
-            error: "Error",
-          })
-        }}
-      >
-        <Label htmlFor={`${row.original.id}-limit`} className="sr-only">
-          Limit
-        </Label>
-        <Input
-          className="h-8 w-16 border-transparent bg-transparent text-right shadow-none hover:bg-input/30 focus-visible:border focus-visible:bg-background"
-          defaultValue={row.original.limit}
-          id={`${row.original.id}-limit`}
-        />
-      </form>
-    ),
+    cell: ({ row, table }) => {
+      const saveRowData = (table.options.meta as any)?.saveRowData
+      return (
+        <form
+          onSubmit={async (e) => {
+            e.preventDefault()
+            const formData = new FormData(e.currentTarget)
+            const newValue = formData.get(`${row.original.id}-limit`) as string
+            
+            if (saveRowData) {
+              toast.promise(
+                saveRowData(row.original.id, 'limit', newValue),
+                {
+                  loading: `Saving ${row.original.header}`,
+                  success: "Limit updated successfully",
+                  error: "Failed to update limit",
+                }
+              )
+            }
+          }}
+        >
+          <Label htmlFor={`${row.original.id}-limit`} className="sr-only">
+            Limit
+          </Label>
+          <Input
+            className="h-8 w-16 border-transparent bg-transparent text-right shadow-none hover:bg-input/30 focus-visible:border focus-visible:bg-background"
+            defaultValue={row.original.limit}
+            id={`${row.original.id}-limit`}
+            name={`${row.original.id}-limit`}
+          />
+        </form>
+      )
+    },
   },
   {
     accessorKey: "reviewer",
     header: "Reviewer",
-    cell: ({ row }) => {
+    cell: ({ row, table }) => {
       const isAssigned = row.original.reviewer !== "Assign reviewer"
+      const saveRowData = (table.options.meta as any)?.saveRowData
 
       if (isAssigned) {
         return row.original.reviewer
@@ -270,7 +295,20 @@ const columns: ColumnDef<z.infer<typeof schema>>[] = [
           <Label htmlFor={`${row.original.id}-reviewer`} className="sr-only">
             Reviewer
           </Label>
-          <Select>
+          <Select
+            onValueChange={(value) => {
+              if (saveRowData) {
+                toast.promise(
+                  saveRowData(row.original.id, 'reviewer', value),
+                  {
+                    loading: `Assigning reviewer for ${row.original.header}`,
+                    success: "Reviewer assigned successfully",
+                    error: "Failed to assign reviewer",
+                  }
+                )
+              }
+            }}
+          >
             <SelectTrigger
               className="h-8 w-40"
               id={`${row.original.id}-reviewer`}
@@ -363,6 +401,24 @@ export function DataTable({
     useSensor(KeyboardSensor, {})
   )
 
+  // TODO: Replace with actual API call when backend persistence is available
+  const saveRowData = async (rowId: number, field: 'target' | 'limit' | 'reviewer', value: string): Promise<void> => {
+    // Simulate API call delay
+    await new Promise(resolve => setTimeout(resolve, 500))
+    
+    // Optimistically update local state
+    setData(prevData => 
+      prevData.map(row => 
+        row.id === rowId 
+          ? { ...row, [field]: value }
+          : row
+      )
+    )
+    
+    // TODO: Implement actual API persistence here
+    // Example: await api.updateRowData(rowId, { [field]: value })
+  }
+
   const dataIds = React.useMemo<UniqueIdentifier[]>(
     () => data?.map(({ id }) => id) || [],
     [data]
@@ -377,6 +433,9 @@ export function DataTable({
       rowSelection,
       columnFilters,
       pagination,
+    },
+    meta: {
+      saveRowData,
     },
     getRowId: (row) => row.id.toString(),
     enableRowSelection: true,
@@ -397,9 +456,23 @@ export function DataTable({
     const { active, over } = event
     if (active && over && active.id !== over.id) {
       setData((data) => {
-        const oldIndex = dataIds.indexOf(active.id)
-        const newIndex = dataIds.indexOf(over.id)
-        return arrayMove(data, oldIndex, newIndex)
+        // Get the current visual row order from the table
+        const currentRows = table.getRowModel().rows
+        
+        // Find the visual indices of the dragged items
+        const activeRowIndex = currentRows.findIndex(row => row.original.id === active.id)
+        const overRowIndex = currentRows.findIndex(row => row.original.id === over.id)
+        
+        if (activeRowIndex === -1 || overRowIndex === -1) {
+          return data // Return unchanged if indices not found
+        }
+        
+        // Create new data array based on visual order
+        const newData = [...data]
+        const [movedItem] = newData.splice(activeRowIndex, 1)
+        newData.splice(overRowIndex, 0, movedItem)
+        
+        return newData
       })
     }
   }
@@ -520,7 +593,7 @@ export function DataTable({
                   </TableRow>
                 ))}
               </TableHeader>
-              <TableBody className="**:data-[slot=table-cell]:first:w-8">
+              <TableBody className="data-[slot=table-cell]:first:w-8">
                 {table.getRowModel().rows?.length ? (
                   <SortableContext
                     items={dataIds}
@@ -653,11 +726,11 @@ const chartData = [
 const chartConfig = {
   desktop: {
     label: "Desktop",
-    color: "var(--primary)",
+    color: "hsl(var(--chart-1))",
   },
   mobile: {
     label: "Mobile",
-    color: "var(--primary)",
+    color: "hsl(var(--chart-2))",
   },
 } satisfies ChartConfig
 
@@ -736,15 +809,46 @@ function TableCellViewer({ item }: { item: z.infer<typeof schema> }) {
               <Separator />
             </>
           )}
-          <form className="flex flex-col gap-4">
+          <form 
+            id="item-form"
+            className="flex flex-col gap-4"
+            onSubmit={async (e) => {
+              e.preventDefault()
+              const formData = new FormData(e.currentTarget)
+              
+              const updatedData = {
+                header: formData.get('header') as string,
+                type: formData.get('type') as string,
+                status: formData.get('status') as string,
+                target: formData.get('target') as string,
+                limit: formData.get('limit') as string,
+                reviewer: formData.get('reviewer') as string,
+              }
+              
+              // TODO: Implement actual API call to save form data
+              toast.promise(
+                new Promise(resolve => {
+                  setTimeout(() => {
+                    console.log('Saving form data:', updatedData)
+                    resolve(true)
+                  }, 500)
+                }),
+                {
+                  loading: `Saving ${item.header}`,
+                  success: "Item updated successfully",
+                  error: "Failed to update item",
+                }
+              )
+            }}
+          >
             <div className="flex flex-col gap-3">
               <Label htmlFor="header">Header</Label>
-              <Input id="header" defaultValue={item.header} />
+              <Input id="header" name="header" defaultValue={item.header} />
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div className="flex flex-col gap-3">
                 <Label htmlFor="type">Type</Label>
-                <Select defaultValue={item.type}>
+                <Select name="type" defaultValue={item.type}>
                   <SelectTrigger id="type" className="w-full">
                     <SelectValue placeholder="Select a type" />
                   </SelectTrigger>
@@ -770,7 +874,7 @@ function TableCellViewer({ item }: { item: z.infer<typeof schema> }) {
               </div>
               <div className="flex flex-col gap-3">
                 <Label htmlFor="status">Status</Label>
-                <Select defaultValue={item.status}>
+                <Select name="status" defaultValue={item.status}>
                   <SelectTrigger id="status" className="w-full">
                     <SelectValue placeholder="Select a status" />
                   </SelectTrigger>
@@ -785,16 +889,16 @@ function TableCellViewer({ item }: { item: z.infer<typeof schema> }) {
             <div className="grid grid-cols-2 gap-4">
               <div className="flex flex-col gap-3">
                 <Label htmlFor="target">Target</Label>
-                <Input id="target" defaultValue={item.target} />
+                <Input id="target" name="target" defaultValue={item.target} />
               </div>
               <div className="flex flex-col gap-3">
                 <Label htmlFor="limit">Limit</Label>
-                <Input id="limit" defaultValue={item.limit} />
+                <Input id="limit" name="limit" defaultValue={item.limit} />
               </div>
             </div>
             <div className="flex flex-col gap-3">
               <Label htmlFor="reviewer">Reviewer</Label>
-              <Select defaultValue={item.reviewer}>
+              <Select name="reviewer" defaultValue={item.reviewer}>
                 <SelectTrigger id="reviewer" className="w-full">
                   <SelectValue placeholder="Select a reviewer" />
                 </SelectTrigger>
@@ -810,7 +914,7 @@ function TableCellViewer({ item }: { item: z.infer<typeof schema> }) {
           </form>
         </div>
         <SheetFooter className="mt-auto flex gap-2 sm:flex-col sm:space-x-0">
-          <Button className="w-full">Submit</Button>
+          <Button type="submit" form="item-form" className="w-full">Submit</Button>
           <SheetClose asChild>
             <Button variant="outline" className="w-full">
               Done

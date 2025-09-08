@@ -4,6 +4,38 @@ import * as React from "react"
 import { Area, AreaChart, CartesianGrid, XAxis, YAxis } from "recharts"
 
 import { useIsMobile } from "@/hooks/use-mobile"
+
+// Robust date parsing utility for YYYY-MM format
+function parseYearMonthString(dateString: string): Date | null {
+  if (!dateString || typeof dateString !== 'string') {
+    return null
+  }
+  
+  const parts = dateString.split('-')
+  if (parts.length !== 2) {
+    return null
+  }
+  
+  const year = parseInt(parts[0], 10)
+  const month = parseInt(parts[1], 10)
+  
+  // Validate year and month
+  if (isNaN(year) || isNaN(month) || year < 1900 || year > 2100 || month < 1 || month > 12) {
+    return null
+  }
+  
+  // Create date with month - 1 (JavaScript months are 0-indexed)
+  return new Date(year, month - 1)
+}
+
+// Safe date formatter that handles invalid dates gracefully
+function formatDateSafely(dateString: string, options: Intl.DateTimeFormatOptions): string {
+  const date = parseYearMonthString(dateString)
+  if (!date || isNaN(date.getTime())) {
+    return dateString // Return original string as fallback
+  }
+  return date.toLocaleDateString("en-US", options)
+}
 import {
   Card,
   CardContent,
@@ -184,8 +216,7 @@ export function FinancialChart() {
               tickMargin={8}
               minTickGap={32}
               tickFormatter={(value) => {
-                const date = new Date(value)
-                return date.toLocaleDateString("en-US", {
+                return formatDateSafely(value, {
                   month: "short",
                   year: "2-digit",
                 })
@@ -202,7 +233,7 @@ export function FinancialChart() {
               content={
                 <ChartTooltipContent
                   labelFormatter={(value) => {
-                    return new Date(value).toLocaleDateString("en-US", {
+                    return formatDateSafely(value, {
                       month: "long",
                       year: "numeric",
                     })
