@@ -93,3 +93,4 @@ export function EquipmentShowcase({ equipment }: EquipmentShowcaseProps) {
     </div>
   );
 }
+

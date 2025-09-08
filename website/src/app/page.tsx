@@ -104,7 +104,8 @@ export default async function HomePage() {
       <InvestmentCalculator data={etlData.businessMetrics} />
 
       {/* Call to Action */}
-      <CallToAction />
+      <CallToAction askingPrice={etlData.businessMetrics.askingPrice} />
     </div>
   );
 }
+

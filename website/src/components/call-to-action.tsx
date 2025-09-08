@@ -1,6 +1,10 @@
 import { formatCurrency } from "@/lib/etl-data";
 
-export function CallToAction() {
+interface CallToActionProps {
+  askingPrice: number;
+}
+
+export function CallToAction({ askingPrice }: CallToActionProps) {
   return (
     <div className="bg-blue-600 text-white py-16">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
@@ -20,7 +24,7 @@ export function CallToAction() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="bg-gray-50 rounded-lg p-6">
               <div className="text-3xl font-bold text-blue-600 mb-2">
-                {formatCurrency(650000)}
+                {formatCurrency(askingPrice)}
               </div>
               <div className="text-sm font-semibold text-gray-700 mb-1">
                 All-Inclusive Package
@@ -59,3 +63,4 @@ export function CallToAction() {
     </div>
   );
 }
+

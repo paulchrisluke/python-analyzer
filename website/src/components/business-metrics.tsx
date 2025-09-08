@@ -8,7 +8,7 @@ export function BusinessMetrics({ data }: BusinessMetricsProps) {
   const metrics = [
     {
       title: "Total Revenue",
-      value: formatCurrency(data.annualRevenue * 2.75), // 30 months of data
+      value: formatCurrency(data.annualRevenue * 2.5), // 30 months of data (2.5×)
       description: "2023-2025 Q2 Performance",
       icon: "📊"
     },
@@ -126,3 +126,4 @@ export function BusinessMetrics({ data }: BusinessMetricsProps) {
     </div>
   );
 }
+

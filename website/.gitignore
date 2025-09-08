@@ -17,6 +17,7 @@ dist/
 .env.development.local
 .env.test.local
 .env.production.local
+.dev.vars
 
 # TypeScript
 *.tsbuildinfo
@@ -107,3 +108,4 @@ playwright/.cache/
 
 # Local development
 *.local
+
