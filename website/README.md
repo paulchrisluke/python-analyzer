@@ -108,6 +108,7 @@ This project uses GitHub Actions for automated CI/CD. See [DEPLOYMENT.md](./DEPL
 
 4. **Deploy:**
    - Push to `main` branch → automatic deployment
+   - Manual: `npm run deploy:workers` (Next on Workers via OpenNext)
    - Tests run on all pull requests
 
 ### Environment Configuration

@@ -435,7 +435,7 @@ export async function GET() {
   return Response.json({
     hero: {
       annualRevenue: financialSummary.summary.revenue_metrics.annual_revenue_projection,
-      ebitdaMargin: businessData.financials.metrics.roi_percentage,
+      ebitdaMargin: financialSummary.summary.profitability.ebitda_margin,
       roi: financialSummary.summary.investment_metrics.roi_percentage,
       equipmentValue: equipmentAnalysis.equipment_summary.total_value
     },

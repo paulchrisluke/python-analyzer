@@ -30,7 +30,7 @@ npm run build
 npm run deploy
 
 # Deploy Next.js to Cloudflare Pages
-npm run deploy:next
+npm run deploy:workers
 
 # Run Playwright tests
 npm run test
