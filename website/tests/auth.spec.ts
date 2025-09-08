@@ -50,6 +50,31 @@ test.describe('Auth Flow', () => {
     const testName = `Test User ${timestamp}`;
     const testPassword = 'TestPassword123!';
 
+    // Listen for page errors to fail test on uncaught exceptions
+    const pageErrors: Error[] = [];
+    page.on('pageerror', (error) => pageErrors.push(error));
+
+    // Stub the signup API to return a stable response
+    await page.route('**/api/auth/sign-up/email', async (route) => {
+      await route.fulfill({
+        status: 201,
+        contentType: 'application/json',
+        body: JSON.stringify({
+          user: {
+            id: 'test-user-id',
+            email: testEmail,
+            name: testName,
+            createdAt: new Date().toISOString()
+          },
+          session: {
+            id: 'test-session-id',
+            userId: 'test-user-id',
+            expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString()
+          }
+        })
+      });
+    });
+
     // Test signup form submission
     await page.goto('/signup');
     
@@ -57,31 +82,65 @@ test.describe('Auth Flow', () => {
     await page.fill('input[id="email"]', testEmail);
     await page.fill('input[id="password"]', testPassword);
     
-    // Submit form and check it doesn't crash
+    // Submit form and wait for success message
     await page.click('button[type="submit"]');
     
-    // Wait a bit to see if anything happens
-    await page.waitForTimeout(3000);
+    // Wait for success message to appear deterministically
+    await page.waitForSelector('text=Account created successfully! Redirecting to login...', { timeout: 10000 });
+    
+    // Verify no page errors occurred
+    expect(pageErrors).toHaveLength(0);
     
     // The page should still be functional (not crashed)
     await expect(page.locator('button[type="submit"]')).toBeVisible();
   });
 
   test('should allow login form submission', async ({ page }) => {
+    const testEmail = 'test@example.com';
+    const testPassword = 'TestPassword123!';
+
+    // Listen for page errors to fail test on uncaught exceptions
+    const pageErrors: Error[] = [];
+    page.on('pageerror', (error) => pageErrors.push(error));
+
+    // Stub the login API to return a stable response
+    await page.route('**/api/auth/sign-in/email', async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({
+          user: {
+            id: 'test-user-id',
+            email: testEmail,
+            name: 'Test User',
+            createdAt: new Date().toISOString()
+          },
+          session: {
+            id: 'test-session-id',
+            userId: 'test-user-id',
+            expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString()
+          }
+        })
+      });
+    });
+
     await page.goto('/login');
     
-    // Fill login form
-    await page.fill('input[type="email"]', 'test@example.com');
-    await page.fill('input[type="password"]', 'password123');
+    // Fill login form with test credentials
+    await page.fill('input[type="email"]', testEmail);
+    await page.fill('input[type="password"]', testPassword);
     
-    // Submit form and check it doesn't crash
+    // Submit form and wait for navigation to dashboard
     await page.click('button[type="submit"]');
     
-    // Wait a bit to see if anything happens
-    await page.waitForTimeout(3000);
+    // Wait for navigation to dashboard (success)
+    await page.waitForURL('/dashboard', { timeout: 10000 });
     
-    // The page should still be functional (not crashed)
-    await expect(page.locator('button[type="submit"]')).toBeVisible();
+    // Verify no page errors occurred
+    expect(pageErrors).toHaveLength(0);
+    
+    // Verify we're on the dashboard
+    await expect(page).toHaveURL('/dashboard');
   });
 
   test('should protect dashboard route', async ({ page }) => {

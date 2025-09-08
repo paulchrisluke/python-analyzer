@@ -104,32 +104,41 @@ website/ (existing Worker setup)
 
 ### Step 2: Shadcn/ui Setup
 
-#### Initialize Shadcn/ui
+#### Initialize Shadcn/ui (Already Completed in PR #1)
 ```bash
-# Initialize Shadcn/ui (choose default options)
+# Initialize Shadcn/ui (choose default options) - ✅ DONE
 npx shadcn@latest init
 
-# Add essential components
-npx shadcn@latest add button
-npx shadcn@latest add card
+# Add essential components for PR #2 - Authentication
+npx shadcn@latest add form
 npx shadcn@latest add input
 npx shadcn@latest add label
-npx shadcn@latest add form
-npx shadcn@latest add dialog
-npx shadcn@latest add dropdown-menu
+npx shadcn@latest add button
+npx shadcn@latest add card
+```
+
+#### Additional Components for Future Phases
+```bash
+# PR #3 - Document Management
 npx shadcn@latest add table
 npx shadcn@latest add badge
 npx shadcn@latest add progress
-npx shadcn@latest add toast
+npx shadcn@latest add dialog
+npx shadcn@latest add dropdown-menu
+
+# PR #4 - Admin Panel
 npx shadcn@latest add sheet
 npx shadcn@latest add tabs
+npx shadcn@latest add avatar
+npx shadcn@latest add skeleton
+npx shadcn@latest add toast
+
+# PR #5 - Enhanced Infrastructure
 npx shadcn@latest add select
 npx shadcn@latest add textarea
 npx shadcn@latest add checkbox
 npx shadcn@latest add switch
 npx shadcn@latest add separator
-npx shadcn@latest add avatar
-npx shadcn@latest add skeleton
 ```
 
 **Note**: The `shadcn@latest init` command will automatically:
@@ -168,131 +177,33 @@ const nextConfig = {
 module.exports = nextConfig
 ```
 
-#### CORS Middleware (lib/cors.ts)
-Create a secure CORS middleware that validates origins against an allowlist:
+#### ETL Data Integration (Direct JSON Imports)
+Since the ETL pipeline copies JSON files directly to `/src/data/`, we use direct imports instead of API routes:
 
 ```typescript
-// lib/cors.ts
-import { NextRequest, NextResponse } from 'next/server'
+// lib/etl-data.ts (already implemented)
+import landingPageData from '../data/landing_page_data.json';
+import financialSummary from '../data/financial_summary.json';
+import equipmentAnalysis from '../data/equipment_analysis.json';
 
-interface CorsOptions {
-  allowedOrigins: string[]
-  allowedMethods: string[]
-  allowedHeaders: string[]
-  maxAge?: number
-}
-
-const defaultOptions: CorsOptions = {
-  allowedOrigins: process.env.ALLOWED_ORIGINS?.split(',') || ['http://localhost:3000'],
-  allowedMethods: ['GET', 'POST', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization'],
-  maxAge: 86400
-}
-
-export function corsMiddleware(options: Partial<CorsOptions> = {}) {
-  const config = { ...defaultOptions, ...options }
+export async function loadETLData() {
+  // Direct access to ETL data - no API calls needed
+  const businessMetrics = {
+    annualRevenue: landingPageData.financial_highlights.annual_revenue,
+    ebitdaMargin: landingPageData.financial_highlights.ebitda_margin,
+    // ... other metrics
+  };
   
-  return (request: NextRequest) => {
-    const origin = request.headers.get('origin')
-    const isAllowedOrigin = origin && config.allowedOrigins.includes(origin)
-    
-    // Handle preflight requests
-    if (request.method === 'OPTIONS') {
-      const response = new NextResponse(null, { status: 200 })
-      
-      if (isAllowedOrigin) {
-        response.headers.set('Access-Control-Allow-Origin', origin)
-        response.headers.set('Access-Control-Allow-Methods', config.allowedMethods.join(', '))
-        response.headers.set('Access-Control-Allow-Headers', config.allowedHeaders.join(', '))
-        response.headers.set('Access-Control-Max-Age', config.maxAge?.toString() || '86400')
-      }
-      
-      return response
-    }
-    
-    // Handle actual requests
-    const response = NextResponse.next()
-    
-    if (isAllowedOrigin) {
-      response.headers.set('Access-Control-Allow-Origin', origin)
-    }
-    
-    return response
-  }
-}
-
-// Helper function to create CORS-enabled API responses
-export function createCorsResponse(data: any, request: NextRequest, status: number = 200) {
-  const origin = request.headers.get('origin')
-  const allowedOrigins = process.env.ALLOWED_ORIGINS?.split(',') || ['http://localhost:3000']
-  const isAllowedOrigin = origin && allowedOrigins.includes(origin)
-  
-  const response = NextResponse.json(data, { status })
-  
-  if (isAllowedOrigin) {
-    response.headers.set('Access-Control-Allow-Origin', origin)
-  }
-  
-  return response
+  return { businessMetrics, equipmentData, investmentHighlights };
 }
 ```
 
-#### API Route Example with CORS
-```typescript
-// app/api/example/route.ts
-import { NextRequest } from 'next/server'
-import { corsMiddleware, createCorsResponse } from '@/lib/cors'
-
-const cors = corsMiddleware()
-
-export async function GET(request: NextRequest) {
-  // Apply CORS middleware
-  const corsResponse = cors(request)
-  if (corsResponse) return corsResponse
-  
-  // Your API logic here
-  const data = { message: 'Hello from API' }
-  return createCorsResponse(data, request)
-}
-
-export async function POST(request: NextRequest) {
-  // Apply CORS middleware
-  const corsResponse = cors(request)
-  if (corsResponse) return corsResponse
-  
-  // Your API logic here
-  const body = await request.json()
-  const data = { received: body }
-  return createCorsResponse(data, request, 201)
-}
-
-export async function OPTIONS(request: NextRequest) {
-  // Handle preflight requests
-  return cors(request) || new Response(null, { status: 200 })
-}
-```
-
-#### CORS Security Configuration
-
-**Environment Variables:**
-```bash
-# .env.local or .dev.vars
-ALLOWED_ORIGINS=http://localhost:3000,https://yourdomain.com,https://app.yourdomain.com
-```
-
-**Security Features:**
-1. **Origin Allowlist**: Only origins in `ALLOWED_ORIGINS` are permitted
-2. **Method Restriction**: Limited to `GET`, `POST`, and `OPTIONS` only
-3. **Header Restriction**: Only `Content-Type` and `Authorization` headers allowed
-4. **Preflight Handling**: OPTIONS requests use the same origin validation
-5. **No Wildcard**: Never uses `*` for Access-Control-Allow-Origin
-
-**Production Setup:**
-```bash
-# Set allowed origins for production
-wrangler secret put ALLOWED_ORIGINS
-# Enter: https://yourdomain.com,https://app.yourdomain.com
-```
+**Benefits of Direct JSON Imports:**
+1. **Faster Performance**: No API calls, direct data access
+2. **Simpler Architecture**: No CORS or API route complexity
+3. **Better SEO**: Data available at build time for static generation
+4. **Reduced Complexity**: No need for API middleware or error handling
+5. **Type Safety**: Direct TypeScript imports with full type checking
 
 #### tailwind.config.ts
 **Note**: This file will be automatically updated by `shadcn@latest init` with the proper configuration. No manual changes needed.
@@ -335,23 +246,14 @@ cp ../wrangler.toml ./wrangler.toml
 
 **Note**: The `create-next-app` command will generate the basic layout. We'll customize it later with ETL data integration.
 
-### Step 8: ETL Data Integration
+### Step 8: ETL Data Integration ✅ COMPLETED (PR #1)
 
-**Note**: After the basic setup is complete, we'll add ETL data integration by:
+**Note**: ETL data integration is already complete using direct JSON imports:
 
-1. **Copy ETL data files** to the Next.js project:
-```bash
-# Copy ETL data for integration
-cp -r ../data ./data
-```
-
-2. **Create API routes** to serve ETL data:
-```bash
-# Create API routes for business metrics
-mkdir -p ./src/app/api/business-metrics
-```
-
-3. **Customize the home page** to use ETL data (this will be done after basic setup is working)
+1. **ETL data files** are automatically copied to `/src/data/` by the ETL pipeline
+2. **Direct JSON imports** in `lib/etl-data.ts` provide fast, type-safe access
+3. **Home page** already uses ETL data for business metrics display
+4. **No API routes needed** - direct imports are faster and simpler
 
 ### Step 9: Test the Setup
 
@@ -853,7 +755,7 @@ website/ (Hybrid Worker + Next.js)
 - [x] Set up hybrid deployment scripts
 
 ### Phase 2: ETL Data Integration ✅ COMPLETED (PR #1)
-- [x] Add ETL data to landing page
+- [x] Add ETL data to landing page (direct JSON imports from `/src/data/`)
 - [x] Create business metrics components
 - [x] Implement investment calculator
 - [x] Add equipment showcase
@@ -863,12 +765,14 @@ website/ (Hybrid Worker + Next.js)
 - [x] Test ETL data display with Playwright
 
 ### Phase 3: Authentication 🔄 NEXT (PR #2)
-- [ ] Update existing login/signup pages
+- [ ] Install additional Shadcn/ui components from [shadcn/ui](https://ui.shadcn.com/) (form, input, button, card, label)
+- [ ] Update existing login/signup pages with Shadcn/ui components
 - [ ] Implement middleware for protected routes
-- [ ] Set up session management (existing)
+- [ ] Set up session management (leverage existing Better Auth)
 - [ ] Test authentication flow with Playwright
 
 ### Phase 4: Document Management 🔄 PLANNED (PR #3)
+- [ ] Install Shadcn/ui components (table, card, badge, progress, dialog, dropdown-menu)
 - [ ] Create document listing pages
 - [ ] Implement category-based organization
 - [ ] Add document viewer component
@@ -876,6 +780,7 @@ website/ (Hybrid Worker + Next.js)
 - [ ] Test document management with Playwright
 
 ### Phase 5: Admin Panel 🔄 PLANNED (PR #4)
+- [ ] Install Shadcn/ui components (sheet, tabs, avatar, skeleton, toast)
 - [ ] Create admin dashboard
 - [ ] Implement document management interface
 - [ ] Add user management features
@@ -883,10 +788,9 @@ website/ (Hybrid Worker + Next.js)
 - [ ] Test admin panel with Playwright
 
 ### Phase 6: Enhanced Infrastructure 🔄 PLANNED (PR #5)
-- [ ] Install additional Shadcn/ui components (button, card, input, label, form, dialog, dropdown-menu, table, badge, progress, toast, sheet, tabs, select, textarea, checkbox, switch, separator, avatar, skeleton)
-- [ ] Implement CORS middleware with secure origin allowlist
-- [ ] Create API routes for business metrics and ETL data
+- [ ] Install remaining Shadcn/ui components (select, textarea, checkbox, switch, separator)
 - [ ] Add comprehensive Playwright tests (business-metrics.spec.ts, document-management.spec.ts, admin-panel.spec.ts, responsive.spec.ts, fixtures/test-data.ts)
+- [ ] Optimize ETL data integration (direct JSON imports - no API routes needed)
 - [ ] Verify and install all dependencies specified in Implementation Guide
 
 ### Phase 7: Advanced Features 🔄 PLANNED (PR #6)
@@ -981,15 +885,15 @@ npx playwright test
 - **Developer Experience**: TypeScript, hot reload, and comprehensive testing
 
 ### 🔄 **Next Steps: PR #2 - Authentication Migration**
-1. **Migrate Better Auth** to Next.js App Router
+1. **Install Shadcn/ui components** from [shadcn/ui](https://ui.shadcn.com/) (form, input, button, card, label)
 2. **Update authentication pages** with Shadcn/ui components
 3. **Implement middleware** for protected routes
 4. **Test authentication flow** with Playwright
 
 ### 📋 **Future Phases:**
-- **PR #3**: Document Management
-- **PR #4**: Admin Panel
-- **PR #5**: Enhanced Infrastructure (CORS, API routes, comprehensive testing)
+- **PR #3**: Document Management (table, card, badge, progress, dialog, dropdown-menu)
+- **PR #4**: Admin Panel (sheet, tabs, avatar, skeleton, toast)
+- **PR #5**: Enhanced Infrastructure (select, textarea, checkbox, switch, separator, comprehensive testing)
 - **PR #6**: Advanced Features
 
 ### 📊 **Business Impact**

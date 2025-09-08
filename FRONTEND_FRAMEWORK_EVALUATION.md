@@ -424,39 +424,45 @@ const equipmentCategories = [
 
 ### Implementation with Next.js + Shadcn/ui
 
-#### **API Routes for Data**
+#### **Server-Only ETL Data Loader**
 ```typescript
-// src/app/api/business-metrics/route.ts
-export async function GET() {
-  const businessData = await loadBusinessSaleData()
-  const financialSummary = await loadFinancialSummary()
-  const equipmentAnalysis = await loadEquipmentAnalysis()
+// src/lib/etl-data.ts (server-only)
+import 'server-only'
+import landingPageData from '../data/landing_page_data.json'
+import financialSummary from '../data/financial_summary.json'
+import equipmentAnalysis from '../data/equipment_analysis.json'
+
+export async function loadETLData() {
+  // Direct JSON imports - no API calls needed
+  const financialHighlights = landingPageData.financial_highlights
   
-  return Response.json({
+  return {
     hero: {
-      annualRevenue: financialSummary.summary.revenue_metrics.annual_revenue_projection,
-      ebitdaMargin: financialSummary.summary.profitability.ebitda_margin,
-      roi: financialSummary.summary.investment_metrics.roi_percentage,
-      equipmentValue: equipmentAnalysis.equipment_summary.total_value
+      annualRevenue: financialHighlights.annual_revenue,
+      ebitdaMargin: financialHighlights.ebitda_margin,
+      roi: financialHighlights.roi,
+      equipmentValue: parseFloat(equipmentAnalysis.equipment_summary.total_value)
     },
     investment: {
-      askingPrice: businessData.valuation.asking_price,
-      marketValue: businessData.valuation.market_value,
-      paybackPeriod: financialSummary.summary.investment_metrics.payback_period_years
+      askingPrice: financialHighlights.asking_price,
+      marketValue: financialHighlights.asking_price * 1.5,
+      paybackPeriod: financialHighlights.payback_period
     }
-  })
+  }
 }
 ```
 
-#### **Landing Page Component**
+#### **Server Component Landing Page**
 ```typescript
-// src/app/page.tsx
+// src/app/page.tsx (server component)
+import { loadETLData } from '@/lib/etl-data'
 import { BusinessMetrics } from '@/components/business-metrics'
 import { InvestmentCalculator } from '@/components/investment-calculator'
 import { EquipmentShowcase } from '@/components/equipment-showcase'
 
 export default async function HomePage() {
-  const metrics = await fetch('/api/business-metrics').then(r => r.json())
+  // Direct server-side data loading - no client fetch needed
+  const metrics = await loadETLData()
   
   return (
     <div className="container mx-auto py-8 px-4">
@@ -477,10 +483,10 @@ export default async function HomePage() {
 - Professional presentation
 
 #### **2. Dynamic Content**
-- Data updates automatically from ETL pipeline
+- Data updates automatically from ETL pipeline on deployment
 - No manual content updates needed
 - Consistent data across all pages
-- Real-time accuracy
+- Deploy-based accuracy (updates with each ETL pipeline run)
 
 #### **3. Competitive Advantage**
 - Data-driven investment decisions
@@ -631,32 +637,31 @@ website/ (Hybrid Worker + Next.js)
 ## Next Steps: PR #2 - Authentication Migration
 
 ### Phase 2: Authentication System (Week 2-3)
-1. **Migrate Better Auth** to Next.js App Router
-2. **Update login/signup pages** with Shadcn/ui components
+1. **Install additional Shadcn/ui components** from [shadcn/ui](https://ui.shadcn.com/) for authentication
+2. **Update login/signup pages** with Shadcn/ui components (form, input, button, card, label)
 3. **Implement middleware** for protected routes
-4. **Set up session management** with Next.js
+4. **Set up session management** with Next.js (leverage existing Better Auth)
 5. **Test authentication flow** with Playwright
 
 ### Phase 3: Document Management (Week 4)
-1. **Create document listing pages** with Shadcn/ui components
+1. **Create document listing pages** with Shadcn/ui components (table, card, badge, progress)
 2. **Implement category-based organization**
 3. **Add document viewer** for PDFs and files
 4. **Set up file upload/download** functionality
 5. **Test document management** with Playwright
 
 ### Phase 4: Admin Panel (Week 5)
-1. **Create admin dashboard** with Shadcn/ui components
-2. **Implement document management interface**
-3. **Add user management** features
+1. **Create admin dashboard** with Shadcn/ui components (dashboard, charts, analytics)
+2. **Implement document management interface** (dialog, dropdown-menu, sheet, tabs)
+3. **Add user management** features (avatar, skeleton, toast notifications)
 4. **Set up analytics and reporting**
 5. **Test admin panel** with Playwright
 
 ### Phase 5: Enhanced Infrastructure (Week 6)
-1. **Install additional Shadcn/ui components** (button, card, input, label, form, dialog, dropdown-menu, table, badge, progress, toast, sheet, tabs, select, textarea, checkbox, switch, separator, avatar, skeleton)
-2. **Implement CORS middleware** with secure origin allowlist
-3. **Create API routes** for business metrics and ETL data
-4. **Add comprehensive Playwright tests** (business-metrics.spec.ts, document-management.spec.ts, admin-panel.spec.ts, responsive.spec.ts, fixtures/test-data.ts)
-5. **Verify and install all dependencies** specified in Implementation Guide
+1. **Install remaining Shadcn/ui components** (select, textarea, checkbox, switch, separator)
+2. **Add comprehensive Playwright tests** (business-metrics.spec.ts, document-management.spec.ts, admin-panel.spec.ts, responsive.spec.ts, fixtures/test-data.ts)
+3. **Optimize ETL data integration** (server-only JSON imports - no API routes needed)
+4. **Verify and install all dependencies** specified in Implementation Guide
 
 ---
 

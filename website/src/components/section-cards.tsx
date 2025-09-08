@@ -73,7 +73,7 @@ export function SectionCards() {
           <div className="line-clamp-1 flex gap-2 font-medium">
             Strong user retention <TrendingUpIcon className="size-4" />
           </div>
-          <div className="text-muted-foreground">Engagement exceed targets</div>
+          <div className="text-muted-foreground">Engagement exceeds targets</div>
         </CardFooter>
       </Card>
       <Card>

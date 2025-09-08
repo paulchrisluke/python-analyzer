@@ -48,6 +48,18 @@ export function NavUser({
     router.push("/login")
   }
 
+  const handleAccountClick = () => {
+    router.push("/account")
+  }
+
+  const handleBillingClick = () => {
+    router.push("/billing")
+  }
+
+  const handleNotificationsClick = () => {
+    router.push("/notifications")
+  }
+
   return (
     <SidebarMenu>
       <SidebarMenuItem>
@@ -93,15 +105,15 @@ export function NavUser({
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
-              <DropdownMenuItem>
+              <DropdownMenuItem onClick={handleAccountClick}>
                 <UserCircleIcon />
                 Account
               </DropdownMenuItem>
-              <DropdownMenuItem>
+              <DropdownMenuItem onClick={handleBillingClick}>
                 <CreditCardIcon />
                 Billing
               </DropdownMenuItem>
-              <DropdownMenuItem>
+              <DropdownMenuItem onClick={handleNotificationsClick}>
                 <BellIcon />
                 Notifications
               </DropdownMenuItem>
