@@ -140,10 +140,10 @@ const ChartTooltipContent = React.forwardRef<
   HTMLDivElement,
   React.ComponentProps<"div"> & {
     active?: boolean
-    payload?: any[]
+    payload?: unknown[]
     label?: string
-    labelFormatter?: (value: any, payload: any[]) => React.ReactNode
-    formatter?: (value: any, name: any, item: any, index: number, payload: any) => React.ReactNode
+    labelFormatter?: (value: unknown, payload: unknown[]) => React.ReactNode
+    formatter?: (value: unknown, name: unknown, item: unknown, index: number, payload: unknown) => React.ReactNode
     hideLabel?: boolean
     hideIndicator?: boolean
     indicator?: "line" | "dot" | "dashed"
@@ -179,8 +179,9 @@ const ChartTooltipContent = React.forwardRef<
       }
 
       const [item] = payload
-      const key = `${labelKey || item?.dataKey || item?.name || "value"}`
-      const itemConfig = getPayloadConfigFromPayload(config, item, key)
+      const itemTyped = item as { dataKey?: string; name?: string } | undefined
+      const key = `${labelKey || itemTyped?.dataKey || itemTyped?.name || "value"}`
+      const itemConfig = getPayloadConfigFromPayload(config, item as Record<string, unknown>, key)
       const value =
         !labelKey && typeof label === "string"
           ? config[label as keyof typeof config]?.label || label
@@ -226,20 +227,21 @@ const ChartTooltipContent = React.forwardRef<
         {!nestLabel ? tooltipLabel : null}
         <div className="grid gap-1.5">
           {payload.map((item, index) => {
-            const key = `${nameKey || item.name || item.dataKey || "value"}`
-            const itemConfig = getPayloadConfigFromPayload(config, item, key)
-            const indicatorColor = color || item.payload.fill || item.color
+            const itemTyped = item as { name?: string; dataKey?: string; payload?: { fill?: string }; color?: string; value?: unknown }
+            const key = `${nameKey || itemTyped.name || itemTyped.dataKey || "value"}`
+            const itemConfig = getPayloadConfigFromPayload(config, item as Record<string, unknown>, key)
+            const indicatorColor = color || itemTyped.payload?.fill || itemTyped.color
 
             return (
               <div
-                key={item.dataKey}
+                key={itemTyped.dataKey}
                 className={cn(
                   "flex w-full flex-wrap items-stretch gap-2 [&>svg]:h-2.5 [&>svg]:w-2.5 [&>svg]:text-muted-foreground",
                   indicator === "dot" && "items-center"
                 )}
               >
-                {formatter && item?.value !== undefined && item.name ? (
-                  formatter(item.value, item.name, item, index, item.payload)
+                {formatter && itemTyped?.value !== undefined && itemTyped.name ? (
+                  formatter(itemTyped.value, itemTyped.name, item as Record<string, unknown>, index, itemTyped.payload)
                 ) : (
                   <>
                     {itemConfig?.icon ? (
@@ -275,12 +277,12 @@ const ChartTooltipContent = React.forwardRef<
                       <div className="grid gap-1.5">
                         {nestLabel ? tooltipLabel : null}
                         <span className="text-muted-foreground">
-                          {itemConfig?.label || item.name}
+                          {itemConfig?.label || itemTyped.name}
                         </span>
                       </div>
-                      {item.value !== null && item.value !== undefined && (
+                      {itemTyped.value !== null && itemTyped.value !== undefined && (
                         <span className="font-mono font-medium tabular-nums text-foreground">
-                          {item.value.toLocaleString()}
+                          {Number(itemTyped.value).toLocaleString()}
                         </span>
                       )}
                     </div>
@@ -326,12 +328,13 @@ const ChartLegendContent = React.forwardRef<
         )}
       >
         {payload.map((item) => {
-          const key = `${nameKey || item.dataKey || "value"}`
-          const itemConfig = getPayloadConfigFromPayload(config, item, key)
+          const itemTyped = item as { dataKey?: string }
+          const key = `${nameKey || itemTyped.dataKey || "value"}`
+          const itemConfig = getPayloadConfigFromPayload(config, item as unknown as Record<string, unknown>, key)
 
           return (
             <div
-              key={item.value}
+              key={itemTyped.dataKey}
               className={cn(
                 "flex items-center gap-1.5 [&>svg]:h-3 [&>svg]:w-3 [&>svg]:text-muted-foreground"
               )}
@@ -377,15 +380,15 @@ function getPayloadConfigFromPayload(
 
   if (
     key in payload &&
-    typeof (payload as Record<string, any>)[key] === "string"
+    typeof (payload as Record<string, unknown>)[key] === "string"
   ) {
-    configLabelKey = (payload as Record<string, any>)[key] as string
+    configLabelKey = (payload as Record<string, unknown>)[key] as string
   } else if (
     payloadPayload &&
     key in payloadPayload &&
-    typeof (payloadPayload as Record<string, any>)[key] === "string"
+    typeof (payloadPayload as Record<string, unknown>)[key] === "string"
   ) {
-    configLabelKey = (payloadPayload as Record<string, any>)[key] as string
+    configLabelKey = (payloadPayload as Record<string, unknown>)[key] as string
   }
 
   return configLabelKey in config

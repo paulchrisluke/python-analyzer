@@ -1,94 +1,112 @@
 import { EquipmentCategory, formatCurrency } from "@/lib/etl-data";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Wrench, MapPin } from "lucide-react";
 
 interface EquipmentShowcaseProps {
   equipment: EquipmentCategory[];
 }
 
 export function EquipmentShowcase({ equipment }: EquipmentShowcaseProps) {
+  console.log("🔧 EquipmentShowcase rendering");
+  
   return (
-    <div className="bg-white py-16">
+    <div className="py-16">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center mb-12">
-          <h2 className="text-3xl font-bold text-gray-900 mb-4">
-            Professional Equipment Included
-          </h2>
-          <p className="text-lg text-gray-600">
-            {formatCurrency(equipment.reduce((sum, cat) => sum + cat.value, 0))} in Professional Audiology Equipment
-          </p>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {equipment.map((category, index) => (
-            <div key={index} className="bg-gray-50 rounded-lg p-6">
-              <div className="text-center">
-                <div className="text-2xl font-bold text-gray-900 mb-2">
-                  {formatCurrency(category.value)}
-                </div>
-                <div className="text-lg font-semibold text-gray-700 mb-3">
-                  {category.category}
-                </div>
-                <div className="text-sm text-gray-600 mb-4">
-                  {category.description}
-                </div>
-                <div className="space-y-1">
-                  {category.items.map((item, itemIndex) => (
-                    <div key={itemIndex} className="text-xs text-gray-500">
-                      • {item}
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-3xl font-bold flex items-center gap-2">
+              <Wrench className="h-8 w-8 text-primary" />
+              Professional Equipment Included
+            </CardTitle>
+            <CardDescription className="text-lg">
+              {formatCurrency(equipment.reduce((sum, cat) => sum + cat.value, 0))} in Professional Audiology Equipment
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              {equipment.map((category, index) => (
+                <Card key={index}>
+                  <CardHeader>
+                    <CardTitle className="text-2xl font-bold">
+                      {formatCurrency(category.value)}
+                    </CardTitle>
+                    <CardDescription className="text-lg font-semibold">
+                      {category.category}
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-sm text-muted-foreground mb-4">
+                      {category.description}
+                    </p>
+                    <div className="space-y-1">
+                      {category.items.map((item, itemIndex) => (
+                        <p key={itemIndex} className="text-xs text-muted-foreground">
+                          • {item}
+                        </p>
+                      ))}
                     </div>
-                  ))}
-                </div>
-              </div>
+                  </CardContent>
+                </Card>
+              ))}
             </div>
-          ))}
-        </div>
+          </CardContent>
+        </Card>
 
         {/* Strategic Multi-Location Advantage */}
-        <div className="mt-16 bg-gray-50 rounded-lg p-8">
-          <h3 className="text-2xl font-bold text-gray-900 mb-6 text-center">
-            Strategic Multi-Location Advantage
-          </h3>
-          <p className="text-center text-gray-600 mb-8">
-            Two established locations serving key Pittsburgh markets
-          </p>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            <div className="bg-white rounded-lg p-6">
-              <div className="text-center">
-                <div className="text-2xl mb-3">📍</div>
-                <div className="text-lg font-semibold text-gray-900 mb-2">
-                  Pittsburgh (West View)
-                </div>
-                <div className="text-sm text-gray-600 mb-4">
-                  Primary location with strong market presence
-                </div>
-                <div className="text-xs text-blue-600 font-medium">
-                  Established Market
-                </div>
-              </div>
+        <Card className="mt-16">
+          <CardHeader>
+            <CardTitle className="text-2xl font-bold flex items-center gap-2">
+              <MapPin className="h-6 w-6 text-primary" />
+              Strategic Multi-Location Advantage
+            </CardTitle>
+            <CardDescription>
+              Two established locations serving key Pittsburgh markets
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-lg font-semibold flex items-center gap-2">
+                    <MapPin className="h-5 w-5 text-primary" />
+                    Pittsburgh (West View)
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-sm text-muted-foreground mb-4">
+                    Primary location with strong market presence
+                  </p>
+                  <p className="text-xs text-primary font-medium">
+                    Established Market
+                  </p>
+                </CardContent>
+              </Card>
+              
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-lg font-semibold flex items-center gap-2">
+                    <MapPin className="h-5 w-5 text-primary" />
+                    Cranberry Hearing & Balance
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-sm text-muted-foreground mb-4">
+                    Secondary location with consistent revenue
+                  </p>
+                  <p className="text-xs text-primary font-medium">
+                    Growth Market
+                  </p>
+                </CardContent>
+              </Card>
             </div>
             
-            <div className="bg-white rounded-lg p-6">
-              <div className="text-center">
-                <div className="text-2xl mb-3">📍</div>
-                <div className="text-lg font-semibold text-gray-900 mb-2">
-                  Cranberry Hearing & Balance
-                </div>
-                <div className="text-sm text-gray-600 mb-4">
-                  Secondary location with consistent revenue
-                </div>
-                <div className="text-xs text-green-600 font-medium">
-                  Growth Market
-                </div>
-              </div>
+            <div className="mt-6">
+              <p className="text-sm text-muted-foreground">
+                <strong>Diversified Revenue Streams:</strong> Multiple locations reduce risk and provide market expansion opportunities
+              </p>
             </div>
-          </div>
-          
-          <div className="mt-6 text-center">
-            <p className="text-sm text-gray-600">
-              <strong>Diversified Revenue Streams:</strong> Multiple locations reduce risk and provide market expansion opportunities
-            </p>
-          </div>
-        </div>
+          </CardContent>
+        </Card>
       </div>
     </div>
   );

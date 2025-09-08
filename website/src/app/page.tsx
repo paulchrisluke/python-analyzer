@@ -2,19 +2,22 @@ import { loadETLData, formatCurrency, formatPercentage } from "@/lib/etl-data";
 import { BusinessMetrics } from "@/components/business-metrics";
 import { EquipmentShowcase } from "@/components/equipment-showcase";
 import { InvestmentHighlights } from "@/components/investment-highlights";
-import { CallToAction } from "@/components/call-to-action";
+// import { CallToAction } from "@/components/call-to-action";
 import { FinancialChart } from "@/components/financial-chart";
 import { BusinessDetails } from "@/components/business-details";
 import { DocumentsTable } from "@/components/documents-table";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { TrendingUpIcon, Building2Icon, MapPinIcon, DollarSignIcon } from "lucide-react";
+import { TrendingUpIcon, Building2Icon } from "lucide-react";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/app-sidebar";
 
 export default async function HomePage() {
   const etlData = await loadETLData();
+  
+  console.log("🏠 HomePage rendering - etlData:", etlData);
+  console.log("🏠 HomePage rendering - components being rendered");
   
   return (
     <SidebarProvider>
@@ -203,8 +206,8 @@ export default async function HomePage() {
                 <DocumentsTable />
               </div>
 
-              {/* Call to Action */}
-              <CallToAction askingPrice={etlData.businessMetrics.askingPrice} />
+              {/* Call to Action - Temporarily removed */}
+              {/* <CallToAction askingPrice={etlData.businessMetrics.askingPrice} /> */}
             </div>
           </div>
         </div>

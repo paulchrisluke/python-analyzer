@@ -11,7 +11,8 @@
 		"binding": "ASSETS"
 	},
 	"vars": {
-		"BETTER_AUTH_URL": "https://cranberry-hearing-balance-workers.paulchrisluke.workers.dev"
+		"BETTER_AUTH_URL": "https://cranberry-auth-worker.paulchrisluke.workers.dev",
+		"NEXT_PUBLIC_BETTER_AUTH_URL": "https://cranberry-auth-worker.paulchrisluke.workers.dev"
 	},
 	"r2_buckets": [
 		{

@@ -5,7 +5,6 @@ import {
   ArrowUpCircleIcon,
   BarChartIcon,
   Building2Icon,
-  CameraIcon,
   ClipboardListIcon,
   DatabaseIcon,
   FileCodeIcon,
@@ -19,7 +18,7 @@ import {
   UserIcon,
   UsersIcon,
 } from "lucide-react"
-import { useSession, signOut } from "@/lib/auth-client"
+import { useSession } from "@/lib/auth-client"
 
 import { NavDocuments } from "@/components/nav-documents"
 import { NavMain } from "@/components/nav-main"
@@ -35,7 +34,7 @@ import {
   SidebarMenuItem,
 } from "@/components/ui/sidebar"
 
-const getNavData = (user: any) => ({
+const getNavData = (user: { name?: string; email?: string; image?: string | null } | null) => ({
   user: {
     name: user?.name || "User",
     email: user?.email || "user@example.com",
@@ -169,8 +168,10 @@ const getNavData = (user: any) => ({
 })
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+  console.log("📱 AppSidebar rendering");
+  
   const { data: session } = useSession()
-  const data = getNavData(session?.user)
+  const data = getNavData(session?.user || null)
 
   return (
     <Sidebar collapsible="offcanvas" {...props}>

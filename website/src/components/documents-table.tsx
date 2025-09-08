@@ -77,6 +77,8 @@ const documents = [
 ]
 
 export function DocumentsTable() {
+  console.log("📄 DocumentsTable rendering");
+  
   return (
     <Card>
       <CardHeader>

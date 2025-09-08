@@ -99,6 +99,8 @@ const chartConfig = {
 } satisfies ChartConfig
 
 export function FinancialChart() {
+  console.log("📊 FinancialChart rendering");
+  
   const isMobile = useIsMobile()
   const [timeRange, setTimeRange] = React.useState("12m")
 
@@ -233,14 +235,14 @@ export function FinancialChart() {
               content={
                 <ChartTooltipContent
                   labelFormatter={(value) => {
-                    return formatDateSafely(value, {
+                    return formatDateSafely(value as string, {
                       month: "long",
                       year: "numeric",
                     })
                   }}
                   formatter={(value, name) => [
                     `$${Number(value).toLocaleString()}`,
-                    chartConfig[name as keyof typeof chartConfig]?.label || name,
+                    chartConfig[name as keyof typeof chartConfig]?.label || String(name),
                   ]}
                   indicator="dot"
                 />

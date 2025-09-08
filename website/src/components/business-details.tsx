@@ -79,7 +79,7 @@ interface MarketOpportunity {
 interface TransactionTerms {
   financing_available: boolean;
   seller_financing?: string;
-  [key: string]: any; // For other potential fields
+  [key: string]: unknown; // For other potential fields
 }
 
 interface ListingDetails {
@@ -118,6 +118,8 @@ interface BusinessDetailsProps {
 }
 
 export function BusinessDetails({ data }: BusinessDetailsProps) {
+  console.log("🏢 BusinessDetails rendering");
+  
   // Helper function to format currency
   const formatCurrency = (amount: number): string => {
     return new Intl.NumberFormat('en-US', {

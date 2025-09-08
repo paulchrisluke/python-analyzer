@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createAuth } from './auth'
+import { createAuth, Env } from './auth'
 
 // Protected routes that require authentication
 const protectedRoutes = ['/dashboard', '/docs']
@@ -18,7 +18,7 @@ async function isAuthenticated(req: NextRequest): Promise<boolean> {
     // Get the auth instance - we need to create it with environment variables
     // For Cloudflare Workers, we need to get the environment from the request
     const env = {
-      cranberry_auth_db: (req as any).env?.cranberry_auth_db,
+      cranberry_auth_db: (req as { env?: { cranberry_auth_db?: D1Database } }).env?.cranberry_auth_db,
       BETTER_AUTH_SECRET: process.env.BETTER_AUTH_SECRET || '',
       BETTER_AUTH_URL: process.env.BETTER_AUTH_URL || process.env.NEXT_PUBLIC_BETTER_AUTH_URL || '',
       NODE_ENV: process.env.NODE_ENV
@@ -29,7 +29,7 @@ async function isAuthenticated(req: NextRequest): Promise<boolean> {
       return false
     }
 
-    const auth = createAuth(env)
+    const auth = createAuth(env as Env)
     
     // Get the session from the request cookies
     const session = await auth.api.getSession({
@@ -88,4 +88,5 @@ export const config = {
      */
     '/((?!api|_next/static|_next/image|favicon.ico).*)',
   ],
+  runtime: 'nodejs', // Use Node.js runtime instead of Edge Runtime
 }
