@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html style='scrollbar-gutter: stable both-edges;'>
+  <head>
+    <meta charset='UTF-8'>
+    <meta name='color-scheme' content='dark light'>
+    <meta name='viewport' content='width=device-width, initial-scale=1.0'>
+    <title>Playwright Test Report</title>
+    <style>
+      body { font-family: system-ui, sans-serif; margin: 0; padding: 20px; }
+      .loading { text-align: center; margin-top: 50px; }
+      .error { color: red; text-align: center; margin-top: 50px; }
+    </style>
+  </head>
+  <body>
+    <div id='root'>
+      <div class="loading">
+        <h2>Loading Playwright Report...</h2>
+        <p>Fetching report data from external source...</p>
+      </div>
+    </div>
+    
+    <script>
+      // Loader script that fetches ZIP from external location
+      async function loadPlaywrightReport() {
+        try {
+          // Replace this URL with your actual CI artifact or hosted asset URL
+          const reportUrl = './report-data.zip'; // or your CI artifact URL
+          
+          const response = await fetch(reportUrl);
+          if (!response.ok) {
+            throw new Error(`Failed to fetch report: ${response.status}`);
+          }
+          
+          const zipData = await response.arrayBuffer();
+          
+          // Process the ZIP data (this would contain the original Playwright report logic)
+          // For now, we'll just show a success message
+          document.getElementById('root').innerHTML = `
+            <div style="text-align: center; margin-top: 50px;">
+              <h2>Report Loaded Successfully</h2>
+              <p>ZIP data size: ${zipData.byteLength} bytes</p>
+              <p>Report processing would happen here...</p>
+            </div>
+          `;
+          
+        } catch (error) {
+          document.getElementById('root').innerHTML = `
+            <div class="error">
+              <h2>Error Loading Report</h2>
+              <p>${error.message}</p>
+              <p>Please ensure the report data is available at the configured URL.</p>
+            </div>
+          `;
+        }
+      }
+      
+      // Load the report when the page loads
+      loadPlaywrightReport();
+    </script>
+  </body>
+</html>
