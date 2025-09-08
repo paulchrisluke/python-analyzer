@@ -79,6 +79,9 @@ website/out/
 website/dist/
 website/build/
 
+# OpenNext build artifacts (Cloudflare Workers deployment)
+website/.open-next/
+
 # Test results and reports
 website/test-results/
 website/playwright-report/
