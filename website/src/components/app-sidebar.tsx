@@ -14,11 +14,13 @@ import {
   HelpCircleIcon,
   LayoutDashboardIcon,
   ListIcon,
+  MapPinIcon,
   SettingsIcon,
   UserIcon,
   UsersIcon,
 } from "lucide-react"
 import { useSession } from "@/lib/auth-client"
+import { getAnchorUrl, ANCHORS } from "@/lib/anchors"
 
 import { NavDocuments } from "@/components/nav-documents"
 import { NavMain } from "@/components/nav-main"
@@ -47,45 +49,50 @@ const getNavData = (user: { name?: string; email?: string; image?: string | null
       icon: LayoutDashboardIcon,
     },
     {
-      title: "Business Sale",
-      url: "/",
+      title: "Investment Highlights",
+      url: getAnchorUrl("INVESTMENT_HIGHLIGHTS"),
       icon: BarChartIcon,
     },
     {
-      title: "Equipment",
-      url: "/docs",
+      title: "Business Details",
+      url: getAnchorUrl("BUSINESS_DETAILS"),
       icon: Building2Icon,
     },
     {
-      title: "Operations",
-      url: "/docs",
-      icon: ListIcon,
+      title: "Location Information",
+      url: getAnchorUrl("LOCATION_INFORMATION"),
+      icon: MapPinIcon,
     },
     {
       title: "Due Diligence",
-      url: "/docs",
+      url: getAnchorUrl("DUE_DILIGENCE_DOCUMENTS"),
       icon: FolderIcon,
     },
   ] : [
     {
-      title: "Business Sale",
-      url: "/",
+      title: "Investment Highlights",
+      url: getAnchorUrl("INVESTMENT_HIGHLIGHTS"),
       icon: BarChartIcon,
     },
     {
-      title: "About",
-      url: "/#about",
-      icon: HelpCircleIcon,
+      title: "Business Details",
+      url: getAnchorUrl("BUSINESS_DETAILS"),
+      icon: Building2Icon,
     },
     {
-      title: "Contact",
-      url: "/#contact",
-      icon: UsersIcon,
+      title: "Location Information",
+      url: getAnchorUrl("LOCATION_INFORMATION"),
+      icon: MapPinIcon,
+    },
+    {
+      title: "Due Diligence",
+      url: getAnchorUrl("DUE_DILIGENCE"),
+      icon: FolderIcon,
     },
   ],
   navClouds: [
     {
-      title: "Quick Create",
+      title: "Request Info",
       icon: ArrowUpCircleIcon,
       isActive: true,
       url: "#",
