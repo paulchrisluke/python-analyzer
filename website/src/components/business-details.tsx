@@ -130,6 +130,17 @@ export function BusinessDetails({ data }: BusinessDetailsProps) {
     }).format(amount);
   };
 
+  // Helper function to parse currency strings (strips non-numeric characters)
+  const parseCurrency = (value: string | number | null | undefined): number => {
+    if (value === null || value === undefined) return 0;
+    if (typeof value === 'number') return isFinite(value) ? value : 0;
+    
+    // Strip all non-numeric characters except decimal point and minus sign
+    const numericString = String(value).replace(/[^0-9.-]/g, '');
+    const parsed = parseFloat(numericString);
+    return isFinite(parsed) ? parsed : 0;
+  };
+
   // Helper function to format percentage
   const formatPercentage = (value: number): string => {
     return `${value.toFixed(1)}%`;
@@ -330,7 +341,7 @@ export function BusinessDetails({ data }: BusinessDetailsProps) {
               <ul className="space-y-2 text-sm">
                 <li className="flex items-center gap-2">
                   <CheckCircleIcon className="h-4 w-4 text-muted-foreground" />
-                  <span>Equipment Inventory & Valuations ({formatCurrency(parseFloat(data.business_operations?.equipment_value || '0'))})</span>
+                  <span>Equipment Inventory & Valuations ({formatCurrency(parseCurrency(data.business_operations?.equipment_value))})</span>
                 </li>
                 <li className="flex items-center gap-2">
                   <CheckCircleIcon className="h-4 w-4 text-muted-foreground" />

@@ -13,7 +13,8 @@
         "plugin:playwright/playwright-test"
       ],
       "env": {
-        "playwright/test": true
+        "browser": true,
+        "node": true
       }
     }
   ]

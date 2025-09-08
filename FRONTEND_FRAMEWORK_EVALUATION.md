@@ -428,7 +428,6 @@ const equipmentCategories = [
 ```typescript
 // src/lib/etl-data.ts (server-only)
 import 'server-only'
-import 'server-only'
 import landingPageData from '../data/landing_page_data.json'
 import financialSummary from '../data/financial_summary.json'
 import equipmentAnalysis from '../data/equipment_analysis.json'
@@ -461,18 +460,13 @@ export async function loadETLData() {
     monthlyRevenue: toNumber(financialHighlights.monthly_cash_flow),
   }
 
-  // …rest of the function…
-}
-    monthlyRevenue: financialHighlights.monthly_cash_flow
-  }
-  
   // Investment highlights for comparison and analysis
   const investmentHighlights = {
-    askingPrice: financialHighlights.asking_price,
+    askingPrice: toNumber(financialHighlights.asking_price),
     marketValue: businessMetrics.marketValue,
-    paybackPeriod: financialHighlights.payback_period,
-    roi: financialHighlights.roi,
-    ebitdaMargin: financialHighlights.ebitda_margin
+    paybackPeriod: toNumber(financialHighlights.payback_period),
+    roi: toNumber(financialHighlights.roi),
+    ebitdaMargin: toNumber(financialHighlights.ebitda_margin)
   }
   
   // Equipment categories grouped from equipment analysis

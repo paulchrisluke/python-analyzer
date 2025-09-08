@@ -279,11 +279,14 @@ class TestDueDiligenceRegression:
                 calculated_float = float(calculated)
                 expected_float = float(expected)
                 
-                # Handle zero-expected cases: use absolute difference instead of percentage
-                if expected_float > 0:
-                    diff_pct = abs(calculated_float - expected_float) / expected_float
+                # Handle zero-expected cases: maintain percentage semantics
+                if expected_float == 0:
+                    if calculated_float == 0:
+                        diff_pct = 0.0
+                    else:
+                        diff_pct = float("inf")  # Any non-zero calculated value fails percentage tolerance
                 else:
-                    diff_pct = abs(calculated_float - expected_float)  # Absolute difference for zero-expected
+                    diff_pct = abs(calculated_float - expected_float) / expected_float
                 within_tolerance = diff_pct <= TOLERANCE
                 status = "✓ PASS" if within_tolerance else "✗ FAIL"
                 

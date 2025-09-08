@@ -2,7 +2,9 @@ export interface Env {
   cranberry_auth_db: D1Database;
   BETTER_AUTH_SECRET: string;
   BETTER_AUTH_URL: string;
+  COOKIE_DOMAIN?: string;
   NODE_ENV?: string;
+  ALLOWED_ORIGINS?: string;
 }
 
 export async function createAuth(env: Env) {
@@ -39,6 +41,20 @@ export async function createAuth(env: Env) {
     session: {
       expiresIn: 60 * 60 * 24 * 7, // 7 days
       updateAge: 60 * 60 * 24, // 1 day
+      cookieCache: {
+        enabled: true,
+        maxAge: 60 * 5, // 5 minutes
+      },
+    },
+    cookies: {
+      sessionToken: {
+        name: "better-auth.session_token",
+        httpOnly: true,
+        secure: true, // Required for cross-domain cookies
+        sameSite: "none", // Allow cross-domain cookies
+        domain: env.COOKIE_DOMAIN || ".paulchrisluke.workers.dev", // Set for parent domain to work across subdomains
+        path: "/",
+      },
     },
     user: {
       additionalFields: {
