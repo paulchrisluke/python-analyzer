@@ -54,11 +54,6 @@ export default async function HomePage() {
                 <BusinessDetails data={etlData} />
               </div>
 
-              {/* Due Diligence */}
-              <div id={ANCHORS.DUE_DILIGENCE} className="px-4 lg:px-6">
-                <DueDiligenceDocuments />
-              </div>
-
               {/* Due Diligence Documents */}
               <div id={ANCHORS.DUE_DILIGENCE_DOCUMENTS} className="px-4 lg:px-6">
                 <DueDiligenceDocuments />

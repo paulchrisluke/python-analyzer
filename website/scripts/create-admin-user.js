@@ -13,8 +13,8 @@ async function createAdminUser() {
   // For now, we'll create the SQL commands to run manually
   
   const adminUserId = createId();
-  const adminEmail = 'admin@cranberryhearing.com';
-  const adminName = 'System Administrator';
+  const adminEmail = process.env.ADMIN_EMAIL || 'admin@cranberryhearing.com';
+  const adminName = process.env.ADMIN_NAME || 'System Administrator';
   
   // Generate cryptographically-strong random password
   const adminPassword = crypto.randomBytes(16).toString('hex');
@@ -23,17 +23,20 @@ async function createAdminUser() {
   const passwordHash = await bcrypt.hash(adminPassword, 12);
   
   // Reuse timestamp for consistency
-  const timestamp = Date.now();
+  const timestamp = new Date().toISOString();
+  
+  // SQL escape function to double single quotes
+  const sqlEscape = (str) => str.replace(/'/g, "''");
   
   console.log('📝 Run these SQL commands to create the admin user:');
   console.log('');
   console.log('-- Create admin user');
   console.log(`INSERT INTO users (id, name, email, email_verified, role, is_active, created_at, updated_at)`);
-  console.log(`VALUES ('${adminUserId}', '${adminName}', '${adminEmail}', 1, 'admin', 1, ${timestamp}, ${timestamp});`);
+  console.log(`VALUES ('${adminUserId}', '${sqlEscape(adminName)}', '${sqlEscape(adminEmail)}', 1, 'admin', 1, '${timestamp}', '${timestamp}');`);
   console.log('');
   console.log('-- Create password account with hashed password');
   console.log(`INSERT INTO accounts (id, account_id, provider_id, user_id, password_hash, created_at, updated_at)`);
-  console.log(`VALUES ('${createId()}', '${adminEmail}', 'credential', '${adminUserId}', '${passwordHash}', ${timestamp}, ${timestamp});`);
+  console.log(`VALUES ('${createId()}', '${sqlEscape(adminEmail)}', 'credential', '${adminUserId}', '${passwordHash}', '${timestamp}', '${timestamp}');`);
   console.log('');
   console.log('🔑 Admin credentials:');
   console.log(`Email: ${adminEmail}`);

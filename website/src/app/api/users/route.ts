@@ -166,21 +166,24 @@ function validateCreateUserRequest(body: unknown): { isValid: boolean; data?: Cr
 export const runtime = "edge"
 export const dynamic = "force-dynamic"
 
+// Safe environment variable accessor for Edge runtime compatibility
+function getEnvVar(key: string): string | undefined {
+  return typeof process !== "undefined" && process.env ? process.env[key] : undefined
+}
+
 // Get and validate environment variables
 function getValidatedEnv(): Env {
-  const isProduction = process.env.NODE_ENV === "production"
-  const secret = process.env.BETTER_AUTH_SECRET
-  const baseURL = process.env.BETTER_AUTH_URL
+  const isProduction = getEnvVar("NODE_ENV") === "production"
+  const secret = getEnvVar("BETTER_AUTH_SECRET")
+  const baseURL = getEnvVar("BETTER_AUTH_URL")
 
   // Fail-fast validation for production
   if (isProduction) {
     if (!secret || secret.trim() === "") {
-      console.error("BETTER_AUTH_SECRET is required in production")
-      process.exit(1)
+      throw new Error("BETTER_AUTH_SECRET is required in production")
     }
     if (!baseURL || baseURL.trim() === "") {
-      console.error("BETTER_AUTH_URL is required in production")
-      process.exit(1)
+      throw new Error("BETTER_AUTH_URL is required in production")
     }
   }
 
@@ -194,12 +197,12 @@ function getValidatedEnv(): Env {
   }
 
   return {
-    cranberry_auth_db: process.env.cranberry_auth_db as any, // D1Database binding from Cloudflare Workers
+    DB: globalThis.cranberry_auth_db, // D1Database binding from Cloudflare Workers
     BETTER_AUTH_SECRET: finalSecret,
     BETTER_AUTH_URL: finalBaseURL,
-    NODE_ENV: process.env.NODE_ENV,
-    COOKIE_DOMAIN: process.env.COOKIE_DOMAIN,
-    ALLOWED_ORIGINS: process.env.ALLOWED_ORIGINS,
+    NODE_ENV: getEnvVar("NODE_ENV"),
+    COOKIE_DOMAIN: getEnvVar("COOKIE_DOMAIN"),
+    ALLOWED_ORIGINS: getEnvVar("ALLOWED_ORIGINS"),
   }
 }
 
@@ -308,8 +311,24 @@ export async function POST(request: NextRequest) {
     if (!newUser) {
       return NextResponse.json({ error: "Failed to create user" }, { status: 500 })
     }
-
-    return NextResponse.json(newUser, { status: 201 })
+    
+    // Re-read created user with a safe projection
+    const [safeUser] = await db
+      .select({
+        id: schema.users.id,
+        name: schema.users.name,
+        email: schema.users.email,
+        role: schema.users.role,
+        isActive: schema.users.isActive,
+        lastLoginAt: schema.users.lastLoginAt,
+        createdAt: schema.users.createdAt,
+        updatedAt: schema.users.updatedAt,
+      })
+      .from(schema.users)
+      .where(eq(schema.users.email, email))
+      .limit(1)
+    
+    return NextResponse.json(safeUser, { status: 201 })
   } catch (error) {
     console.error("Error creating user:", error)
     return NextResponse.json({ error: "Internal Server Error" }, { status: 500 })

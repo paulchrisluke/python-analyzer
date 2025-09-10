@@ -8,7 +8,7 @@ declare global {
 }
 
 export interface Env {
-  cranberry_auth_db?: D1Database;
+  DB?: D1Database;
   BETTER_AUTH_SECRET: string;
   BETTER_AUTH_URL: string;
   COOKIE_DOMAIN?: string;
@@ -30,7 +30,7 @@ export async function createAuth(env: Env) {
   
   // Create database connection with proper typing and validation
   const db = await createDatabaseConnection({
-    cranberry_auth_db: env.cranberry_auth_db
+    DB: env.DB
   });
   
   return betterAuth({

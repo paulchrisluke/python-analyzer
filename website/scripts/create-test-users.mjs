@@ -1,7 +1,11 @@
-import { schema } from '../db/schema.ts';
+import { schema } from '../db/schema.js';
 import { eq } from 'drizzle-orm';
 import { createId } from '@paralleldrive/cuid2';
 import bcrypt from 'bcryptjs';
+import dotenv from 'dotenv';
+
+// Load environment variables
+dotenv.config();
 
 // Create test users for the test suite
 async function createTestUsers() {
@@ -20,26 +24,26 @@ async function createTestUsers() {
     process.exit(1);
   }
   
-  const timestamp = new Date();
+  const timestamp = Date.now();
   
-  // Test users from .env file
+  // Test users from environment variables
   const testUsers = [
     {
-      email: 'admin@cranberryhearing.com',
-      password: 'Superman12!',
-      name: 'Test Admin User',
+      email: process.env.ADMIN_EMAIL || 'admin@cranberryhearing.com',
+      password: process.env.ADMIN_PASSWORD || 'Superman12!',
+      name: process.env.ADMIN_NAME || 'Test Admin User',
       role: 'admin'
     },
     {
-      email: 'buyer@test.local',
-      password: 'test-buyer-password-123',
-      name: 'Test Buyer User',
+      email: process.env.BUYER_EMAIL || 'buyer@test.local',
+      password: process.env.BUYER_PASSWORD || 'test-buyer-password-123',
+      name: process.env.BUYER_NAME || 'Test Buyer User',
       role: 'buyer'
     },
     {
-      email: 'viewer@test.local',
-      password: 'test-viewer-password-123',
-      name: 'Test Viewer User',
+      email: process.env.VIEWER_EMAIL || 'viewer@test.local',
+      password: process.env.VIEWER_PASSWORD || 'test-viewer-password-123',
+      name: process.env.VIEWER_NAME || 'Test Viewer User',
       role: 'viewer'
     }
   ];
@@ -47,13 +51,13 @@ async function createTestUsers() {
   for (const user of testUsers) {
     try {
       // Check if user already exists
-      const existingUser = await db.select().from(schema.users).where(eq(schema.users.email, user.email)).limit(1).get();
+      const existingUser = db.select().from(schema.users).where(eq(schema.users.email, user.email)).limit(1).get();
       
       if (existingUser) {
         console.log(`✅ User ${user.email} already exists, updating...`);
         
         // Update existing user
-        await db.update(schema.users)
+        db.update(schema.users)
           .set({
             name: user.name,
             role: user.role,
@@ -65,7 +69,7 @@ async function createTestUsers() {
         
         // Create new user
         const userId = createId();
-        await db.insert(schema.users).values({
+        db.insert(schema.users).values({
           id: userId,
           name: user.name,
           email: user.email,
@@ -81,7 +85,7 @@ async function createTestUsers() {
       const passwordHash = await bcrypt.hash(user.password, 12);
       
       // Check if account already exists
-      const existingAccount = await db.select().from(schema.accounts)
+      const existingAccount = db.select().from(schema.accounts)
         .where(eq(schema.accounts.accountId, user.email))
         .limit(1).get();
       
@@ -89,9 +93,9 @@ async function createTestUsers() {
         console.log(`✅ Account for ${user.email} already exists, updating password...`);
         
         // Update existing account
-        await db.update(schema.accounts)
+        db.update(schema.accounts)
           .set({
-            password: passwordHash,
+            password_hash: passwordHash,
             updatedAt: timestamp
           })
           .where(eq(schema.accounts.accountId, user.email)).run();
@@ -99,16 +103,16 @@ async function createTestUsers() {
         console.log(`➕ Creating account for: ${user.email}`);
         
         // Get user ID
-        const userRecord = await db.select().from(schema.users).where(eq(schema.users.email, user.email)).limit(1).get();
+        const userRecord = db.select().from(schema.users).where(eq(schema.users.email, user.email)).limit(1).get();
         const userId = userRecord.id;
         
         // Create new account
-        await db.insert(schema.accounts).values({
+        db.insert(schema.accounts).values({
           id: createId(),
           accountId: user.email,
           providerId: 'credential',
           userId: userId,
-          password: passwordHash,
+          password_hash: passwordHash,
           createdAt: timestamp,
           updatedAt: timestamp
         }).run();

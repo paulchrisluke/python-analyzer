@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
 import { createAuth, Env } from "@/auth"
 import { schema } from "../../../../../db/schema"
-import { eq } from "drizzle-orm"
+import { eq, and, ne, count } from "drizzle-orm"
 import { UserRole } from "@/lib/roles"
 import { getDb } from "@/lib/database"
 import { z } from "zod"
@@ -73,7 +73,7 @@ try {
 
 // Create environment object for auth
 const env: Env = {
-  cranberry_auth_db: process.env.cranberry_auth_db as any, // D1Database binding from Cloudflare Workers
+  DB: globalThis.cranberry_auth_db, // D1Database binding from Cloudflare Workers
   BETTER_AUTH_SECRET: secret,
   BETTER_AUTH_URL: baseURL,
   NODE_ENV: process.env.NODE_ENV,
@@ -84,7 +84,7 @@ const env: Env = {
 // GET /api/users/[id] - Get a specific user
 export async function GET(
   request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: { id: string } }
 ) {
   try {
     // Create auth instance to verify admin access
@@ -100,8 +100,8 @@ export async function GET(
     // Get database connection using the new getDb helper
     const db = await getDb()
 
-    // Get the resolved params
-    const { id } = await params
+    // Get the params
+    const { id } = params
 
     // Fetch user by ID
     const user = await db
@@ -133,7 +133,7 @@ export async function GET(
 // PUT /api/users/[id] - Update a user
 export async function PUT(
   request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: { id: string } }
 ) {
   try {
     // Create auth instance to verify admin access
@@ -163,8 +163,8 @@ export async function PUT(
     
     const validatedData: UpdateUserInput = validationResult.data
 
-    // Get the resolved params
-    const { id } = await params
+    // Get the params
+    const { id } = params
 
     // Get database connection using the new getDb helper
     const db = await getDb()
@@ -178,6 +178,35 @@ export async function PUT(
 
     if (existingUser.length === 0) {
       return NextResponse.json({ error: "User not found" }, { status: 404 })
+    }
+
+    // Guard against removing the last admin
+    const isChangingFromAdmin = validatedData.role !== undefined && 
+      existingUser[0].role === 'admin' && 
+      validatedData.role !== 'admin'
+    const isDeactivatingAdmin = validatedData.isActive === false && 
+      existingUser[0].role === 'admin'
+    
+    if (isChangingFromAdmin || isDeactivatingAdmin) {
+      // Count other active admins excluding this user
+      const adminCountResult = await db
+        .select({ count: count() })
+        .from(schema.users)
+        .where(
+          and(
+            eq(schema.users.role, 'admin'),
+            eq(schema.users.isActive, true),
+            ne(schema.users.id, id)
+          )
+        )
+      
+      const otherAdminCount = adminCountResult[0]?.count || 0
+      
+      if (otherAdminCount === 0) {
+        return NextResponse.json({ 
+          error: "Cannot demote or deactivate the last admin user" 
+        }, { status: 409 })
+      }
     }
 
     // Check if email is being changed and if it already exists
@@ -237,7 +266,7 @@ export async function PUT(
 // DELETE /api/users/[id] - Delete a user
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: { id: string } }
 ) {
   try {
     // Create auth instance to verify admin access
@@ -250,8 +279,8 @@ export async function DELETE(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
-    // Get the resolved params
-    const { id } = await params
+    // Get the params
+    const { id } = params
 
     // Prevent admin from deleting themselves
     if (session.user.id === id) {
@@ -270,6 +299,29 @@ export async function DELETE(
 
     if (existingUser.length === 0) {
       return NextResponse.json({ error: "User not found" }, { status: 404 })
+    }
+
+    // Guard against deleting the last admin
+    if (existingUser[0].role === 'admin') {
+      // Count other active admins excluding this user
+      const adminCountResult = await db
+        .select({ count: count() })
+        .from(schema.users)
+        .where(
+          and(
+            eq(schema.users.role, 'admin'),
+            eq(schema.users.isActive, true),
+            ne(schema.users.id, id)
+          )
+        )
+      
+      const otherAdminCount = adminCountResult[0]?.count || 0
+      
+      if (otherAdminCount === 0) {
+        return NextResponse.json({ 
+          error: "Cannot delete the last admin user" 
+        }, { status: 403 })
+      }
     }
 
     // Delete user (cascade will handle related records)

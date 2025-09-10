@@ -1,5 +1,6 @@
 import { NextRequest } from "next/server"
 import { createAuth, Env } from "@/auth"
+import type { D1Database } from "@/auth"
 
 // Force Node.js runtime and disable caching for SQLite/Drizzle compatibility
 export const runtime = "nodejs"
@@ -21,9 +22,17 @@ if (isProduction) {
 const secret = process.env.BETTER_AUTH_SECRET || "your-secret-key-change-in-production"
 const baseURL = process.env.BETTER_AUTH_URL || "http://localhost:3000"
 
+// Get D1 database binding (will be undefined in local development)
+const dbBinding = process.env.DB as D1Database | undefined
+
+// Runtime guard for production - ensure DB binding is available
+if (isProduction && !dbBinding) {
+  throw new Error("D1 database binding 'DB' is required in production but was not found")
+}
+
 // Create environment object for auth
 const env: Env = {
-  cranberry_auth_db: process.env.cranberry_auth_db as any, // This will be bound in Cloudflare Workers
+  DB: dbBinding,
   BETTER_AUTH_SECRET: secret,
   BETTER_AUTH_URL: baseURL,
   NODE_ENV: process.env.NODE_ENV,
@@ -31,13 +40,23 @@ const env: Env = {
   ALLOWED_ORIGINS: process.env.ALLOWED_ORIGINS,
 }
 
-// For local development, cranberry_auth_db will be undefined
+// For local development, DB will be undefined
 // The createAuth function will handle this by using better-sqlite3 directly
+
+// Lazy initialization of auth instance - created once and reused
+let authInstance: Awaited<ReturnType<typeof createAuth>> | null = null
+
+async function getAuth() {
+  if (!authInstance) {
+    authInstance = await createAuth(env)
+  }
+  return authInstance
+}
 
 export async function GET(request: NextRequest) {
   try {
-    // Create Better Auth instance using the D1-compatible configuration
-    const auth = await createAuth(env)
+    // Use singleton auth instance
+    const auth = await getAuth()
     return await auth.handler(request)
   } catch (error) {
     console.error("Auth GET error:", error)
@@ -47,8 +66,8 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
-    // Create Better Auth instance using the D1-compatible configuration
-    const auth = await createAuth(env)
+    // Use singleton auth instance
+    const auth = await getAuth()
     return await auth.handler(request)
   } catch (error) {
     console.error("Auth POST error:", error)

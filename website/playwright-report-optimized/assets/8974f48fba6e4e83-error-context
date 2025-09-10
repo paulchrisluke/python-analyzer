@@ -1,0 +1,494 @@
+# Page snapshot
+
+```yaml
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - generic [ref=e5]:
+      - list [ref=e7]:
+        - listitem [ref=e8]:
+          - link "Cranberry Hearing" [ref=e9] [cursor=pointer]:
+            - /url: /
+            - img [ref=e10] [cursor=pointer]
+            - generic [ref=e13] [cursor=pointer]: Cranberry Hearing
+      - generic [ref=e14]:
+        - generic [ref=e16]:
+          - list [ref=e17]:
+            - listitem [ref=e18]:
+              - button "Request Info" [ref=e19] [cursor=pointer]:
+                - img [ref=e20] [cursor=pointer]
+                - generic [ref=e22] [cursor=pointer]: Request Info
+              - button "Inbox" [ref=e23] [cursor=pointer]:
+                - img
+                - generic [ref=e24] [cursor=pointer]: Inbox
+          - list [ref=e25]:
+            - listitem [ref=e26]:
+              - link "Investment Highlights" [ref=e27] [cursor=pointer]:
+                - /url: /#investment-highlights
+                - img [ref=e28] [cursor=pointer]
+                - generic [ref=e29] [cursor=pointer]: Investment Highlights
+            - listitem [ref=e30]:
+              - link "Business Details" [ref=e31] [cursor=pointer]:
+                - /url: /#business-details
+                - img [ref=e32] [cursor=pointer]
+                - generic [ref=e36] [cursor=pointer]: Business Details
+            - listitem [ref=e37]:
+              - link "Location Information" [ref=e38] [cursor=pointer]:
+                - /url: /#location-information
+                - img [ref=e39] [cursor=pointer]
+                - generic [ref=e42] [cursor=pointer]: Location Information
+            - listitem [ref=e43]:
+              - link "Due Diligence" [ref=e44] [cursor=pointer]:
+                - /url: /#due-diligence
+                - img [ref=e45] [cursor=pointer]
+                - generic [ref=e47] [cursor=pointer]: Due Diligence
+        - generic [ref=e48]:
+          - generic [ref=e49]: Documents
+          - list [ref=e50]:
+            - listitem [ref=e51]:
+              - button "More" [ref=e52] [cursor=pointer]:
+                - img [ref=e53] [cursor=pointer]
+                - generic [ref=e57] [cursor=pointer]: More
+        - generic [ref=e58]:
+          - generic:
+            - list
+      - list [ref=e60]:
+        - listitem [ref=e61]:
+          - link "Sign In Access your account" [ref=e62] [cursor=pointer]:
+            - /url: /login
+            - generic [ref=e63] [cursor=pointer]:
+              - img [ref=e65] [cursor=pointer]
+              - generic [ref=e68] [cursor=pointer]:
+                - generic [ref=e69] [cursor=pointer]: Sign In
+                - generic [ref=e70] [cursor=pointer]: Access your account
+    - main [ref=e71]:
+      - generic [ref=e73]:
+        - button "Toggle Sidebar" [ref=e74] [cursor=pointer]:
+          - img
+          - generic [ref=e75] [cursor=pointer]: Toggle Sidebar
+        - heading "Documents" [level=1] [ref=e76]
+      - generic [ref=e79]:
+        - generic [ref=e81]:
+          - heading "Established Two-Location Audiology Practice Available" [level=1] [ref=e82]
+          - paragraph [ref=e83]: Cranberry Township & Pittsburgh, PA (Butler & Allegheny Counties)
+          - generic [ref=e84]:
+            - generic [ref=e85]:
+              - img "Professional audiology practice interior showing modern exam room with equipment" [ref=e87]
+              - generic [ref=e88]:
+                - generic [ref=e90]: "1"
+                - generic [ref=e92]: "2"
+                - generic [ref=e94]: "3"
+                - generic [ref=e96]: "4"
+                - generic [ref=e98]: "5"
+                - generic [ref=e100]: "6"
+            - generic [ref=e102]:
+              - generic [ref=e103]:
+                - generic [ref=e104]: Get More Information
+                - generic [ref=e105]: Interested in this audiology practice? Contact us for a confidential discussion.
+              - generic [ref=e106]:
+                - generic [ref=e107]:
+                  - generic [ref=e108]:
+                    - generic [ref=e109]: Full Name *
+                    - textbox "Full Name *" [ref=e110]
+                  - generic [ref=e111]:
+                    - generic [ref=e112]: Email Address *
+                    - textbox "Email Address *" [ref=e113]
+                  - generic [ref=e114]:
+                    - generic [ref=e115]: Phone Number
+                    - textbox "Phone Number" [ref=e116]
+                  - generic [ref=e117]:
+                    - generic [ref=e118]: Message
+                    - textbox "Message" [ref=e119]
+                  - generic [ref=e120]:
+                    - checkbox "I agree to receive communications about this business opportunity" [ref=e121] [cursor=pointer]
+                    - checkbox
+                    - generic [ref=e122]: I agree to receive communications about this business opportunity
+                  - button "Request Information" [disabled]
+                - generic [ref=e124]:
+                  - generic [ref=e125]:
+                    - img [ref=e126]
+                    - generic [ref=e129]: info@cranberryhearing.com
+                  - generic [ref=e130]:
+                    - img [ref=e131]
+                    - generic [ref=e133]: (724) 779-1234
+                  - generic [ref=e134]:
+                    - img [ref=e135]
+                    - generic [ref=e138]: Cranberry Township, PA
+        - generic [ref=e140]:
+          - generic [ref=e141]:
+            - generic [ref=e142]:
+              - generic [ref=e143]: Asking Price
+              - generic [ref=e144]: $650,000
+              - generic [ref=e146]:
+                - img [ref=e147]
+                - text: Below Market
+            - generic [ref=e150]:
+              - generic [ref=e151]:
+                - text: All-inclusive price
+                - img [ref=e152]
+              - generic [ref=e157]: Equipment & locations included
+          - generic [ref=e158]:
+            - generic [ref=e159]:
+              - generic [ref=e160]: Cash Flow (EBITDA)
+              - generic [ref=e161]: $266,517
+              - generic [ref=e163]:
+                - img [ref=e164]
+                - text: Strong
+            - generic [ref=e167]:
+              - generic [ref=e168]:
+                - text: Consistent cash flow
+                - img [ref=e169]
+              - generic [ref=e171]: Insurance-based revenue
+          - generic [ref=e172]:
+            - generic [ref=e173]:
+              - generic [ref=e174]: Gross Revenue
+              - generic [ref=e175]: $2,604,167
+              - generic [ref=e177]:
+                - img [ref=e178]
+                - text: Growing
+            - generic [ref=e181]:
+              - generic [ref=e182]:
+                - text: Annual revenue
+                - img [ref=e183]
+              - generic [ref=e185]: 30-month track record
+          - generic [ref=e186]:
+            - generic [ref=e187]:
+              - generic [ref=e188]: EBITDA
+              - generic [ref=e189]: $266,517
+              - generic [ref=e191]:
+                - img [ref=e192]
+                - text: 10.2%
+            - generic [ref=e195]:
+              - generic [ref=e196]:
+                - text: Strong profitability
+                - img [ref=e197]
+              - generic [ref=e201]: Industry-leading margins
+        - generic [ref=e203]:
+          - generic [ref=e204]:
+            - generic [ref=e205]:
+              - generic [ref=e206]:
+                - img [ref=e207]
+                - text: Business Overview
+              - generic [ref=e211]: Comprehensive details about Cranberry Hearing and Balance Center
+            - generic [ref=e212]:
+              - generic [ref=e213]:
+                - generic [ref=e214]:
+                  - generic [ref=e215]:
+                    - img [ref=e216]
+                    - generic [ref=e219]: "Location:"
+                    - generic [ref=e220]: Cranberry Twp, PA
+                  - generic [ref=e221]:
+                    - img [ref=e222]
+                    - generic [ref=e226]: "Business Type:"
+                    - generic [ref=e227]: Audiology Practice
+                  - generic [ref=e228]:
+                    - img [ref=e229]
+                    - generic [ref=e234]: "Locations:"
+                    - generic [ref=e235]: 2 locations
+                  - generic [ref=e236]:
+                    - img [ref=e237]
+                    - generic [ref=e239]: "Established:"
+                    - generic [ref=e240]: 2010 (15 years)
+                  - generic [ref=e241]:
+                    - img [ref=e242]
+                    - generic [ref=e246]: "Parking:"
+                    - generic [ref=e247]: 10 parking spaces
+                  - generic [ref=e248]:
+                    - img [ref=e249]
+                    - generic [ref=e254]: "Staff:"
+                    - generic [ref=e255]: 2.5 staff members
+                - generic [ref=e256]:
+                  - generic [ref=e257]:
+                    - img [ref=e258]
+                    - generic [ref=e260]: "Asking Price:"
+                    - generic [ref=e261]: $650,000
+                  - generic [ref=e262]:
+                    - img [ref=e263]
+                    - generic [ref=e266]: "Annual Revenue:"
+                    - generic [ref=e267]: $932,533
+                  - generic [ref=e268]:
+                    - img [ref=e269]
+                    - generic [ref=e272]: "EBITDA Margin:"
+                    - generic [ref=e273]: 27.9%
+                  - generic [ref=e274]:
+                    - img [ref=e275]
+                    - generic [ref=e278]: "Payback Period:"
+                    - generic [ref=e279]: 2.5 years
+                  - generic [ref=e280]:
+                    - img [ref=e281]
+                    - generic [ref=e285]: "Monthly Rent:"
+                    - generic [ref=e286]: $2,500 + $100 CAM
+                  - generic [ref=e287]:
+                    - img [ref=e288]
+                    - generic [ref=e290]: "Inventory:"
+                    - generic [ref=e291]: Included in asking price
+              - generic [ref=e293]:
+                - img [ref=e294]
+                - generic [ref=e296]:
+                  - generic [ref=e297]: "Reason for Sale:"
+                  - paragraph [ref=e298]: Owner is retiring after 15 successful years in business. This well-established practice is ready for a new owner to continue serving the community with the same high-quality audiological care.
+          - generic [ref=e299]:
+            - generic [ref=e300]:
+              - generic [ref=e301]: Business Description
+              - generic [ref=e302]: Detailed overview of the audiology practice
+            - generic [ref=e303]:
+              - paragraph [ref=e304]: Cranberry Hearing and Balance Center is a well-established, multi-location audiology practice serving the Cranberry Township & Pittsburgh Metro Area. Founded in 2010, the practice has built a strong reputation for providing comprehensive hearing healthcare services to patients of all ages.
+              - paragraph [ref=e305]: The business operates from 2 locations, offering a full range of audiological services including Diagnostic Audiologic Evaluations, Diagnostic Hearing Evaluations, Industrial Hearing Tests, Tympanometry, Hearing Aid Dispensing and Fitting, Hearing Aid Evaluation, Hearing Aid Repair, Earwax Removal, Hearing and Balance Testing, Tinnitus Treatment and Evaluations, Custom Earmolds and Earplugs, Musicians Earplugs and Monitors. The practice has developed strong relationships with local healthcare providers and maintains a loyal patient base.
+              - paragraph [ref=e306]:
+                - strong [ref=e307]: "Key Strengths:"
+              - list [ref=e308]:
+                - listitem [ref=e309]: Established insurance relationships (UPMC since 2006, Aetna since 2015)
+                - listitem [ref=e310]: Two prime locations in growing markets
+                - listitem [ref=e311]: Professional audiology equipment included
+                - listitem [ref=e312]: Steady cash flow from insurance payments
+                - listitem [ref=e313]: Absentee owner opportunity
+                - listitem [ref=e314]: Strong EBITDA margins
+              - paragraph [ref=e315]:
+                - strong [ref=e316]: "Market Opportunity:"
+                - text: High - aging population demographics - Established insurance relationships
+        - generic [ref=e318]:
+          - generic [ref=e320]:
+            - generic [ref=e321]:
+              - generic [ref=e322]: Due Diligence Documents
+              - generic [ref=e323]: Available documentation for serious buyers
+            - button "Request Full Due Diligence Package" [ref=e324] [cursor=pointer]
+          - table [ref=e328]:
+            - rowgroup [ref=e329]:
+              - row "Document Name Category Type Size" [ref=e330]:
+                - cell "Document Name" [ref=e331]
+                - cell "Category" [ref=e332]
+                - cell "Type" [ref=e333]
+                - cell "Size" [ref=e334]
+            - rowgroup [ref=e335]:
+              - row "Profit & Loss Statements (2023-2024) Financial Documents Financial 2.5MB" [ref=e336]:
+                - cell "Profit & Loss Statements (2023-2024)" [ref=e337]:
+                  - generic [ref=e338]:
+                    - img [ref=e339]
+                    - generic [ref=e341]: Profit & Loss Statements (2023-2024)
+                - cell "Financial Documents" [ref=e342]:
+                  - generic [ref=e343]: Financial Documents
+                - cell "Financial" [ref=e344]:
+                  - generic [ref=e345]: Financial
+                - cell "2.5MB" [ref=e346]
+              - row "Balance Sheets (2022-2024) Financial Documents Financial 1.8MB" [ref=e347]:
+                - cell "Balance Sheets (2022-2024)" [ref=e348]:
+                  - generic [ref=e349]:
+                    - img [ref=e350]
+                    - generic [ref=e352]: Balance Sheets (2022-2024)
+                - cell "Financial Documents" [ref=e353]:
+                  - generic [ref=e354]: Financial Documents
+                - cell "Financial" [ref=e355]:
+                  - generic [ref=e356]: Financial
+                - cell "1.8MB" [ref=e357]
+              - row "General Ledger (2021-2025) Financial Documents Financial 3.2MB" [ref=e358]:
+                - cell "General Ledger (2021-2025)" [ref=e359]:
+                  - generic [ref=e360]:
+                    - img [ref=e361]
+                    - generic [ref=e363]: General Ledger (2021-2025)
+                - cell "Financial Documents" [ref=e364]:
+                  - generic [ref=e365]: Financial Documents
+                - cell "Financial" [ref=e366]:
+                  - generic [ref=e367]: Financial
+                - cell "3.2MB" [ref=e368]
+              - row "Tax Returns (2021-2023) Financial Documents Financial 3.1MB" [ref=e369]:
+                - cell "Tax Returns (2021-2023)" [ref=e370]:
+                  - generic [ref=e371]:
+                    - img [ref=e372]
+                    - generic [ref=e374]: Tax Returns (2021-2023)
+                - cell "Financial Documents" [ref=e375]:
+                  - generic [ref=e376]: Financial Documents
+                - cell "Financial" [ref=e377]:
+                  - generic [ref=e378]: Financial
+                - cell "3.1MB" [ref=e379]
+              - row "Equipment Inventory & Valuations ($61,728) Operational Documents Equipment 850KB" [ref=e380]:
+                - cell "Equipment Inventory & Valuations ($61,728)" [ref=e381]:
+                  - generic [ref=e382]:
+                    - img [ref=e383]
+                    - generic [ref=e386]: Equipment Inventory & Valuations ($61,728)
+                - cell "Operational Documents" [ref=e387]:
+                  - generic [ref=e388]: Operational Documents
+                - cell "Equipment" [ref=e389]:
+                  - generic [ref=e390]: Equipment
+                - cell "850KB" [ref=e391]
+              - row "Lease Agreements (Leased) Operational Documents Legal 1.2MB" [ref=e392]:
+                - cell "Lease Agreements (Leased)" [ref=e393]:
+                  - generic [ref=e394]:
+                    - img [ref=e395]
+                    - generic [ref=e398]: Lease Agreements (Leased)
+                - cell "Operational Documents" [ref=e399]:
+                  - generic [ref=e400]: Operational Documents
+                - cell "Legal" [ref=e401]:
+                  - generic [ref=e402]: Legal
+                - cell "1.2MB" [ref=e403]
+              - row "Insurance Policies (2 providers) Operational Documents Legal 650KB" [ref=e404]:
+                - cell "Insurance Policies (2 providers)" [ref=e405]:
+                  - generic [ref=e406]:
+                    - img [ref=e407]
+                    - generic [ref=e409]: Insurance Policies (2 providers)
+                - cell "Operational Documents" [ref=e410]:
+                  - generic [ref=e411]: Operational Documents
+                - cell "Legal" [ref=e412]:
+                  - generic [ref=e413]: Legal
+                - cell "650KB" [ref=e414]
+              - row "Staff Information & Contracts Operational Documents HR 420KB" [ref=e415]:
+                - cell "Staff Information & Contracts" [ref=e416]:
+                  - generic [ref=e417]:
+                    - img [ref=e418]
+                    - generic [ref=e423]: Staff Information & Contracts
+                - cell "Operational Documents" [ref=e424]:
+                  - generic [ref=e425]: Operational Documents
+                - cell "HR" [ref=e426]:
+                  - generic [ref=e427]: HR
+                - cell "420KB" [ref=e428]
+        - generic [ref=e430]:
+          - generic [ref=e432]:
+            - generic [ref=e433]:
+              - generic [ref=e434]: Due Diligence Documents
+              - generic [ref=e435]: Available documentation for serious buyers
+            - button "Request Full Due Diligence Package" [ref=e436] [cursor=pointer]
+          - table [ref=e440]:
+            - rowgroup [ref=e441]:
+              - row "Document Name Category Type Size" [ref=e442]:
+                - cell "Document Name" [ref=e443]
+                - cell "Category" [ref=e444]
+                - cell "Type" [ref=e445]
+                - cell "Size" [ref=e446]
+            - rowgroup [ref=e447]:
+              - row "Profit & Loss Statements (2023-2024) Financial Documents Financial 2.5MB" [ref=e448]:
+                - cell "Profit & Loss Statements (2023-2024)" [ref=e449]:
+                  - generic [ref=e450]:
+                    - img [ref=e451]
+                    - generic [ref=e453]: Profit & Loss Statements (2023-2024)
+                - cell "Financial Documents" [ref=e454]:
+                  - generic [ref=e455]: Financial Documents
+                - cell "Financial" [ref=e456]:
+                  - generic [ref=e457]: Financial
+                - cell "2.5MB" [ref=e458]
+              - row "Balance Sheets (2022-2024) Financial Documents Financial 1.8MB" [ref=e459]:
+                - cell "Balance Sheets (2022-2024)" [ref=e460]:
+                  - generic [ref=e461]:
+                    - img [ref=e462]
+                    - generic [ref=e464]: Balance Sheets (2022-2024)
+                - cell "Financial Documents" [ref=e465]:
+                  - generic [ref=e466]: Financial Documents
+                - cell "Financial" [ref=e467]:
+                  - generic [ref=e468]: Financial
+                - cell "1.8MB" [ref=e469]
+              - row "General Ledger (2021-2025) Financial Documents Financial 3.2MB" [ref=e470]:
+                - cell "General Ledger (2021-2025)" [ref=e471]:
+                  - generic [ref=e472]:
+                    - img [ref=e473]
+                    - generic [ref=e475]: General Ledger (2021-2025)
+                - cell "Financial Documents" [ref=e476]:
+                  - generic [ref=e477]: Financial Documents
+                - cell "Financial" [ref=e478]:
+                  - generic [ref=e479]: Financial
+                - cell "3.2MB" [ref=e480]
+              - row "Tax Returns (2021-2023) Financial Documents Financial 3.1MB" [ref=e481]:
+                - cell "Tax Returns (2021-2023)" [ref=e482]:
+                  - generic [ref=e483]:
+                    - img [ref=e484]
+                    - generic [ref=e486]: Tax Returns (2021-2023)
+                - cell "Financial Documents" [ref=e487]:
+                  - generic [ref=e488]: Financial Documents
+                - cell "Financial" [ref=e489]:
+                  - generic [ref=e490]: Financial
+                - cell "3.1MB" [ref=e491]
+              - row "Equipment Inventory & Valuations ($61,728) Operational Documents Equipment 850KB" [ref=e492]:
+                - cell "Equipment Inventory & Valuations ($61,728)" [ref=e493]:
+                  - generic [ref=e494]:
+                    - img [ref=e495]
+                    - generic [ref=e498]: Equipment Inventory & Valuations ($61,728)
+                - cell "Operational Documents" [ref=e499]:
+                  - generic [ref=e500]: Operational Documents
+                - cell "Equipment" [ref=e501]:
+                  - generic [ref=e502]: Equipment
+                - cell "850KB" [ref=e503]
+              - row "Lease Agreements (Leased) Operational Documents Legal 1.2MB" [ref=e504]:
+                - cell "Lease Agreements (Leased)" [ref=e505]:
+                  - generic [ref=e506]:
+                    - img [ref=e507]
+                    - generic [ref=e510]: Lease Agreements (Leased)
+                - cell "Operational Documents" [ref=e511]:
+                  - generic [ref=e512]: Operational Documents
+                - cell "Legal" [ref=e513]:
+                  - generic [ref=e514]: Legal
+                - cell "1.2MB" [ref=e515]
+              - row "Insurance Policies (2 providers) Operational Documents Legal 650KB" [ref=e516]:
+                - cell "Insurance Policies (2 providers)" [ref=e517]:
+                  - generic [ref=e518]:
+                    - img [ref=e519]
+                    - generic [ref=e521]: Insurance Policies (2 providers)
+                - cell "Operational Documents" [ref=e522]:
+                  - generic [ref=e523]: Operational Documents
+                - cell "Legal" [ref=e524]:
+                  - generic [ref=e525]: Legal
+                - cell "650KB" [ref=e526]
+              - row "Staff Information & Contracts Operational Documents HR 420KB" [ref=e527]:
+                - cell "Staff Information & Contracts" [ref=e528]:
+                  - generic [ref=e529]:
+                    - img [ref=e530]
+                    - generic [ref=e535]: Staff Information & Contracts
+                - cell "Operational Documents" [ref=e536]:
+                  - generic [ref=e537]: Operational Documents
+                - cell "HR" [ref=e538]:
+                  - generic [ref=e539]: HR
+                - cell "420KB" [ref=e540]
+        - generic [ref=e544]:
+          - generic [ref=e545]:
+            - generic [ref=e546]:
+              - generic [ref=e547]:
+                - img [ref=e548]
+                - generic [ref=e551]: Primary Location
+              - generic [ref=e552]:
+                - generic [ref=e553]:
+                  - generic [ref=e554]: 20820 Route 19, Suite A
+                  - generic [ref=e555]: Cranberry Twp, PA 16066
+                - generic [ref=e556]:
+                  - generic [ref=e557]:
+                    - img [ref=e558]
+                    - generic [ref=e562]: 10 parking spaces
+                  - generic [ref=e563]:
+                    - img [ref=e564]
+                    - generic [ref=e569]: 2.5 staff members
+                - iframe [ref=e571]:
+                  
+                - link "Open in Google Maps" [ref=e572] [cursor=pointer]:
+                  - /url: https://www.google.com/maps/place/20820%20Route%2019+Cranberry%20Twp+PA+16066
+                  - img
+                  - text: Open in Google Maps
+            - generic [ref=e573]:
+              - generic [ref=e574]:
+                - img [ref=e575]
+                - generic [ref=e578]: Secondary Location
+              - generic [ref=e579]:
+                - generic [ref=e580]:
+                  - generic [ref=e581]: 999 West View Park Drive
+                  - generic [ref=e582]: Pittsburgh, PA 15229
+                - generic [ref=e583]:
+                  - generic [ref=e584]:
+                    - img [ref=e585]
+                    - generic [ref=e589]: 10 parking spaces
+                  - generic [ref=e590]:
+                    - img [ref=e591]
+                    - generic [ref=e596]: 2.5 staff members
+                - iframe [ref=e598]:
+                  
+                - link "Open in Google Maps" [ref=e599] [cursor=pointer]:
+                  - /url: https://www.google.com/maps/place/999%20West%20View%20Park%20Drive+Pittsburgh+PA+15229
+                  - img
+                  - text: Open in Google Maps
+          - generic [ref=e600]:
+            - generic [ref=e601]:
+              - img [ref=e602]
+              - generic [ref=e606]: Monthly Rent Information
+            - generic [ref=e607]:
+              - generic [ref=e608]: $2,500 + $100 CAM
+              - generic [ref=e609]: "Total Monthly Cost: $2,600"
+      - generic [ref=e612]:
+        - paragraph [ref=e613]: © 2025 Cranberry Hearing & Balance Center. All rights reserved.
+        - paragraph [ref=e614]: Confidential business sale information. For qualified buyers only.
+  - region "Notifications alt+T"
+  - button "Open Next.js Dev Tools" [ref=e620] [cursor=pointer]:
+    - img [ref=e621] [cursor=pointer]
+  - alert [ref=e624]
+```

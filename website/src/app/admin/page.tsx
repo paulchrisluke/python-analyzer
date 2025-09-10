@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation"
 import { requireAdmin } from "@/lib/server-auth"
+import Link from "next/link"
 
 export const dynamic = 'force-dynamic'
 
@@ -94,23 +95,23 @@ export default async function AdminPage() {
           <div className="bg-white p-6 rounded-lg shadow">
             <h2 className="text-xl font-semibold mb-4">User Management</h2>
             <p className="text-gray-600 mb-4">Manage user accounts and permissions</p>
-            <a href="/admin/users" className="text-blue-600 hover:text-blue-800">
+            <Link href="/admin/users" className="text-blue-600 hover:text-blue-800">
               Go to User Management →
-            </a>
+            </Link>
           </div>
           <div className="bg-white p-6 rounded-lg shadow">
             <h2 className="text-xl font-semibold mb-4">Analytics</h2>
             <p className="text-gray-600 mb-4">View system analytics and reports</p>
-            <a href="/admin/analytics" className="text-blue-600 hover:text-blue-800">
+            <Link href="/admin/analytics" className="text-blue-600 hover:text-blue-800">
               View Analytics →
-            </a>
+            </Link>
           </div>
           <div className="bg-white p-6 rounded-lg shadow">
             <h2 className="text-xl font-semibold mb-4">System Settings</h2>
             <p className="text-gray-600 mb-4">Configure system settings</p>
-            <a href="/admin/settings" className="text-blue-600 hover:text-blue-800">
+            <Link href="/admin/settings" className="text-blue-600 hover:text-blue-800">
               Go to Settings →
-            </a>
+            </Link>
           </div>
         </div>
       </div>

@@ -1,8 +1,9 @@
-const fs = require('fs');
-const path = require('path');
-const { createWriteStream } = require('fs');
-const { pipeline } = require('stream');
-const { promisify } = require('util');
+import fs from 'fs';
+import path from 'path';
+import crypto from 'crypto';
+import { createWriteStream } from 'fs';
+import { pipeline } from 'stream';
+import { promisify } from 'util';
 
 const pipelineAsync = promisify(pipeline);
 
@@ -25,16 +26,45 @@ class OptimizedHTMLReporter {
   }
 
   onTestEnd(test, result) {
+    // Helper function to safely serialize objects and avoid circular references
+    const safeSerialize = (obj, seen = new WeakSet()) => {
+      if (obj === null || typeof obj !== 'object') {
+        return obj;
+      }
+      
+      if (seen.has(obj)) {
+        return '[Circular Reference]';
+      }
+      
+      seen.add(obj);
+      
+      if (Array.isArray(obj)) {
+        return obj.map(item => safeSerialize(item, seen));
+      }
+      
+      const serialized = {};
+      for (const [key, value] of Object.entries(obj)) {
+        // Skip problematic properties that often contain circular references
+        if (key === 'parent' || key === 'child' || key === 'suite' || key === 'project') {
+          continue;
+        }
+        serialized[key] = safeSerialize(value, seen);
+      }
+      
+      seen.delete(obj);
+      return serialized;
+    };
+
     this.results.push({
-      test: {
+      test: safeSerialize({
         title: test.title,
         location: test.location,
         annotations: test.annotations,
         expectedStatus: test.expectedStatus,
         timeout: test.timeout,
         retries: test.retries,
-      },
-      result: {
+      }),
+      result: safeSerialize({
         status: result.status,
         duration: result.duration,
         errors: result.errors,
@@ -42,16 +72,45 @@ class OptimizedHTMLReporter {
         steps: result.steps,
         stdout: result.stdout,
         stderr: result.stderr,
-      }
+      })
     });
   }
 
   async onEnd(result) {
+    // Helper function to safely serialize objects and avoid circular references
+    const safeSerialize = (obj, seen = new WeakSet()) => {
+      if (obj === null || typeof obj !== 'object') {
+        return obj;
+      }
+      
+      if (seen.has(obj)) {
+        return '[Circular Reference]';
+      }
+      
+      seen.add(obj);
+      
+      if (Array.isArray(obj)) {
+        return obj.map(item => safeSerialize(item, seen));
+      }
+      
+      const serialized = {};
+      for (const [key, value] of Object.entries(obj)) {
+        // Skip problematic properties that often contain circular references
+        if (key === 'parent' || key === 'child' || key === 'suite' || key === 'project') {
+          continue;
+        }
+        serialized[key] = safeSerialize(value, seen);
+      }
+      
+      seen.delete(obj);
+      return serialized;
+    };
+
     // Save test results as separate JSON files
     const resultsFile = path.join(this.dataDir, 'test-results.json');
     fs.writeFileSync(resultsFile, JSON.stringify({
-      config: this.config,
-      summary: result,
+      config: safeSerialize(this.config),
+      summary: safeSerialize(result),
       results: this.results
     }, null, 2));
 
@@ -78,10 +137,11 @@ class OptimizedHTMLReporter {
   }
 
   generateTestId(test) {
-    return Buffer.from(`${test.title}-${test.location?.file}-${test.location?.line}`)
-      .toString('base64')
-      .replace(/[^a-zA-Z0-9]/g, '')
-      .substring(0, 16);
+    // Create a stable hash from test title, file, and line to prevent collisions
+    const inputString = `${test.title}-${test.location?.file}-${test.location?.line}`;
+    const hash = crypto.createHash('sha256').update(inputString).digest('hex');
+    // Return first 16 characters for compatibility
+    return hash.substring(0, 16);
   }
 
   async processAttachments(attachments, testId) {
@@ -376,17 +436,57 @@ class OptimizedHTMLReporter {
 
     fs.writeFileSync(path.join(this.outputDir, 'index.html'), html);
     
-    // Create a simple server script for local development
+    // Create a simple server script for local development using Node's built-in modules
     const serverScript = `#!/usr/bin/env node
-const express = require('express');
-const path = require('path');
+import http from 'http';
+import fs from 'fs';
+import path from 'path';
+import url from 'url';
 
-const app = express();
 const port = 9323;
 
-app.use(express.static(__dirname));
+const mimeTypes = {
+  '.html': 'text/html',
+  '.js': 'text/javascript',
+  '.css': 'text/css',
+  '.json': 'application/json',
+  '.png': 'image/png',
+  '.jpg': 'image/jpg',
+  '.gif': 'image/gif',
+  '.svg': 'image/svg+xml',
+  '.ico': 'image/x-icon'
+};
 
-app.listen(port, () => {
+const server = http.createServer((req, res) => {
+  const parsedUrl = url.parse(req.url);
+  let pathname = parsedUrl.pathname;
+  
+  // Default to index.html for root path
+  if (pathname === '/') {
+    pathname = '/index.html';
+  }
+  
+  const filePath = path.join(__dirname, pathname);
+  const ext = path.extname(filePath).toLowerCase();
+  const contentType = mimeTypes[ext] || 'application/octet-stream';
+  
+  fs.readFile(filePath, (err, data) => {
+    if (err) {
+      if (err.code === 'ENOENT') {
+        res.writeHead(404, { 'Content-Type': 'text/html' });
+        res.end('<h1>404 Not Found</h1>');
+      } else {
+        res.writeHead(500, { 'Content-Type': 'text/html' });
+        res.end('<h1>500 Internal Server Error</h1>');
+      }
+    } else {
+      res.writeHead(200, { 'Content-Type': contentType });
+      res.end(data);
+    }
+  });
+});
+
+server.listen(port, () => {
   console.log(\`Playwright report server running at http://localhost:\${port}\`);
   console.log('Press Ctrl+C to stop the server');
 });
@@ -424,4 +524,4 @@ app.listen(port, () => {
   }
 }
 
-module.exports = OptimizedHTMLReporter;
+export default OptimizedHTMLReporter;

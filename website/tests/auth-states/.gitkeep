@@ -1,3 +1,2 @@
-# This directory contains Playwright authentication state files
-# These files are generated during test setup and should not be committed
-# They contain session cookies and authentication tokens
+# This file ensures the auth-states directory exists in git
+# Authentication state files are generated at runtime and should not be committed

@@ -75,15 +75,15 @@ export async function getDb(env?: CloudflareEnv): Promise<DrizzleD1Database<type
  * @returns Drizzle database instance
  */
 export async function createDatabaseConnection(config: DatabaseConfig): Promise<DrizzleD1Database<typeof schema>> {
-  const { cranberry_auth_db } = config
+  const { DB } = config
 
   // Feature detection: Check if D1 binding is available and valid
-  const hasD1 = !!cranberry_auth_db && typeof cranberry_auth_db.prepare === "function";
+  const hasD1 = !!DB && typeof DB.prepare === "function";
   
   if (hasD1) {
     // Use D1 database when a binding is available
     const { drizzle } = await import("drizzle-orm/d1");
-    return drizzle(cranberry_auth_db, { schema });
+    return drizzle(DB, { schema });
   } else {
     // Fallback to better-sqlite3 for local development
     try {
@@ -109,11 +109,11 @@ export async function createDatabaseConnection(config: DatabaseConfig): Promise<
  * @returns Drizzle database instance
  */
 export async function createDatabaseFromEnv(env: {
-  cranberry_auth_db?: D1Database
+  DB?: D1Database
   NODE_ENV?: string
 }) {
   return await createDatabaseConnection({
-    cranberry_auth_db: env.cranberry_auth_db,
+    DB: env.DB,
     NODE_ENV: env.NODE_ENV
   })
 }
@@ -125,35 +125,35 @@ export async function createDatabaseFromEnv(env: {
  * @returns Validated environment object with proper typing
  */
 export function validateDatabaseEnv(env: {
-  cranberry_auth_db?: unknown
+  DB?: unknown
   NODE_ENV?: string
 }): {
-  cranberry_auth_db?: D1Database
+  DB?: D1Database
   NODE_ENV?: string
 } {
-  const { cranberry_auth_db, NODE_ENV } = env
+  const { DB, NODE_ENV } = env
 
   // Feature detection: Validate D1 binding if present
-  if (cranberry_auth_db) {
+  if (DB) {
     // Type guard to ensure it's a valid D1Database
-    if (typeof cranberry_auth_db !== "object" || 
-        !cranberry_auth_db || 
-        typeof (cranberry_auth_db as any).prepare !== "function") {
+    if (typeof DB !== "object" || 
+        !DB || 
+        typeof (DB as any).prepare !== "function") {
       throw new Error(
-        "cranberry_auth_db must be a valid D1Database instance. " +
+        "DB must be a valid D1Database instance. " +
         "Received invalid database binding."
       )
     }
   }
 
   return {
-    cranberry_auth_db: cranberry_auth_db as D1Database | undefined,
+    DB: DB as D1Database | undefined,
     NODE_ENV
   }
 }
 
 // Legacy interface for backward compatibility
 export interface DatabaseConfig {
-  cranberry_auth_db?: D1Database
+  DB?: D1Database
   NODE_ENV?: string // Deprecated: no longer used for gating, kept for backward compatibility
 }

@@ -1,6 +1,10 @@
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import dotenv from 'dotenv';
+
+// Load environment variables
+dotenv.config();
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -11,7 +15,10 @@ async function initLocalDb() {
   let db;
   try {
     const Database = (await import('better-sqlite3')).default;
-    const dbPath = path.join(__dirname, '../local.db');
+    // Use DATABASE_PATH env var if provided, otherwise fall back to default
+    const dbPath = process.env.DATABASE_PATH 
+      ? path.resolve(process.env.DATABASE_PATH)
+      : path.join(__dirname, '../local.db');
     db = new Database(dbPath);
   } catch (error) {
     console.error('❌ Failed to load better-sqlite3. Ensure it is installed for local development.');
@@ -60,8 +67,7 @@ async function initLocalDb() {
     const adminEmail = process.env.ADMIN_EMAIL || 'admin@cranberryhearing.com';
     const adminPasswordHash = process.env.ADMIN_PASSWORD_HASH; // bcrypt hash of the admin password
     if (!adminPasswordHash) {
-      console.error('Missing ADMIN_PASSWORD_HASH env var. Aborting for safety.');
-      process.exit(1);
+      throw new Error('Missing ADMIN_PASSWORD_HASH env var. Aborting for safety.');
     }
     const now = new Date().toISOString();
 

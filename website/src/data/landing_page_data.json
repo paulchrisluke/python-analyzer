@@ -101,7 +101,7 @@
       "Private pay",
       "Cash payments"
     ],
-    "equipment_value": "61727.50",
+    "equipment_value": 61727.50,
     "business_hours": "Monday-Friday 9AM-5PM",
     "total_employees": 5,
     "employees_per_location": 2.5,

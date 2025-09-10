@@ -25,7 +25,8 @@ test('debug login process', async ({ page }) => {
     return;
   }
   
-  console.log('🔍 Testing login flow');
+  // Log non-sensitive indicators for debugging
+  console.log(`🔍 Testing login flow with adminEmail: ${adminEmail ? '[PROVIDED]' : '[MISSING]'}, adminPassword: [REDACTED]`);
   
   // Navigate to login page using full URL
   const loginUrl = `${baseUrl}/login`;

@@ -229,6 +229,46 @@ class SalesExtractor(BaseExtractor):
                 summary['staff'] = staff_counts
                 summary['unique_staff'] = len(staff_counts)
             
+            # Location-specific statistics (parking_spaces and staff_count)
+            if 'Clinic Name' in df.columns:
+                # Extract parking_spaces and staff_count from location data
+                location_stats = {}
+                for location in df['Clinic Name'].unique():
+                    if pd.notna(location):
+                        location_data = df[df['Clinic Name'] == location]
+                        
+                        # Try to extract parking_spaces (int) from various possible columns
+                        parking_spaces = None
+                        for col in ['Parking Spaces', 'parking_spaces', 'Parking', 'parking']:
+                            if col in df.columns:
+                                parking_val = location_data[col].iloc[0] if len(location_data) > 0 else None
+                                if pd.notna(parking_val):
+                                    try:
+                                        parking_spaces = int(float(parking_val))
+                                        break
+                                    except (ValueError, TypeError):
+                                        continue
+                        
+                        # Try to extract staff_count (float) from various possible columns
+                        staff_count = None
+                        for col in ['Staff Count', 'staff_count', 'Staff', 'staff', 'Employees', 'employees']:
+                            if col in df.columns:
+                                staff_val = location_data[col].iloc[0] if len(location_data) > 0 else None
+                                if pd.notna(staff_val):
+                                    try:
+                                        staff_count = float(staff_val)
+                                        break
+                                    except (ValueError, TypeError):
+                                        continue
+                        
+                        location_stats[location] = {
+                            'parking_spaces': parking_spaces,
+                            'staff_count': staff_count
+                        }
+                
+                if location_stats:
+                    summary['location_details'] = location_stats
+            
             # Date statistics
             if 'Sale Date' in df.columns:
                 df['Sale Date'] = pd.to_datetime(df['Sale Date'], errors='coerce')

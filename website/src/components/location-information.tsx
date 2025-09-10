@@ -2,7 +2,7 @@
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { MapPinIcon, ExternalLinkIcon, Building2Icon } from "lucide-react";
+import { MapPinIcon, ExternalLinkIcon, Building2Icon, CarIcon, UsersIcon } from "lucide-react";
 
 interface LocationInformationProps {
   data: {
@@ -17,6 +17,8 @@ interface LocationInformationProps {
         google_maps_url?: string;
         location_type: string;
         for_sale: boolean;
+        parking_spaces?: number;
+        staff_count?: number;
       };
       secondary_location?: {
         name: string;
@@ -28,6 +30,8 @@ interface LocationInformationProps {
         google_maps_url?: string;
         location_type: string;
         for_sale: boolean;
+        parking_spaces?: number;
+        staff_count?: number;
       };
       lease_analysis?: {
         monthly_rent: number;
@@ -49,6 +53,27 @@ const formatCurrency = (amount: number): string => {
     minimumFractionDigits: 0,
     maximumFractionDigits: 0,
   }).format(amount);
+};
+
+const formatStaffCount = (count: number | undefined): string => {
+  if (count === undefined || count === null) {
+    return 'Not specified';
+  }
+  
+  // Handle fractional staff counts (like 2.5)
+  if (count % 1 === 0) {
+    return `${count} staff member${count === 1 ? '' : 's'}`;
+  } else {
+    return `${count} staff members`;
+  }
+};
+
+const formatParkingSpaces = (spaces: number | undefined): string => {
+  if (spaces === undefined || spaces === null) {
+    return 'Not specified';
+  }
+  
+  return `${spaces} parking space${spaces === 1 ? '' : 's'}`;
 };
 
 export function LocationInformation({ data }: LocationInformationProps) {
@@ -77,6 +102,18 @@ export function LocationInformation({ data }: LocationInformationProps) {
                   <div className="font-medium space-y-1">
                     <div>{primaryLocation.address}</div>
                     <div>{primaryLocation.city}, {primaryLocation.state} {primaryLocation.zip_code}</div>
+                  </div>
+                  
+                  {/* Location Details */}
+                  <div className="flex flex-wrap gap-4 text-sm text-muted-foreground">
+                    <div className="flex items-center gap-1">
+                      <CarIcon className="h-3 w-3" />
+                      <span>{formatParkingSpaces(primaryLocation.parking_spaces)}</span>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <UsersIcon className="h-3 w-3" />
+                      <span>{formatStaffCount(primaryLocation.staff_count)}</span>
+                    </div>
                   </div>
                   {/* Embedded Google Map */}
                   <div className="w-full h-64 rounded-lg overflow-hidden border">
@@ -118,6 +155,18 @@ export function LocationInformation({ data }: LocationInformationProps) {
                   <div className="font-medium space-y-1">
                     <div>{secondaryLocation.address}</div>
                     <div>{secondaryLocation.city}, {secondaryLocation.state} {secondaryLocation.zip_code}</div>
+                  </div>
+                  
+                  {/* Location Details */}
+                  <div className="flex flex-wrap gap-4 text-sm text-muted-foreground">
+                    <div className="flex items-center gap-1">
+                      <CarIcon className="h-3 w-3" />
+                      <span>{formatParkingSpaces(secondaryLocation.parking_spaces)}</span>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <UsersIcon className="h-3 w-3" />
+                      <span>{formatStaffCount(secondaryLocation.staff_count)}</span>
+                    </div>
                   </div>
                   {/* Embedded Google Map */}
                   <div className="w-full h-64 rounded-lg overflow-hidden border">

@@ -176,6 +176,25 @@ schemas:
       ebitda: decimal
       profit_margin: decimal
       roi: decimal
+      location_details: dict
+      
+  location_details:
+    fields:
+      location_name:
+        type: string
+        description: "Name of the location"
+      parking_spaces:
+        type: integer
+        nullable: true
+        validation: ">= 0"
+        description: "Number of parking spaces available at the location"
+      staff_count:
+        type: decimal
+        precision: 3
+        scale: 1
+        nullable: true
+        validation: ">= 0"
+        description: "Number of staff members at the location (supports fractional values like 2.5)"
       
   equipment_raw:
     fields:

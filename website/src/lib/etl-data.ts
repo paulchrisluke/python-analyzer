@@ -18,6 +18,20 @@ export interface BusinessMetrics {
   monthlyRevenue: number;
 }
 
+export interface LocationDetails {
+  name: string;
+  address: string;
+  city: string;
+  state: string;
+  zip_code: string;
+  phone: string;
+  google_maps_url?: string;
+  location_type: string;
+  for_sale: boolean;
+  parking_spaces?: number;
+  staff_count?: number;
+}
+
 export interface EquipmentCategory {
   category: string;
   value: number;

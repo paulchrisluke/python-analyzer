@@ -102,7 +102,10 @@ temp/
 test-results/
 playwright-report/
 playwright/.cache/
-tests/auth-states/*.json
+
+# Authentication states (contain sensitive session data)
+auth-states/
+tests/auth-states/
 
 # Wrangler
 .wrangler/

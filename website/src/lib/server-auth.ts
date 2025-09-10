@@ -60,7 +60,7 @@ const allowedOrigins = getOptionalStringEnv('ALLOWED_ORIGINS')
 
 // Create environment object for auth with properly validated values
 const env: Env = {
-  cranberry_auth_db: process.env.cranberry_auth_db as any, // D1Database binding from Cloudflare Workers
+  DB: process.env.DB as any, // D1Database binding from Cloudflare Workers
   BETTER_AUTH_SECRET: secret,
   BETTER_AUTH_URL: baseURL,
   NODE_ENV: nodeEnv,

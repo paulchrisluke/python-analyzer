@@ -21,6 +21,8 @@ interface Location {
   google_maps_url?: string;
   location_type: string;
   for_sale: boolean;
+  parking_spaces?: number;
+  staff_count?: number;
 }
 
 interface LeaseAnalysis {

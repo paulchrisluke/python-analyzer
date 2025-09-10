@@ -9,7 +9,8 @@ import {
   ClockIcon,
   WrenchIcon,
   CheckCircleIcon,
-  InfoIcon
+  InfoIcon,
+  CarIcon
 } from "lucide-react";
 
 // Business data interfaces based on the actual ETL data structure
@@ -23,6 +24,8 @@ interface Location {
   google_maps_url?: string;
   location_type: string;
   for_sale: boolean;
+  parking_spaces?: number;
+  staff_count?: number;
 }
 
 interface LeaseAnalysis {
@@ -79,6 +82,27 @@ interface BusinessData {
 interface BusinessOverviewProps {
   data: BusinessData;
 }
+
+const formatStaffCount = (count: number | undefined): string => {
+  if (count === undefined || count === null) {
+    return 'Not specified';
+  }
+  
+  // Handle fractional staff counts (like 2.5)
+  if (count % 1 === 0) {
+    return `${count} staff member${count === 1 ? '' : 's'}`;
+  } else {
+    return `${count} staff members`;
+  }
+};
+
+const formatParkingSpaces = (spaces: number | undefined): string => {
+  if (spaces === undefined || spaces === null) {
+    return 'Not specified';
+  }
+  
+  return `${spaces} parking space${spaces === 1 ? '' : 's'}`;
+};
 
 export function BusinessOverview({ data }: BusinessOverviewProps) {
   console.log("🏢 BusinessOverview rendering");
@@ -160,6 +184,16 @@ export function BusinessOverview({ data }: BusinessOverviewProps) {
                 {data.listing_details?.established || 'N/A'}
                 {yearsInBusiness > 0 && ` (${yearsInBusiness} years)`}
               </span>
+            </div>
+            <div className="flex items-center gap-2">
+              <CarIcon className="h-4 w-4 text-muted-foreground" />
+              <span className="font-medium">Parking:</span>
+              <span>{formatParkingSpaces(data.property_details?.primary_location?.parking_spaces)}</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <UsersIcon className="h-4 w-4 text-muted-foreground" />
+              <span className="font-medium">Staff:</span>
+              <span>{formatStaffCount(data.property_details?.primary_location?.staff_count)}</span>
             </div>
           </div>
           <div className="space-y-3">

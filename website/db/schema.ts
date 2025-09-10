@@ -1,4 +1,5 @@
 import { sqliteTable, text, integer, index, uniqueIndex } from "drizzle-orm/sqlite-core";
+import { sql } from "drizzle-orm";
 
 export const users = sqliteTable("users", {
   id: text("id").primaryKey(),
@@ -15,12 +16,11 @@ export const users = sqliteTable("users", {
     .default(true)
     .notNull(),
   lastLoginAt: integer("last_login_at", { mode: "timestamp" }),
-  createdAt: integer("created_at", { mode: "timestamp" })
-    .$defaultFn(() => new Date())
+  createdAt: integer("created_at", { mode: "number" })
+    .default(sql`(unixepoch())`)
     .notNull(),
-  updatedAt: integer("updated_at", { mode: "timestamp" })
-    .$defaultFn(() => new Date())
-    .$onUpdate(() => new Date())
+  updatedAt: integer("updated_at", { mode: "number" })
+    .default(sql`(unixepoch())`)
     .notNull(),
 });
 
@@ -28,12 +28,11 @@ export const sessions = sqliteTable("sessions", {
   id: text("id").primaryKey(),
   expiresAt: integer("expires_at", { mode: "timestamp" }).notNull(),
   token: text("token").notNull().unique(),
-  createdAt: integer("created_at", { mode: "timestamp" })
-    .$defaultFn(() => new Date())
+  createdAt: integer("created_at", { mode: "number" })
+    .default(sql`(unixepoch())`)
     .notNull(),
-  updatedAt: integer("updated_at", { mode: "timestamp" })
-    .$defaultFn(() => new Date())
-    .$onUpdate(() => new Date())
+  updatedAt: integer("updated_at", { mode: "number" })
+    .default(sql`(unixepoch())`)
     .notNull(),
   ipAddress: text("ip_address"),
   userAgent: text("user_agent"),
@@ -59,27 +58,25 @@ export const accounts = sqliteTable("accounts", {
     mode: "timestamp",
   }),
   scope: text("scope"),
-  password: text("password"),
-  createdAt: integer("created_at", { mode: "timestamp" })
-    .$defaultFn(() => new Date())
+  password: text("password_hash"),
+  createdAt: integer("created_at", { mode: "number" })
+    .default(sql`(unixepoch())`)
     .notNull(),
-  updatedAt: integer("updated_at", { mode: "timestamp" })
-    .$defaultFn(() => new Date())
-    .$onUpdate(() => new Date())
+  updatedAt: integer("updated_at", { mode: "number" })
+    .default(sql`(unixepoch())`)
     .notNull(),
 });
 
 export const verifications = sqliteTable("verifications", {
   id: text("id").primaryKey(),
   identifier: text("identifier").notNull(),
-  value: text("value").notNull(),
+  valueHash: text("value_hash").notNull(),
   expiresAt: integer("expires_at", { mode: "timestamp" }).notNull(),
-  createdAt: integer("created_at", { mode: "timestamp" })
-    .$defaultFn(() => new Date())
+  createdAt: integer("created_at", { mode: "number" })
+    .default(sql`(unixepoch())`)
     .notNull(),
-  updatedAt: integer("updated_at", { mode: "timestamp" })
-    .$defaultFn(() => new Date())
-    .$onUpdate(() => new Date())
+  updatedAt: integer("updated_at", { mode: "number" })
+    .default(sql`(unixepoch())`)
     .notNull(),
 });
 
@@ -94,7 +91,7 @@ export const accountsUserIdx = index("idx_accounts_user_id").on(accounts.userId)
 
 // Unique constraint and indexes for verifications table
 export const verificationsIdentifierTokenUnique = uniqueIndex("ux_verifications_identifier_token")
-  .on(verifications.identifier, verifications.value);
+  .on(verifications.identifier, verifications.valueHash);
 export const verificationsIdentifierIdx = index("idx_verifications_identifier").on(verifications.identifier);
 export const verificationsExpiresAtIdx = index("idx_verifications_expires_at").on(verifications.expiresAt);
 
@@ -109,27 +106,26 @@ export const userActivity = sqliteTable("user_activity", {
   metadata: text("metadata"), // JSON string for additional data
   ipAddress: text("ip_address"),
   userAgent: text("user_agent"),
-  createdAt: integer("created_at", { mode: "timestamp" })
-    .$defaultFn(() => new Date())
+  createdAt: integer("created_at", { mode: "number" })
+    .default(sql`(unixepoch())`)
     .notNull(),
 });
 
 // Document access control table
 export const documentAccess = sqliteTable("document_access", {
   id: text("id").primaryKey(),
-  documentId: text("document_id").notNull().unique(),
+  documentId: text("document_id").notNull(),
   documentName: text("document_name").notNull(),
   documentType: text("document_type").notNull(), // "financial", "equipment", "legal", etc.
-  accessLevel: text("access_level", { enum: ["public", "authenticated", "buyer_only", "admin_only"] })
+  accessLevel: text("access_level", { enum: ["public", "authenticated", "private"] })
     .default("authenticated")
     .notNull(),
   filePath: text("file_path"),
   fileSize: integer("file_size"),
   uploadedBy: text("uploaded_by")
-    .notNull()
-    .references(() => users.id),
-  uploadedAt: integer("uploaded_at", { mode: "timestamp" })
-    .$defaultFn(() => new Date())
+    .references(() => users.id, { onDelete: "set null" }),
+  uploadedAt: integer("uploaded_at", { mode: "number" })
+    .default(sql`(unixepoch())`)
     .notNull(),
   isActive: integer("is_active", { mode: "boolean" })
     .default(true)
@@ -137,10 +133,8 @@ export const documentAccess = sqliteTable("document_access", {
 });
 
 // Indexes for new tables
-export const userActivityUserIdx = index("idx_user_activity_user_id").on(userActivity.userId);
+export const userActivityUserCreatedAtIdx = index("idx_user_activity_user_created_at").on(userActivity.userId, userActivity.createdAt);
 export const userActivityCreatedAtIdx = index("idx_user_activity_created_at").on(userActivity.createdAt);
-export const documentAccessTypeIdx = index("idx_document_access_type").on(documentAccess.documentType);
-export const documentAccessLevelIdx = index("idx_document_access_level").on(documentAccess.accessLevel);
 
 // Export the schema object
 export const schema = {

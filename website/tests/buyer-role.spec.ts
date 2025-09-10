@@ -34,7 +34,7 @@ test.describe('Buyer Role Access Restrictions', () => {
     await page.goto('/admin/users');
     
     // Should be redirected to dashboard
-    await page.waitForURL('/dashboard', { timeout: 15000 });
+    await page.waitForURL(/\/dashboard/, { timeout: 15000 });
   });
 
   test('should show correct navigation for buyer user', async ({ page }) => {

@@ -326,6 +326,10 @@ website/.env*
 *.sqlite
 *.sqlite3
 
+# Database migration snapshots (Drizzle)
+**/migrations/meta/*_snapshot.json
+**/migrations/meta/_journal.json
+
 # =============================================================================
 # NOTES FOR OPEN SOURCE PREPARATION
 # =============================================================================

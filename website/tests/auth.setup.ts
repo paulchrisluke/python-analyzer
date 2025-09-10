@@ -3,28 +3,12 @@ import path from 'path';
 import { mkdirSync } from 'node:fs';
 import { config } from 'dotenv';
 import { fileURLToPath } from 'url';
+import { getTestUser } from './fixtures/test-users';
 
 // Load environment variables from .env file
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 config({ path: path.resolve(__dirname, '../.env') });
-
-// Test user configuration from environment variables
-const getTestUser = (role: 'admin' | 'buyer' | 'viewer') => {
-  const envPrefix = role.toUpperCase();
-  const email = process.env[`${envPrefix}_EMAIL`];
-  const password = process.env[`${envPrefix}_PASSWORD`];
-  const name = process.env[`${envPrefix}_NAME`] || `${role.charAt(0).toUpperCase() + role.slice(1)} User`;
-
-  if (!email || !password) {
-    throw new Error(
-      `Missing environment variables for ${role} user. Required: ${envPrefix}_EMAIL, ${envPrefix}_PASSWORD. ` +
-      `Optional: ${envPrefix}_NAME. Please set these in your .env file or environment.`
-    );
-  }
-
-  return { email, password, name, role };
-};
 
 // Storage state paths
 const storageStatePath = (role: string) => path.join(__dirname, `../auth-states/${role}-state.json`);
@@ -96,4 +80,4 @@ setup('authenticate as viewer', async ({ page }) => {
 });
 
 // Export utility functions for use in tests
-export { getTestUser, storageStatePath };
+export { storageStatePath };

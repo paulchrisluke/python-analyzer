@@ -19,20 +19,22 @@ Create a `.env` file in the website root directory with the following variables.
 
 ```bash
 # Admin user credentials
-ADMIN_EMAIL=admin@yourdomain.com
-ADMIN_PASSWORD=your-secure-admin-password
-ADMIN_NAME=System Administrator
+ADMIN_EMAIL=<your-admin-email>
+ADMIN_PASSWORD=<your-secure-admin-password>
+ADMIN_NAME=<admin-display-name>
 
 # Buyer user credentials  
-BUYER_EMAIL=buyer@yourdomain.com
-BUYER_PASSWORD=your-secure-buyer-password
-BUYER_NAME=Sarah Buyer
+BUYER_EMAIL=<your-buyer-email>
+BUYER_PASSWORD=<your-secure-buyer-password>
+BUYER_NAME=<buyer-display-name>
 
 # Viewer user credentials
-VIEWER_EMAIL=viewer@yourdomain.com
-VIEWER_PASSWORD=your-secure-viewer-password
-VIEWER_NAME=Mike Viewer
+VIEWER_EMAIL=<your-viewer-email>
+VIEWER_PASSWORD=<your-secure-viewer-password>
+VIEWER_NAME=<viewer-display-name>
 ```
+
+**Note**: This file can be used as `.env.example` - actual credentials should be set via a real `.env` file that is not committed to version control.
 
 ### Security Notes
 

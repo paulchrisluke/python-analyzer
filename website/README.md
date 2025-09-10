@@ -134,7 +134,7 @@ This project uses GitHub Actions for automated CI/CD. See [DEPLOYMENT.md](./DEPL
 
 - **BETTER_AUTH_SECRET**: Set using `wrangler secret put BETTER_AUTH_SECRET`
 - **BETTER_AUTH_URL**: Configured in `wrangler.toml`
-- **D1 Database**: Automatically bound as `cranberry_auth_db` (database name: `cranberry-auth-db`)
+- **D1 Database**: Automatically bound as `DB` (database name: `cranberry-auth-db`)
 
 #### D1 HTTP Driver Configuration (for migrations and database operations)
 
