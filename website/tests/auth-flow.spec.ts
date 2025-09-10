@@ -3,39 +3,35 @@ import { test, expect } from '@playwright/test';
 test.describe('Authentication Flow', () => {
   
   test('should allow user signup and login', async ({ page }) => {
+    // Generate unique email for this test run
+    const timestamp = Date.now();
+    const uniqueEmail = `testuser-${timestamp}@example.com`;
+    
     // Navigate to signup page
     await page.goto('/signup');
     
     // Fill in signup form
     await page.getByLabel('Name').fill('Test User');
-    await page.getByLabel('Email').fill('testuser@example.com');
+    await page.getByLabel('Email').fill(uniqueEmail);
     await page.getByLabel('Password').fill('testpassword123');
     
     // Submit signup form
     await page.click('button[type="submit"]');
     
-    // Wait for some response (could be redirect or error message)
-    await page.waitForTimeout(2000);
-    
-    // Navigate to login page
-    await page.goto('/login');
+    // Wait for success message and redirect to login
+    await page.waitForSelector('div.text-sm.text-green-600.bg-green-50', { timeout: 10000 });
+    await page.waitForURL('/login', { timeout: 10000 });
     
     // Now login with the new user
-    await page.getByLabel('Email').fill('testuser@example.com');
+    await page.getByLabel('Email').fill(uniqueEmail);
     await page.getByLabel('Password').fill('testpassword123');
     await page.click('button[type="submit"]');
     
-    // Wait for some response
-    await page.waitForTimeout(2000);
+    // Wait for redirect to dashboard after successful login
+    await page.waitForURL('/dashboard', { timeout: 10000 });
     
-    // Check if we're on dashboard or still on login (authentication might not be fully working in test)
-    const currentUrl = page.url();
-    if (currentUrl.includes('/dashboard')) {
-      await expect(page.getByRole('heading', { name: 'Dashboard' })).toBeVisible();
-    } else {
-      // If still on login, that's okay for now - the form submission worked
-      await expect(page.locator('div.font-semibold.tracking-tight.text-2xl').filter({ hasText: 'Login' })).toBeVisible();
-    }
+    // Assert that we're on the dashboard and the heading is visible
+    await expect(page.getByRole('heading', { name: 'Dashboard' })).toBeVisible();
   });
 
   test('should display login form correctly', async ({ page }) => {

@@ -92,9 +92,10 @@ export const accountsProviderAccountUnique = uniqueIndex("ux_accounts_provider_p
   .on(accounts.providerId, accounts.accountId);
 export const accountsUserIdx = index("idx_accounts_user_id").on(accounts.userId);
 
-// Unique constraint and index for verifications table
+// Unique constraint and indexes for verifications table
 export const verificationsIdentifierTokenUnique = uniqueIndex("ux_verifications_identifier_token")
   .on(verifications.identifier, verifications.value);
+export const verificationsIdentifierIdx = index("idx_verifications_identifier").on(verifications.identifier);
 export const verificationsExpiresAtIdx = index("idx_verifications_expires_at").on(verifications.expiresAt);
 
 // User activity log table for admin monitoring
@@ -116,7 +117,7 @@ export const userActivity = sqliteTable("user_activity", {
 // Document access control table
 export const documentAccess = sqliteTable("document_access", {
   id: text("id").primaryKey(),
-  documentId: text("document_id").notNull(),
+  documentId: text("document_id").notNull().unique(),
   documentName: text("document_name").notNull(),
   documentType: text("document_type").notNull(), // "financial", "equipment", "legal", etc.
   accessLevel: text("access_level", { enum: ["public", "authenticated", "buyer_only", "admin_only"] })
@@ -125,6 +126,7 @@ export const documentAccess = sqliteTable("document_access", {
   filePath: text("file_path"),
   fileSize: integer("file_size"),
   uploadedBy: text("uploaded_by")
+    .notNull()
     .references(() => users.id),
   uploadedAt: integer("uploaded_at", { mode: "timestamp" })
     .$defaultFn(() => new Date())

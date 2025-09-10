@@ -21,17 +21,26 @@ export async function createAuth(env: Env) {
   const [
     { betterAuth },
     { drizzleAdapter },
-    { drizzle },
     { schema }
   ] = await Promise.all([
     import("better-auth"),
     import("better-auth/adapters/drizzle"),
-    import("drizzle-orm/d1"),
     import("../db/schema")
   ]);
   
-  // Create Drizzle instance with D1 database and schema
-  const db = drizzle(env.cranberry_auth_db, { schema });
+  // Use different Drizzle imports based on environment
+  let db;
+  if (env.NODE_ENV === "production" || env.cranberry_auth_db) {
+    // Production: Use D1 database
+    const { drizzle } = await import("drizzle-orm/d1");
+    db = drizzle(env.cranberry_auth_db, { schema });
+  } else {
+    // Local development: Use better-sqlite3
+    const { drizzle } = await import("drizzle-orm/better-sqlite3");
+    const Database = require('better-sqlite3');
+    const sqlite = new Database('./local.db');
+    db = drizzle(sqlite, { schema });
+  }
   
   return betterAuth({
     emailAndPassword: {

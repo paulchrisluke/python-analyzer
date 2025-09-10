@@ -17,7 +17,7 @@ export default function Page() {
   return (
     <AuthGuard>
       <SidebarProvider>
-        <AppSidebar variant="inset" user={session?.user} />
+        <AppSidebar variant="inset" />
         <SidebarInset>
           <SiteHeader title="Dashboard" />
           <div className="flex flex-1 flex-col">

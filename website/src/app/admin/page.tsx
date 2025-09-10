@@ -1,11 +1,18 @@
-import { RoleGuard } from "@/components/role-guard"
-import { UserRole } from "@/lib/roles"
+import { redirect } from "next/navigation"
+import { requireAdmin } from "@/lib/server-auth"
 
-export default function AdminPage() {
+export default async function AdminPage() {
+  // Server-side authorization check
+  const session = await requireAdmin()
+  
+  if (!session) {
+    // Redirect to home page if not authorized
+    redirect("/")
+  }
+
   return (
-    <RoleGuard requiredRole={UserRole.ADMIN}>
-      <div className="container mx-auto py-8">
-        <h1 className="text-3xl font-bold mb-6">Admin Dashboard</h1>
+    <div className="container mx-auto py-8">
+      <h1 className="text-3xl font-bold mb-6">Admin Dashboard</h1>
         
                {/* Analytics Dashboard Section */}
                <div className="mb-8">
@@ -47,6 +54,26 @@ export default function AdminPage() {
                    </div>
                  </div>
                  
+                 {/* Role Statistics */}
+                 <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+                   <div className="bg-white p-4 rounded-lg shadow">
+                     <h3 className="text-sm font-medium text-gray-500">Administrator</h3>
+                     <p className="text-2xl font-bold">2</p>
+                   </div>
+                   <div className="bg-white p-4 rounded-lg shadow">
+                     <h3 className="text-sm font-medium text-gray-500">Qualified Buyer</h3>
+                     <p className="text-2xl font-bold">1</p>
+                   </div>
+                   <div className="bg-white p-4 rounded-lg shadow">
+                     <h3 className="text-sm font-medium text-gray-500">Viewer</h3>
+                     <p className="text-2xl font-bold">1</p>
+                   </div>
+                   <div className="bg-white p-4 rounded-lg shadow">
+                     <h3 className="text-sm font-medium text-gray-500">Guest</h3>
+                     <p className="text-2xl font-bold">5</p>
+                   </div>
+                 </div>
+
                  {/* Additional Analytics Sections */}
                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
                    <div className="bg-white p-6 rounded-lg shadow">
@@ -85,6 +112,5 @@ export default function AdminPage() {
           </div>
         </div>
       </div>
-    </RoleGuard>
   )
 }

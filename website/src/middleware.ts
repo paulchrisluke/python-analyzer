@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 
 // Protected routes that require authentication
-const protectedRoutes = ['/dashboard', '/docs']
+const protectedRoutes = ['/dashboard', '/docs', '/admin']
 
 // Public routes that don't require authentication
 const publicRoutes = ['/', '/login', '/signup']

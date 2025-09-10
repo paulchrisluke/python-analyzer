@@ -1,7 +1,8 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import Link from "next/link"
+import { useSearchParams } from "next/navigation"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import {
@@ -23,6 +24,8 @@ export function LoginForm({
   const [password, setPassword] = useState("")
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState("")
+  const searchParams = useSearchParams()
+  const redirectTo = searchParams.get('redirect') || '/dashboard'
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -38,8 +41,8 @@ export function LoginForm({
       if (result.error) {
         setError(result.error.message || "Sign in failed")
       } else {
-        // Redirect to dashboard after successful login
-        window.location.href = "/dashboard"
+        // Redirect to original URL or dashboard after successful login
+        window.location.href = redirectTo
       }
     } catch {
       setError("An unexpected error occurred")

@@ -2,6 +2,8 @@ import { drizzle } from 'drizzle-orm/d1';
 import { schema } from '../db/schema.js';
 import { eq } from 'drizzle-orm';
 import { createId } from '@paralleldrive/cuid2';
+import crypto from 'node:crypto';
+import bcrypt from 'bcryptjs';
 
 // This script creates an admin user for testing
 async function createAdminUser() {
@@ -13,23 +15,32 @@ async function createAdminUser() {
   const adminUserId = createId();
   const adminEmail = 'admin@cranberryhearing.com';
   const adminName = 'System Administrator';
-  const adminPassword = 'admin123'; // In production, this should be hashed
+  
+  // Generate cryptographically-strong random password
+  const adminPassword = crypto.randomBytes(16).toString('hex');
+  
+  // Hash the password with bcrypt
+  const passwordHash = await bcrypt.hash(adminPassword, 12);
+  
+  // Reuse timestamp for consistency
+  const timestamp = Date.now();
   
   console.log('📝 Run these SQL commands to create the admin user:');
   console.log('');
   console.log('-- Create admin user');
   console.log(`INSERT INTO users (id, name, email, email_verified, role, is_active, created_at, updated_at)`);
-  console.log(`VALUES ('${adminUserId}', '${adminName}', '${adminEmail}', 1, 'admin', 1, ${Date.now()}, ${Date.now()});`);
+  console.log(`VALUES ('${adminUserId}', '${adminName}', '${adminEmail}', 1, 'admin', 1, ${timestamp}, ${timestamp});`);
   console.log('');
-  console.log('-- Create password account (you may need to hash the password properly)');
-  console.log(`INSERT INTO accounts (id, account_id, provider_id, user_id, password, created_at, updated_at)`);
-  console.log(`VALUES ('${createId()}', '${adminEmail}', 'credential', '${adminUserId}', '${adminPassword}', ${Date.now()}, ${Date.now()});`);
+  console.log('-- Create password account with hashed password');
+  console.log(`INSERT INTO accounts (id, account_id, provider_id, user_id, password_hash, created_at, updated_at)`);
+  console.log(`VALUES ('${createId()}', '${adminEmail}', 'credential', '${adminUserId}', '${passwordHash}', ${timestamp}, ${timestamp});`);
   console.log('');
   console.log('🔑 Admin credentials:');
   console.log(`Email: ${adminEmail}`);
   console.log(`Password: ${adminPassword}`);
   console.log('');
-  console.log('⚠️  Remember to change the password after first login!');
+  console.log('⚠️  IMPORTANT: Save this password securely - it will not be shown again!');
+  console.log('⚠️  Consider changing the password after first login for additional security.');
 }
 
 createAdminUser().catch(console.error);

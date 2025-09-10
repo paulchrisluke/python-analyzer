@@ -1,0 +1,3 @@
+# This directory contains Playwright authentication state files
+# These files are generated during test setup and should not be committed
+# They contain session cookies and authentication tokens
