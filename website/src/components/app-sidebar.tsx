@@ -36,7 +36,7 @@ import {
   SidebarMenuItem,
 } from "@/components/ui/sidebar"
 
-const getNavData = (user: { name?: string; email?: string; image?: string | null } | null) => ({
+const getNavData = (user: { name?: string; email?: string; image?: string | null; role?: string } | null) => ({
   user: {
     name: user?.name || "User",
     email: user?.email || "user@example.com",
@@ -139,6 +139,18 @@ const getNavData = (user: { name?: string; email?: string; image?: string | null
     },
   ],
   navSecondary: user ? [
+    ...(user.role === 'admin' ? [
+      {
+        title: "Admin Panel",
+        url: "/admin",
+        icon: SettingsIcon,
+      },
+      {
+        title: "User Management",
+        url: "/admin/users",
+        icon: UsersIcon,
+      },
+    ] : []),
     {
       title: "Settings",
       url: "#",

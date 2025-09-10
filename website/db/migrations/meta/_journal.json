@@ -15,6 +15,13 @@
       "when": 1757299354491,
       "tag": "0001_thankful_nightcrawler",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1757376042240,
+      "tag": "0002_fuzzy_pyro",
+      "breakpoints": true
     }
   ]
 }

@@ -44,6 +44,11 @@ export async function createAuth(env: Env) {
     }),
     secret: env.BETTER_AUTH_SECRET,
     baseURL: env.BETTER_AUTH_URL,
+    trustedOrigins: [
+      "http://localhost:3000",
+      "http://localhost:3001", 
+      "https://cranberry-hearing-balance-workers.paulchrisluke.workers.dev"
+    ],
     logger: {
       level: (env?.NODE_ENV ?? "production") === "development" ? "debug" : "info"
     },
@@ -67,7 +72,11 @@ export async function createAuth(env: Env) {
     },
     user: {
       additionalFields: {
-        // Add any additional user fields if needed
+        role: {
+          type: "string",
+          required: false,
+          defaultValue: "guest"
+        }
       }
     }
   });

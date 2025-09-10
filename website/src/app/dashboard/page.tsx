@@ -1,3 +1,5 @@
+"use client"
+
 import { AppSidebar } from "@/components/app-sidebar"
 import { ChartAreaInteractive } from "@/components/chart-area-interactive"
 import { DataTable } from "@/components/data-table"
@@ -5,14 +7,17 @@ import { SectionCards } from "@/components/section-cards"
 import { SiteHeader } from "@/components/site-header"
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar"
 import { AuthGuard } from "@/components/auth-guard"
+import { useSession } from "@/lib/auth-client"
 
 import data from "./data.json"
 
 export default function Page() {
+  const { data: session } = useSession()
+
   return (
     <AuthGuard>
       <SidebarProvider>
-        <AppSidebar variant="inset" />
+        <AppSidebar variant="inset" user={session?.user} />
         <SidebarInset>
           <SiteHeader title="Dashboard" />
           <div className="flex flex-1 flex-col">

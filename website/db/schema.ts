@@ -8,6 +8,13 @@ export const users = sqliteTable("users", {
     .default(false)
     .notNull(),
   image: text("image"),
+  role: text("role", { enum: ["admin", "buyer", "viewer", "guest"] })
+    .default("guest")
+    .notNull(),
+  isActive: integer("is_active", { mode: "boolean" })
+    .default(true)
+    .notNull(),
+  lastLoginAt: integer("last_login_at", { mode: "timestamp" }),
   createdAt: integer("created_at", { mode: "timestamp" })
     .$defaultFn(() => new Date())
     .notNull(),
@@ -90,10 +97,55 @@ export const verificationsIdentifierTokenUnique = uniqueIndex("ux_verifications_
   .on(verifications.identifier, verifications.value);
 export const verificationsExpiresAtIdx = index("idx_verifications_expires_at").on(verifications.expiresAt);
 
+// User activity log table for admin monitoring
+export const userActivity = sqliteTable("user_activity", {
+  id: text("id").primaryKey(),
+  userId: text("user_id")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
+  action: text("action").notNull(), // "login", "logout", "view_document", "download_document", etc.
+  resource: text("resource"), // Document ID, page URL, etc.
+  metadata: text("metadata"), // JSON string for additional data
+  ipAddress: text("ip_address"),
+  userAgent: text("user_agent"),
+  createdAt: integer("created_at", { mode: "timestamp" })
+    .$defaultFn(() => new Date())
+    .notNull(),
+});
+
+// Document access control table
+export const documentAccess = sqliteTable("document_access", {
+  id: text("id").primaryKey(),
+  documentId: text("document_id").notNull(),
+  documentName: text("document_name").notNull(),
+  documentType: text("document_type").notNull(), // "financial", "equipment", "legal", etc.
+  accessLevel: text("access_level", { enum: ["public", "authenticated", "buyer_only", "admin_only"] })
+    .default("authenticated")
+    .notNull(),
+  filePath: text("file_path"),
+  fileSize: integer("file_size"),
+  uploadedBy: text("uploaded_by")
+    .references(() => users.id),
+  uploadedAt: integer("uploaded_at", { mode: "timestamp" })
+    .$defaultFn(() => new Date())
+    .notNull(),
+  isActive: integer("is_active", { mode: "boolean" })
+    .default(true)
+    .notNull(),
+});
+
+// Indexes for new tables
+export const userActivityUserIdx = index("idx_user_activity_user_id").on(userActivity.userId);
+export const userActivityCreatedAtIdx = index("idx_user_activity_created_at").on(userActivity.createdAt);
+export const documentAccessTypeIdx = index("idx_document_access_type").on(documentAccess.documentType);
+export const documentAccessLevelIdx = index("idx_document_access_level").on(documentAccess.accessLevel);
+
 // Export the schema object
 export const schema = {
   users,
   sessions,
   accounts,
   verifications,
+  userActivity,
+  documentAccess,
 };
