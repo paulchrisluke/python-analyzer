@@ -1,21 +1,79 @@
 import { NextRequest, NextResponse } from "next/server"
 import { createAuth, Env } from "@/auth"
-import { drizzle } from "drizzle-orm/d1"
 import { schema } from "../../../../../db/schema"
 import { eq } from "drizzle-orm"
 import { UserRole } from "@/lib/roles"
+import { getDb } from "@/lib/database"
+import { z } from "zod"
+
+// Validation schema for user updates
+const UpdateUserInputSchema = z.object({
+  name: z.string()
+    .min(1, "Name is required")
+    .max(100, "Name must be 100 characters or less")
+    .regex(/^[a-zA-Z0-9\s\-'\.]+$/, "Name contains invalid characters")
+    .optional(),
+  email: z.string()
+    .email("Must be a valid email address")
+    .max(255, "Email must be 255 characters or less")
+    .optional(),
+  role: z.nativeEnum(UserRole, {
+    message: "Role must be one of: admin, buyer, viewer, guest"
+  }).optional(),
+  isActive: z.boolean().optional()
+}).strict() // Reject unknown fields
+
+// Type for the validated update data
+type UpdateUserInput = z.infer<typeof UpdateUserInputSchema>
+
+// Type for the database update data (excludes optional fields that are undefined)
+type UserUpdateData = {
+  updatedAt: Date
+} & Partial<{
+  name: string
+  email: string
+  role: UserRole
+  isActive: boolean
+}>
 
 // Force Node.js runtime and disable caching for SQLite/Drizzle compatibility
-export const runtime = "nodejs"
+export const runtime = "edge"
 export const dynamic = "force-dynamic"
 
-// Get validated environment variables with safe defaults for non-production
-const secret = process.env.BETTER_AUTH_SECRET || "your-secret-key-change-in-production"
-const baseURL = process.env.BETTER_AUTH_URL || "http://localhost:3000"
+// Validate required environment variables - fail fast if missing
+// SECURITY: BETTER_AUTH_SECRET must be set from a secure source (env management/secret store)
+// Never use hardcoded defaults in production as this creates a security vulnerability
+const secret = process.env.BETTER_AUTH_SECRET
+if (!secret) {
+  throw new Error(
+    "BETTER_AUTH_SECRET environment variable is required. " +
+    "This must be set from a secure source (env management/secret store) before deployment. " +
+    "Never use hardcoded defaults in production."
+  )
+}
+
+// Validate BETTER_AUTH_URL - require it to be explicitly set
+// SECURITY: Avoid permissive defaults that could lead to insecure configurations
+const baseURL = process.env.BETTER_AUTH_URL
+if (!baseURL) {
+  throw new Error(
+    "BETTER_AUTH_URL environment variable is required. " +
+    "This must be set to the correct application URL before deployment."
+  )
+}
+
+// Additional validation for URL format
+try {
+  new URL(baseURL)
+} catch {
+  throw new Error(
+    `BETTER_AUTH_URL must be a valid URL. Received: ${baseURL}`
+  )
+}
 
 // Create environment object for auth
 const env: Env = {
-  cranberry_auth_db: process.env.cranberry_auth_db as any,
+  cranberry_auth_db: process.env.cranberry_auth_db as any, // D1Database binding from Cloudflare Workers
   BETTER_AUTH_SECRET: secret,
   BETTER_AUTH_URL: baseURL,
   NODE_ENV: process.env.NODE_ENV,
@@ -39,8 +97,8 @@ export async function GET(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
-    // Create Drizzle instance
-    const db = drizzle(env.cranberry_auth_db, { schema })
+    // Get database connection using the new getDb helper
+    const db = await getDb()
 
     // Get the resolved params
     const { id } = await params
@@ -89,18 +147,27 @@ export async function PUT(
     }
 
     const body = await request.json()
-    const { name, email, role, isActive } = body
+    
+    // Validate and parse input using zod schema
+    const validationResult = UpdateUserInputSchema.safeParse(body)
+    
+    if (!validationResult.success) {
+      const errorMessages = validationResult.error.issues.map((err: any) => 
+        `${err.path.join('.')}: ${err.message}`
+      )
+      return NextResponse.json({ 
+        error: 'Validation failed', 
+        details: errorMessages 
+      }, { status: 400 })
+    }
+    
+    const validatedData: UpdateUserInput = validationResult.data
 
     // Get the resolved params
     const { id } = await params
 
-    // Validate role if provided
-    if (role && !Object.values(UserRole).includes(role)) {
-      return NextResponse.json({ error: "Invalid role" }, { status: 400 })
-    }
-
-    // Create Drizzle instance
-    const db = drizzle(env.cranberry_auth_db, { schema })
+    // Get database connection using the new getDb helper
+    const db = await getDb()
 
     // Check if user exists
     const existingUser = await db
@@ -114,11 +181,11 @@ export async function PUT(
     }
 
     // Check if email is being changed and if it already exists
-    if (email && email !== existingUser[0].email) {
+    if (validatedData.email && validatedData.email !== existingUser[0].email) {
       const emailExists = await db
         .select()
         .from(schema.users)
-        .where(eq(schema.users.email, email))
+        .where(eq(schema.users.email, validatedData.email))
         .limit(1)
 
       if (emailExists.length > 0) {
@@ -126,15 +193,24 @@ export async function PUT(
       }
     }
 
-    // Update user
-    const updateData: any = {
+    // Build update data with proper typing and whitelisting
+    const updateData: UserUpdateData = {
       updatedAt: new Date()
     }
 
-    if (name !== undefined) updateData.name = name
-    if (email !== undefined) updateData.email = email
-    if (role !== undefined) updateData.role = role
-    if (isActive !== undefined) updateData.isActive = isActive
+    // Only include fields that are provided and validated
+    if (validatedData.name !== undefined) {
+      updateData.name = validatedData.name
+    }
+    if (validatedData.email !== undefined) {
+      updateData.email = validatedData.email
+    }
+    if (validatedData.role !== undefined) {
+      updateData.role = validatedData.role
+    }
+    if (validatedData.isActive !== undefined) {
+      updateData.isActive = validatedData.isActive
+    }
 
     const updatedUser = await db
       .update(schema.users)
@@ -179,11 +255,11 @@ export async function DELETE(
 
     // Prevent admin from deleting themselves
     if (session.user.id === id) {
-      return NextResponse.json({ error: "Cannot delete your own account" }, { status: 400 })
+      return NextResponse.json({ error: "Cannot delete your own account" }, { status: 403 })
     }
 
-    // Create Drizzle instance
-    const db = drizzle(env.cranberry_auth_db, { schema })
+    // Get database connection using the new getDb helper
+    const db = await getDb()
 
     // Check if user exists
     const existingUser = await db

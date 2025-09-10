@@ -2,7 +2,7 @@
 export const runtime = "nodejs"
 
 import { drizzle } from "drizzle-orm/better-sqlite3"
-import Database from "better-sqlite3"
+import type { Database as BetterSqliteDatabase } from "better-sqlite3"
 import * as schema from "../../../db/schema"
 import path from "path"
 
@@ -11,9 +11,9 @@ const dbPath = process.env.DATABASE_PATH || "local.db"
 const absoluteDbPath = path.isAbsolute(dbPath) ? dbPath : path.resolve(process.cwd(), dbPath)
 
 // Create or reuse singleton SQLite connection to survive HMR
-function getDatabase(): Database.Database {
+function getDatabase(): BetterSqliteDatabase {
   if (!globalThis.__sqlite_db) {
-    globalThis.__sqlite_db = new Database(absoluteDbPath)
+    globalThis.__sqlite_db = new (require("better-sqlite3").default)(absoluteDbPath)
     
     // Configure SQLite with important PRAGMA settings
     globalThis.__sqlite_db.pragma("journal_mode = WAL")
@@ -21,7 +21,7 @@ function getDatabase(): Database.Database {
     globalThis.__sqlite_db.pragma("busy_timeout = 5000")
   }
   
-  return globalThis.__sqlite_db
+  return globalThis.__sqlite_db!
 }
 
 // Create drizzle instance from singleton connection
@@ -30,7 +30,7 @@ export const db = drizzle(sqlite, { schema })
 
 // Type declaration for globalThis
 declare global {
-  var __sqlite_db: Database.Database | undefined
+  var __sqlite_db: BetterSqliteDatabase | undefined
 }
 
 

@@ -1,6 +1,8 @@
 import { redirect } from "next/navigation"
 import { requireAdmin } from "@/lib/server-auth"
 
+export const dynamic = 'force-dynamic'
+
 export default async function AdminPage() {
   // Server-side authorization check
   const session = await requireAdmin()

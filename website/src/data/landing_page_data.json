@@ -3,7 +3,7 @@
     "business_name": "Cranberry Hearing and Balance Center",
     "business_type": "Audiology Practice",
     "asking_price": 650000.0,
-    "established": "2003",
+    "established": "2010",
     "locations": 2,
     "state": "Pennsylvania"
   },
@@ -19,6 +19,7 @@
   },
   "property_details": {
     "primary_location": {
+      "location_id": "cranberry_pa",
       "name": "Cranberry Hearing & Balance",
       "address": "20820 Route 19, Suite A",
       "city": "Cranberry Twp",
@@ -26,19 +27,25 @@
       "zip_code": "16066",
       "phone": "724-779-4444",
       "google_maps_url": "https://www.google.com/maps/place/20820%20Route%2019+Cranberry%20Twp+PA+16066",
-      "location_type": "Primary Location",
-      "for_sale": true
+      "location_type": "primary",
+      "for_sale": true,
+      "parking_spaces": 10,
+      "staff_count": 2.5
     },
     "secondary_location": {
-      "name": "Cranberry Hearing & Balance",
+      "location_id": "west_view_pa",
+      "name": "Cranberry Hearing & Balance - West View",
       "address": "999 West View Park Drive",
       "city": "Pittsburgh",
       "state": "PA",
       "zip_code": "15229",
       "phone": "412-931-9290",
       "google_maps_url": "https://www.google.com/maps/place/999%20West%20View%20Park%20Drive+Pittsburgh+PA+15229",
-      "location_type": "Secondary Location",
-      "for_sale": true
+      "location_type": "satellite",
+      "for_sale": true,
+      "parking_spaces": 10,
+      "staff_count": 2.5,
+      "square_footage": 1500
     },
     "lease_analysis": {
       "monthly_rent": 2500,
@@ -54,10 +61,18 @@
   },
   "business_operations": {
     "services": [
-      "Hearing Tests",
-      "Hearing Aid Sales",
-      "Balance Testing",
-      "Tinnitus Treatment"
+      "Diagnostic Audiologic Evaluations",
+      "Diagnostic Hearing Evaluations",
+      "Industrial Hearing Tests",
+      "Tympanometry",
+      "Hearing Aid Dispensing and Fitting",
+      "Hearing Aid Evaluation",
+      "Hearing Aid Repair",
+      "Earwax Removal",
+      "Hearing and Balance Testing",
+      "Tinnitus Treatment and Evaluations",
+      "Custom Earmolds and Earplugs",
+      "Musicians Earplugs and Monitors"
     ],
     "insurance_coverage": {
       "total_insurers": 2,
@@ -87,7 +102,11 @@
       "Cash payments"
     ],
     "equipment_value": "61727.50",
-    "business_hours": "Monday-Friday 9AM-5PM"
+    "business_hours": "Monday-Friday 9AM-5PM",
+    "total_employees": 5,
+    "employees_per_location": 2.5,
+    "shared_employees": 1,
+    "staffing_model": "2 dedicated staff per location + 1 shared staff member"
   },
   "market_opportunity": {
     "local_market": "Cranberry Township & Pittsburgh Metro Area",
@@ -99,7 +118,7 @@
     "financing_available": true,
     "seller_financing": "20% down, seller carryback available",
     "training_period": "30 days",
-    "reason_for_sale": "Absentee owner seeking retirement and lifestyle change",
+    "reason_for_sale": "Owner retirement and lifestyle change",
     "transition_support": "Available for smooth transition"
   },
   "key_benefits": [
@@ -108,11 +127,10 @@
     "Professional audiology equipment included",
     "Steady cash flow from insurance payments",
     "Absentee owner opportunity",
-    "Strong EBITDA margins",
-    "Over 20 years of established business operations"
+    "Strong EBITDA margins"
   ],
   "metadata": {
-    "generated_at": "2025-09-08T12:30:02.946270",
+    "generated_at": "2025-09-10T13:19:12.887374",
     "data_source": "ETL Pipeline Analysis",
     "version": "1.0"
   }

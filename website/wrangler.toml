@@ -5,7 +5,7 @@ compatibility_flags = ["nodejs_compat"]
 
 # D1 Database configuration
 [[d1_databases]]
-binding = "cranberry_auth_db"
+binding = "DB"
 database_name = "cranberry-auth-db"
 database_id = "6e3eab94-840f-484f-900f-a2ddd78196d7"
 migrations_dir = "db/migrations"

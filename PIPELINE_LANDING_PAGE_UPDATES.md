@@ -36,9 +36,9 @@ This document outlines the required updates to our ETL pipeline to generate comp
 - Market analysis (local market, competition, growth potential)
 - Transaction terms (financing, training, reason for sale)
 - Contact information (phone numbers, Google Maps links)
+- **NEW: Square footage details (1,500 sqft for West View location)**
 
 ❌ **Still Missing:**
-- Square footage details
 - Employee count specifics
 - Some market research data
 
@@ -60,10 +60,10 @@ This document outlines the required updates to our ETL pipeline to generate comp
 |-------|-------------------|------------------|---------|---------------|
 | Location | Prescott, AZ | Cranberry, PA + Pittsburgh, PA | ✅ | **COMPLETED** |
 | Rent | $2,500 per Month | $2,500 + $1,200 CAM | ✅ | **COMPLETED** |
-| Building SF | 1,350 | ❌ Missing | ❌ | Add square footage |
+| Building SF | 1,350 | ✅ 1,500 (West View) | ✅ | **COMPLETED** |
 | Lease Expiration | 12/31/2028 | 12/31/2030 | ✅ | **COMPLETED** |
 | Real Estate | Leased | Leased | ✅ | **COMPLETED** |
-| Parking | ❌ | ❌ Missing | ❌ | Add parking details |
+| Parking | ❌ | ✅ 10 spaces per location | ✅ | **COMPLETED** |
 
 ### 3. Business Operations (Priority: HIGH)
 | Field | BizBuySell Example | Our Current Data | Status | Action Needed |
@@ -117,7 +117,7 @@ business_details:
 location_details:
   address: "123 Main Street, Cranberry, PA 16066"  # NEED ACTUAL ADDRESS
   square_footage: 2500  # NEED ACTUAL SQ FT
-  parking_spaces: 8  # NEED ACTUAL COUNT
+  parking_spaces: 10  # 10 spaces per location
   property_type: "Leased"  # NEED ACTUAL STATUS
   
 lease_information:
@@ -180,7 +180,7 @@ def calculate_working_capital(self, current_assets: float, current_liabilities: 
       "square_footage": 2500,
       "monthly_rent": 3500,
       "lease_expiration": "2026-12-31",
-      "parking_spaces": 8
+      "parking_spaces": 10
     },
     "business_operations": {
       "employees": 4,

@@ -317,7 +317,7 @@ class ETLPipeline:
         
         # Initialize JSON loader
         data_output_dir = Path(__file__).parent.parent / "data"
-        self.loaders['json'] = JsonLoader(str(data_output_dir))
+        self.loaders['json'] = JsonLoader(str(data_output_dir), self.business_rules)
         logger.info("JSON loader initialized")
         
         # Initialize report generator

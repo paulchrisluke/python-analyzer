@@ -84,7 +84,7 @@ test.describe('Admin Role System', () => {
       await expect(page.getByRole('link', { name: 'Dashboard' })).toBeVisible();
       await expect(page.getByText('Investment Highlights')).toBeVisible();
       await expect(page.getByText('Business Details')).toBeVisible();
-      await expect(page.locator('a[href="/#due-diligence-documents"]')).toBeVisible();
+      await expect(page.locator('a[href="/#due-diligence"]')).toBeVisible();
     });
 
     test('should display user role information correctly', async ({ page }) => {
@@ -132,7 +132,7 @@ test.describe('Admin Role System', () => {
       await expect(page.locator('div.font-semibold.tracking-tight.text-2xl').filter({ hasText: 'Login' })).toBeVisible();
     });
 
-    test('should redirect to original page after login', async ({ page }) => {
+    test('should allow authenticated admin to access admin panel', async ({ page }) => {
       // Navigate to admin panel (authentication handled by storage state)
       await page.goto('/admin');
       await expect(page.getByText('Analytics Dashboard')).toBeVisible();

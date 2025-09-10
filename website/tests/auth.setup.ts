@@ -1,5 +1,6 @@
 import { test as setup, expect } from '@playwright/test';
 import path from 'path';
+import { mkdirSync } from 'node:fs';
 import { config } from 'dotenv';
 import { fileURLToPath } from 'url';
 
@@ -28,6 +29,12 @@ const getTestUser = (role: 'admin' | 'buyer' | 'viewer') => {
 // Storage state paths
 const storageStatePath = (role: string) => path.join(__dirname, `../auth-states/${role}-state.json`);
 
+// Ensure auth-states directory exists
+const ensureAuthStatesDir = (role: string) => {
+  const dirPath = path.dirname(storageStatePath(role));
+  mkdirSync(dirPath, { recursive: true });
+};
+
 // Setup test for admin user authentication
 setup('authenticate as admin', async ({ page }) => {
   const user = getTestUser('admin');
@@ -43,7 +50,8 @@ setup('authenticate as admin', async ({ page }) => {
   // Verify admin access
   await expect(page.getByText('Admin Panel')).toBeVisible();
   
-  // Save authentication state
+  // Ensure directory exists and save authentication state
+  ensureAuthStatesDir('admin');
   await page.context().storageState({ path: storageStatePath('admin') });
 });
 
@@ -62,7 +70,8 @@ setup('authenticate as buyer', async ({ page }) => {
   // Verify buyer access (no admin panel)
   await expect(page.getByText('Admin Panel')).not.toBeVisible();
   
-  // Save authentication state
+  // Ensure directory exists and save authentication state
+  ensureAuthStatesDir('buyer');
   await page.context().storageState({ path: storageStatePath('buyer') });
 });
 
@@ -81,7 +90,8 @@ setup('authenticate as viewer', async ({ page }) => {
   // Verify viewer access (no admin panel)
   await expect(page.getByText('Admin Panel')).not.toBeVisible();
   
-  // Save authentication state
+  // Ensure directory exists and save authentication state
+  ensureAuthStatesDir('viewer');
   await page.context().storageState({ path: storageStatePath('viewer') });
 });
 

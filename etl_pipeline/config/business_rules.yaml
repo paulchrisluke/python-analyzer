@@ -22,6 +22,8 @@ locations:
       google_maps_url: "https://www.google.com/maps/place/20820%20Route%2019+Cranberry%20Twp+PA+16066"
       location_type: "primary"
       for_sale: true
+      parking_spaces: 10
+      staff_count: 2.5  # 2 dedicated + 0.5 shared staff
       
     west_view_location:
       location_id: "west_view_pa"
@@ -34,6 +36,9 @@ locations:
       google_maps_url: "https://www.google.com/maps/place/999%20West%20View%20Park%20Drive+Pittsburgh+PA+15229"
       location_type: "satellite"
       for_sale: true
+      parking_spaces: 10
+      staff_count: 2.5  # 2 dedicated + 0.5 shared staff
+      square_footage: 1500  # West View location square footage
       
   # Non-sale locations (Virginia state)  
   virginia:
@@ -47,6 +52,34 @@ staff_categories:
   audiologists: ["Jenna Wickham", "Jordan Zdinak", "Hima Bindu Dasari"]
   technicians: ["Barbara Beck", "Jessica Cooper"]
   support: ["Kristen McCabe", "Richard Hoben"]
+
+# Business operational details
+business_details:
+  total_employees: 5  # 2 staff per location + 1 shared staff member
+  employees_per_location: 2.5  # 2 dedicated + 0.5 shared per location
+  shared_employees: 1  # 1 person shared between both locations
+  total_locations: 2
+  business_hours: "Monday-Friday 9AM-5PM"
+  staffing_model: "2 dedicated staff per location + 1 shared staff member"
+
+# Services offered (updated to reflect current offerings - no in-home services)
+services:
+  hearing_tests:
+    - "Diagnostic Audiologic Evaluations"
+    - "Diagnostic Hearing Evaluations"
+    - "Industrial Hearing Tests"
+    - "Tympanometry"
+  hearing_aid_services:
+    - "Hearing Aid Dispensing and Fitting"
+    - "Hearing Aid Evaluation"
+    - "Hearing Aid Repair"
+  additional_services:
+    - "Earwax Removal"
+    - "Hearing and Balance Testing"
+    - "Tinnitus Treatment and Evaluations"
+    - "Custom Earmolds and Earplugs"
+    - "Musicians Earplugs and Monitors"
+  note: "In-home services are no longer offered - all services are performed at clinic locations"
   
 product_categories:
   hearing_aids: ["Hearing Aid", "HA", "Hearing Device"]

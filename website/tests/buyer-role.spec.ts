@@ -49,6 +49,6 @@ test.describe('Buyer Role Access Restrictions', () => {
     await expect(page.getByRole('link', { name: 'Dashboard' })).toBeVisible();
     await expect(page.getByText('Investment Highlights')).toBeVisible();
     await expect(page.getByText('Business Details')).toBeVisible();
-    await expect(page.locator('a[href="/#due-diligence-documents"]')).toBeVisible();
+    await expect(page.locator('a[href="/#due-diligence"]')).toBeVisible();
   });
 });

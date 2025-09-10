@@ -8,7 +8,7 @@ declare global {
 }
 
 export interface Env {
-  cranberry_auth_db: D1Database;
+  cranberry_auth_db?: D1Database;
   BETTER_AUTH_SECRET: string;
   BETTER_AUTH_URL: string;
   COOKIE_DOMAIN?: string;
@@ -21,31 +21,41 @@ export async function createAuth(env: Env) {
   const [
     { betterAuth },
     { drizzleAdapter },
-    { schema }
+    { createDatabaseConnection }
   ] = await Promise.all([
     import("better-auth"),
     import("better-auth/adapters/drizzle"),
-    import("../db/schema")
+    import("./lib/database")
   ]);
   
-  // Use different Drizzle imports based on environment
-  let db;
-  if (env.NODE_ENV === "production" || env.cranberry_auth_db) {
-    // Production: Use D1 database
-    const { drizzle } = await import("drizzle-orm/d1");
-    db = drizzle(env.cranberry_auth_db, { schema });
-  } else {
-    // Local development: Use better-sqlite3
-    const { drizzle } = await import("drizzle-orm/better-sqlite3");
-    const Database = require('better-sqlite3');
-    const sqlite = new Database('./local.db');
-    db = drizzle(sqlite, { schema });
-  }
+  // Create database connection with proper typing and validation
+  const db = await createDatabaseConnection({
+    cranberry_auth_db: env.cranberry_auth_db
+  });
   
   return betterAuth({
     emailAndPassword: {
       enabled: true,
       requireEmailVerification: false, // Set to true in production if needed
+      password: {
+        hash: async (password: string) => {
+          // Use Web Crypto API for edge runtime compatibility
+          const encoder = new TextEncoder();
+          const data = encoder.encode(password);
+          const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+          const hashArray = Array.from(new Uint8Array(hashBuffer));
+          return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+        },
+        verify: async ({ hash, password }: { hash: string; password: string }) => {
+          // Use Web Crypto API for edge runtime compatibility
+          const encoder = new TextEncoder();
+          const data = encoder.encode(password);
+          const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+          const hashArray = Array.from(new Uint8Array(hashBuffer));
+          const computedHash = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+          return computedHash === hash;
+        },
+      },
     },
     database: drizzleAdapter(db, {
       provider: "sqlite",

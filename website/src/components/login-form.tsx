@@ -25,7 +25,38 @@ export function LoginForm({
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState("")
   const searchParams = useSearchParams()
-  const redirectTo = searchParams.get('redirect') || '/dashboard'
+  
+  // Secure redirect validation to prevent open redirects
+  const validateRedirect = (redirect: string | null): string => {
+    if (!redirect) return '/dashboard'
+    
+    // Reject strings starting with '//' or containing scheme before first '/'
+    if (redirect.startsWith('//') || redirect.includes(':')) {
+      return '/dashboard'
+    }
+    
+    // Must start with '/'
+    if (!redirect.startsWith('/')) {
+      return '/dashboard'
+    }
+    
+    try {
+      // Resolve with current origin and validate
+      const url = new URL(redirect, window.location.origin)
+      
+      // Ensure same origin and pathname starts with '/'
+      if (url.origin !== window.location.origin || !url.pathname.startsWith('/')) {
+        return '/dashboard'
+      }
+      
+      return url.pathname
+    } catch {
+      // If URL parsing fails, fall back to safe default
+      return '/dashboard'
+    }
+  }
+  
+  const redirectTo = validateRedirect(searchParams.get('redirect'))
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()

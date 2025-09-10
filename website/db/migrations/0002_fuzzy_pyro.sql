@@ -37,15 +37,30 @@ CREATE INDEX IF NOT EXISTS idx_document_access_is_active ON document_access(is_a
 CREATE INDEX IF NOT EXISTS idx_accounts_user_id ON accounts(user_id);
 
 -- Unique constraint for accounts table
+-- Dedupe before creating unique index
+DELETE FROM accounts
+WHERE rowid NOT IN (
+  SELECT MIN(rowid)
+  FROM accounts
+  GROUP BY provider_id, account_id
+);
+
+-- Verify no duplicates remain
+-- SELECT provider_id, account_id, COUNT(*) c
+-- FROM accounts
+-- GROUP BY provider_id, account_id
+-- HAVING c > 1;
+
 CREATE UNIQUE INDEX IF NOT EXISTS idx_accounts_provider_account_unique ON accounts(provider_id, account_id);
 
 -- Backfill existing users to avoid NULLs
 UPDATE users SET role = 'guest' WHERE role IS NULL;
 UPDATE users SET is_active = 1 WHERE is_active IS NULL;
 
--- Add CHECK constraints for users table
-ALTER TABLE users ADD CONSTRAINT users_bool_ck CHECK (email_verified IN (0, 1) AND is_active IN (0, 1));
-ALTER TABLE users ADD CONSTRAINT users_role_ck CHECK (role IN ('guest', 'user', 'admin'));
+-- NOTE: SQLite does not support ADD CONSTRAINT; implement these CHECKs by rebuilding `users`
+-- in a subsequent migration (CREATE TABLE users_new ... CHECK(...); INSERT ...; DROP; RENAME).
+-- ALTER TABLE users ADD CONSTRAINT users_bool_ck CHECK (email_verified IN (0, 1) AND is_active IN (0, 1));
+-- ALTER TABLE users ADD CONSTRAINT users_role_ck CHECK (role IN ('guest', 'user', 'admin'));
 
 -- Rename password column to password_hash for security
 ALTER TABLE accounts RENAME COLUMN password TO password_hash;
@@ -62,4 +77,18 @@ CREATE INDEX IF NOT EXISTS idx_verifications_identifier ON verifications(identif
 CREATE INDEX IF NOT EXISTS idx_verifications_expires_at ON verifications(expires_at);
 
 -- Unique constraint for verifications table
+-- Dedupe before creating unique index
+DELETE FROM verifications
+WHERE rowid NOT IN (
+  SELECT MIN(rowid)
+  FROM verifications
+  GROUP BY identifier, value_hash
+);
+
+-- Verify no duplicates remain
+-- SELECT identifier, value_hash, COUNT(*) c
+-- FROM verifications
+-- GROUP BY identifier, value_hash
+-- HAVING c > 1;
+
 CREATE UNIQUE INDEX IF NOT EXISTS idx_verifications_identifier_value_unique ON verifications(identifier, value_hash);

@@ -6,7 +6,10 @@ export default defineConfig({
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,
   workers: process.env.CI ? 1 : undefined,
-  reporter: 'html',
+  reporter: [
+    ['html', { outputFolder: 'playwright-report' }],
+    ['./playwright-report-optimized.js', { outputDir: 'playwright-report-optimized' }]
+  ],
   use: {
     baseURL: 'http://localhost:3000',
     trace: 'on-first-retry',
@@ -53,13 +56,13 @@ export default defineConfig({
       name: 'multi-role-tests',
       use: { ...devices['Desktop Chrome'] },
       dependencies: ['setup'],
-      testMatch: /.*role.*\.spec\.ts/,
+      testMatch: /.*\broles?\b.*\.spec\.ts/,
     },
     // General tests without authentication
     {
       name: 'general-tests',
       use: { ...devices['Desktop Chrome'] },
-      testMatch: /^(?!.*(admin|buyer|viewer|role)).*\.spec\.ts$/,
+      testMatch: /^(?!.*\b(?:admin|buyer|viewer|role)s?\b).*\.spec\.ts$/,
     },
     // Cross-browser tests (without authentication for now)
     {

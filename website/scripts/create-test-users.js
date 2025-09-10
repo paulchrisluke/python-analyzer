@@ -1,19 +1,26 @@
-import { drizzle } from 'drizzle-orm/better-sqlite3';
 import { schema } from '../db/schema.ts';
 import { eq } from 'drizzle-orm';
 import { createId } from '@paralleldrive/cuid2';
 import bcrypt from 'bcryptjs';
-import Database from 'better-sqlite3';
 
 // Create test users for the test suite
 async function createTestUsers() {
   console.log('🔧 Creating test users...');
   
-  // Connect to the local SQLite database
-  const sqlite = new Database('./local.db');
-  const db = drizzle(sqlite);
+  // Connect to the local SQLite database using dynamic imports
+  let sqlite, db;
+  try {
+    const { drizzle } = await import('drizzle-orm/better-sqlite3');
+    const Database = (await import('better-sqlite3')).default;
+    sqlite = new Database('./local.db');
+    db = drizzle(sqlite);
+  } catch (error) {
+    console.error('❌ Failed to load better-sqlite3. Ensure it is installed for local development.');
+    console.error('Error:', error.message);
+    process.exit(1);
+  }
   
-  const timestamp = Date.now();
+  const timestamp = new Date();
   
   // Test users from .env file
   const testUsers = [
@@ -40,9 +47,9 @@ async function createTestUsers() {
   for (const user of testUsers) {
     try {
       // Check if user already exists
-      const existingUser = await db.select().from(schema.users).where(eq(schema.users.email, user.email)).limit(1);
+      const existingUser = await db.select().from(schema.users).where(eq(schema.users.email, user.email)).limit(1).get();
       
-      if (existingUser.length > 0) {
+      if (existingUser) {
         console.log(`✅ User ${user.email} already exists, updating...`);
         
         // Update existing user
@@ -50,9 +57,9 @@ async function createTestUsers() {
           .set({
             name: user.name,
             role: user.role,
-            updated_at: timestamp
+            updatedAt: timestamp
           })
-          .where(eq(schema.users.email, user.email));
+          .where(eq(schema.users.email, user.email)).run();
       } else {
         console.log(`➕ Creating new user: ${user.email}`);
         
@@ -62,12 +69,12 @@ async function createTestUsers() {
           id: userId,
           name: user.name,
           email: user.email,
-          email_verified: true,
+          emailVerified: true,
           role: user.role,
-          is_active: true,
-          created_at: timestamp,
-          updated_at: timestamp
-        });
+          isActive: true,
+          createdAt: timestamp,
+          updatedAt: timestamp
+        }).run();
       }
       
       // Hash password
@@ -75,36 +82,36 @@ async function createTestUsers() {
       
       // Check if account already exists
       const existingAccount = await db.select().from(schema.accounts)
-        .where(eq(schema.accounts.account_id, user.email))
-        .limit(1);
+        .where(eq(schema.accounts.accountId, user.email))
+        .limit(1).get();
       
-      if (existingAccount.length > 0) {
+      if (existingAccount) {
         console.log(`✅ Account for ${user.email} already exists, updating password...`);
         
         // Update existing account
         await db.update(schema.accounts)
           .set({
             password: passwordHash,
-            updated_at: timestamp
+            updatedAt: timestamp
           })
-          .where(eq(schema.accounts.account_id, user.email));
+          .where(eq(schema.accounts.accountId, user.email)).run();
       } else {
         console.log(`➕ Creating account for: ${user.email}`);
         
         // Get user ID
-        const userRecord = await db.select().from(schema.users).where(eq(schema.users.email, user.email)).limit(1);
-        const userId = userRecord[0].id;
+        const userRecord = await db.select().from(schema.users).where(eq(schema.users.email, user.email)).limit(1).get();
+        const userId = userRecord.id;
         
         // Create new account
         await db.insert(schema.accounts).values({
           id: createId(),
-          account_id: user.email,
-          provider_id: 'credential',
-          user_id: userId,
+          accountId: user.email,
+          providerId: 'credential',
+          userId: userId,
           password: passwordHash,
-          created_at: timestamp,
-          updated_at: timestamp
-        });
+          createdAt: timestamp,
+          updatedAt: timestamp
+        }).run();
       }
       
       console.log(`✅ User ${user.email} ready with role: ${user.role}`);

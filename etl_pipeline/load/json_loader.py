@@ -67,14 +67,16 @@ def parse_price_value(price_raw):
 class JsonLoader(BaseLoader):
     """Loader for saving data to JSON files."""
     
-    def __init__(self, output_dir: str):
+    def __init__(self, output_dir: str, business_rules: Dict[str, Any] = None):
         """
         Initialize JSON loader.
         
         Args:
             output_dir: Output directory for JSON files
+            business_rules: Business rules configuration
         """
         super().__init__(output_dir)
+        self.business_rules = business_rules or {}
         self.load_results = {}
         
     def load(self, transformed_data: Dict[str, Any]) -> Dict[str, Any]:
@@ -677,11 +679,15 @@ class JsonLoader(BaseLoader):
                 "property_type": "Leased"
             },
             "business_operations": {
-                "services": ["Hearing Tests", "Hearing Aid Sales", "Balance Testing", "Tinnitus Treatment"],
+                "services": self._get_services_from_config(),
                 "insurance_coverage": landing_page_metrics.get('insurance_coverage', {}),
                 "payment_methods": ["Insurance billing (UPMC, Aetna)", "Private pay", "Cash payments"],
                 "equipment_value": equipment_metrics.get('total_value', 0),
-                "business_hours": "Monday-Friday 9AM-5PM"  # TODO: Get actual hours
+                "business_hours": "Monday-Friday 9AM-5PM",  # TODO: Get actual hours
+                "total_employees": 5,  # 2 staff per location + 1 shared staff member
+                "employees_per_location": 2.5,  # 2 dedicated + 0.5 shared per location
+                "shared_employees": 1,  # 1 person shared between both locations
+                "staffing_model": "2 dedicated staff per location + 1 shared staff member"
             },
             "market_opportunity": {
                 "local_market": "Cranberry Township & Pittsburgh Metro Area",
@@ -994,3 +1000,35 @@ class JsonLoader(BaseLoader):
         except Exception as e:
             logger.error(f"Error loading patient dimension data: {str(e)}")
             return False
+    
+    def _get_services_from_config(self) -> List[str]:
+        """
+        Get services list from business rules configuration.
+        
+        Returns:
+            List of services offered by the business
+        """
+        services = []
+        
+        # Get services from business rules configuration
+        if 'services' in self.business_rules:
+            services_config = self.business_rules['services']
+            
+            # Add hearing tests
+            if 'hearing_tests' in services_config:
+                services.extend(services_config['hearing_tests'])
+            
+            # Add hearing aid services
+            if 'hearing_aid_services' in services_config:
+                services.extend(services_config['hearing_aid_services'])
+            
+            # Add additional services
+            if 'additional_services' in services_config:
+                services.extend(services_config['additional_services'])
+        
+        # Fallback to default services if configuration is not available
+        if not services:
+            services = ["Hearing Tests", "Hearing Aid Sales", "Balance Testing", "Tinnitus Treatment"]
+            logger.warning("Using fallback services list - business rules configuration not available")
+        
+        return services

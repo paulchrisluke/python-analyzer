@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect, useRef } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -14,8 +14,11 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { MoreHorizontalIcon, PlusIcon, SearchIcon, UserIcon, ShieldIcon, EyeIcon, EditIcon, TrashIcon, LoaderIcon, AlertTriangleIcon } from "lucide-react"
 import { UserRole, getRoleDisplayName, getRoleDescription } from "@/lib/roles"
 import { useUsers, useCreateUser, useUpdateUser, useDeleteUser, type User, type CreateUserData } from "@/hooks/use-users"
+import { useSession } from "@/lib/auth-client"
 import { toast } from "sonner"
 
+// Email validation regex - consistent across all validation points
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
 export function UserManagement() {
   // API hooks
@@ -23,6 +26,10 @@ export function UserManagement() {
   const createUserMutation = useCreateUser()
   const updateUserMutation = useUpdateUser()
   const deleteUserMutation = useDeleteUser()
+  
+  // Get current user session
+  const { data: session } = useSession()
+  const currentUser = session?.user
 
   // Local state
   const [searchTerm, setSearchTerm] = useState("")
@@ -30,6 +37,24 @@ export function UserManagement() {
   const [isAddUserOpen, setIsAddUserOpen] = useState(false)
   const [editingUser, setEditingUser] = useState<User | null>(null)
   const [deleteConfirmUser, setDeleteConfirmUser] = useState<User | null>(null)
+  const [showActionMenu, setShowActionMenu] = useState<string | null>(null)
+
+  // Click outside handler to close action menu
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (showActionMenu) {
+        setShowActionMenu(null)
+      }
+    }
+
+    if (showActionMenu) {
+      document.addEventListener('mousedown', handleClickOutside)
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside)
+    }
+  }, [showActionMenu])
 
   // Form state for adding new user
   const [newUserName, setNewUserName] = useState("")
@@ -43,53 +68,71 @@ export function UserManagement() {
   const [editUserRole, setEditUserRole] = useState<UserRole>(UserRole.VIEWER)
   
   // Form validation state
-  const [formErrors, setFormErrors] = useState<{name?: string; email?: string}>({})
+  const [formErrors, setFormErrors] = useState<{name?: string; email?: string; password?: string}>({})
   const [editFormErrors, setEditFormErrors] = useState<{name?: string; email?: string}>({})
 
-  // Form validation function for add user
-  const validateForm = (): boolean => {
-    const errors: {name?: string; email?: string} = {}
+  // Shared validation utility function
+  const validateUserInput = (name: string, email: string, password?: string): {errors: {name?: string; email?: string; password?: string}, isValid: boolean} => {
+    const errors: {name?: string; email?: string; password?: string} = {}
     
     // Validate name
-    if (!newUserName.trim()) {
+    if (!name.trim()) {
       errors.name = "Name is required"
+    } else if (name.trim().length < 2) {
+      errors.name = "Name must be at least 2 characters"
+    } else if (name.trim().length > 100) {
+      errors.name = "Name must be 100 characters or less"
     }
     
     // Validate email
-    if (!newUserEmail.trim()) {
+    if (!email.trim()) {
       errors.email = "Email is required"
+    } else if (email.trim().length < 5) {
+      errors.email = "Email must be at least 5 characters"
+    } else if (email.trim().length > 254) {
+      errors.email = "Email must be 254 characters or less"
     } else {
-      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-      if (!emailRegex.test(newUserEmail)) {
+      if (!EMAIL_REGEX.test(email)) {
         errors.email = "Invalid email format"
       }
     }
     
+    // Validate password (only when provided)
+    if (password !== undefined) {
+      if (!password.trim()) {
+        errors.password = "Password is required"
+      } else if (password.length < 8) {
+        errors.password = "Password must be at least 8 characters"
+      } else if (password.length > 128) {
+        errors.password = "Password must be 128 characters or less"
+      } else {
+        // Check password complexity
+        const hasUpperCase = /[A-Z]/.test(password)
+        const hasLowerCase = /[a-z]/.test(password)
+        const hasNumbers = /\d/.test(password)
+        const hasSpecialChar = /[!@#$%^&*(),.?":{}|<>]/.test(password)
+        
+        if (!hasUpperCase || !hasLowerCase || !hasNumbers || !hasSpecialChar) {
+          errors.password = "Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character"
+        }
+      }
+    }
+    
+    return { errors, isValid: Object.keys(errors).length === 0 }
+  }
+
+  // Form validation function for add user
+  const validateForm = (): boolean => {
+    const { errors, isValid } = validateUserInput(newUserName, newUserEmail, newUserPassword)
     setFormErrors(errors)
-    return Object.keys(errors).length === 0
+    return isValid
   }
 
   // Form validation function for edit user
   const validateEditForm = (): boolean => {
-    const errors: {name?: string; email?: string} = {}
-    
-    // Validate name
-    if (!editUserName.trim()) {
-      errors.name = "Name is required"
-    }
-    
-    // Validate email
-    if (!editUserEmail.trim()) {
-      errors.email = "Email is required"
-    } else {
-      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-      if (!emailRegex.test(editUserEmail)) {
-        errors.email = "Invalid email format"
-      }
-    }
-    
+    const { errors, isValid } = validateUserInput(editUserName, editUserEmail)
     setEditFormErrors(errors)
-    return Object.keys(errors).length === 0
+    return isValid
   }
 
   // Filter users based on search and role
@@ -128,6 +171,13 @@ export function UserManagement() {
   }
 
   const handleDeleteUser = async (userId: string) => {
+    // Prevent self-deletion
+    if (currentUser && userId === currentUser.id) {
+      toast.error("You cannot delete your own account")
+      setDeleteConfirmUser(null)
+      return
+    }
+    
     if (deleteConfirmUser?.id === userId) {
       try {
         await deleteUserMutation.mutateAsync(userId)
@@ -145,11 +195,6 @@ export function UserManagement() {
       return
     }
 
-    if (!newUserPassword) {
-      toast.error("Password is required")
-      return
-    }
-
     try {
       const userData: CreateUserData = {
         name: newUserName,
@@ -161,12 +206,8 @@ export function UserManagement() {
       await createUserMutation.mutateAsync(userData)
       toast.success("User created successfully")
       
-      // Reset form and errors
-      setNewUserName("")
-      setNewUserEmail("")
-      setNewUserRole(UserRole.VIEWER)
-      setNewUserPassword("")
-      setFormErrors({})
+      // Reset form and close dialog
+      resetCreateForm()
       setIsAddUserOpen(false)
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Failed to create user")
@@ -207,6 +248,14 @@ export function UserManagement() {
     setEditUserEmail("")
     setEditUserRole(UserRole.VIEWER)
     setEditFormErrors({})
+  }
+
+  const resetCreateForm = () => {
+    setNewUserName("")
+    setNewUserEmail("")
+    setNewUserRole(UserRole.VIEWER)
+    setNewUserPassword("")
+    setFormErrors({})
   }
 
   const handleEditUserOpen = (user: User) => {
@@ -275,7 +324,12 @@ export function UserManagement() {
             Manage user accounts, roles, and permissions
           </p>
         </div>
-        <Dialog open={isAddUserOpen} onOpenChange={setIsAddUserOpen}>
+        <Dialog open={isAddUserOpen} onOpenChange={(open) => {
+          if (!open && !createUserMutation.isPending) {
+            setIsAddUserOpen(false)
+            resetCreateForm()
+          }
+        }}>
           <DialogTrigger asChild>
             <Button>
               <PlusIcon className="mr-2 h-4 w-4" />
@@ -303,11 +357,14 @@ export function UserManagement() {
                     }
                   }}
                   disabled={createUserMutation.isPending}
+                  maxLength={100}
+                  required
                   aria-invalid={!!formErrors.name}
+                  aria-describedby={formErrors.name ? "name-error" : undefined}
                   className={formErrors.name ? "border-red-500 focus:border-red-500" : ""}
                 />
                 {formErrors.name && (
-                  <p className="text-sm text-red-500" role="alert">
+                  <p id="name-error" className="text-sm text-red-500" role="alert">
                     {formErrors.name}
                   </p>
                 )}
@@ -322,18 +379,20 @@ export function UserManagement() {
                   onChange={(e) => setNewUserEmail(e.target.value)}
                   onBlur={() => {
                     if (newUserEmail.trim()) {
-                      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-                      if (emailRegex.test(newUserEmail)) {
+                      if (EMAIL_REGEX.test(newUserEmail)) {
                         setFormErrors(prev => ({ ...prev, email: undefined }))
                       }
                     }
                   }}
                   disabled={createUserMutation.isPending}
+                  maxLength={254}
+                  required
                   aria-invalid={!!formErrors.email}
+                  aria-describedby={formErrors.email ? "email-error" : undefined}
                   className={formErrors.email ? "border-red-500 focus:border-red-500" : ""}
                 />
                 {formErrors.email && (
-                  <p className="text-sm text-red-500" role="alert">
+                  <p id="email-error" className="text-sm text-red-500" role="alert">
                     {formErrors.email}
                   </p>
                 )}
@@ -347,7 +406,17 @@ export function UserManagement() {
                   value={newUserPassword}
                   onChange={(e) => setNewUserPassword(e.target.value)}
                   disabled={createUserMutation.isPending}
+                  maxLength={128}
+                  required
+                  aria-invalid={!!formErrors.password}
+                  aria-describedby={formErrors.password ? "password-error" : undefined}
+                  className={formErrors.password ? "border-red-500 focus:border-red-500" : ""}
                 />
+                {formErrors.password && (
+                  <p id="password-error" className="text-sm text-red-500" role="alert">
+                    {formErrors.password}
+                  </p>
+                )}
               </div>
               <div className="space-y-2">
                 <Label htmlFor="role">Role</Label>
@@ -372,7 +441,10 @@ export function UserManagement() {
             <DialogFooter>
               <Button 
                 variant="outline" 
-                onClick={() => setIsAddUserOpen(false)}
+                onClick={() => {
+                  setIsAddUserOpen(false)
+                  resetCreateForm()
+                }}
                 disabled={createUserMutation.isPending}
               >
                 Cancel
@@ -500,36 +572,60 @@ export function UserManagement() {
                     </div>
                   </TableCell>
                   <TableCell>
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" className="h-8 w-8 p-0">
-                          <MoreHorizontalIcon className="h-4 w-4" />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                        <DropdownMenuItem onClick={() => handleEditUserOpen(user)}>
-                          <EditIcon className="mr-2 h-4 w-4" />
-                          Edit User
-                        </DropdownMenuItem>
-                        <DropdownMenuItem 
-                          onClick={() => handleToggleActive(user.id)}
-                          disabled={updateUserMutation.isPending}
-                        >
-                          <ShieldIcon className="mr-2 h-4 w-4" />
-                          {user.isActive ? "Deactivate" : "Activate"}
-                        </DropdownMenuItem>
-                        <DropdownMenuSeparator />
-                        <DropdownMenuItem 
-                          onClick={() => setDeleteConfirmUser(user)}
-                          className="text-destructive"
-                          disabled={deleteUserMutation.isPending}
-                        >
-                          <TrashIcon className="mr-2 h-4 w-4" />
-                          Delete User
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
+                    <div className="relative">
+                      <button 
+                        onClick={() => setShowActionMenu(showActionMenu === user.email ? null : user.email)}
+                        className="text-gray-600 hover:text-gray-800"
+                        aria-label="Open menu"
+                      >
+                        ⋮
+                      </button>
+                      {showActionMenu === user.email && (
+                        <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg z-10 border">
+                          <div className="py-1">
+                            <button
+                              onClick={() => {
+                                handleEditUserOpen(user)
+                                setShowActionMenu(null)
+                              }}
+                              className="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                            >
+                              <EditIcon className="mr-2 h-4 w-4" />
+                              Edit User
+                            </button>
+                            <button
+                              onClick={() => {
+                                handleToggleActive(user.id)
+                                setShowActionMenu(null)
+                              }}
+                              disabled={updateUserMutation.isPending}
+                              className="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 disabled:opacity-50"
+                            >
+                              <ShieldIcon className="mr-2 h-4 w-4" />
+                              {user.isActive ? "Deactivate" : "Activate"}
+                            </button>
+                            <div className="border-t border-gray-100"></div>
+                            {currentUser && user.id === currentUser.id ? (
+                              <div className="flex items-center w-full px-4 py-2 text-sm text-gray-400 cursor-not-allowed">
+                                <TrashIcon className="mr-2 h-4 w-4" />
+                                Delete User (Cannot delete yourself)
+                              </div>
+                            ) : (
+                              <button
+                                onClick={() => {
+                                  setDeleteConfirmUser(user)
+                                  setShowActionMenu(null)
+                                }}
+                                className="flex items-center w-full px-4 py-2 text-sm text-red-600 hover:bg-gray-100"
+                              >
+                                <TrashIcon className="mr-2 h-4 w-4" />
+                                Delete User
+                              </button>
+                            )}
+                          </div>
+                        </div>
+                      )}
+                    </div>
                   </TableCell>
                 </TableRow>
               ))}
@@ -567,7 +663,10 @@ export function UserManagement() {
           <DialogHeader>
             <DialogTitle>Delete User</DialogTitle>
             <DialogDescription>
-              Are you sure you want to delete {deleteConfirmUser?.name}? This action cannot be undone.
+              {currentUser && deleteConfirmUser?.id === currentUser.id 
+                ? "You cannot delete your own account. This action is not allowed."
+                : `Are you sure you want to delete ${deleteConfirmUser?.name}? This action cannot be undone.`
+              }
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
@@ -581,7 +680,7 @@ export function UserManagement() {
             <Button 
               variant="destructive" 
               onClick={() => deleteConfirmUser && handleDeleteUser(deleteConfirmUser.id)}
-              disabled={deleteUserMutation.isPending}
+              disabled={deleteUserMutation.isPending || (currentUser && deleteConfirmUser?.id === currentUser.id)}
             >
               {deleteUserMutation.isPending ? (
                 <>
@@ -619,11 +718,14 @@ export function UserManagement() {
                   }
                 }}
                 disabled={updateUserMutation.isPending}
+                maxLength={100}
+                required
                 aria-invalid={!!editFormErrors.name}
+                aria-describedby={editFormErrors.name ? "edit-name-error" : undefined}
                 className={editFormErrors.name ? "border-red-500 focus:border-red-500" : ""}
               />
               {editFormErrors.name && (
-                <p className="text-sm text-red-500" role="alert">
+                <p id="edit-name-error" className="text-sm text-red-500" role="alert">
                   {editFormErrors.name}
                 </p>
               )}
@@ -638,18 +740,20 @@ export function UserManagement() {
                 onChange={(e) => setEditUserEmail(e.target.value)}
                 onBlur={() => {
                   if (editUserEmail.trim()) {
-                    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-                    if (emailRegex.test(editUserEmail)) {
+                    if (EMAIL_REGEX.test(editUserEmail)) {
                       setEditFormErrors(prev => ({ ...prev, email: undefined }))
                     }
                   }
                 }}
                 disabled={updateUserMutation.isPending}
+                maxLength={254}
+                required
                 aria-invalid={!!editFormErrors.email}
+                aria-describedby={editFormErrors.email ? "edit-email-error" : undefined}
                 className={editFormErrors.email ? "border-red-500 focus:border-red-500" : ""}
               />
               {editFormErrors.email && (
-                <p className="text-sm text-red-500" role="alert">
+                <p id="edit-email-error" className="text-sm text-red-500" role="alert">
                   {editFormErrors.email}
                 </p>
               )}

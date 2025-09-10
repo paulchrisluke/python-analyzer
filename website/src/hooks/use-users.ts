@@ -26,6 +26,68 @@ export interface UpdateUserData {
   isActive?: boolean
 }
 
+// Raw API response interface (with string dates)
+interface ApiUserResponse {
+  id: string
+  name: string
+  email: string
+  role: UserRole
+  isActive: boolean
+  lastLoginAt?: string | null
+  createdAt: string
+  updatedAt: string
+}
+
+// Transform API response to User object with proper Date objects
+function transformApiUser(apiUser: ApiUserResponse): User {
+  return {
+    id: apiUser.id,
+    name: apiUser.name,
+    email: apiUser.email,
+    role: apiUser.role,
+    isActive: apiUser.isActive,
+    lastLoginAt: apiUser.lastLoginAt ? new Date(apiUser.lastLoginAt) : undefined,
+    createdAt: new Date(apiUser.createdAt),
+    updatedAt: new Date(apiUser.updatedAt),
+  }
+}
+
+// Safely handle error responses that might be JSON or plain text
+async function handleErrorResponse(response: Response, defaultMessage: string): Promise<never> {
+  let errorMessage = defaultMessage
+  
+  try {
+    const errorData = await response.json()
+    errorMessage = errorData.error || defaultMessage
+  } catch {
+    // If JSON parsing fails, try to get the response as text
+    try {
+      const errorText = await response.text()
+      errorMessage = errorText || defaultMessage
+    } catch {
+      // If both fail, use the default message
+    }
+  }
+  
+  throw new Error(`HTTP ${response.status}: ${errorMessage}`)
+}
+
+// Safely parse JSON response with fallback to text
+async function safeParseJsonResponse<T>(response: Response, errorMessage: string): Promise<T> {
+  try {
+    return await response.json()
+  } catch {
+    // If JSON parsing fails, try to get the response as text
+    try {
+      const text = await response.text()
+      throw new Error(text || response.statusText || errorMessage)
+    } catch (textError) {
+      // If text parsing also fails, throw with the best available message
+      throw new Error(response.statusText || errorMessage)
+    }
+  }
+}
+
 // Fetch all users
 export function useUsers() {
   return useQuery({
@@ -33,9 +95,10 @@ export function useUsers() {
     queryFn: async (): Promise<User[]> => {
       const response = await fetch('/api/users')
       if (!response.ok) {
-        throw new Error('Failed to fetch users')
+        await handleErrorResponse(response, 'Failed to fetch users')
       }
-      return response.json()
+      const apiUsers: ApiUserResponse[] = await safeParseJsonResponse(response, 'Failed to fetch users')
+      return apiUsers.map(transformApiUser)
     },
   })
 }
@@ -55,11 +118,11 @@ export function useCreateUser() {
       })
 
       if (!response.ok) {
-        const error = await response.json()
-        throw new Error(error.error || 'Failed to create user')
+        await handleErrorResponse(response, 'Failed to create user')
       }
 
-      return response.json()
+      const apiUser: ApiUserResponse = await safeParseJsonResponse(response, 'Failed to create user')
+      return transformApiUser(apiUser)
     },
     onSuccess: () => {
       // Invalidate and refetch users
@@ -83,11 +146,11 @@ export function useUpdateUser() {
       })
 
       if (!response.ok) {
-        const error = await response.json()
-        throw new Error(error.error || 'Failed to update user')
+        await handleErrorResponse(response, 'Failed to update user')
       }
 
-      return response.json()
+      const apiUser: ApiUserResponse = await safeParseJsonResponse(response, 'Failed to update user')
+      return transformApiUser(apiUser)
     },
     onSuccess: () => {
       // Invalidate and refetch users
@@ -107,8 +170,7 @@ export function useDeleteUser() {
       })
 
       if (!response.ok) {
-        const error = await response.json()
-        throw new Error(error.error || 'Failed to delete user')
+        await handleErrorResponse(response, 'Failed to delete user')
       }
     },
     onSuccess: () => {

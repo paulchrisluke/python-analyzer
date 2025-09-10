@@ -7,7 +7,7 @@ const __dirname = dirname(__filename);
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   outputFileTracingRoot: __dirname,
-  serverExternalPackages: ['drizzle-orm'],
+  serverExternalPackages: ['drizzle-orm', 'better-sqlite3'],
   images: {
     domains: ['localhost'],
   },
