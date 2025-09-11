@@ -19,7 +19,7 @@ import {
   UserIcon,
   UsersIcon,
 } from "lucide-react"
-import { useSession } from "@/lib/auth-client"
+import { useSession } from "@/lib/simple-auth"
 import { getAnchorUrl, ANCHORS } from "@/lib/anchors"
 
 import { NavDocuments } from "@/components/nav-documents"

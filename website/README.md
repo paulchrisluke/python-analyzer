@@ -1,38 +1,45 @@
-# Cranberry Auth Worker
+# Cranberry Hearing & Balance Center - Business Sale Website
 
-A secure authentication service for the Cranberry Hearing & Balance Center business sale website, built with Cloudflare Workers and Better Auth.
+A modern Next.js application for the Cranberry Hearing & Balance Center business sale, featuring a simple admin-only authentication system and comprehensive business data presentation.
 
 ## 🚀 Features
 
-- **Secure Authentication**: Email/password authentication with Better Auth
-- **Session Management**: Secure session handling with proper expiration
-- **Database Integration**: D1 database with Drizzle ORM
-- **Protected Routes**: Authentication-required document access
+- **Simple Admin Authentication**: Environment-based authentication for two admin accounts
+- **Session Management**: Local storage-based session handling with 7-day expiration
+- **Protected Routes**: Admin-only access to dashboard and documents
 - **ETL Data Integration**: Real-time business metrics from ETL pipeline
-- **Modern UI**: Clean, responsive design with Tailwind CSS
+- **Modern UI**: Clean, responsive design with Tailwind CSS and shadcn/ui
 - **Testing**: Comprehensive Playwright test suite
+- **Static Generation**: Optimized Next.js build with static page generation
 
 ## 📁 Project Structure
 
 ```
 website/
 ├── src/
-│   ├── index.ts          # Main Workers entry point
-│   ├── auth.ts           # Better Auth configuration
+│   ├── app/              # Next.js App Router
+│   │   ├── layout.tsx    # Root layout with AuthProvider
+│   │   ├── page.tsx      # Landing page
+│   │   ├── login/        # Login page
+│   │   ├── dashboard/    # Admin dashboard
+│   │   └── docs/         # Protected documents
+│   ├── components/       # React components
+│   │   ├── ui/           # shadcn/ui components
+│   │   ├── login-form.tsx
+│   │   ├── auth-guard.tsx
+│   │   └── ...           # Other components
 │   ├── lib/
-│   │   └── etl-data.ts   # ETL pipeline data integration
+│   │   ├── simple-auth.tsx # Simple authentication system
+│   │   ├── etl-data.ts   # ETL pipeline data integration
+│   │   └── utils.ts      # Utility functions
 │   └── data/             # ETL-generated JSON data files
 │       ├── landing_page_data.json
 │       ├── financial_summary.json
 │       └── equipment_analysis.json
-├── db/
-│   ├── schema.ts         # Database schema
-│   └── migrations/       # Database migrations
 ├── tests/
-│   ├── auth.spec.ts      # Authentication tests
-│   └── basic.spec.ts     # Basic functionality tests
-├── wrangler.toml         # Cloudflare Workers configuration
-├── drizzle.config.ts     # Drizzle ORM configuration
+│   └── auth.spec.ts      # Authentication tests
+├── next.config.mjs       # Next.js configuration
+├── tailwind.config.ts    # Tailwind CSS configuration
 └── package.json          # Dependencies and scripts
 ```
 
@@ -42,8 +49,6 @@ website/
 
 - Node.js 18+ 
 - npm or yarn
-- Cloudflare account
-- Wrangler CLI
 
 ### Installation
 
@@ -54,18 +59,15 @@ website/
 
 2. **Set up environment variables:**
    ```bash
-   # Set the Better Auth secret
-   wrangler secret put BETTER_AUTH_SECRET
-   ```
-
-3. **Run database migrations:**
-   ```bash
-   # Apply migrations to local database
-   npm run db:migrate
+   # Copy the environment template
+   cp env.example .env.local
    
-   # Apply migrations to remote database
-   npm run db:migrate:remote
+   # Edit .env.local with your admin credentials (server-only variables)
+   # ADMIN_EMAILS=your-email@example.com,admin2@example.com
+   # ADMIN_PASSWORDS=$argon2id$v=19$m=65536,t=3,p=4$hash1,$argon2id$v=19$m=65536,t=3,p=4$hash2
    ```
+   
+   **Security Note**: Passwords must be stored as secure hashes (argon2id recommended). Never use plaintext passwords or NEXT_PUBLIC_* variables for credentials.
 
 ## 🚀 Development
 
@@ -76,7 +78,7 @@ website/
 npm run dev
 ```
 
-The application will be available at `http://localhost:8787`
+The application will be available at `http://localhost:3000`
 
 ### ETL Data Integration
 
@@ -103,95 +105,99 @@ npm run test:headed
 
 ## 📦 Deployment
 
-This project uses GitHub Actions for automated CI/CD. See [DEPLOYMENT.md](./DEPLOYMENT.md) for detailed setup instructions.
+This is a standard Next.js application that can be deployed to any hosting platform that supports Next.js.
 
-### Quick Setup
+### Build
 
-1. **Set GitHub Secrets:**
-   - `CLOUDFLARE_API_TOKEN`
-   - `CLOUDFLARE_ACCOUNT_ID`
+```bash
+# Build the application
+npm run build
 
-2. **Set Worker Secrets:**
-   ```bash
-   wrangler secret put BETTER_AUTH_SECRET --name cranberry-auth-worker
-   ```
+# Start production server
+npm start
+```
 
-3. **Configure Environment Variables:**
-   ```bash
-   # Copy environment template
-   cp env.example .env
-   # Edit .env with your Cloudflare credentials
-   ```
+### Deployment Options
 
-4. **Deploy:**
-   - Push to `main` branch → automatic deployment
-   - Manual: `npm run deploy:workers` (Next on Workers via OpenNext)
-   - Tests run on all pull requests
+- **Vercel**: Recommended for Next.js applications
+- **Netlify**: Static site generation support
+- **Cloudflare Pages**: Static site hosting
+- **Any Node.js hosting**: Standard Next.js deployment
 
 ### Environment Configuration
 
 #### Required Environment Variables
 
-- **BETTER_AUTH_SECRET**: Set using `wrangler secret put BETTER_AUTH_SECRET`
-- **BETTER_AUTH_URL**: Configured in `wrangler.toml`
-- **D1 Database**: Automatically bound as `cranberry_auth_db` (database name: `cranberry-auth-db`)
+- **ADMIN_EMAILS**: Comma-separated list of admin email addresses (server-only)
+- **ADMIN_PASSWORDS**: Comma-separated list of admin password hashes (argon2id format, server-only)
+- **NEXT_PUBLIC_APP_URL**: Base URL for the application (default: http://localhost:3000)
+- **NODE_ENV**: Environment (development/production)
 
-#### D1 HTTP Driver Configuration (for migrations and database operations)
+**Security Implementation**: Credentials must be validated server-side (Route Handler or Middleware) and admin sessions should use HttpOnly, Secure cookies rather than client-exposed variables.
 
-For local development and database migrations, you'll need to set these environment variables in your `.env` file:
-
-- **CLOUDFLARE_ACCOUNT_ID**: Your Cloudflare account ID
-- **CLOUDFLARE_D1_DATABASE_ID**: Your D1 database ID (found in wrangler.toml)
-- **CLOUDFLARE_API_TOKEN**: Your Cloudflare API token with D1 permissions
-
-⚠️ **Security Note**: `CLOUDFLARE_API_TOKEN` should only be stored in:
-- GitHub Secrets (for CI/CD)
-- Local `.env` file (for development)
-- **Never** as a Worker secret (account-scoped token)
-
-Create a `.env` file in the project root with these values:
+#### Example Environment File
 
 ```bash
-# Copy from env.example and fill in your values
-cp env.example .env
+# Admin Configuration (Server-only variables)
+ADMIN_EMAILS=admin1@example.com,admin2@example.com
+ADMIN_PASSWORDS=$argon2id$v=19$m=65536,t=3,p=4$hash1,$argon2id$v=19$m=65536,t=3,p=4$hash2
+
+# Application URLs
+NEXT_PUBLIC_APP_URL=http://localhost:3000
+
+# Environment
+NODE_ENV=development
 ```
 
-**Note**: For production deployments, copy `wrangler.toml.example` to `wrangler.toml` and update the `database_id` with your actual D1 database ID.
+⚠️ **Security Note**: In production, use secure password hashes (argon2id), implement server-side credential validation, and use HttpOnly, Secure cookies for admin sessions. Never expose credentials via NEXT_PUBLIC_* variables.
 
 ## 🔐 Authentication Flow
 
-### User Registration
-1. Users visit `/signup`
-2. Provide name, email, and password
-3. Account created and redirected to sign in
+### Server-Side Protections
 
-### User Sign In
-1. Users visit `/docs` (protected route)
-2. Redirected to sign-in form if not authenticated
-3. After successful authentication, access granted
+- **Authentication Middleware**: Validates session cookies on protected routes
+- **Session Expiry**: Server-enforced 7-day expiration with automatic cleanup
+- **CSRF Mitigation**: SameSite cookie attributes and optional CSRF tokens
+- **Prefetch Handling**: Middleware blocks unauthorized prefetch requests
+- **Route Protection**: Server-side validation prevents direct URL access to protected content
+
+### Admin Sign In
+1. Admins visit `/login`
+2. Enter email and password credentials
+3. Credentials POSTed to server for validation
+4. Server validates against hashed passwords and sets HttpOnly, Secure cookie
+5. Server returns only non-sensitive client state (user role, session expiry)
+6. Redirected to dashboard after successful authentication
 
 ### Protected Routes
+- `/dashboard` - Admin dashboard with business metrics
 - `/docs` - Due diligence documents
-- `/docs.html` - Alternative due diligence page
 
-## 🗄️ Database Schema
+### Session Management
+- Sessions stored in HttpOnly, Secure cookies (SameSite=Lax for CSRF protection)
+- 7-day automatic expiration enforced server-side
+- Manual sign out clears server-side session and cookie
+- Server middleware validates session on each protected route request
+- Prefetch protection prevents unauthorized data access
 
-The application uses the following tables:
+## 🗄️ Data Storage
 
-- **users**: User account information
-- **sessions**: Active user sessions
-- **accounts**: Authentication provider accounts
-- **verifications**: Email verification tokens
+The application uses:
+
+- **HttpOnly Cookies**: Secure server-side session management
+- **Static JSON Files**: ETL pipeline data stored in `src/data/`
+- **No Database**: Simple environment-based authentication requires no database
 
 ## 🧪 Testing
 
 The test suite covers:
 
-- User registration flow
-- User authentication
+- Admin authentication flow
+- Login form functionality
 - Protected route access
 - Session management
 - Error handling
+- Business sale page accessibility
 
 Run tests with:
 ```bash
@@ -200,83 +206,67 @@ npm test
 
 ## 🔧 Configuration
 
-### Better Auth Configuration
+### Simple Auth Configuration
 
-Located in `src/auth.ts`:
+Located in `src/lib/simple-auth.tsx`:
 
-- Email/password authentication enabled
+- Environment-based admin authentication
 - 7-day session expiration
-- D1 database integration
-- Debug logging in development
+- Local storage session management
+- No database required
 
-### Cloudflare Workers Configuration
+### Next.js Configuration
 
-Located in `wrangler.toml`:
+Located in `next.config.mjs`:
 
-- D1 database binding
-- Environment variables
-- Compatibility settings
+- Static site generation
+- Image optimization
+- Build optimization
 
-## 📚 API Endpoints
+## 📚 Pages
 
-Better Auth automatically provides:
+The application includes:
 
-- `POST /api/auth/sign-up/email` - User registration
-- `POST /api/auth/sign-in/email` - User sign in
-- `POST /api/auth/sign-out` - User sign out
-- `GET /api/auth/get-session` - Get current session
+- `/` - Public business sale landing page
+- `/login` - Admin login page
+- `/dashboard` - Protected admin dashboard
+- `/docs` - Protected due diligence documents
 
 ## 🛡️ Security Features
 
-- **Secure Password Hashing**: Automatic password hashing
-- **Session Security**: HttpOnly cookies with proper expiration
-- **CSRF Protection**: Built-in CSRF protection
-- **Environment Secrets**: Sensitive data stored as Cloudflare secrets
+- **Environment-based Authentication**: Admin credentials stored in server-only environment variables
+- **Secure Session Management**: HttpOnly, Secure cookies with server-side validation
+- **Protected Routes**: Middleware-based route protection with session validation
+- **CSRF Protection**: SameSite cookie attributes and server-side token validation
+- **Prefetch Protection**: Server-side route guards prevent unauthorized data access
+- **No Database**: No sensitive data stored in databases
 
 ## 🆘 Troubleshooting
 
 ### Common Issues
 
 1. **Authentication not working:**
-   - Verify `BETTER_AUTH_SECRET` is set correctly
-   - Check that `BETTER_AUTH_URL` matches your domain
-   - Ensure database migrations are applied
+   - Verify `ADMIN_EMAILS` and `ADMIN_PASSWORDS` are set correctly (server-only variables)
+   - Check that environment variables are loaded properly on the server
+   - Ensure password hashes are in correct argon2id format
+   - Verify server-side authentication middleware is working
 
-2. **Database connection issues:**
-   - Verify D1 database binding in `wrangler.toml`
-   - Check that migrations have been applied
-   - Ensure database ID is correct
+2. **Build failures:**
+   - Check that all dependencies are installed: `npm install`
+   - Verify TypeScript compilation: `npm run build`
+   - Check for missing environment variables
 
 3. **Tests failing:**
-   - Make sure local dev server is running
+   - Make sure local dev server is running: `npm run dev`
    - Check Playwright configuration
    - Verify test URLs are correct
 
-### Debug Mode
-
-Enable debug logging by setting the log level in `src/auth.ts`:
-
-```typescript
-logger: {
-  level: "debug"
-}
-```
-
 ## 📈 Performance
 
-- **Cold Start**: ~50ms
-- **Response Time**: <100ms for most requests
-- **Database**: D1 provides fast, edge-distributed queries
-- **Caching**: Automatic Cloudflare caching
-
-## 🔄 Migration from Pages
-
-This project was migrated from Cloudflare Pages to Workers for:
-
-- Better API endpoint support
-- Improved D1 database integration
-- Enhanced error handling
-- More reliable authentication
+- **Static Generation**: Pre-built pages for optimal performance
+- **Fast Loading**: Optimized Next.js build with code splitting
+- **No Database**: No database queries or external API calls
+- **Local Storage**: Fast client-side session management
 
 ## 📄 License
 

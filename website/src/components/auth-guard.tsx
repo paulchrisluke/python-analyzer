@@ -1,6 +1,6 @@
 "use client"
 
-import { useSession } from "@/lib/auth-client"
+import { useSession } from "@/lib/simple-auth"
 import { useRouter } from "next/navigation"
 import { useEffect } from "react"
 

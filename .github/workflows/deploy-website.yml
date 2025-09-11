@@ -1,4 +1,4 @@
-name: Deploy Cranberry Auth Worker
+name: Deploy Cranberry Website
 
 on:
   push:
@@ -58,7 +58,7 @@ jobs:
 
   deploy:
     runs-on: ubuntu-latest
-    name: Deploy Website
+    name: Deploy Website to Cloudflare Pages
     defaults:
       run:
         working-directory: ./website
@@ -84,6 +84,7 @@ jobs:
           exit 1
         fi
         echo "Required data files found"
+    
     - name: Setup Node.js
       uses: actions/setup-node@v4
       with:
@@ -101,9 +102,7 @@ jobs:
         echo "Data files content:"
         head -20 src/data/landing_page_data.json
     
-    - name: Build website
-      env:
-        BETTER_AUTH_URL: ${{ secrets.BETTER_AUTH_URL }}
+    - name: Build static website
       run: |
         set -euo pipefail
         echo "Current working directory: $(pwd)"
@@ -111,16 +110,14 @@ jobs:
         ls -la
         echo "Listing src directory contents:"
         ls -la src/
-        echo "Listing lib directory contents:"
-        ls -la src/lib/ || true
-        echo "Running build..."
+        echo "Running static build..."
         npm run build
     
-    - name: Deploy to Cloudflare Workers
+    - name: Deploy to Cloudflare Pages
       if: github.ref == 'refs/heads/main'
-      uses: cloudflare/wrangler-action@v3
+      uses: cloudflare/pages-action@v1
       with:
         apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
         accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-        command: deploy
-        workingDirectory: ./website
+        projectName: cranberry-hearing-balance
+        directory: ./out

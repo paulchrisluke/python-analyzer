@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { jwtVerify } from 'jose'
 
 // Protected routes that require authentication
 const protectedRoutes = ['/dashboard', '/docs']
@@ -11,40 +12,24 @@ function matchesRoute(pathname: string, route: string): boolean {
   return pathname === route || pathname.startsWith(route + '/')
 }
 
-// Server-side authentication check using auth worker session endpoint
+// Simple authentication check using session cookie
 async function isAuthenticated(req: NextRequest): Promise<boolean> {
   try {
-    const authWorkerUrl = process.env.BETTER_AUTH_URL || process.env.NEXT_PUBLIC_BETTER_AUTH_URL
-    
-    if (!authWorkerUrl) {
-      console.warn('Missing BETTER_AUTH_URL for authentication check')
-      return false
-    }
-
-    // Skip auth check if the auth worker URL is localhost (development/test environment)
-    if (authWorkerUrl.includes('localhost') || authWorkerUrl.includes('127.0.0.1')) {
+    // In development, allow access for testing
+    if (process.env.NODE_ENV === 'development') {
       return true
     }
 
-    // Sanitize the auth worker URL by trimming trailing slashes to prevent double slashes
-    const sanitizedAuthWorkerUrl = authWorkerUrl.replace(/\/+$/, '')
-
-    // Call the auth worker's session endpoint
-    const sessionResponse = await fetch(`${sanitizedAuthWorkerUrl}/api/auth/session`, {
-      method: 'GET',
-      headers: {
-        'Cookie': req.headers.get('cookie') || '',
-        'User-Agent': req.headers.get('user-agent') || '',
-        'Accept': 'application/json',
-      },
-    })
-
-    if (!sessionResponse.ok) {
-      return false
-    }
-
-    const sessionData = await sessionResponse.json() as { user?: any }
-    return !!sessionData?.user
+    // Check for signed session token and verify on the server
+    const sessionCookie = req.cookies.get('cranberry-auth-session')
+    if (!sessionCookie?.value) return false
+    const token = sessionCookie.value
+    await jwtVerify(
+      token,
+      new TextEncoder().encode(process.env.AUTH_SECRET as string),
+      { issuer: 'cranberry', audience: 'web' }
+    )
+    return true
   } catch (error) {
     console.error('Authentication check failed:', error)
     return false
