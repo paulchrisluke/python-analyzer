@@ -9,24 +9,32 @@ import { randomBytes } from 'crypto';
 /**
  * Generate a secure random password for testing
  * @param length - Password length (default: 16)
- * @returns Secure random password
+ * @returns Secure random password with guaranteed character classes
  */
 function generateSecurePassword(length: number = 16): string {
   const charset = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*';
   const bytes = randomBytes(length);
-  let password = '';
   
-  for (let i = 0; i < length; i++) {
-    password += charset[bytes[i] % charset.length];
+  // Pre-seed one character from each required class
+  const requiredChars = ['A', 'a', '1', '!']; // uppercase, lowercase, digit, symbol
+  const remainingLength = length - requiredChars.length;
+  
+  // Generate random characters for the remaining positions
+  const randomChars: string[] = [];
+  for (let i = 0; i < remainingLength; i++) {
+    randomChars.push(charset[bytes[i] % charset.length]);
   }
   
-  // Ensure password has at least one of each required character type
-  if (!/[A-Z]/.test(password)) password = password.slice(0, -1) + 'A';
-  if (!/[a-z]/.test(password)) password = password.slice(0, -1) + 'a';
-  if (!/[0-9]/.test(password)) password = password.slice(0, -1) + '1';
-  if (!/[!@#$%^&*]/.test(password)) password = password.slice(0, -1) + '!';
+  // Combine required chars and random chars
+  const allChars = [...requiredChars, ...randomChars];
   
-  return password;
+  // Shuffle the combined array using the same random bytes
+  for (let i = allChars.length - 1; i > 0; i--) {
+    const j = bytes[i % bytes.length] % (i + 1);
+    [allChars[i], allChars[j]] = [allChars[j], allChars[i]];
+  }
+  
+  return allChars.join('');
 }
 
 export interface TestUser {
@@ -128,9 +136,7 @@ export async function loginAs(
     }
     
     // Fill the form fields
-    await emailInput.clear();
     await emailInput.fill(user.email);
-    await passwordInput.clear();
     await passwordInput.fill(user.password);
     
     // Wait a moment for the form to register the values
@@ -325,12 +331,9 @@ export async function createTestUser(page: Page, role: 'user' | 'admin'): Promis
     
     // Fill the form fields (no role field - will default to 'user')
     if (nameInput) {
-      await nameInput.clear();
       await nameInput.fill(user.name);
     }
-    await emailInput.clear();
     await emailInput.fill(user.email);
-    await passwordInput.clear();
     await passwordInput.fill(user.password);
     
     // Wait a moment for the form to register the values
