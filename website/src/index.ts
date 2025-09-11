@@ -75,6 +75,18 @@ const handler = {
         console.log(`[${new Date().toISOString()}] Environment check - BETTER_AUTH_SECRET exists: ${!!env.BETTER_AUTH_SECRET}`);
         console.log(`[${new Date().toISOString()}] Environment check - D1 database binding exists: ${!!env.cranberry_auth_db}`);
         
+        // Gate admin endpoints with bootstrap token verification
+        if (url.pathname.startsWith('/api/auth/admin/')) {
+          const bootstrapToken = request.headers.get('X-Admin-Bootstrap-Token');
+          if (bootstrapToken !== env.BETTER_AUTH_SECRET) {
+            console.warn(`[${new Date().toISOString()}] Unauthorized admin access attempt from ${request.headers.get('Origin') || 'unknown origin'}`);
+            return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+              status: 401,
+              headers: { 'Content-Type': 'application/json' }
+            });
+          }
+        }
+        
         const auth = await createAuth(env);
         console.log(`[${new Date().toISOString()}] Auth instance created successfully`);
         

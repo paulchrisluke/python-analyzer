@@ -1,4 +1,28 @@
 import { test, expect } from '@playwright/test';
+import { randomBytes } from 'crypto';
+
+/**
+ * Generate a secure random password for testing
+ * @param length - Password length (default: 16)
+ * @returns Secure random password
+ */
+function generateSecurePassword(length: number = 16): string {
+  const charset = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*';
+  const bytes = randomBytes(length);
+  let password = '';
+  
+  for (let i = 0; i < length; i++) {
+    password += charset[bytes[i] % charset.length];
+  }
+  
+  // Ensure password has at least one of each required character type
+  if (!/[A-Z]/.test(password)) password = password.slice(0, -1) + 'A';
+  if (!/[a-z]/.test(password)) password = password.slice(0, -1) + 'a';
+  if (!/[0-9]/.test(password)) password = password.slice(0, -1) + '1';
+  if (!/[!@#$%^&*]/.test(password)) password = password.slice(0, -1) + '!';
+  
+  return password;
+}
 
 test.describe('Auth Flow', () => {
   test.beforeEach(async ({ page }) => {
@@ -77,7 +101,7 @@ test.describe('Auth Flow', () => {
     const timestamp = Date.now();
     const testEmail = `test-${timestamp}@example.com`;
     const testName = `Test User ${timestamp}`;
-    const testPassword = 'TestPassword123!';
+    const testPassword = generateSecurePassword();
 
     // Listen for page errors to fail test on uncaught exceptions
     const pageErrors: Error[] = [];
@@ -116,7 +140,7 @@ test.describe('Auth Flow', () => {
 
   test('should allow login form input without errors', async ({ page }) => {
     const testEmail = 'test@example.com';
-    const testPassword = 'TestPassword123!';
+    const testPassword = generateSecurePassword();
 
     // Listen for page errors to fail test on uncaught exceptions
     const pageErrors: Error[] = [];

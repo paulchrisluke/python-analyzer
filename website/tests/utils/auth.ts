@@ -1,9 +1,33 @@
 import { Page, BrowserContext } from '@playwright/test';
+import { randomBytes } from 'crypto';
 
 /**
  * Auth test utilities for role-based access testing
  * Based on Better-Auth API documentation: https://www.better-auth.com/docs/plugins/admin#api
  */
+
+/**
+ * Generate a secure random password for testing
+ * @param length - Password length (default: 16)
+ * @returns Secure random password
+ */
+function generateSecurePassword(length: number = 16): string {
+  const charset = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*';
+  const bytes = randomBytes(length);
+  let password = '';
+  
+  for (let i = 0; i < length; i++) {
+    password += charset[bytes[i] % charset.length];
+  }
+  
+  // Ensure password has at least one of each required character type
+  if (!/[A-Z]/.test(password)) password = password.slice(0, -1) + 'A';
+  if (!/[a-z]/.test(password)) password = password.slice(0, -1) + 'a';
+  if (!/[0-9]/.test(password)) password = password.slice(0, -1) + '1';
+  if (!/[!@#$%^&*]/.test(password)) password = password.slice(0, -1) + '!';
+  
+  return password;
+}
 
 export interface TestUser {
   email: string;
@@ -12,17 +36,17 @@ export interface TestUser {
   role: 'user' | 'admin';
 }
 
-// Test user credentials - loaded from environment variables
+// Test user credentials - loaded from environment variables with secure fallbacks
 export const TEST_USERS: Record<'user' | 'admin', TestUser> = {
   user: {
     email: process.env.TEST_USER_EMAIL || 'testuser@example.com',
-    password: process.env.TEST_USER_PASSWORD || 'testpass123!',
+    password: process.env.TEST_USER_PASSWORD || generateSecurePassword(),
     name: 'Test User',
     role: 'user'
   },
   admin: {
     email: process.env.TEST_ADMIN_EMAIL || 'admin@cranberryhearing.com',
-    password: process.env.TEST_ADMIN_PASSWORD || 'admin123!',
+    password: process.env.TEST_ADMIN_PASSWORD || generateSecurePassword(),
     name: 'Admin User',
     role: 'admin'
   }
@@ -299,7 +323,7 @@ export async function createTestUser(page: Page, role: 'user' | 'admin'): Promis
       throw new Error('Could not find password input field');
     }
     
-    // Fill the form fields
+    // Fill the form fields (no role field - will default to 'user')
     if (nameInput) {
       await nameInput.clear();
       await nameInput.fill(user.name);
@@ -399,14 +423,76 @@ export async function createTestUser(page: Page, role: 'user' | 'admin'): Promis
 }
 
 /**
- * Create admin user via Better Auth API
+ * Create admin user via Better Auth admin endpoint
  * @param user - Test user object
  */
 async function createAdminUserViaAPI(user: TestUser): Promise<void> {
+  const authUrl = process.env.NEXT_PUBLIC_BETTER_AUTH_URL || 'http://localhost:8787';
+  const bootstrapToken = process.env.BETTER_AUTH_SECRET;
+  
+  if (!bootstrapToken) {
+    console.error('❌ BETTER_AUTH_SECRET not found - cannot create admin user via admin endpoint');
+    console.log('ℹ️  Falling back to public signup (without role) - admin functionality will be limited');
+    await createAdminUserViaPublicSignup(user);
+    return;
+  }
+
+  try {
+    console.log(`🔐 Creating admin user via admin endpoint: ${user.email}`);
+    
+    // Use the admin-only endpoint with bootstrap token authentication
+    const response = await fetch(`${authUrl}/api/auth/admin/create-user`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Admin-Bootstrap-Token': bootstrapToken,
+      },
+      body: JSON.stringify({
+        email: user.email,
+        password: user.password,
+        name: user.name,
+        role: 'admin',
+      }),
+    });
+
+    if (response.ok) {
+      console.log(`✅ Admin user created successfully via admin endpoint`);
+      return;
+    }
+
+    const result = await response.json();
+    
+    // Check if user already exists
+    if (result.error?.message?.includes('already exists') || 
+        result.error?.message?.includes('User already exists') ||
+        response.status === 409) {
+      console.log(`ℹ️  Admin user already exists via admin endpoint`);
+      return;
+    }
+
+    // If admin endpoint fails with non-recoverable error, log and fallback
+    console.warn(`⚠️  Admin endpoint failed: ${result.error?.message || 'Unknown error'}`);
+    console.log(`🔄 Falling back to public signup (without role) - admin functionality will be limited`);
+    await createAdminUserViaPublicSignup(user);
+
+  } catch (error) {
+    console.error(`❌ Admin endpoint request failed: ${error}`);
+    console.log(`🔄 Falling back to public signup (without role) - admin functionality will be limited`);
+    await createAdminUserViaPublicSignup(user);
+  }
+}
+
+/**
+ * Fallback: Create admin user via public signup (without role)
+ * @param user - Test user object
+ */
+async function createAdminUserViaPublicSignup(user: TestUser): Promise<void> {
   try {
     const authUrl = process.env.NEXT_PUBLIC_BETTER_AUTH_URL || 'http://localhost:8787';
     
-    // Try to create admin user via regular signup with admin role
+    console.log(`📝 Creating user via public signup (role will be 'user'): ${user.email}`);
+    
+    // Create user via public signup WITHOUT role field
     const response = await fetch(`${authUrl}/api/auth/sign-up/email`, {
       method: 'POST',
       headers: {
@@ -416,26 +502,25 @@ async function createAdminUserViaAPI(user: TestUser): Promise<void> {
         email: user.email,
         password: user.password,
         name: user.name,
-        role: 'admin', // Set role to admin
+        // Note: No role field - will default to 'user'
       }),
     });
 
     if (response.ok) {
-      console.log(`✅ Admin user created successfully via API`);
+      console.log(`✅ User created via public signup (role: 'user')`);
+      console.log(`⚠️  WARNING: User has 'user' role, not 'admin' - admin tests may fail`);
     } else {
       const result = await response.json();
-      if (result.error?.message?.includes('already exists') || result.error?.message?.includes('User already exists')) {
-        console.log(`ℹ️  Admin user already exists`);
+      if (result.error?.message?.includes('already exists') || 
+          result.error?.message?.includes('User already exists')) {
+        console.log(`ℹ️  User already exists via public signup`);
       } else {
-        console.log(`ℹ️  Admin user creation had an issue: ${result.error?.message || 'Unknown error'}`);
-        // For testing purposes, we'll continue even if admin creation fails
-        // The important thing is that the security vulnerability is fixed
-        console.log(`ℹ️  Continuing with test - admin functionality may be limited`);
+        console.log(`ℹ️  Public signup had an issue: ${result.error?.message || 'Unknown error'}`);
       }
     }
   } catch (error) {
-    console.log(`ℹ️  Admin user creation failed via API: ${error}`);
-    console.log(`ℹ️  Continuing with test - admin functionality may be limited`);
+    console.log(`ℹ️  Public signup failed: ${error}`);
+    console.log(`ℹ️  Continuing with test - admin functionality will be limited`);
   }
 }
 

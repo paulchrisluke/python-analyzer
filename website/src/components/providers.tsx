@@ -15,9 +15,12 @@ function getBaseURL(): string {
     return envURL;
   }
   
-  // In production, default to HTTPS
+  // In production, fail fast if environment variable is not set
   if (process.env.NODE_ENV === "production") {
-    return "https://localhost:8787";
+    throw new Error(
+      "NEXT_PUBLIC_BETTER_AUTH_URL environment variable is required in production. " +
+      "Please set this variable to your production auth URL."
+    );
   }
   
   // Development fallback

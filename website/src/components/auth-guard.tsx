@@ -1,6 +1,6 @@
 "use client"
 
-import { SignedIn, RedirectToSignIn } from "@daveyplate/better-auth-ui"
+import { SignedIn, SignedOut, RedirectToSignIn } from "@daveyplate/better-auth-ui"
 
 interface AuthGuardProps {
   children: React.ReactNode
@@ -9,7 +9,9 @@ interface AuthGuardProps {
 export function AuthGuard({ children }: AuthGuardProps) {
   return (
     <>
-      <RedirectToSignIn />
+      <SignedOut>
+        <RedirectToSignIn />
+      </SignedOut>
       <SignedIn>
         {children}
       </SignedIn>

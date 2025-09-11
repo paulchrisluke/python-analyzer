@@ -25,12 +25,35 @@ export interface Env {
 
 export async function createAuth(env: Env) {
   console.log(`[${new Date().toISOString()}] Starting createAuth function`);
-  console.log(`[${new Date().toISOString()}] Environment variables check:`, {
-    hasSecret: !!env.BETTER_AUTH_SECRET,
-    hasDatabase: !!env.cranberry_auth_db,
-    hasAdminEmails: !!env.ADMIN_EMAILS,
-    adminEmails: env.ADMIN_EMAILS
-  });
+  
+  // Explicit validation of required environment variables and bindings
+  if (!env.BETTER_AUTH_SECRET) {
+    const error = new Error("Missing required environment variable: BETTER_AUTH_SECRET");
+    console.error(`[${new Date().toISOString()}] ${error.message}`);
+    throw error;
+  }
+  
+  if (!env.BETTER_AUTH_URL) {
+    const error = new Error("Missing required environment variable: BETTER_AUTH_URL");
+    console.error(`[${new Date().toISOString()}] ${error.message}`);
+    throw error;
+  }
+  
+  if (!env.cranberry_auth_db) {
+    const error = new Error("Missing required database binding: cranberry_auth_db");
+    console.error(`[${new Date().toISOString()}] ${error.message}`);
+    throw error;
+  }
+  
+  // Only log environment info in development mode and avoid PII
+  if (env.NODE_ENV === "development") {
+    console.log(`[${new Date().toISOString()}] Environment variables check:`, {
+      hasSecret: !!env.BETTER_AUTH_SECRET,
+      hasUrl: !!env.BETTER_AUTH_URL,
+      hasDatabase: !!env.cranberry_auth_db,
+      hasAdminEmails: !!env.ADMIN_EMAILS
+    });
+  }
 
   try {
     // Dynamic ESM imports to avoid Edge Runtime issues
@@ -90,18 +113,20 @@ export async function createAuth(env: Env) {
     },
     user: {
       additionalFields: {
-        role: {
-          type: "string",
-          defaultValue: "user",
-          required: true,
-        }
+        // Role is managed server-side only, not exposed to client
       }
     },
     plugins: [
       admin({
-        // Configure admin plugin for role-based access
-        // The admin plugin automatically handles role-based permissions
-        // Users with role "admin" will have admin privileges
+        // Configure admin plugin for role-based access with proper authorization
+        authorize: async ({ session, user }) => {
+          // Only allow access if user has admin role
+          return user?.role === "admin";
+        },
+        bootstrapAllowlist: (env.ADMIN_EMAILS ?? "")
+          .split(",")
+          .map(s => s.trim())
+          .filter(Boolean)
       })
     ]
   });
