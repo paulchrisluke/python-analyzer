@@ -41,7 +41,7 @@ test.describe('Auth Flow', () => {
     
     // Should show business sale page
     await expect(page).toHaveURL('/');
-    await expect(page.locator('text=Business Sale Dashboard')).toBeVisible();
+    await expect(page.locator('text=Established Two-Location Audiology Practice Available')).toBeVisible();
   });
 
   test('should allow form input without errors', async ({ page }) => {
