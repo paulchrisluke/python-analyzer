@@ -1,14 +1,6 @@
-name = "cranberry-auth-worker"
-main = "src/index.ts"
+name = "cranberry-hearing-balance"
 compatibility_date = "2025-01-27"
 compatibility_flags = ["nodejs_compat"]
-
-# D1 Database configuration
-[[d1_databases]]
-binding = "cranberry_auth_db"
-database_name = "cranberry-auth-db"
-database_id = "6e3eab94-840f-484f-900f-a2ddd78196d7"
-migrations_dir = "db/migrations"
 
 # R2 Bucket for OpenNext incremental cache
 [[r2_buckets]]
@@ -19,15 +11,3 @@ bucket_name = "cranberry-nextjs-cache"
 [[kv_namespaces]]
 binding = "NEXT_INC_CACHE_KV"
 id = "1b838f6f51914d8db9ae6c836c374f4e"
-
-# Environment variables for default environment (dev/preview)
-[vars]
-BETTER_AUTH_URL = "http://localhost:8787"
-
-# Production environment configuration
-[env.production]
-vars = { BETTER_AUTH_URL = "https://cranberry-auth-worker.paulchrisluke.workers.dev" }
-
-# Secrets (set using: wrangler secret put BETTER_AUTH_SECRET)
-# BETTER_AUTH_SECRET - Required for Better Auth
-# For local development, use .dev.vars file

@@ -13,7 +13,7 @@ import {
 } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { signIn } from "@/lib/auth-client"
+import { useAuth } from "@/lib/simple-auth"
 
 export function LoginForm({
   className,
@@ -23,6 +23,7 @@ export function LoginForm({
   const [password, setPassword] = useState("")
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState("")
+  const { signIn } = useAuth()
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -30,13 +31,10 @@ export function LoginForm({
     setError("")
 
     try {
-      const result = await signIn.email({
-        email,
-        password,
-      })
+      const result = await signIn(email, password)
 
-      if (result.error) {
-        setError(result.error.message || "Sign in failed")
+      if (!result.success) {
+        setError(result.error || "Sign in failed")
       } else {
         // Redirect to dashboard after successful login
         window.location.href = "/dashboard"
@@ -98,11 +96,8 @@ export function LoginForm({
                 {isLoading ? "Signing in..." : "Login"}
               </Button>
             </div>
-            <div className="mt-4 text-center text-sm">
-              Don&apos;t have an account?{" "}
-              <Link href="/signup" className="underline underline-offset-4">
-                Sign up
-              </Link>
+            <div className="mt-4 text-center text-sm text-muted-foreground">
+              Admin access only
             </div>
           </form>
         </CardContent>
