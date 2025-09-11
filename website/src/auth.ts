@@ -14,6 +14,13 @@ export interface Env {
   COOKIE_DOMAIN?: string;
   NODE_ENV?: string;
   ALLOWED_ORIGINS?: string;
+  ADMIN_EMAILS?: string;
+  TEST_USER_EMAIL?: string;
+  TEST_USER_PASSWORD?: string;
+  TEST_ADMIN_EMAIL?: string;
+  TEST_ADMIN_PASSWORD?: string;
+  NEXT_PUBLIC_APP_URL?: string;
+  NEXT_PUBLIC_BETTER_AUTH_URL?: string;
 }
 
 export async function createAuth(env: Env) {
@@ -78,7 +85,7 @@ export async function createAuth(env: Env) {
       {
         id: "admin",
         config: {
-          adminEmails: ["admin@cranberryhearing.com"], // Add admin emails here
+          adminEmails: env.ADMIN_EMAILS ? env.ADMIN_EMAILS.split(',').map(email => email.trim()) : [],
         }
       }
     ]

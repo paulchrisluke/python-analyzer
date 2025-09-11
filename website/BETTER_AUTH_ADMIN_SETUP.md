@@ -28,7 +28,7 @@ plugins: [
   {
     id: "admin",
     config: {
-      adminEmails: ["admin@cranberryhearing.com"], // Add admin emails here
+      adminEmails: env.ADMIN_EMAILS ? env.ADMIN_EMAILS.split(',').map(email => email.trim()) : [],
     }
   }
 ]
@@ -45,10 +45,10 @@ node scripts/create-admin-user.mjs
 
 ### Method 2: Direct API Call
 ```bash
-curl -X POST http://localhost:3000/api/admin/create-admin \
+curl -X POST ${NEXT_PUBLIC_APP_URL}/api/admin/create-admin \
   -H "Content-Type: application/json" \
   -d '{
-    "email": "admin@cranberryhearing.com",
+    "email": "admin@example.com",
     "password": "admin123!",
     "name": "Admin User"
   }'
@@ -108,14 +108,14 @@ The `tests/utils/auth.ts` file provides utilities for testing:
 ```typescript
 const TEST_USERS = {
   user: {
-    email: 'testuser@example.com',
-    password: 'testpass123!',
+    email: process.env.TEST_USER_EMAIL || 'testuser@example.com',
+    password: process.env.TEST_USER_PASSWORD || 'testpass123!',
     name: 'Test User',
     role: 'user'
   },
   admin: {
-    email: 'admin@cranberryhearing.com',
-    password: 'admin123!',
+    email: process.env.TEST_ADMIN_EMAIL || 'admin@example.com',
+    password: process.env.TEST_ADMIN_PASSWORD || 'admin123!',
     name: 'Admin User',
     role: 'admin'
   }
@@ -158,10 +158,29 @@ The tests verify:
 
 ## 8. Environment Variables
 
-Required environment variables:
+### Required Environment Variables:
 - `BETTER_AUTH_SECRET` - Secret key for Better-Auth
 - `BETTER_AUTH_URL` - Base URL for Better-Auth
 - `NODE_ENV` - Environment (development/production)
+
+### Admin Configuration:
+- `ADMIN_EMAILS` - Comma-separated list of admin email addresses
+
+### Test Configuration:
+- `TEST_USER_EMAIL` - Test user email for development/testing
+- `TEST_USER_PASSWORD` - Test user password
+- `TEST_ADMIN_EMAIL` - Test admin email for development/testing
+- `TEST_ADMIN_PASSWORD` - Test admin password
+
+### Application URLs:
+- `NEXT_PUBLIC_APP_URL` - Base URL for the Next.js application
+- `NEXT_PUBLIC_BETTER_AUTH_URL` - Base URL for the Better-Auth worker
+
+### Setup Instructions:
+1. Copy `.dev.vars.example` to `.dev.vars` for local development
+2. Update values in `.dev.vars` with your actual credentials
+3. For production, set secrets using `wrangler secret put`
+4. Environment variables are configured in `wrangler.toml`
 
 ## 9. Development Workflow
 

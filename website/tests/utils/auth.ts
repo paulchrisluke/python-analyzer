@@ -12,17 +12,17 @@ export interface TestUser {
   role: 'user' | 'admin';
 }
 
-// Test user credentials
+// Test user credentials - loaded from environment variables
 export const TEST_USERS: Record<'user' | 'admin', TestUser> = {
   user: {
-    email: 'testuser@example.com',
-    password: 'testpass123!',
+    email: process.env.TEST_USER_EMAIL || 'testuser@example.com',
+    password: process.env.TEST_USER_PASSWORD || 'testpass123!',
     name: 'Test User',
     role: 'user'
   },
   admin: {
-    email: 'admin@cranberryhearing.com',
-    password: 'admin123!',
+    email: process.env.TEST_ADMIN_EMAIL || 'admin@example.com',
+    password: process.env.TEST_ADMIN_PASSWORD || 'admin123!',
     name: 'Admin User',
     role: 'admin'
   }
@@ -45,7 +45,8 @@ export async function loginAs(
     console.log(`Logging in as ${role} user: ${user.email}`);
     
     // Navigate to login page and fill form
-    await page.goto('http://localhost:3000/login');
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+    await page.goto(`${appUrl}/login`);
     
     // Fill login form
     await page.fill('input[type="email"]', user.email);
@@ -90,7 +91,8 @@ export async function createTestUser(page: Page, role: 'user' | 'admin'): Promis
     console.log(`Creating ${role} user: ${user.email}`);
     
     // Navigate to signup page
-    await page.goto('http://localhost:3000/signup');
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+    await page.goto(`${appUrl}/signup`);
     
     // Fill signup form
     await page.fill('input[id="name"]', user.name);
@@ -134,7 +136,8 @@ export async function createTestUser(page: Page, role: 'user' | 'admin'): Promis
  */
 export async function logout(page: Page): Promise<void> {
   try {
-    await page.request.post('http://localhost:8787/api/auth/sign-out', {
+    const authUrl = process.env.NEXT_PUBLIC_BETTER_AUTH_URL || 'http://localhost:8787';
+    await page.request.post(`${authUrl}/api/auth/sign-out`, {
       headers: {
         'Content-Type': 'application/json',
       },
@@ -155,7 +158,8 @@ export async function logout(page: Page): Promise<void> {
  */
 export async function isAuthenticated(page: Page): Promise<boolean> {
   try {
-    const response = await page.request.get('http://localhost:8787/api/auth/get-session');
+    const authUrl = process.env.NEXT_PUBLIC_BETTER_AUTH_URL || 'http://localhost:8787';
+    const response = await page.request.get(`${authUrl}/api/auth/get-session`);
     return response.ok();
   } catch (error) {
     return false;

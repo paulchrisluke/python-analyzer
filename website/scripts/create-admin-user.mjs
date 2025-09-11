@@ -5,15 +5,16 @@
  * Based on: https://www.better-auth.com/docs/plugins/admin#api
  */
 
-const ADMIN_EMAIL = "admin@cranberryhearing.com";
-const ADMIN_PASSWORD = "admin123!";
+const ADMIN_EMAIL = process.env.TEST_ADMIN_EMAIL || "admin@example.com";
+const ADMIN_PASSWORD = process.env.TEST_ADMIN_PASSWORD || "admin123!";
 const ADMIN_NAME = "Admin User";
 
 async function createAdminUser() {
   try {
     console.log("Creating admin user...");
     
-    const response = await fetch("http://localhost:3000/api/admin/create-admin", {
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+    const response = await fetch(`${appUrl}/api/admin/create-admin`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -54,7 +55,8 @@ async function createAdminViaAuthAPI() {
     console.log("Creating admin user via Better-Auth API...");
     
     // First, create a regular user
-    const signUpResponse = await fetch("http://localhost:8787/api/auth/sign-up/email", {
+    const authUrl = process.env.NEXT_PUBLIC_BETTER_AUTH_URL || "http://localhost:8787";
+    const signUpResponse = await fetch(`${authUrl}/api/auth/sign-up/email`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

@@ -1,0 +1,25 @@
+# Local Development Environment Variables
+# Copy this file to .dev.vars and update with your actual values
+# DO NOT commit .dev.vars to version control
+
+# Better Auth Configuration for Local Development
+BETTER_AUTH_URL=http://localhost:8787
+BETTER_AUTH_SECRET=your-local-secret-key-here
+
+# Cloudflare D1 HTTP Driver Configuration for Local Development
+CLOUDFLARE_ACCOUNT_ID=your-cloudflare-account-id
+CLOUDFLARE_D1_DATABASE_ID=your-d1-database-id
+CLOUDFLARE_API_TOKEN=your-cloudflare-api-token
+
+# Admin Configuration
+ADMIN_EMAILS=admin@example.com,admin2@example.com
+
+# Test Configuration
+TEST_USER_EMAIL=testuser@example.com
+TEST_USER_PASSWORD=testpass123!
+TEST_ADMIN_EMAIL=admin@example.com
+TEST_ADMIN_PASSWORD=admin123!
+
+# Application URLs
+NEXT_PUBLIC_APP_URL=http://localhost:3000
+NEXT_PUBLIC_BETTER_AUTH_URL=http://localhost:8787

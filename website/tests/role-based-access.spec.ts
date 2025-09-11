@@ -1,6 +1,9 @@
 import { test, expect } from '@playwright/test';
 import { loginAs, createTestUser, logout, TEST_USERS } from './utils/auth';
 
+// Helper function to get app URL
+const getAppUrl = () => process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+
 test.describe('Role-Based Access Control', () => {
   test.beforeEach(async ({ page }) => {
     // Clear any existing auth state
@@ -15,7 +18,7 @@ test.describe('Role-Based Access Control', () => {
     await loginAs(page, 'user');
     
     // Try to access admin page
-    await page.goto('http://localhost:3000/admin');
+    await page.goto(`${getAppUrl()}/admin`);
     
     // Should see access denied message
     await expect(page.locator('text=Access Denied')).toBeVisible();
@@ -31,7 +34,7 @@ test.describe('Role-Based Access Control', () => {
     await loginAs(page, 'admin');
     
     // Navigate to admin page
-    await page.goto('http://localhost:3000/admin');
+    await page.goto(`${getAppUrl()}/admin`);
     
     // Should see admin dashboard content
     await expect(page.locator('text=Admin Dashboard')).toBeVisible();
@@ -56,7 +59,7 @@ test.describe('Role-Based Access Control', () => {
     await logout(page);
     
     // Try to access admin page
-    await page.goto('http://localhost:3000/admin');
+    await page.goto(`${getAppUrl()}/admin`);
     
     // Should be redirected to login with redirect parameter
     await expect(page).toHaveURL(/\/login\?redirect=%2Fadmin/);
@@ -75,10 +78,10 @@ test.describe('Role-Based Access Control', () => {
     await loginAs(page, 'admin');
     
     // Should be able to access regular pages
-    await page.goto('http://localhost:3000/');
+    await page.goto(`${getAppUrl()}/`);
     await expect(page.locator('text=Established Two-Location Audiology Practice Available')).toBeVisible();
     
-    await page.goto('http://localhost:3000/dashboard');
+    await page.goto(`${getAppUrl()}/dashboard`);
     // Should see dashboard content (assuming it exists)
     // This test verifies admin users have normal access too
   });
@@ -91,10 +94,10 @@ test.describe('Role-Based Access Control', () => {
     await loginAs(page, 'user');
     
     // Should be able to access regular pages
-    await page.goto('http://localhost:3000/');
+    await page.goto(`${getAppUrl()}/`);
     await expect(page.locator('text=Established Two-Location Audiology Practice Available')).toBeVisible();
     
-    await page.goto('http://localhost:3000/dashboard');
+    await page.goto(`${getAppUrl()}/dashboard`);
     // Should see dashboard content
   });
 
@@ -103,7 +106,7 @@ test.describe('Role-Based Access Control', () => {
     await createTestUser(page, 'admin');
     await loginAs(page, 'admin');
     
-    await page.goto('http://localhost:3000/admin');
+    await page.goto(`${getAppUrl()}/admin`);
     await expect(page.locator('text=Admin Dashboard')).toBeVisible();
     
     // Test user navigation (should be blocked)
@@ -111,7 +114,7 @@ test.describe('Role-Based Access Control', () => {
     await createTestUser(page, 'user');
     await loginAs(page, 'user');
     
-    await page.goto('http://localhost:3000/admin');
+    await page.goto(`${getAppUrl()}/admin`);
     
     // Should see access denied message
     await expect(page.locator('text=Access Denied')).toBeVisible();

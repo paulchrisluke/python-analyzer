@@ -23,10 +23,21 @@ id = "1b838f6f51914d8db9ae6c836c374f4e"
 # Environment variables for default environment (dev/preview)
 [vars]
 BETTER_AUTH_URL = "http://localhost:8787"
+NEXT_PUBLIC_APP_URL = "http://localhost:3000"
+NEXT_PUBLIC_BETTER_AUTH_URL = "http://localhost:8787"
+ADMIN_EMAILS = "admin@example.com"
+TEST_USER_EMAIL = "testuser@example.com"
+TEST_USER_PASSWORD = "testpass123!"
+TEST_ADMIN_EMAIL = "admin@example.com"
+TEST_ADMIN_PASSWORD = "admin123!"
 
 # Production environment configuration
 [env.production]
-vars = { BETTER_AUTH_URL = "https://cranberry-auth-worker.paulchrisluke.workers.dev" }
+vars = { 
+  BETTER_AUTH_URL = "https://cranberry-auth-worker.paulchrisluke.workers.dev",
+  NEXT_PUBLIC_APP_URL = "https://cranberry-hearing-balance-workers.paulchrisluke.workers.dev",
+  NEXT_PUBLIC_BETTER_AUTH_URL = "https://cranberry-auth-worker.paulchrisluke.workers.dev"
+}
 
 # Secrets (set using: wrangler secret put BETTER_AUTH_SECRET)
 # BETTER_AUTH_SECRET - Required for Better Auth
