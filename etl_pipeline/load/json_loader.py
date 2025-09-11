@@ -318,6 +318,10 @@ class JsonLoader(BaseLoader):
         # Sanitize coverage analysis before JSON serialization
         sanitized_coverage = self._sanitize_for_json(coverage_analysis)
         
+        # Add ETL run timestamp to coverage analysis
+        if isinstance(sanitized_coverage, dict):
+            sanitized_coverage['etl_run_timestamp'] = datetime.now(timezone.utc).isoformat()
+        
         # Save coverage analysis
         coverage_file = final_dir / "due_diligence_coverage.json"
         FileUtils.save_json(sanitized_coverage, str(coverage_file))
@@ -363,6 +367,7 @@ class JsonLoader(BaseLoader):
             "metadata": {
                 "business_name": financial_metrics.get('business_name') or 'Cranberry Hearing and Balance Center',
                 "generated_at": datetime.now().isoformat(),
+                "etl_run_timestamp": datetime.now(timezone.utc).isoformat(),
                 "data_period": data_period,
                 "months_analyzed": financial_metrics.get('revenue_metrics', {}).get('analysis_period_months', 30),
                 "data_source": "ETL Pipeline - Real Business Data",
@@ -602,6 +607,7 @@ class JsonLoader(BaseLoader):
         return {
             "summary": financial_data,
             "generated_at": datetime.now().isoformat(),
+            "etl_run_timestamp": datetime.now(timezone.utc).isoformat(),
             "data_source": "ETL Pipeline Analysis"
         }
     
@@ -632,6 +638,7 @@ class JsonLoader(BaseLoader):
                 "items": items
             },
             "generated_at": datetime.now().isoformat(),
+            "etl_run_timestamp": datetime.now(timezone.utc).isoformat(),
             "data_source": "ETL Pipeline Analysis"
         }
     
@@ -706,6 +713,7 @@ class JsonLoader(BaseLoader):
             ],
             "metadata": {
                 "generated_at": datetime.now().isoformat(),
+                "etl_run_timestamp": datetime.now(timezone.utc).isoformat(),
                 "data_source": "ETL Pipeline Analysis",
                 "version": "1.0"
             }
