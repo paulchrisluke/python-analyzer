@@ -31,6 +31,43 @@ test.describe('Simple Auth Flow', () => {
     await expect(page.locator('h1:has-text("Established Two-Location")')).toBeVisible();
   });
 
+  test('should allow form input without errors', async ({ page }) => {
+    const timestamp = Date.now();
+    const testEmail = `test-${timestamp}@example.com`;
+    const testName = `Test User ${timestamp}`;
+    const testPassword = 'TestPassword123!';
+
+    // Listen for page errors to fail test on uncaught exceptions
+    const pageErrors: Error[] = [];
+    page.on('pageerror', (error) => pageErrors.push(error));
+
+    // Test signup form input functionality
+    await page.goto('/signup');
+    
+    // Wait for the form to be ready
+    await page.waitForSelector('input[id="name"]', { state: 'visible' });
+    
+    // Fill form fields with more robust approach for WebKit
+    await page.locator('input[id="name"]').fill(testName);
+    await page.locator('input[id="email"]').fill(testEmail);
+    await page.locator('input[id="password"]').fill(testPassword);
+    
+    // Wait a bit for the values to be set, especially for WebKit
+    await page.waitForTimeout(100);
+    
+    // Verify form fields have the correct values
+    await expect(page.locator('input[id="name"]')).toHaveValue(testName);
+    await expect(page.locator('input[id="email"]')).toHaveValue(testEmail);
+    await expect(page.locator('input[id="password"]')).toHaveValue(testPassword);
+    
+    // Verify submit button is enabled and visible
+    await expect(page.locator('button[type="submit"]')).toBeVisible();
+    await expect(page.locator('button[type="submit"]')).toBeEnabled();
+    
+    // Verify no page errors occurred
+    expect(pageErrors).toHaveLength(0);
+  });
+
   test('should allow login form input without errors', async ({ page }) => {
     const testEmail = 'test@example.com';
     const testPassword = 'TestPassword123!';

@@ -15,7 +15,8 @@ export function AuthGuard({ children, fallback }: AuthGuardProps) {
 
   useEffect(() => {
     if (!isPending && !session) {
-      router.push("/login")
+      const currentPath = window.location.pathname
+      router.push(`/login?redirect=${encodeURIComponent(currentPath)}`)
     }
   }, [session, isPending, router])
 
