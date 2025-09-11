@@ -24,23 +24,39 @@ export interface Env {
 }
 
 export async function createAuth(env: Env) {
-  // Dynamic ESM imports to avoid Edge Runtime issues
-  const [
-    { betterAuth },
-    { drizzleAdapter },
-    { drizzle },
-    { schema }
-  ] = await Promise.all([
-    import("better-auth"),
-    import("better-auth/adapters/drizzle"),
-    import("drizzle-orm/d1"),
-    import("../db/schema")
-  ]);
-  
-  // Create Drizzle instance with D1 database and schema
-  const db = drizzle(env.cranberry_auth_db, { schema });
-  
-  return betterAuth({
+  console.log(`[${new Date().toISOString()}] Starting createAuth function`);
+  console.log(`[${new Date().toISOString()}] Environment variables check:`, {
+    hasSecret: !!env.BETTER_AUTH_SECRET,
+    hasDatabase: !!env.cranberry_auth_db,
+    hasAdminEmails: !!env.ADMIN_EMAILS,
+    adminEmails: env.ADMIN_EMAILS
+  });
+
+  try {
+    // Dynamic ESM imports to avoid Edge Runtime issues
+    const [
+      { betterAuth },
+      { drizzleAdapter },
+      { drizzle },
+      { schema },
+      { admin }
+    ] = await Promise.all([
+      import("better-auth"),
+      import("better-auth/adapters/drizzle"),
+      import("drizzle-orm/d1"),
+      import("../db/schema"),
+      import("better-auth/plugins/admin")
+    ]);
+    
+    console.log(`[${new Date().toISOString()}] All imports loaded successfully`);
+    
+    // Create Drizzle instance with D1 database and schema
+    console.log(`[${new Date().toISOString()}] Creating Drizzle database connection`);
+    const db = drizzle(env.cranberry_auth_db, { schema });
+    console.log(`[${new Date().toISOString()}] Drizzle database connection created`);
+    
+    console.log(`[${new Date().toISOString()}] Initializing Better Auth with configuration`);
+    const authInstance = betterAuth({
     emailAndPassword: {
       enabled: true,
       requireEmailVerification: false, // Set to true in production if needed
@@ -82,12 +98,17 @@ export async function createAuth(env: Env) {
       }
     },
     plugins: [
-      {
-        id: "admin",
-        config: {
-          adminEmails: env.ADMIN_EMAILS ? env.ADMIN_EMAILS.split(',').map(email => email.trim()) : [],
-        }
-      }
+      admin({
+        adminEmails: env.ADMIN_EMAILS ? env.ADMIN_EMAILS.split(',').map(email => email.trim()) : [],
+      })
     ]
   });
+  
+  console.log(`[${new Date().toISOString()}] Better Auth instance created successfully`);
+  return authInstance;
+  
+  } catch (error) {
+    console.error(`[${new Date().toISOString()}] Error in createAuth:`, error);
+    throw error;
+  }
 }

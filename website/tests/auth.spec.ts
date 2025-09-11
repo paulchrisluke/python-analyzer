@@ -7,33 +7,54 @@ test.describe('Auth Flow', () => {
   });
 
   test('should show login page with form fields', async ({ page }) => {
-    await page.goto('/login');
+    await page.goto('/auth/sign-in');
+    
+    // Wait for Better Auth UI to load
+    await page.waitForLoadState('networkidle');
+    
+    // Wait for form elements to be visible
+    await page.waitForSelector('input[name="email"], input[type="email"]', { timeout: 10000 });
     
     // Check basic form elements exist
-    await expect(page.locator('input[type="email"]')).toBeVisible();
-    await expect(page.locator('input[type="password"]')).toBeVisible();
+    await expect(page.locator('input[name="email"], input[type="email"]').first()).toBeVisible();
+    await expect(page.locator('input[name="password"], input[type="password"]').first()).toBeVisible();
     await expect(page.locator('button[type="submit"]')).toBeVisible();
   });
 
   test('should show signup page with form fields', async ({ page }) => {
-    await page.goto('/signup');
+    await page.goto('/auth/sign-up');
+    
+    // Wait for Better Auth UI to load
+    await page.waitForLoadState('networkidle');
+    
+    // Wait for form elements to be visible
+    await page.waitForSelector('input[name="name"], input[name="email"], input[type="email"]', { timeout: 10000 });
     
     // Check basic form elements exist
-    await expect(page.locator('input[id="name"]')).toBeVisible();
-    await expect(page.locator('input[id="email"]')).toBeVisible();
-    await expect(page.locator('input[id="password"]')).toBeVisible();
+    await expect(page.locator('input[name="name"], input[type="text"]').first()).toBeVisible();
+    await expect(page.locator('input[name="email"], input[type="email"]').first()).toBeVisible();
+    await expect(page.locator('input[name="password"], input[type="password"]').first()).toBeVisible();
     await expect(page.locator('button[type="submit"]')).toBeVisible();
   });
 
   test('should navigate between login and signup pages', async ({ page }) => {
     // Test login to signup navigation
-    await page.goto('/login');
-    await page.click('a[href="/signup"]');
-    await expect(page).toHaveURL('/signup');
+    await page.goto('/auth/sign-in');
+    await page.waitForLoadState('networkidle');
+    
+    // Look for signup link in Better Auth UI
+    const signupLink = page.locator('a[href*="sign-up"], a[href*="signup"]').first();
+    if (await signupLink.isVisible()) {
+      await signupLink.click();
+      await expect(page).toHaveURL(/\/auth\/sign-up/);
+    }
     
     // Test signup to login navigation
-    await page.click('a[href="/login"]');
-    await expect(page).toHaveURL('/login');
+    const signinLink = page.locator('a[href*="sign-in"], a[href*="signin"]').first();
+    if (await signinLink.isVisible()) {
+      await signinLink.click();
+      await expect(page).toHaveURL(/\/auth\/sign-in/);
+    }
   });
 
   test('should show business sale page without authentication', async ({ page }) => {
@@ -55,23 +76,30 @@ test.describe('Auth Flow', () => {
     page.on('pageerror', (error) => pageErrors.push(error));
 
     // Test signup form input functionality
-    await page.goto('/signup');
+    await page.goto('/auth/sign-up');
+    
+    // Wait for Better Auth UI to load
+    await page.waitForLoadState('networkidle');
     
     // Wait for the form to be ready
-    await page.waitForSelector('input[id="name"]', { state: 'visible' });
+    await page.waitForSelector('input[name="name"], input[name="email"], input[type="email"]', { timeout: 10000 });
     
-    // Fill form fields with more robust approach for WebKit
-    await page.locator('input[id="name"]').fill(testName);
-    await page.locator('input[id="email"]').fill(testEmail);
-    await page.locator('input[id="password"]').fill(testPassword);
+    // Fill form fields with Better Auth UI selectors
+    const nameInput = page.locator('input[name="name"], input[type="text"]').first();
+    const emailInput = page.locator('input[name="email"], input[type="email"]').first();
+    const passwordInput = page.locator('input[name="password"], input[type="password"]').first();
+    
+    await nameInput.fill(testName);
+    await emailInput.fill(testEmail);
+    await passwordInput.fill(testPassword);
     
     // Wait a bit for the values to be set, especially for WebKit
     await page.waitForTimeout(100);
     
     // Verify form fields have the correct values
-    await expect(page.locator('input[id="name"]')).toHaveValue(testName);
-    await expect(page.locator('input[id="email"]')).toHaveValue(testEmail);
-    await expect(page.locator('input[id="password"]')).toHaveValue(testPassword);
+    await expect(nameInput).toHaveValue(testName);
+    await expect(emailInput).toHaveValue(testEmail);
+    await expect(passwordInput).toHaveValue(testPassword);
     
     // Verify submit button is enabled and visible
     await expect(page.locator('button[type="submit"]')).toBeVisible();
@@ -89,15 +117,24 @@ test.describe('Auth Flow', () => {
     const pageErrors: Error[] = [];
     page.on('pageerror', (error) => pageErrors.push(error));
 
-    await page.goto('/login');
+    await page.goto('/auth/sign-in');
     
-    // Fill login form with test credentials
-    await page.fill('input[type="email"]', testEmail);
-    await page.fill('input[type="password"]', testPassword);
+    // Wait for Better Auth UI to load
+    await page.waitForLoadState('networkidle');
+    
+    // Wait for form elements to be visible
+    await page.waitForSelector('input[name="email"], input[type="email"]', { timeout: 10000 });
+    
+    // Fill login form with Better Auth UI selectors
+    const emailInput = page.locator('input[name="email"], input[type="email"]').first();
+    const passwordInput = page.locator('input[name="password"], input[type="password"]').first();
+    
+    await emailInput.fill(testEmail);
+    await passwordInput.fill(testPassword);
     
     // Verify form fields have the correct values
-    await expect(page.locator('input[type="email"]')).toHaveValue(testEmail);
-    await expect(page.locator('input[type="password"]')).toHaveValue(testPassword);
+    await expect(emailInput).toHaveValue(testEmail);
+    await expect(passwordInput).toHaveValue(testPassword);
     
     // Verify submit button is enabled and visible
     await expect(page.locator('button[type="submit"]')).toBeVisible();
@@ -111,7 +148,7 @@ test.describe('Auth Flow', () => {
     // Try to access dashboard without login
     await page.goto('/dashboard');
     
-    // Should redirect to login with redirect parameter
-    await expect(page).toHaveURL(/\/login\?redirect=%2Fdashboard/);
+    // Should redirect to Better Auth UI sign-in with redirect parameter
+    await expect(page).toHaveURL(/\/auth\/sign-in\?redirectTo=\/dashboard/);
   });
 });

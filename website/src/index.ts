@@ -71,8 +71,15 @@ const handler = {
     // Handle Better Auth API routes
     if (url.pathname.startsWith('/api/auth/')) {
       try {
+        console.log(`[${new Date().toISOString()}] Processing auth request: ${request.method} ${url.pathname}`);
+        console.log(`[${new Date().toISOString()}] Environment check - BETTER_AUTH_SECRET exists: ${!!env.BETTER_AUTH_SECRET}`);
+        console.log(`[${new Date().toISOString()}] Environment check - D1 database binding exists: ${!!env.cranberry_auth_db}`);
+        
         const auth = await createAuth(env);
+        console.log(`[${new Date().toISOString()}] Auth instance created successfully`);
+        
         const response = await auth.handler(request);
+        console.log(`[${new Date().toISOString()}] Auth handler completed with status: ${response.status}`);
         
         // Resolve allowed origin for this request
         const allowedOrigin = resolveAllowedOrigin(request, env);

@@ -61,12 +61,14 @@ test.describe('Role-Based Access Control', () => {
     // Try to access admin page
     await page.goto(`${getAppUrl()}/admin`);
     
-    // Should be redirected to login with redirect parameter
-    await expect(page).toHaveURL(/\/login\?redirect=%2Fadmin/);
+    // Should be redirected to Better Auth UI sign-in with redirect parameter
+    await expect(page).toHaveURL(/\/auth\/sign-in\?redirectTo=\/admin/);
     
-    // Should see login form
-    await expect(page.locator('input[type="email"]')).toBeVisible();
-    await expect(page.locator('input[type="password"]')).toBeVisible();
+    // Should see Better Auth UI login form
+    await page.waitForLoadState('networkidle');
+    await page.waitForSelector('input[name="email"], input[type="email"]', { timeout: 10000 });
+    await expect(page.locator('input[name="email"], input[type="email"]').first()).toBeVisible();
+    await expect(page.locator('input[name="password"], input[type="password"]').first()).toBeVisible();
     await expect(page.locator('button[type="submit"]')).toBeVisible();
   });
 
@@ -81,9 +83,19 @@ test.describe('Role-Based Access Control', () => {
     await page.goto(`${getAppUrl()}/`);
     await expect(page.locator('text=Established Two-Location Audiology Practice Available')).toBeVisible();
     
+    // Navigate to dashboard and verify access
     await page.goto(`${getAppUrl()}/dashboard`);
-    // Should see dashboard content (assuming it exists)
-    // This test verifies admin users have normal access too
+    await page.waitForLoadState('networkidle');
+    
+    // Verify URL is correct
+    await expect(page).toHaveURL(`${getAppUrl()}/dashboard`);
+    
+    // Verify dashboard heading is visible
+    await expect(page.locator('h1:has-text("Dashboard")')).toBeVisible();
+    
+    // Verify dashboard content is loaded
+    await expect(page.locator('text=Asking Price')).toBeVisible();
+    await expect(page.locator('text=Cash Flow (EBITDA)')).toBeVisible();
   });
 
   test('user role can access regular pages', async ({ page }) => {
@@ -97,8 +109,19 @@ test.describe('Role-Based Access Control', () => {
     await page.goto(`${getAppUrl()}/`);
     await expect(page.locator('text=Established Two-Location Audiology Practice Available')).toBeVisible();
     
+    // Navigate to dashboard and verify access
     await page.goto(`${getAppUrl()}/dashboard`);
-    // Should see dashboard content
+    await page.waitForLoadState('networkidle');
+    
+    // Verify URL is correct
+    await expect(page).toHaveURL(`${getAppUrl()}/dashboard`);
+    
+    // Verify dashboard heading is visible
+    await expect(page.locator('h1:has-text("Dashboard")')).toBeVisible();
+    
+    // Verify dashboard content is loaded
+    await expect(page.locator('text=Asking Price')).toBeVisible();
+    await expect(page.locator('text=Cash Flow (EBITDA)')).toBeVisible();
   });
 
   test('role-based navigation works correctly', async ({ page }) => {
