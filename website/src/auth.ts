@@ -99,7 +99,9 @@ export async function createAuth(env: Env) {
     },
     plugins: [
       admin({
-        adminEmails: env.ADMIN_EMAILS ? env.ADMIN_EMAILS.split(',').map(email => email.trim()) : [],
+        // Configure admin plugin for role-based access
+        // The admin plugin automatically handles role-based permissions
+        // Users with role "admin" will have admin privileges
       })
     ]
   });

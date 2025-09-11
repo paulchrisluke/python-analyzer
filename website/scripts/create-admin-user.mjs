@@ -13,6 +13,48 @@ const ADMIN_NAME = "Admin User";
 // Timeout configuration (in milliseconds)
 const REQUEST_TIMEOUT = 10000; // 10 seconds
 
+/**
+ * Robustly detects if an error indicates an existing user condition
+ * Checks structured properties first, then falls back to safe string matching
+ */
+function isExistingUserError(error) {
+  if (!error) return false;
+  
+  // Check structured properties first (most reliable)
+  if (error.code === 'UserExists' || error.name === 'UserExists') {
+    return true;
+  }
+  
+  // Check for other common structured error indicators
+  if (error.code === 'USER_EXISTS' || error.name === 'USER_EXISTS') {
+    return true;
+  }
+  
+  // Check for HTTP status codes that typically indicate existing user
+  if (error.status === 409 || error.statusCode === 409) { // Conflict
+    return true;
+  }
+  
+  // Fallback to safe string matching on error message
+  if (error.message && typeof error.message === 'string') {
+    const message = error.message.toLowerCase();
+    // Use regex for more flexible matching
+    const existingUserPatterns = [
+      /user already exists/i,
+      /user exists/i,
+      /already exists/i,
+      /duplicate user/i,
+      /user already registered/i,
+      /email already in use/i,
+      /account already exists/i
+    ];
+    
+    return existingUserPatterns.some(pattern => pattern.test(message));
+  }
+  
+  return false;
+}
+
 async function createAdminUser() {
   try {
     console.log("Creating admin user using Better Auth admin plugin...");
@@ -57,7 +99,8 @@ async function createAdminUser() {
       console.error("❌ Error creating admin user:", error.message);
     }
     
-    if (error.message && error.message.includes("User already exists")) {
+    // Check if this is an existing user error using robust detection
+    if (isExistingUserError(error)) {
       console.log("ℹ️  Admin user already exists. You can use the existing credentials:");
       console.log("Email:", ADMIN_EMAIL);
       console.log("Note: Password is not displayed for security reasons.");

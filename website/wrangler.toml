@@ -22,20 +22,25 @@ id = "1b838f6f51914d8db9ae6c836c374f4e"
 
 # Environment variables for default environment (dev/preview)
 [vars]
-BETTER_AUTH_URL = "http://localhost:8787"
+# Non-sensitive public URLs - safe to deploy
 NEXT_PUBLIC_APP_URL = "http://localhost:3000"
 NEXT_PUBLIC_BETTER_AUTH_URL = "http://localhost:8787"
-ADMIN_EMAILS = "admin@cranberryhearing.com"
-TEST_USER_EMAIL = "testuser@example.com"
-TEST_USER_PASSWORD = "testpass123!"
-TEST_ADMIN_EMAIL = "admin@cranberryhearing.com"
-TEST_ADMIN_PASSWORD = "admin123!"
+# BETTER_AUTH_URL needed by Next.js middleware for authentication checks
+BETTER_AUTH_URL = "http://localhost:8787"
+
+# Dev/test-only variables moved to .dev.vars or environment-specific sections
+# ADMIN_EMAILS - consider moving to env-specific table if it differs by env
+# TEST_USER_EMAIL - move to .dev.vars if only used locally
+# TEST_USER_PASSWORD - set via .dev.vars locally or wrangler secret put TEST_USER_PASSWORD
+# TEST_ADMIN_EMAIL - define only in .dev.vars if needed for local testing
+# TEST_ADMIN_PASSWORD - set via .dev.vars locally or wrangler secret put TEST_ADMIN_PASSWORD
 
 # Production environment configuration
 [env.production.vars]
 BETTER_AUTH_URL = "https://cranberry-auth-worker.paulchrisluke.workers.dev"
 NEXT_PUBLIC_APP_URL = "https://cranberry-hearing-balance-workers.paulchrisluke.workers.dev"
 NEXT_PUBLIC_BETTER_AUTH_URL = "https://cranberry-auth-worker.paulchrisluke.workers.dev"
+# ADMIN_EMAILS - set via wrangler secret put --env production ADMIN_EMAILS
 
 # Secrets (set using: wrangler secret put BETTER_AUTH_SECRET)
 # BETTER_AUTH_SECRET - Required for Better Auth

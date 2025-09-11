@@ -1,27 +1,59 @@
 "use client";
 
+import type { ReactNode } from "react";
+import { useMemo, useCallback } from "react";
 import { AuthUIProvider } from "@daveyplate/better-auth-ui";
 import { createAuthClient } from "better-auth/react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 
-export function Providers({ children }: { children: React.ReactNode }) {
+// Production-safe base URL helper
+function getBaseURL(): string {
+  const envURL = process.env.NEXT_PUBLIC_BETTER_AUTH_URL;
+  
+  if (envURL) {
+    return envURL;
+  }
+  
+  // In production, default to HTTPS
+  if (process.env.NODE_ENV === "production") {
+    return "https://localhost:8787";
+  }
+  
+  // Development fallback
+  return "http://localhost:8787";
+}
+
+export function Providers({ children }: { children: ReactNode }) {
   const router = useRouter();
 
-  // Create auth client directly for Better Auth UI
-  const authClient = createAuthClient({
-    baseURL: process.env.NEXT_PUBLIC_BETTER_AUTH_URL || "http://localhost:8787",
-  });
+  // Memoize auth client to prevent recreation on every render
+  const authClient = useMemo(() => {
+    return createAuthClient({
+      baseURL: getBaseURL(),
+    });
+  }, []);
+
+  // Stable navigation handlers
+  const handleNavigate = useCallback((href: string) => {
+    router.push(href);
+  }, [router]);
+
+  const handleReplace = useCallback((href: string) => {
+    router.replace(href);
+  }, [router]);
+
+  const handleSessionChange = useCallback(() => {
+    // Clear router cache (protected routes)
+    router.refresh();
+  }, [router]);
 
   return (
     <AuthUIProvider 
       authClient={authClient} 
-      navigate={router.push}
-      replace={router.replace}
-      onSessionChange={() => {
-        // Clear router cache (protected routes)
-        router.refresh()
-      }}
+      navigate={handleNavigate}
+      replace={handleReplace}
+      onSessionChange={handleSessionChange}
       Link={Link}
     >
       {children}

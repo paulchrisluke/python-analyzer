@@ -17,7 +17,7 @@ export function AdminGuard({ children, fallback }: AdminGuardProps) {
         <RedirectToSignIn />
       </SignedOut>
       <SignedIn>
-        {session?.user?.role === "admin" ? (
+        {(session?.user as any)?.role === "admin" ? (
           children
         ) : (
           fallback || (
