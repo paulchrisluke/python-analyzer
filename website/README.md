@@ -62,10 +62,12 @@ website/
    # Copy the environment template
    cp env.example .env.local
    
-   # Edit .env.local with your admin credentials
-   # NEXT_PUBLIC_ADMIN_EMAILS=your-email@example.com,admin2@example.com
-   # NEXT_PUBLIC_ADMIN_PASSWORDS=password1,password2
+   # Edit .env.local with your admin credentials (server-only variables)
+   # ADMIN_EMAILS=your-email@example.com,admin2@example.com
+   # ADMIN_PASSWORDS=$argon2id$v=19$m=65536,t=3,p=4$hash1,$argon2id$v=19$m=65536,t=3,p=4$hash2
    ```
+   
+   **Security Note**: Passwords must be stored as secure hashes (argon2id recommended). Never use plaintext passwords or NEXT_PUBLIC_* variables for credentials.
 
 ## 🚀 Development
 
@@ -126,17 +128,19 @@ npm start
 
 #### Required Environment Variables
 
-- **NEXT_PUBLIC_ADMIN_EMAILS**: Comma-separated list of admin email addresses
-- **NEXT_PUBLIC_ADMIN_PASSWORDS**: Comma-separated list of admin passwords (in same order as emails)
+- **ADMIN_EMAILS**: Comma-separated list of admin email addresses (server-only)
+- **ADMIN_PASSWORDS**: Comma-separated list of admin password hashes (argon2id format, server-only)
 - **NEXT_PUBLIC_APP_URL**: Base URL for the application (default: http://localhost:3000)
 - **NODE_ENV**: Environment (development/production)
+
+**Security Implementation**: Credentials must be validated server-side (Route Handler or Middleware) and admin sessions should use HttpOnly, Secure cookies rather than client-exposed variables.
 
 #### Example Environment File
 
 ```bash
-# Admin Configuration
-NEXT_PUBLIC_ADMIN_EMAILS=admin1@example.com,admin2@example.com
-NEXT_PUBLIC_ADMIN_PASSWORDS=password1,password2
+# Admin Configuration (Server-only variables)
+ADMIN_EMAILS=admin1@example.com,admin2@example.com
+ADMIN_PASSWORDS=$argon2id$v=19$m=65536,t=3,p=4$hash1,$argon2id$v=19$m=65536,t=3,p=4$hash2
 
 # Application URLs
 NEXT_PUBLIC_APP_URL=http://localhost:3000
@@ -145,30 +149,42 @@ NEXT_PUBLIC_APP_URL=http://localhost:3000
 NODE_ENV=development
 ```
 
-⚠️ **Security Note**: In production, use secure passwords and consider using environment-specific configuration.
+⚠️ **Security Note**: In production, use secure password hashes (argon2id), implement server-side credential validation, and use HttpOnly, Secure cookies for admin sessions. Never expose credentials via NEXT_PUBLIC_* variables.
 
 ## 🔐 Authentication Flow
 
+### Server-Side Protections
+
+- **Authentication Middleware**: Validates session cookies on protected routes
+- **Session Expiry**: Server-enforced 7-day expiration with automatic cleanup
+- **CSRF Mitigation**: SameSite cookie attributes and optional CSRF tokens
+- **Prefetch Handling**: Middleware blocks unauthorized prefetch requests
+- **Route Protection**: Server-side validation prevents direct URL access to protected content
+
 ### Admin Sign In
 1. Admins visit `/login`
-2. Enter email and password from environment variables
-3. Session stored in localStorage with 7-day expiration
-4. Redirected to dashboard after successful authentication
+2. Enter email and password credentials
+3. Credentials POSTed to server for validation
+4. Server validates against hashed passwords and sets HttpOnly, Secure cookie
+5. Server returns only non-sensitive client state (user role, session expiry)
+6. Redirected to dashboard after successful authentication
 
 ### Protected Routes
 - `/dashboard` - Admin dashboard with business metrics
 - `/docs` - Due diligence documents
 
 ### Session Management
-- Sessions are stored in browser localStorage
-- 7-day automatic expiration
-- Manual sign out clears session
+- Sessions stored in HttpOnly, Secure cookies (SameSite=Lax for CSRF protection)
+- 7-day automatic expiration enforced server-side
+- Manual sign out clears server-side session and cookie
+- Server middleware validates session on each protected route request
+- Prefetch protection prevents unauthorized data access
 
 ## 🗄️ Data Storage
 
 The application uses:
 
-- **Local Storage**: Browser localStorage for session management
+- **HttpOnly Cookies**: Secure server-side session management
 - **Static JSON Files**: ETL pipeline data stored in `src/data/`
 - **No Database**: Simple environment-based authentication requires no database
 
@@ -218,9 +234,11 @@ The application includes:
 
 ## 🛡️ Security Features
 
-- **Environment-based Authentication**: Admin credentials stored in environment variables
-- **Session Security**: Local storage with automatic expiration
-- **Protected Routes**: Middleware-based route protection
+- **Environment-based Authentication**: Admin credentials stored in server-only environment variables
+- **Secure Session Management**: HttpOnly, Secure cookies with server-side validation
+- **Protected Routes**: Middleware-based route protection with session validation
+- **CSRF Protection**: SameSite cookie attributes and server-side token validation
+- **Prefetch Protection**: Server-side route guards prevent unauthorized data access
 - **No Database**: No sensitive data stored in databases
 
 ## 🆘 Troubleshooting
@@ -228,9 +246,10 @@ The application includes:
 ### Common Issues
 
 1. **Authentication not working:**
-   - Verify `NEXT_PUBLIC_ADMIN_EMAILS` and `NEXT_PUBLIC_ADMIN_PASSWORDS` are set correctly
-   - Check that environment variables are loaded properly
-   - Ensure passwords match exactly (case-sensitive)
+   - Verify `ADMIN_EMAILS` and `ADMIN_PASSWORDS` are set correctly (server-only variables)
+   - Check that environment variables are loaded properly on the server
+   - Ensure password hashes are in correct argon2id format
+   - Verify server-side authentication middleware is working
 
 2. **Build failures:**
    - Check that all dependencies are installed: `npm install`

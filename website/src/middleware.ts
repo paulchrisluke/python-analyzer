@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { jwtVerify } from 'jose'
 
 // Protected routes that require authentication
 const protectedRoutes = ['/dashboard', '/docs']
@@ -19,14 +20,15 @@ async function isAuthenticated(req: NextRequest): Promise<boolean> {
       return true
     }
 
-    // Check for session cookie
+    // Check for signed session token and verify on the server
     const sessionCookie = req.cookies.get('cranberry-auth-session')
-    if (!sessionCookie) {
-      return false
-    }
-
-    // In production, you might want to verify the session server-side
-    // For now, we'll trust the client-side session
+    if (!sessionCookie?.value) return false
+    const token = sessionCookie.value
+    await jwtVerify(
+      token,
+      new TextEncoder().encode(process.env.AUTH_SECRET as string),
+      { issuer: 'cranberry', audience: 'web' }
+    )
     return true
   } catch (error) {
     console.error('Authentication check failed:', error)
