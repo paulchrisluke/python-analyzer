@@ -67,8 +67,20 @@ export async function createAuth(env: Env) {
     },
     user: {
       additionalFields: {
-        // Add any additional user fields if needed
+        role: {
+          type: "string",
+          defaultValue: "user",
+          required: true,
+        }
       }
-    }
+    },
+    plugins: [
+      {
+        id: "admin",
+        config: {
+          adminEmails: ["admin@cranberryhearing.com"], // Add admin emails here
+        }
+      }
+    ]
   });
 }
