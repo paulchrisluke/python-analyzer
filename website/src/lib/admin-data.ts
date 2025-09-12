@@ -14,25 +14,25 @@ export function generateCalculationSteps(businessData: BusinessSaleData): Calcul
   const steps: CalculationStep[] = []
   
   // Revenue calculation steps
-  if (businessData.sales.total_revenue > 0) {
+  if (businessData.sales.total_revenue.amount > 0) {
     steps.push({
       step: steps.length + 1,
       description: "Calculate Annual Revenue Projection",
       formula: "Total Revenue ÷ Analysis Period (months) × 12",
-      input: businessData.sales.total_revenue,
-      result: businessData.financials.metrics.annual_revenue_projection,
+      input: businessData.sales.total_revenue.amount,
+      result: businessData.financials.metrics.annual_revenue_projection.amount,
       source: "Sales data from ETL pipeline"
     })
   }
   
   // EBITDA calculation steps
-  if (businessData.financials.metrics.estimated_annual_ebitda > 0) {
+  if (businessData.financials.metrics.estimated_annual_ebitda.amount > 0) {
     steps.push({
       step: steps.length + 1,
       description: "Calculate Annual EBITDA",
       formula: "Annual Revenue × EBITDA Margin",
-      input: businessData.financials.metrics.annual_revenue_projection,
-      result: businessData.financials.metrics.estimated_annual_ebitda,
+      input: businessData.financials.metrics.annual_revenue_projection.amount,
+      result: businessData.financials.metrics.estimated_annual_ebitda.amount,
       source: "Financial analysis from ETL pipeline"
     })
   }
@@ -44,12 +44,12 @@ export function generateCalculationSteps(businessData: BusinessSaleData): Calcul
                        businessData.financials.metrics.asking_price || 
                        null
     
-    if (askingPrice && askingPrice > 0) {
+    if (askingPrice && askingPrice.amount > 0) {
       steps.push({
         step: steps.length + 1,
         description: "Calculate ROI Percentage",
         formula: "Annual EBITDA ÷ Asking Price × 100",
-        input: askingPrice,
+        input: askingPrice.amount,
         result: businessData.financials.metrics.roi_percentage,
         source: "Investment metrics from ETL pipeline"
       })
@@ -62,7 +62,7 @@ export function generateCalculationSteps(businessData: BusinessSaleData): Calcul
       step: steps.length + 1,
       description: "Calculate Payback Period",
       formula: "Asking Price ÷ Annual EBITDA",
-      input: businessData.financials.metrics.asking_price,
+      input: businessData.financials.metrics.asking_price.amount,
       result: businessData.financials.metrics.payback_period_years,
       source: "Investment metrics from ETL pipeline"
     })
@@ -89,7 +89,7 @@ export function generateDataSources(businessData: BusinessSaleData): DataSource[
   // Add equipment data
   sources.push({
     name: "Equipment Analysis",
-    file_path: "data/final/equipment_analysis.json",
+    file_path: "data/equipment_analysis.json",
     last_modified: businessData.metadata.etl_run_timestamp,
     size: "Unknown",
     status: 'valid'
@@ -98,7 +98,7 @@ export function generateDataSources(businessData: BusinessSaleData): DataSource[
   // Add sales data
   sources.push({
     name: "Sales Data",
-    file_path: "data/raw/sales_raw.json",
+    file_path: "data/business_sale_data.json",
     last_modified: businessData.metadata.etl_run_timestamp,
     size: "Unknown",
     status: businessData.sales.total_transactions > 0 ? 'valid' : 'missing'

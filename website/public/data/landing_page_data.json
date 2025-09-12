@@ -14,28 +14,58 @@
   },
   "financial_highlights": {
     "annual_revenue": {
-      "value": null,
+      "value": 932533.0299999996,
       "currency": "USD",
-      "status": "unknown"
+      "status": "available"
     },
     "annual_ebitda": {
-      "value": null,
+      "value": 13453.824,
       "currency": "USD",
-      "status": "unknown"
+      "status": "available"
     },
     "monthly_cash_flow": {
-      "value": null,
+      "value": 1121.152,
       "currency": "USD",
-      "status": "unknown"
+      "status": "available"
     },
-    "roi": null,
-    "payback_period": null,
-    "ebitda_margin": null
+    "roi": 2.1,
+    "payback_period": 48.3,
+    "ebitda_margin": 1.4
   },
   "property_details": {
-    "primary_location": {},
-    "secondary_location": {},
-    "lease_analysis": {},
+    "primary_location": {
+      "location_id": "cranberry_pa",
+      "name": "Cranberry Hearing & Balance",
+      "address": "20820 Route 19, Suite A",
+      "city": "Cranberry Twp",
+      "state": "PA",
+      "zip_code": "16066",
+      "phone": "724-779-4444",
+      "google_maps_url": "https://www.google.com/maps/place/20820%20Route%2019+Cranberry%20Twp+PA+16066",
+      "location_type": "primary",
+      "for_sale": true
+    },
+    "secondary_location": {
+      "location_id": "west_view_pa",
+      "name": "Cranberry Hearing & Balance - West View",
+      "address": "999 West View Park Drive",
+      "city": "Pittsburgh",
+      "state": "PA",
+      "zip_code": "15229",
+      "phone": "412-931-9290",
+      "google_maps_url": "https://www.google.com/maps/place/999%20West%20View%20Park%20Drive+Pittsburgh+PA+15229",
+      "location_type": "satellite",
+      "for_sale": true
+    },
+    "lease_analysis": {
+      "monthly_rent": 2500,
+      "annual_rent": 30000,
+      "monthly_cam": 100.0,
+      "annual_cam": 1200,
+      "total_monthly_cost": 2600.0,
+      "total_annual_cost": 31200,
+      "cam_percentage": 4.0
+    },
     "property_type": "Leased"
   },
   "business_operations": {
@@ -69,9 +99,9 @@
       "Cash payments"
     ],
     "equipment_value": {
-      "value": null,
+      "value": 61727.5,
       "currency": "USD",
-      "status": "unknown"
+      "status": "available"
     },
     "business_hours": {
       "monday": "9:00 AM - 5:00 PM",
@@ -93,7 +123,7 @@
     "financing_available": true,
     "seller_financing": "20% down, seller carryback available",
     "training_period": "30 days",
-    "reason_for_sale": "Owner retirement",
+    "reason_for_sale": "Owner retirement and lifestyle change",
     "transition_support": "Available for smooth transition"
   },
   "key_benefits": [
@@ -105,8 +135,8 @@
     "Strong EBITDA margins"
   ],
   "metadata": {
-    "generated_at": "2025-09-12T05:40:48.708Z",
-    "etl_run_timestamp": "2025-09-12T05:40:48.708Z",
+    "generated_at": "2025-09-12T06:18:12.411Z",
+    "etl_run_timestamp": "2025-09-12T06:18:12.411Z",
     "data_source": "ETL Pipeline Analysis",
     "version": "1.0"
   }

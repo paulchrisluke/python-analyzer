@@ -749,9 +749,12 @@ class JsonLoader(BaseLoader):
                         unit_price_normalized = normalize_money(unit_price_raw)
                         
                         # Calculate total price if not provided or invalid
-                        if total_price_raw and total_price_raw != 0:
-                            total_price_normalized = normalize_money(total_price_raw)
-                        else:
+                        # Check if total_price is valid (not None, not empty string, not "N/A", not "0", not 0)
+                        total_price_normalized = normalize_money(total_price_raw)
+                        if (total_price_raw is None or 
+                            total_price_raw == "" or 
+                            str(total_price_raw).strip().upper() in ['N/A', 'NA', 'NULL', 'NONE', '0'] or
+                            total_price_normalized["value"] == 0.0):
                             # Fallback: unit_price * quantity
                             total_price_normalized = {
                                 "value": unit_price_normalized["value"] * quantity,
@@ -776,8 +779,22 @@ class JsonLoader(BaseLoader):
                         additional_quantity = int(item.get('quantity', 1))
                         existing_item["quantity"] += additional_quantity
                         
-                        # Aggregate total price using normalize_money
-                        additional_total_price = normalize_money(item.get('total_price', 0))
+                        # Aggregate total price - use unit_price * quantity if total_price is invalid
+                        additional_total_price_raw = item.get('total_price', 0)
+                        additional_total_price = normalize_money(additional_total_price_raw)
+                        
+                        # If total_price is invalid, calculate from unit_price * quantity
+                        if (additional_total_price_raw is None or 
+                            additional_total_price_raw == "" or 
+                            str(additional_total_price_raw).strip().upper() in ['N/A', 'NA', 'NULL', 'NONE', '0'] or
+                            additional_total_price["value"] == 0.0):
+                            # Use unit_price * quantity for this duplicate item
+                            additional_unit_price = normalize_money(item.get('unit_price', 0))
+                            additional_total_price = {
+                                "value": additional_unit_price["value"] * additional_quantity,
+                                "currency": additional_unit_price["currency"]
+                            }
+                        
                         existing_item["total_price"]["value"] += additional_total_price["value"]
         
         # Calculate total value from actual items

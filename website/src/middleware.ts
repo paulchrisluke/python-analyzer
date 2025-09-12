@@ -23,13 +23,19 @@ async function isAuthenticated(req: NextRequest): Promise<boolean> {
       return true
     }
 
+    // Security: Fail closed if AUTH_SECRET is not configured
+    if (!process.env.AUTH_SECRET || process.env.AUTH_SECRET.trim() === '') {
+      console.error('AUTH_SECRET is not configured - authentication disabled for security')
+      return false
+    }
+
     // Check for signed session token and verify on the server
     const sessionCookie = req.cookies.get('cranberry-auth-session')
     if (!sessionCookie?.value) return false
     const token = sessionCookie.value
     await jwtVerify(
       token,
-      new TextEncoder().encode(process.env.AUTH_SECRET || 'your-super-secret-jwt-key-here-minimum-32-characters'),
+      new TextEncoder().encode(process.env.AUTH_SECRET),
       { issuer: 'cranberry', audience: 'web' }
     )
     return true

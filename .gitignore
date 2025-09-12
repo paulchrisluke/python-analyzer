@@ -41,8 +41,8 @@
 
 # ETL Pipeline Generated Files (Contains real business data)
 # Allow ETL pipeline output for CI/CD builds
-!data/final/
 data/
+!data/final/
 examples/data/
 reports/
 logs/

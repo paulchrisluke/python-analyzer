@@ -13,7 +13,6 @@ import {
 } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { useAuth } from "@/lib/simple-auth"
 
 export function LoginForm({
   className,
@@ -23,7 +22,6 @@ export function LoginForm({
   const [password, setPassword] = useState("")
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState("")
-  const { signIn } = useAuth()
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -46,33 +44,30 @@ export function LoginForm({
         body: JSON.stringify({ email: email.trim(), password }),
         signal: controller.signal,
       })
-      
-      // Clear timeout on successful completion
-      clearTimeout(timeoutId)
 
       if (!response.ok) {
-        const errorData = await response.json()
-        setError(errorData.error || "Sign in failed")
-      } else {
-        // Also update client-side session for consistency
-        const result = await signIn(email, password)
-        if (result.success) {
-          // Redirect to dashboard after successful login
-          window.location.href = "/dashboard"
-        } else {
-          setError(result.error || "Sign in failed")
+        // Guard JSON parsing with try/catch
+        try {
+          const errorData = await response.json()
+          setError(errorData.error || "Sign in failed")
+        } catch (jsonError) {
+          // Fall back to generic error message if JSON parsing fails
+          setError("Sign in failed. Please try again.")
         }
+      } else {
+        // Server already set the session cookie, treat successful response as authenticated
+        // Redirect to dashboard after successful login
+        window.location.href = "/dashboard"
       }
     } catch (error) {
-      // Clear timeout in case of error
-      clearTimeout(timeoutId)
-      
       if (error instanceof Error && error.name === 'AbortError') {
         setError("Request timed out. Please try again.")
       } else {
         setError("An unexpected error occurred")
       }
     } finally {
+      // Always clear timeout and reset loading state
+      clearTimeout(timeoutId)
       setIsLoading(false)
     }
   }

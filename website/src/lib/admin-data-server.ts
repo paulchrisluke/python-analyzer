@@ -58,10 +58,33 @@ async function loadJsonFile<T>(filePath: string): Promise<T> {
     const fs = await import('fs/promises')
     const path = await import('path')
     
-    // Use ADMIN_DATA_DIR if set (for production builds), otherwise fall back to public/data/
-    const dataDir = process.env.ADMIN_DATA_DIR || path.join('public', 'data')
-    const fullDataPath = path.join(process.cwd(), dataDir, filePath)
-    const fileContent = await fs.readFile(fullDataPath, 'utf-8')
+    // Try multiple possible data directory locations
+    const possibleDataDirs = [
+      process.env.ADMIN_DATA_DIR,
+      path.join('public', 'data'),
+      path.join('.data'),
+      path.join('data')
+    ].filter((dir): dir is string => Boolean(dir)) // Remove undefined values and type guard
+    
+    let fileContent: string
+    let lastError: Error | null = null
+    
+    // Try each possible directory until we find the file
+    for (const dataDir of possibleDataDirs) {
+      try {
+        const fullDataPath = path.join(process.cwd(), dataDir, filePath)
+        fileContent = await fs.readFile(fullDataPath, 'utf-8')
+        break // Success, exit the loop
+      } catch (error) {
+        lastError = error as Error
+        continue // Try next directory
+      }
+    }
+    
+    if (!fileContent!) {
+      throw lastError || new Error(`File not found in any data directory: ${filePath}`)
+    }
+    
     return JSON.parse(fileContent) as T
   } catch (error) {
     console.error(`Error loading ${filePath}:`, error)

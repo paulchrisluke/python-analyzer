@@ -620,41 +620,59 @@ class ETLPipeline:
         """Get default coverage analysis structure."""
         return {
             'sales': {
+                'status': 'no_data',
                 'completeness_score': 0.0,
+                'missing_periods': [],
+                'data_quality_issues': ['No sales data found'],
                 'coverage_details': {
                     'total_records': 0,
                     'date_range': {'start': 'Unknown', 'end': 'Unknown'},
                     'categories_found': [],
                     'categories_missing': ['sales_transactions']
-                }
+                },
+                'fallback_strategies': []
             },
             'financial': {
+                'status': 'no_data',
                 'completeness_score': 0.0,
+                'missing_documents': ['profit_loss', 'balance_sheets', 'general_ledger', 'cogs'],
+                'data_quality_issues': ['No financial data found'],
                 'coverage_details': {
                     'total_documents': 0,
                     'found_documents': [],
                     'missing_documents': ['profit_loss', 'balance_sheets', 'general_ledger', 'cogs']
-                }
+                },
+                'fallback_strategies': []
             },
             'equipment': {
+                'status': 'no_data',
                 'completeness_score': 0.0,
+                'missing_documents': ['equipment_items'],
+                'data_quality_issues': ['No equipment data found'],
                 'coverage_details': {
                     'equipment_count': 0,
                     'total_value': 0.0,
                     'categories_found': [],
                     'categories_missing': ['equipment_items']
+                },
+                'fallback_strategies': []
+            },
+            'due_diligence': {
+                'overall_score': 0.0,
+                'readiness_level': 'poor',
+                'recommendation': 'Not ready for due diligence',
+                'category_scores': {
+                    'sales': 0.0,
+                    'financial': 0.0,
+                    'equipment': 0.0
                 }
             },
-            'overall_score': 0.0,
             'recommendations': [
                 'No data available - please ensure data sources are properly configured',
                 'Check file paths and permissions for data extraction',
                 'Verify data source configurations in data_sources.yaml'
             ],
-            'metadata': {
-                'status': 'no_data_available',
-                'message': 'Coverage analysis not available - using default values'
-            }
+            'etl_run_timestamp': datetime.now().isoformat()
         }
     
     def _transform_data(self) -> bool:

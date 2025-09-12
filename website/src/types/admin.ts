@@ -1,6 +1,12 @@
 // Admin Dashboard TypeScript Interfaces
 // These interfaces map exactly to the ETL JSON structures
 
+export interface Money {
+  amount: number;
+  currency: string;
+  display?: string;
+}
+
 export interface BusinessSaleData {
   metadata: {
     business_name: string;
@@ -13,22 +19,22 @@ export interface BusinessSaleData {
   };
   sales: {
     total_transactions: number;
-    total_revenue: number;
+    total_revenue: Money;
   };
   financials: {
     documents: DocumentItem[];
     metrics: {
-      annual_revenue_projection: number;
-      estimated_annual_ebitda: number;
+      annual_revenue_projection: Money;
+      estimated_annual_ebitda: Money;
       ebitda_margin: number;
       roi_percentage: number;
       payback_period_years: number;
-      equipment_value: number;
-      asking_price: number;
+      equipment_value: Money;
+      asking_price: Money;
     };
   };
   equipment: {
-    total_value: number;
+    total_value: Money;
     items: EquipmentItem[];
   };
   legal: {
@@ -42,10 +48,10 @@ export interface BusinessSaleData {
     milestones: MilestoneItem[];
   };
   valuation: {
-    asking_price: number;
-    market_value: number;
+    asking_price: Money;
+    market_value: Money;
     discount_percentage: number;
-    discount_amount: number;
+    discount_amount: Money;
   };
   locations: LocationItem[];
   highlights: string[];
@@ -107,7 +113,7 @@ export interface DueDiligenceCoverage {
 export interface EquipmentAnalysis {
   etl_run_timestamp: string;
   equipment_summary: {
-    total_value: number;
+    total_value: Money;
     items: EquipmentItem[];
   };
   generated_at: string;
@@ -126,17 +132,17 @@ export interface LandingPageData {
   listing_details: {
     business_name: string;
     business_type: string;
-    asking_price: number;
+    asking_price: Money;
     established: string;
     locations: number;
     state: string;
   };
   financial_highlights: {
-    asking_price: number;
-    annual_revenue: number;
-    annual_ebitda: number;
-    sde: number;
-    monthly_cash_flow: number;
+    asking_price: Money;
+    annual_revenue: Money;
+    annual_ebitda: Money;
+    sde: Money;
+    monthly_cash_flow: Money;
     roi: number;
     payback_period: number;
     ebitda_margin: number;
@@ -191,7 +197,7 @@ export interface DocumentItem {
 export interface EquipmentItem {
   name: string;
   category: string;
-  value: number;
+  value: Money;
   status: boolean;
   description?: string;
   file_path?: string;
@@ -217,7 +223,7 @@ export interface LocationItem {
 }
 
 export interface SummaryCard {
-  value: number;
+  value: Money;
   label: string;
   description: string;
 }

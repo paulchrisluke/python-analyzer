@@ -1,6 +1,6 @@
 {
   "extends": [
-    "next/core-web-vitals"
+    "next"
   ],
   "rules": {
     "@next/next/no-duplicate-head": "off",
