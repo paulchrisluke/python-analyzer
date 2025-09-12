@@ -14,11 +14,11 @@ import {
 
 // Primary data sources for admin dashboard
 const adminDataSources = {
-  businessMetrics: 'data/final/business_sale_data.json',
-  coverageAnalysis: 'data/final/due_diligence_coverage.json',
-  equipmentAnalysis: 'data/final/equipment_analysis.json',
-  financialSummary: 'data/final/financial_summary.json',
-  landingPageData: 'data/final/landing_page_data.json'
+  businessMetrics: 'business_sale_data.json',
+  coverageAnalysis: 'due_diligence_coverage.json',
+  equipmentAnalysis: 'equipment_analysis.json',
+  financialSummary: 'financial_summary.json',
+  landingPageData: 'landing_page_data.json'
 }
 
 // Load all ETL data for admin dashboard
@@ -58,10 +58,9 @@ async function loadJsonFile<T>(filePath: string): Promise<T> {
     const fs = await import('fs/promises')
     const path = await import('path')
     
-    // Construct full path from project root (go up one level from website directory)
-    const projectRoot = path.join(process.cwd(), '..')
-    const fullPath = path.join(projectRoot, filePath)
-    const fileContent = await fs.readFile(fullPath, 'utf-8')
+    // Use public/data/ directory for bundled data (works in both dev and production)
+    const publicDataPath = path.join(process.cwd(), 'public', 'data', filePath)
+    const fileContent = await fs.readFile(publicDataPath, 'utf-8')
     return JSON.parse(fileContent) as T
   } catch (error) {
     console.error(`Error loading ${filePath}:`, error)

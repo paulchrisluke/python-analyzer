@@ -59,6 +59,7 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     name: Deploy Website to Cloudflare Pages
+    needs: run-etl-pipeline
     defaults:
       run:
         working-directory: ./website
@@ -67,19 +68,41 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v4
     
+    - name: Download ETL pipeline data
+      uses: actions/download-artifact@v4
+      with:
+        name: etl-pipeline-data
+        path: ../data/final/
+    
+    - name: Set up Python for ETL pipeline
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+    
+    - name: Install Python dependencies
+      run: |
+        cd ..
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+    
+    - name: Ensure data files are available
+      run: |
+        echo "Ensuring data files are available for build..."
+        ./scripts/ensure-data.sh
+    
     - name: Verify website data files
       run: |
         echo "Verifying website data files..."
         ls -la
-        echo "Checking if website data files exist..."
-        if [ ! -d "src/data" ]; then
-          echo "ERROR: src/data directory not found"
+        echo "Checking if public/data directory exists..."
+        if [ ! -d "public/data" ]; then
+          echo "ERROR: public/data directory not found"
           exit 1
         fi
-        echo "src/data directory exists"
-        ls -la src/data/
+        echo "public/data directory exists"
+        ls -la public/data/
         echo "Verifying required data files..."
-        if [ ! -f "src/data/landing_page_data.json" ]; then
+        if [ ! -f "public/data/landing_page_data.json" ]; then
           echo "ERROR: landing_page_data.json not found"
           exit 1
         fi
@@ -98,9 +121,9 @@ jobs:
     - name: Verify data files
       run: |
         echo "Verifying data files are available..."
-        ls -la src/data/
+        ls -la public/data/
         echo "Data files content:"
-        head -20 src/data/landing_page_data.json
+        head -20 public/data/landing_page_data.json
     
     - name: Build static website
       run: |
@@ -108,8 +131,8 @@ jobs:
         echo "Current working directory: $(pwd)"
         echo "Listing website directory contents:"
         ls -la
-        echo "Listing src directory contents:"
-        ls -la src/
+        echo "Listing public directory contents:"
+        ls -la public/
         echo "Running static build..."
         npm run build
     

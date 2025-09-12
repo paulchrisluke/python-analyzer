@@ -131,9 +131,10 @@ export function generateDataQualityAlerts(
   // Check equipment completeness
   const equipmentScore = coverageData.equipment.completeness_score
   if (equipmentScore < 100) {
+    const missingCategories = coverageData.equipment.coverage_details?.categories_missing || []
     alerts.push({
       type: 'warning',
-      message: `Equipment data ${equipmentScore}% complete - missing categories: ${coverageData.equipment.missing_documents.join(', ')}`,
+      message: `Equipment data ${equipmentScore}% complete - missing categories: ${missingCategories.join(', ')}`,
       category: 'Equipment',
       severity: equipmentScore < 50 ? 'high' : 'medium'
     })
@@ -177,7 +178,29 @@ export function formatPercentage(value: number | undefined | null): string {
 export function formatTimeAgo(timestamp: string): string {
   const now = new Date()
   const time = new Date(timestamp)
-  const diffInHours = Math.floor((now.getTime() - time.getTime()) / (1000 * 60 * 60))
+  
+  // Check for invalid timestamps
+  if (isNaN(time.getTime())) {
+    return 'Invalid date'
+  }
+  
+  const diffMs = now.getTime() - time.getTime()
+  
+  // Handle future timestamps
+  if (diffMs < 0) {
+    const absDiffMs = Math.abs(diffMs)
+    const absDiffInHours = Math.floor(absDiffMs / (1000 * 60 * 60))
+    
+    if (absDiffInHours < 24) {
+      return `In ${absDiffInHours} hour${absDiffInHours > 1 ? 's' : ''}`
+    } else {
+      const absDiffInDays = Math.floor(absDiffInHours / 24)
+      return `In ${absDiffInDays} day${absDiffInDays > 1 ? 's' : ''}`
+    }
+  }
+  
+  // Handle past timestamps (existing logic)
+  const diffInHours = Math.floor(diffMs / (1000 * 60 * 60))
   
   if (diffInHours < 1) {
     return 'Just now'
@@ -191,12 +214,32 @@ export function formatTimeAgo(timestamp: string): string {
 
 // Calculate data freshness status
 export function getDataFreshnessStatus(timestamp: string): {
-  status: 'fresh' | 'stale' | 'old';
+  status: 'fresh' | 'stale' | 'old' | 'invalid' | 'future';
   message: string;
-  color: 'green' | 'yellow' | 'red';
+  color: 'green' | 'yellow' | 'red' | 'gray' | 'blue';
 } {
   const now = new Date()
   const time = new Date(timestamp)
+  
+  // Check for invalid timestamps
+  if (isNaN(time.getTime())) {
+    return {
+      status: 'invalid',
+      message: 'Invalid timestamp',
+      color: 'gray'
+    }
+  }
+  
+  // Check for future timestamps
+  if (time.getTime() > now.getTime()) {
+    return {
+      status: 'future',
+      message: 'Future timestamp',
+      color: 'blue'
+    }
+  }
+  
+  // Only compute diffInHours for past timestamps
   const diffInHours = Math.floor((now.getTime() - time.getTime()) / (1000 * 60 * 60))
   
   if (diffInHours < 24) {

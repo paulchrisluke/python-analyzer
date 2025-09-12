@@ -723,19 +723,13 @@ class JsonLoader(BaseLoader):
         return landing_page_data
     
     def _copy_files_to_website(self, final_dir: Path) -> None:
-        """Copy essential JSON files to website directory for Next.js integration."""
+        """Copy essential JSON files to website public/data directory for Next.js integration."""
         try:
             import shutil
             
-            # Check if website data directory is configured via environment variable
-            website_data_dir_path = os.environ.get("WEBSITE_DATA_DIR")
-            if not website_data_dir_path:
-                logger.info("WEBSITE_DATA_DIR environment variable not set - skipping website file publishing")
-                self.load_results['website_publish_skipped'] = True
-                return
-            
-            # Define website data directory from environment variable
-            website_data_dir = Path(website_data_dir_path)
+            # Define website public/data directory (relative to project root)
+            project_root = Path(__file__).parent.parent.parent
+            website_data_dir = project_root / "website" / "public" / "data"
             website_data_dir.mkdir(parents=True, exist_ok=True)
             
             # Files to copy to website
@@ -743,7 +737,8 @@ class JsonLoader(BaseLoader):
                 "landing_page_data.json",
                 "financial_summary.json", 
                 "equipment_analysis.json",
-                "business_sale_data.json"
+                "business_sale_data.json",
+                "due_diligence_coverage.json"
             ]
             
             copied_files = []
@@ -753,18 +748,18 @@ class JsonLoader(BaseLoader):
                     dest_file = website_data_dir / filename
                     shutil.copy2(source_file, dest_file)
                     copied_files.append(filename)
-                    logger.info(f"Copied {filename} to website directory: {dest_file}")
+                    logger.info(f"Copied {filename} to website public/data directory: {dest_file}")
                 else:
                     logger.warning(f"Source file not found: {source_file}")
             
             if copied_files:
-                logger.info(f"Successfully copied {len(copied_files)} files to website directory")
+                logger.info(f"Successfully copied {len(copied_files)} files to website public/data directory")
                 self.load_results['website_files_copied'] = copied_files
             else:
-                logger.warning("No files were copied to website directory")
+                logger.warning("No files were copied to website public/data directory")
                 
         except Exception as e:
-            logger.error(f"Failed to copy files to website directory: {e}")
+            logger.error(f"Failed to copy files to website public/data directory: {e}")
             # Don't raise the exception - this is not critical for the main pipeline
     
     def _convert_dataframes_to_dict(self, data: Dict[str, Any]) -> Dict[str, Any]:

@@ -1,0 +1,121 @@
+{
+  "listing_details": {
+    "business_name": "Cranberry Hearing and Balance Center",
+    "business_type": "Audiology Practice",
+    "asking_price": 650000.0,
+    "established": "2010",
+    "locations": 2,
+    "state": "Pennsylvania"
+  },
+  "financial_highlights": {
+    "asking_price": 650000.0,
+    "annual_revenue": 932533.0299999996,
+    "annual_ebitda": 260403.12000000005,
+    "sde": 260403.12000000005,
+    "monthly_cash_flow": 21700.260000000006,
+    "roi": 40.062018461538464,
+    "payback_period": 2.4961298466777198,
+    "ebitda_margin": 27.924278456925023
+  },
+  "property_details": {
+    "primary_location": {
+      "location_id": "cranberry_pa",
+      "name": "Cranberry Hearing & Balance",
+      "address": "20820 Route 19, Suite A",
+      "city": "Cranberry Twp",
+      "state": "PA",
+      "zip_code": "16066",
+      "phone": "724-779-4444",
+      "google_maps_url": "https://www.google.com/maps/place/20820%20Route%2019+Cranberry%20Twp+PA+16066",
+      "location_type": "primary",
+      "for_sale": true
+    },
+    "secondary_location": {
+      "location_id": "west_view_pa",
+      "name": "Cranberry Hearing & Balance - West View",
+      "address": "999 West View Park Drive",
+      "city": "Pittsburgh",
+      "state": "PA",
+      "zip_code": "15229",
+      "phone": "412-931-9290",
+      "google_maps_url": "https://www.google.com/maps/place/999%20West%20View%20Park%20Drive+Pittsburgh+PA+15229",
+      "location_type": "satellite",
+      "for_sale": true
+    },
+    "lease_analysis": {
+      "monthly_rent": 2500,
+      "annual_rent": 30000,
+      "monthly_cam": 100.0,
+      "annual_cam": 1200,
+      "total_monthly_cost": 2600.0,
+      "total_annual_cost": 31200,
+      "cam_percentage": 4.0
+    },
+    "total_locations": 2,
+    "property_type": "Leased"
+  },
+  "business_operations": {
+    "services": [
+      "Hearing Tests",
+      "Hearing Aid Sales",
+      "Balance Testing",
+      "Tinnitus Treatment"
+    ],
+    "insurance_coverage": {
+      "total_insurers": 2,
+      "insurers": [
+        {
+          "name": "UPMC",
+          "years_active": 19,
+          "contract_date": "2006-08-31",
+          "status": "Active",
+          "coverage_type": "Primary Insurance"
+        },
+        {
+          "name": "Aetna",
+          "years_active": 10,
+          "contract_date": "2015-09-28",
+          "status": "Active",
+          "coverage_type": "Primary Insurance"
+        }
+      ],
+      "total_years_coverage": 29,
+      "average_years_per_insurer": 14.5,
+      "coverage_stability_score": 100
+    },
+    "payment_methods": [
+      "Insurance billing (UPMC, Aetna)",
+      "Private pay",
+      "Cash payments"
+    ],
+    "equipment_value": "61727.50",
+    "business_hours": "Monday-Friday 9AM-5PM"
+  },
+  "market_opportunity": {
+    "local_market": "Cranberry Township & Pittsburgh Metro Area",
+    "competition": "Limited local competition",
+    "growth_potential": "High - aging population demographics",
+    "market_advantage": "Established insurance relationships"
+  },
+  "transaction_terms": {
+    "financing_available": true,
+    "seller_financing": "20% down, seller carryback available",
+    "training_period": "30 days",
+    "reason_for_sale": "Owner retirement and lifestyle change",
+    "transition_support": "Available for smooth transition"
+  },
+  "key_benefits": [
+    "Established insurance relationships (UPMC since 2006, Aetna since 2015)",
+    "Two prime locations in growing markets",
+    "Professional audiology equipment included",
+    "Steady cash flow from insurance payments",
+    "Absentee owner opportunity",
+    "Strong EBITDA margins"
+  ],
+  "metadata": {
+    "generated_at": "2025-09-12T11:05:05.097783",
+    "etl_run_timestamp": "2025-09-12T04:05:05.097788+00:00",
+    "data_source": "ETL Pipeline Analysis",
+    "version": "1.0"
+  }
+}

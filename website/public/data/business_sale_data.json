@@ -1,0 +1,844 @@
+{
+  "metadata": {
+    "business_name": "Cranberry Hearing and Balance Center",
+    "generated_at": "2025-09-12T11:05:05.092703",
+    "etl_run_timestamp": "2025-09-12T04:05:05.092714+00:00",
+    "data_period": "2023-01-01 to 2025-06-30",
+    "months_analyzed": 30,
+    "data_source": "ETL Pipeline - Real Business Data",
+    "analysis_period": "2023-01-01 to 2025-06-30"
+  },
+  "sales": {
+    "total_transactions": 0,
+    "total_revenue": 2331332.5749999993
+  },
+  "financials": {
+    "documents": [
+      {
+        "name": "Profit and Loss Statements 2023-2024",
+        "file_path": "docs/financials/Profit_and_Loss/",
+        "status": true,
+        "notes": "Monthly P&L statements for 2023-2024",
+        "due_date": null,
+        "file_type": "CSV",
+        "file_size": "2.5MB",
+        "visibility": [
+          "public",
+          "nda",
+          "buyer",
+          "internal"
+        ]
+      },
+      {
+        "name": "Balance Sheets 2022",
+        "file_path": "docs/financials/Balance_Sheets/",
+        "status": true,
+        "notes": "Monthly balance sheets for 2022",
+        "due_date": null,
+        "file_type": "CSV",
+        "file_size": "1.8MB",
+        "visibility": [
+          "nda",
+          "buyer",
+          "internal"
+        ]
+      },
+      {
+        "name": "General Ledger 2021-2025",
+        "file_path": "docs/financials/General_Ledger/",
+        "status": true,
+        "notes": "Complete general ledger entries",
+        "due_date": null,
+        "file_type": "CSV",
+        "file_size": "15.2MB",
+        "visibility": [
+          "buyer",
+          "internal"
+        ]
+      }
+    ],
+    "metrics": {
+      "annual_revenue_projection": 932533.0299999996,
+      "estimated_annual_ebitda": 260403.12000000005,
+      "roi_percentage": 40.062018461538464,
+      "visibility": [
+        "public",
+        "nda",
+        "buyer",
+        "internal"
+      ]
+    }
+  },
+  "equipment": {
+    "total_value": "61727.50",
+    "items": [
+      {
+        "name": "CL-12B LP Single Wall Room O.D. 6'2\"x4'4\"x7'2\" I.D.\n5'6\"x3'8\"x6'6\"",
+        "part_number": "68068-004",
+        "quantity": 1,
+        "unit_price": "8555.00",
+        "total_price": "8555.00",
+        "category": "Test Booth",
+        "source_file": "2019-11-06_Celloaudiometer_Cosmetichearingsolutions.csv",
+        "value": "8555.00",
+        "file_path": "docs/equipment/2019-11-06_Celloaudiometer_Cosmetichearingsolutions.csv",
+        "status": true,
+        "notes": "Equipment item from 2019-11-06_Celloaudiometer_Cosmetichearingsolutions.csv",
+        "due_date": null,
+        "file_type": "CSV",
+        "file_size": "Unknown",
+        "visibility": [
+          "public",
+          "nda",
+          "buyer",
+          "internal"
+        ]
+      },
+      {
+        "name": "20'' X 60\" Window In Door",
+        "part_number": "68066-500",
+        "quantity": 1,
+        "unit_price": "400.00",
+        "total_price": "400.00",
+        "category": "Other",
+        "source_file": "2019-11-06_Celloaudiometer_Cosmetichearingsolutions.csv",
+        "value": "400.00",
+        "file_path": "docs/equipment/2019-11-06_Celloaudiometer_Cosmetichearingsolutions.csv",
+        "status": true,
+        "notes": "Equipment item from 2019-11-06_Celloaudiometer_Cosmetichearingsolutions.csv",
+        "due_date": null,
+        "file_type": "CSV",
+        "file_size": "Unknown",
+        "visibility": [
+          "public",
+          "nda",
+          "buyer",
+          "internal"
+        ]
+      },
+      {
+        "name": "CL12B LP standard Installation with Cello connections\nand FF calibration if needed",
+        "part_number": "MISCEQU",
+        "quantity": 1,
+        "unit_price": "4000.00",
+        "total_price": "4000.00",
+        "category": "Audiometer",
+        "source_file": "2019-11-06_Celloaudiometer_Cosmetichearingsolutions.csv",
+        "value": "4000.00",
+        "file_path": "docs/equipment/2019-11-06_Celloaudiometer_Cosmetichearingsolutions.csv",
+        "status": true,
+        "notes": "Equipment item from 2019-11-06_Celloaudiometer_Cosmetichearingsolutions.csv",
+        "due_date": null,
+        "file_type": "CSV",
+        "file_size": "Unknown",
+        "visibility": [
+          "public",
+          "nda",
+          "buyer",
+          "internal"
+        ]
+      },
+      {
+        "name": "Sound room freight",
+        "part_number": "MISCEQU",
+        "quantity": 1,
+        "unit_price": "1900.00",
+        "total_price": "1900.00",
+        "category": "Test Booth",
+        "source_file": "2019-11-06_Celloaudiometer_Cosmetichearingsolutions.csv",
+        "value": "1900.00",
+        "file_path": "docs/equipment/2019-11-06_Celloaudiometer_Cosmetichearingsolutions.csv",
+        "status": true,
+        "notes": "Equipment item from 2019-11-06_Celloaudiometer_Cosmetichearingsolutions.csv",
+        "due_date": null,
+        "file_type": "CSV",
+        "file_size": "Unknown",
+        "visibility": [
+          "public",
+          "nda",
+          "buyer",
+          "internal"
+        ]
+      },
+      {
+        "name": "Cello Computer Controled Diagnostic Audiometer",
+        "part_number": "31243-051",
+        "quantity": 1,
+        "unit_price": "3420.00",
+        "total_price": "3420.00",
+        "category": "Audiometer",
+        "source_file": "2019-11-06_Celloaudiometer_Cosmetichearingsolutions.csv",
+        "value": "3420.00",
+        "file_path": "docs/equipment/2019-11-06_Celloaudiometer_Cosmetichearingsolutions.csv",
+        "status": true,
+        "notes": "Equipment item from 2019-11-06_Celloaudiometer_Cosmetichearingsolutions.csv",
+        "due_date": null,
+        "file_type": "CSV",
+        "file_size": "Unknown",
+        "visibility": [
+          "public",
+          "nda",
+          "buyer",
+          "internal"
+        ]
+      },
+      {
+        "name": "ER 3C Insert Earphone",
+        "part_number": "68001-080",
+        "quantity": 1,
+        "unit_price": "450.00",
+        "total_price": "450.00",
+        "category": "Accessory",
+        "source_file": "2019-11-06_Celloaudiometer_Cosmetichearingsolutions.csv",
+        "value": "450.00",
+        "file_path": "docs/equipment/2019-11-06_Celloaudiometer_Cosmetichearingsolutions.csv",
+        "status": true,
+        "notes": "Equipment item from 2019-11-06_Celloaudiometer_Cosmetichearingsolutions.csv",
+        "due_date": null,
+        "file_type": "CSV",
+        "file_size": "Unknown",
+        "visibility": [
+          "public",
+          "nda",
+          "buyer",
+          "internal"
+        ]
+      },
+      {
+        "name": "Cable Gray 3 Ft",
+        "part_number": "19101-031",
+        "quantity": 3,
+        "unit_price": "12.50",
+        "total_price": "37.50",
+        "category": "Accessory",
+        "source_file": "2019-11-06_Celloaudiometer_Cosmetichearingsolutions.csv",
+        "value": "37.50",
+        "file_path": "docs/equipment/2019-11-06_Celloaudiometer_Cosmetichearingsolutions.csv",
+        "status": true,
+        "notes": "Equipment item from 2019-11-06_Celloaudiometer_Cosmetichearingsolutions.csv",
+        "due_date": null,
+        "file_type": "CSV",
+        "file_size": "Unknown",
+        "visibility": [
+          "public",
+          "nda",
+          "buyer",
+          "internal"
+        ]
+      },
+      {
+        "name": "Cable Red 3 Ft",
+        "part_number": "19101-032",
+        "quantity": 2,
+        "unit_price": "12.50",
+        "total_price": "25.00",
+        "category": "Accessory",
+        "source_file": "2019-11-06_Celloaudiometer_Cosmetichearingsolutions.csv",
+        "value": "25.00",
+        "file_path": "docs/equipment/2019-11-06_Celloaudiometer_Cosmetichearingsolutions.csv",
+        "status": true,
+        "notes": "Equipment item from 2019-11-06_Celloaudiometer_Cosmetichearingsolutions.csv",
+        "due_date": null,
+        "file_type": "CSV",
+        "file_size": "Unknown",
+        "visibility": [
+          "public",
+          "nda",
+          "buyer",
+          "internal"
+        ]
+      },
+      {
+        "name": "Cable Blue 3 Ft",
+        "part_number": "19101-033",
+        "quantity": 2,
+        "unit_price": "12.50",
+        "total_price": "25.00",
+        "category": "Accessory",
+        "source_file": "2019-11-06_Celloaudiometer_Cosmetichearingsolutions.csv",
+        "value": "25.00",
+        "file_path": "docs/equipment/2019-11-06_Celloaudiometer_Cosmetichearingsolutions.csv",
+        "status": true,
+        "notes": "Equipment item from 2019-11-06_Celloaudiometer_Cosmetichearingsolutions.csv",
+        "due_date": null,
+        "file_type": "CSV",
+        "file_size": "Unknown",
+        "visibility": [
+          "public",
+          "nda",
+          "buyer",
+          "internal"
+        ]
+      },
+      {
+        "name": "CL-12B LP Single Wall Room O.D. 6'2\"x4'4\"x7'2\" I.D.\n5'6\"x3'8\"x6'6\"",
+        "part_number": "68068-004",
+        "quantity": 1,
+        "unit_price": "8555.00",
+        "total_price": "8555.00",
+        "category": "Test Booth",
+        "source_file": "2019-11-08_Celloaudiometer_Trumpetrem_Cranberryhearing.csv",
+        "value": "8555.00",
+        "file_path": "docs/equipment/2019-11-08_Celloaudiometer_Trumpetrem_Cranberryhearing.csv",
+        "status": true,
+        "notes": "Equipment item from 2019-11-08_Celloaudiometer_Trumpetrem_Cranberryhearing.csv",
+        "due_date": null,
+        "file_type": "CSV",
+        "file_size": "Unknown",
+        "visibility": [
+          "public",
+          "nda",
+          "buyer",
+          "internal"
+        ]
+      },
+      {
+        "name": "20'' X 60\" Window In Door",
+        "part_number": "68066-500",
+        "quantity": 1,
+        "unit_price": "400.00",
+        "total_price": "400.00",
+        "category": "Other",
+        "source_file": "2019-11-08_Celloaudiometer_Trumpetrem_Cranberryhearing.csv",
+        "value": "400.00",
+        "file_path": "docs/equipment/2019-11-08_Celloaudiometer_Trumpetrem_Cranberryhearing.csv",
+        "status": true,
+        "notes": "Equipment item from 2019-11-08_Celloaudiometer_Trumpetrem_Cranberryhearing.csv",
+        "due_date": null,
+        "file_type": "CSV",
+        "file_size": "Unknown",
+        "visibility": [
+          "public",
+          "nda",
+          "buyer",
+          "internal"
+        ]
+      },
+      {
+        "name": "CL12BLP Sound booth and audiometer install",
+        "part_number": "MISCEQU",
+        "quantity": 1,
+        "unit_price": "4000.00",
+        "total_price": "4000.00",
+        "category": "Audiometer",
+        "source_file": "2019-11-08_Celloaudiometer_Trumpetrem_Cranberryhearing.csv",
+        "value": "4000.00",
+        "file_path": "docs/equipment/2019-11-08_Celloaudiometer_Trumpetrem_Cranberryhearing.csv",
+        "status": true,
+        "notes": "Equipment item from 2019-11-08_Celloaudiometer_Trumpetrem_Cranberryhearing.csv",
+        "due_date": null,
+        "file_type": "CSV",
+        "file_size": "Unknown",
+        "visibility": [
+          "public",
+          "nda",
+          "buyer",
+          "internal"
+        ]
+      },
+      {
+        "name": "Sound Booth Freight",
+        "part_number": "MISCEQU",
+        "quantity": 1,
+        "unit_price": "1000.00",
+        "total_price": "1000.00",
+        "category": "Test Booth",
+        "source_file": "2019-11-08_Celloaudiometer_Trumpetrem_Cranberryhearing.csv",
+        "value": "1000.00",
+        "file_path": "docs/equipment/2019-11-08_Celloaudiometer_Trumpetrem_Cranberryhearing.csv",
+        "status": true,
+        "notes": "Equipment item from 2019-11-08_Celloaudiometer_Trumpetrem_Cranberryhearing.csv",
+        "due_date": null,
+        "file_type": "CSV",
+        "file_size": "Unknown",
+        "visibility": [
+          "public",
+          "nda",
+          "buyer",
+          "internal"
+        ]
+      },
+      {
+        "name": "Cello Computer Controled Diagnostic Audiometer\nIncludes QSIN License",
+        "part_number": "31243-051",
+        "quantity": 1,
+        "unit_price": "3420.00",
+        "total_price": "3420.00",
+        "category": "Audiometer",
+        "source_file": "2019-11-08_Celloaudiometer_Trumpetrem_Cranberryhearing.csv",
+        "value": "3420.00",
+        "file_path": "docs/equipment/2019-11-08_Celloaudiometer_Trumpetrem_Cranberryhearing.csv",
+        "status": true,
+        "notes": "Equipment item from 2019-11-08_Celloaudiometer_Trumpetrem_Cranberryhearing.csv",
+        "due_date": null,
+        "file_type": "CSV",
+        "file_size": "Unknown",
+        "visibility": [
+          "public",
+          "nda",
+          "buyer",
+          "internal"
+        ]
+      },
+      {
+        "name": "ER 3C Insert Earphone",
+        "part_number": "68001-080",
+        "quantity": 1,
+        "unit_price": "450.00",
+        "total_price": "450.00",
+        "category": "Accessory",
+        "source_file": "2019-11-08_Celloaudiometer_Trumpetrem_Cranberryhearing.csv",
+        "value": "450.00",
+        "file_path": "docs/equipment/2019-11-08_Celloaudiometer_Trumpetrem_Cranberryhearing.csv",
+        "status": true,
+        "notes": "Equipment item from 2019-11-08_Celloaudiometer_Trumpetrem_Cranberryhearing.csv",
+        "due_date": null,
+        "file_type": "CSV",
+        "file_size": "Unknown",
+        "visibility": [
+          "public",
+          "nda",
+          "buyer",
+          "internal"
+        ]
+      },
+      {
+        "name": "Cable Gray 3 Ft",
+        "part_number": "19101-031",
+        "quantity": 3,
+        "unit_price": "12.50",
+        "total_price": "37.50",
+        "category": "Accessory",
+        "source_file": "2019-11-08_Celloaudiometer_Trumpetrem_Cranberryhearing.csv",
+        "value": "37.50",
+        "file_path": "docs/equipment/2019-11-08_Celloaudiometer_Trumpetrem_Cranberryhearing.csv",
+        "status": true,
+        "notes": "Equipment item from 2019-11-08_Celloaudiometer_Trumpetrem_Cranberryhearing.csv",
+        "due_date": null,
+        "file_type": "CSV",
+        "file_size": "Unknown",
+        "visibility": [
+          "public",
+          "nda",
+          "buyer",
+          "internal"
+        ]
+      },
+      {
+        "name": "Cable Red 3 Ft",
+        "part_number": "19101-032",
+        "quantity": 2,
+        "unit_price": "12.50",
+        "total_price": "25.00",
+        "category": "Accessory",
+        "source_file": "2019-11-08_Celloaudiometer_Trumpetrem_Cranberryhearing.csv",
+        "value": "25.00",
+        "file_path": "docs/equipment/2019-11-08_Celloaudiometer_Trumpetrem_Cranberryhearing.csv",
+        "status": true,
+        "notes": "Equipment item from 2019-11-08_Celloaudiometer_Trumpetrem_Cranberryhearing.csv",
+        "due_date": null,
+        "file_type": "CSV",
+        "file_size": "Unknown",
+        "visibility": [
+          "public",
+          "nda",
+          "buyer",
+          "internal"
+        ]
+      },
+      {
+        "name": "Cable Blue 3 Ft",
+        "part_number": "19101-033",
+        "quantity": 2,
+        "unit_price": "12.50",
+        "total_price": "25.00",
+        "category": "Accessory",
+        "source_file": "2019-11-08_Celloaudiometer_Trumpetrem_Cranberryhearing.csv",
+        "value": "25.00",
+        "file_path": "docs/equipment/2019-11-08_Celloaudiometer_Trumpetrem_Cranberryhearing.csv",
+        "status": true,
+        "notes": "Equipment item from 2019-11-08_Celloaudiometer_Trumpetrem_Cranberryhearing.csv",
+        "due_date": null,
+        "file_type": "CSV",
+        "file_size": "Unknown",
+        "visibility": [
+          "public",
+          "nda",
+          "buyer",
+          "internal"
+        ]
+      },
+      {
+        "name": "Trumpet REM - Real-Ear Measurement system",
+        "part_number": "31243-067",
+        "quantity": 1,
+        "unit_price": "4090.00",
+        "total_price": "4090.00",
+        "category": "REM System",
+        "source_file": "2019-11-08_Celloaudiometer_Trumpetrem_Cranberryhearing.csv",
+        "value": "4090.00",
+        "file_path": "docs/equipment/2019-11-08_Celloaudiometer_Trumpetrem_Cranberryhearing.csv",
+        "status": true,
+        "notes": "Equipment item from 2019-11-08_Celloaudiometer_Trumpetrem_Cranberryhearing.csv",
+        "due_date": null,
+        "file_type": "CSV",
+        "file_size": "Unknown",
+        "visibility": [
+          "public",
+          "nda",
+          "buyer",
+          "internal"
+        ]
+      },
+      {
+        "name": "CL-12B LP Single Wall Room O.D. 6'2\"x4'4\"x7'2\" I.D.\n5'6\"x3'8\"x6'6\"",
+        "part_number": "68068-004",
+        "quantity": 1,
+        "unit_price": "8555.00",
+        "total_price": "8555.00",
+        "category": "Test Booth",
+        "source_file": "2019-11-11_Trumpetrem_Audiometercombo_Cranberryhearing.csv",
+        "value": "8555.00",
+        "file_path": "docs/equipment/2019-11-11_Trumpetrem_Audiometercombo_Cranberryhearing.csv",
+        "status": true,
+        "notes": "Equipment item from 2019-11-11_Trumpetrem_Audiometercombo_Cranberryhearing.csv",
+        "due_date": null,
+        "file_type": "CSV",
+        "file_size": "Unknown",
+        "visibility": [
+          "public",
+          "nda",
+          "buyer",
+          "internal"
+        ]
+      },
+      {
+        "name": "20'' X 60\" Window In Door",
+        "part_number": "68066-500",
+        "quantity": 1,
+        "unit_price": "400.00",
+        "total_price": "400.00",
+        "category": "Other",
+        "source_file": "2019-11-11_Trumpetrem_Audiometercombo_Cranberryhearing.csv",
+        "value": "400.00",
+        "file_path": "docs/equipment/2019-11-11_Trumpetrem_Audiometercombo_Cranberryhearing.csv",
+        "status": true,
+        "notes": "Equipment item from 2019-11-11_Trumpetrem_Audiometercombo_Cranberryhearing.csv",
+        "due_date": null,
+        "file_type": "CSV",
+        "file_size": "Unknown",
+        "visibility": [
+          "public",
+          "nda",
+          "buyer",
+          "internal"
+        ]
+      },
+      {
+        "name": "CL12BLP Sound booth and audiometer install",
+        "part_number": "MISCEQU",
+        "quantity": 1,
+        "unit_price": "4000.00",
+        "total_price": "4000.00",
+        "category": "Audiometer",
+        "source_file": "2019-11-11_Trumpetrem_Audiometercombo_Cranberryhearing.csv",
+        "value": "4000.00",
+        "file_path": "docs/equipment/2019-11-11_Trumpetrem_Audiometercombo_Cranberryhearing.csv",
+        "status": true,
+        "notes": "Equipment item from 2019-11-11_Trumpetrem_Audiometercombo_Cranberryhearing.csv",
+        "due_date": null,
+        "file_type": "CSV",
+        "file_size": "Unknown",
+        "visibility": [
+          "public",
+          "nda",
+          "buyer",
+          "internal"
+        ]
+      },
+      {
+        "name": "Sound Booth Freight",
+        "part_number": "MISCEQU",
+        "quantity": 1,
+        "unit_price": "1000.00",
+        "total_price": "1000.00",
+        "category": "Test Booth",
+        "source_file": "2019-11-11_Trumpetrem_Audiometercombo_Cranberryhearing.csv",
+        "value": "1000.00",
+        "file_path": "docs/equipment/2019-11-11_Trumpetrem_Audiometercombo_Cranberryhearing.csv",
+        "status": true,
+        "notes": "Equipment item from 2019-11-11_Trumpetrem_Audiometercombo_Cranberryhearing.csv",
+        "due_date": null,
+        "file_type": "CSV",
+        "file_size": "Unknown",
+        "visibility": [
+          "public",
+          "nda",
+          "buyer",
+          "internal"
+        ]
+      },
+      {
+        "name": "Trumpet REM & Aud - Real-Ear Measurement system &\nDiagnostic Audiom",
+        "part_number": "31243-071",
+        "quantity": 1,
+        "unit_price": "6180.00",
+        "total_price": "6180.00",
+        "category": "REM System",
+        "source_file": "2019-11-11_Trumpetrem_Audiometercombo_Cranberryhearing.csv",
+        "value": "6180.00",
+        "file_path": "docs/equipment/2019-11-11_Trumpetrem_Audiometercombo_Cranberryhearing.csv",
+        "status": true,
+        "notes": "Equipment item from 2019-11-11_Trumpetrem_Audiometercombo_Cranberryhearing.csv",
+        "due_date": null,
+        "file_type": "CSV",
+        "file_size": "Unknown",
+        "visibility": [
+          "public",
+          "nda",
+          "buyer",
+          "internal"
+        ]
+      },
+      {
+        "name": "ER 3C Insert Earphone",
+        "part_number": "68001-080",
+        "quantity": 1,
+        "unit_price": "450.00",
+        "total_price": "450.00",
+        "category": "Accessory",
+        "source_file": "2019-11-11_Trumpetrem_Audiometercombo_Cranberryhearing.csv",
+        "value": "450.00",
+        "file_path": "docs/equipment/2019-11-11_Trumpetrem_Audiometercombo_Cranberryhearing.csv",
+        "status": true,
+        "notes": "Equipment item from 2019-11-11_Trumpetrem_Audiometercombo_Cranberryhearing.csv",
+        "due_date": null,
+        "file_type": "CSV",
+        "file_size": "Unknown",
+        "visibility": [
+          "public",
+          "nda",
+          "buyer",
+          "internal"
+        ]
+      },
+      {
+        "name": "Cable Gray 3 Ft",
+        "part_number": "19101-031",
+        "quantity": 3,
+        "unit_price": "12.50",
+        "total_price": "37.50",
+        "category": "Accessory",
+        "source_file": "2019-11-11_Trumpetrem_Audiometercombo_Cranberryhearing.csv",
+        "value": "37.50",
+        "file_path": "docs/equipment/2019-11-11_Trumpetrem_Audiometercombo_Cranberryhearing.csv",
+        "status": true,
+        "notes": "Equipment item from 2019-11-11_Trumpetrem_Audiometercombo_Cranberryhearing.csv",
+        "due_date": null,
+        "file_type": "CSV",
+        "file_size": "Unknown",
+        "visibility": [
+          "public",
+          "nda",
+          "buyer",
+          "internal"
+        ]
+      },
+      {
+        "name": "Cable Red 3 Ft",
+        "part_number": "19101-032",
+        "quantity": 2,
+        "unit_price": "12.50",
+        "total_price": "25.00",
+        "category": "Accessory",
+        "source_file": "2019-11-11_Trumpetrem_Audiometercombo_Cranberryhearing.csv",
+        "value": "25.00",
+        "file_path": "docs/equipment/2019-11-11_Trumpetrem_Audiometercombo_Cranberryhearing.csv",
+        "status": true,
+        "notes": "Equipment item from 2019-11-11_Trumpetrem_Audiometercombo_Cranberryhearing.csv",
+        "due_date": null,
+        "file_type": "CSV",
+        "file_size": "Unknown",
+        "visibility": [
+          "public",
+          "nda",
+          "buyer",
+          "internal"
+        ]
+      },
+      {
+        "name": "Cable Blue 3 Ft",
+        "part_number": "19101-033",
+        "quantity": 2,
+        "unit_price": "12.50",
+        "total_price": "25.00",
+        "category": "Accessory",
+        "source_file": "2019-11-11_Trumpetrem_Audiometercombo_Cranberryhearing.csv",
+        "value": "25.00",
+        "file_path": "docs/equipment/2019-11-11_Trumpetrem_Audiometercombo_Cranberryhearing.csv",
+        "status": true,
+        "notes": "Equipment item from 2019-11-11_Trumpetrem_Audiometercombo_Cranberryhearing.csv",
+        "due_date": null,
+        "file_type": "CSV",
+        "file_size": "Unknown",
+        "visibility": [
+          "public",
+          "nda",
+          "buyer",
+          "internal"
+        ]
+      }
+    ]
+  },
+  "legal": {
+    "documents": [
+      {
+        "name": "Business License",
+        "file_path": "docs/legal/business_license.pdf",
+        "status": true,
+        "notes": "Current business license",
+        "due_date": "2025-12-31",
+        "file_type": "PDF",
+        "file_size": "2.1MB",
+        "visibility": [
+          "public",
+          "nda",
+          "buyer",
+          "internal"
+        ]
+      },
+      {
+        "name": "Insurance Policies",
+        "file_path": "docs/legal/insurance_policies.pdf",
+        "status": true,
+        "notes": "General liability and professional insurance",
+        "due_date": "2025-06-30",
+        "file_type": "PDF",
+        "file_size": "5.3MB",
+        "visibility": [
+          "nda",
+          "buyer",
+          "internal"
+        ]
+      }
+    ],
+    "visibility": [
+      "public",
+      "nda",
+      "buyer",
+      "internal"
+    ]
+  },
+  "operational": {
+    "documents": [
+      {
+        "name": "Standard Operating Procedures",
+        "file_path": "docs/operational/sop.pdf",
+        "status": true,
+        "notes": "Complete SOP documentation",
+        "due_date": null,
+        "file_type": "PDF",
+        "file_size": "3.2MB",
+        "visibility": [
+          "nda",
+          "buyer",
+          "internal"
+        ]
+      }
+    ],
+    "visibility": [
+      "nda",
+      "buyer",
+      "internal"
+    ]
+  },
+  "closing": {
+    "documents": [
+      {
+        "name": "Purchase Agreement",
+        "file_path": "docs/closing/purchase_agreement.pdf",
+        "status": false,
+        "notes": "Draft purchase agreement",
+        "due_date": "2025-10-15",
+        "file_type": "PDF",
+        "file_size": "1.5MB",
+        "visibility": [
+          "buyer",
+          "internal"
+        ]
+      },
+      {
+        "name": "Closing Checklist",
+        "file_path": "docs/closing/closing_checklist.pdf",
+        "status": false,
+        "notes": "Pre-closing checklist",
+        "due_date": "2025-10-30",
+        "file_type": "PDF",
+        "file_size": "0.8MB",
+        "visibility": [
+          "internal"
+        ]
+      }
+    ],
+    "milestones": [
+      {
+        "name": "Due Diligence Complete",
+        "status": true,
+        "date": "2025-09-07",
+        "visibility": [
+          "buyer",
+          "internal"
+        ]
+      },
+      {
+        "name": "Purchase Agreement Signed",
+        "status": false,
+        "date": null,
+        "visibility": [
+          "buyer",
+          "internal"
+        ]
+      }
+    ],
+    "visibility": [
+      "buyer",
+      "internal"
+    ]
+  },
+  "valuation": {
+    "asking_price": 650000.0,
+    "market_value": 987072.75,
+    "discount_percentage": 34.15,
+    "discount_amount": 337072.75
+  },
+  "locations": [],
+  "highlights": [
+    "Strong Margins: 27.9% EBITDA margin",
+    "Healthcare Industry: Recession-resistant business",
+    "Turnkey Operation: Complete infrastructure included",
+    "Below Market Value: 34% discount from industry standard",
+    "High ROI: 40.1% annual return potential"
+  ],
+  "summary_cards": {
+    "revenue_total": {
+      "value": 0,
+      "label": "Total Revenue",
+      "description": "2021-2025 Performance"
+    },
+    "annual_ebitda": {
+      "value": 260403.12000000005,
+      "label": "Annual EBITDA",
+      "description": "Projected Annual"
+    },
+    "roi": {
+      "value": 40.062018461538464,
+      "label": "ROI",
+      "description": "Annual Return"
+    },
+    "equipment_value": {
+      "value": "61727.50",
+      "label": "Equipment Value",
+      "description": "Included in Sale"
+    }
+  }
+}

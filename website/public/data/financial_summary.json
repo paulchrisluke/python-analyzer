@@ -1,0 +1,26 @@
+{
+  "summary": {
+    "revenue_metrics": {
+      "total_revenue": 2331332.5749999993,
+      "annual_revenue_projection": 932533.0299999996,
+      "monthly_revenue_average": 77711.0858333333,
+      "analysis_period_months": 30
+    },
+    "start_date": "2023-01-01",
+    "end_date": "2025-06-30",
+    "profitability": {
+      "estimated_ebitda": 21700.260000000006,
+      "ebitda_margin": 27.924278456925023,
+      "estimated_annual_ebitda": 260403.12000000005
+    },
+    "investment_metrics": {
+      "asking_price": 650000.0,
+      "estimated_annual_ebitda": 260403.12000000005,
+      "roi_percentage": 40.062018461538464,
+      "payback_period_years": 2.4961298466777198
+    }
+  },
+  "generated_at": "2025-09-12T11:05:05.095291",
+  "etl_run_timestamp": "2025-09-12T04:05:05.095301+00:00",
+  "data_source": "ETL Pipeline Analysis"
+}

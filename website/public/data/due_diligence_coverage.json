@@ -1,0 +1,80 @@
+{
+  "sales": {
+    "status": "no_data",
+    "completeness_score": 0,
+    "missing_periods": [],
+    "data_quality_issues": [
+      "No sales data found"
+    ],
+    "coverage_details": {},
+    "fallback_strategies": []
+  },
+  "financial": {
+    "status": "good",
+    "completeness_score": 75.0,
+    "missing_documents": [
+      "profit_loss"
+    ],
+    "data_quality_issues": [
+      "Missing 1 critical financial documents"
+    ],
+    "coverage_details": {
+      "found_documents": [
+        "balance_sheets_balance_sheets",
+        "general_ledger_general_ledger",
+        "cogs_cogs"
+      ],
+      "missing_documents": [
+        "profit_loss"
+      ],
+      "total_expected": 4,
+      "found_count": 3
+    },
+    "fallback_strategies": [
+      "Use sales data to estimate P&L based on industry margins"
+    ],
+    "coverage_percentage": 75.0
+  },
+  "equipment": {
+    "status": "good",
+    "completeness_score": 50.0,
+    "missing_documents": [
+      "hearing_aid_programmer",
+      "audiometer"
+    ],
+    "data_quality_issues": [
+      "Missing equipment categories: ['hearing_aid_programmer', 'audiometer']",
+      "Equipment value seems low for audiology practice"
+    ],
+    "coverage_details": {
+      "equipment_count": 3,
+      "total_value": "25665.00",
+      "found_categories": [
+        "diagnostic_equipment",
+        "office_equipment"
+      ],
+      "missing_categories": [
+        "hearing_aid_programmer",
+        "audiometer"
+      ]
+    },
+    "fallback_strategies": [
+      "Use industry averages for missing equipment categories",
+      "Estimate equipment value based on practice size and type"
+    ],
+    "coverage_percentage": 50.0
+  },
+  "due_diligence": {
+    "overall_score": 40.0,
+    "readiness_level": "poor",
+    "recommendation": "Not ready for due diligence",
+    "category_scores": {
+      "sales": 0,
+      "financial": 75.0,
+      "equipment": 50.0
+    }
+  },
+  "recommendations": [
+    "Data coverage is poor - significant gaps need to be addressed"
+  ]
+}

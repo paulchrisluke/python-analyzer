@@ -47,6 +47,7 @@ logs/
 
 # Exception: Allow website data directory (contains public business listing data)
 !website/src/data/
+!website/public/data/
 
 # ALL sensitive directories - completely exclude
 01_FINANCIAL_DATA/

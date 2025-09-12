@@ -5,7 +5,10 @@
   "type": "module",
   "scripts": {
     "dev": "next dev",
+    "dev:with-data": "./scripts/dev-with-data.sh",
     "build": "next build",
+    "build:with-data": "./scripts/build-with-data.sh",
+    "ensure-data": "./scripts/ensure-data.sh",
     "export": "next build && next export",
     "start": "next start",
     "test": "playwright test",
