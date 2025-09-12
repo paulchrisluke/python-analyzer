@@ -2,20 +2,30 @@
   "listing_details": {
     "business_name": "Cranberry Hearing and Balance Center",
     "business_type": "Audiology Practice",
-    "asking_price": 650000.0,
-    "established": "2010",
+    "asking_price": {
+      "value": 650000.0,
+      "currency": "USD"
+    },
+    "established": 2010,
     "locations": 2,
-    "state": "Pennsylvania"
+    "state": "PA"
   },
   "financial_highlights": {
-    "asking_price": 650000.0,
-    "annual_revenue": 932533.0299999996,
-    "annual_ebitda": 260403.12000000005,
-    "sde": 260403.12000000005,
-    "monthly_cash_flow": 21700.260000000006,
-    "roi": 40.062018461538464,
-    "payback_period": 2.4961298466777198,
-    "ebitda_margin": 27.924278456925023
+    "annual_revenue": {
+      "value": 932533.0299999996,
+      "currency": "USD"
+    },
+    "annual_ebitda": {
+      "value": 260403.12000000005,
+      "currency": "USD"
+    },
+    "monthly_cash_flow": {
+      "value": 21700.260000000006,
+      "currency": "USD"
+    },
+    "roi": 40.1,
+    "payback_period": 2.5,
+    "ebitda_margin": 27.9
   },
   "property_details": {
     "primary_location": {
@@ -51,7 +61,6 @@
       "total_annual_cost": 31200,
       "cam_percentage": 4.0
     },
-    "total_locations": 2,
     "property_type": "Leased"
   },
   "business_operations": {
@@ -62,7 +71,6 @@
       "Tinnitus Treatment"
     ],
     "insurance_coverage": {
-      "total_insurers": 2,
       "insurers": [
         {
           "name": "UPMC",
@@ -78,18 +86,26 @@
           "status": "Active",
           "coverage_type": "Primary Insurance"
         }
-      ],
-      "total_years_coverage": 29,
-      "average_years_per_insurer": 14.5,
-      "coverage_stability_score": 100
+      ]
     },
     "payment_methods": [
       "Insurance billing (UPMC, Aetna)",
       "Private pay",
       "Cash payments"
     ],
-    "equipment_value": "61727.50",
-    "business_hours": "Monday-Friday 9AM-5PM"
+    "equipment_value": {
+      "value": 61727.5,
+      "currency": "USD"
+    },
+    "business_hours": {
+      "monday": "9:00 AM - 5:00 PM",
+      "tuesday": "9:00 AM - 5:00 PM",
+      "wednesday": "9:00 AM - 5:00 PM",
+      "thursday": "9:00 AM - 5:00 PM",
+      "friday": "9:00 AM - 5:00 PM",
+      "saturday": "Closed",
+      "sunday": "Closed"
+    }
   },
   "market_opportunity": {
     "local_market": "Cranberry Township & Pittsburgh Metro Area",
@@ -113,8 +129,8 @@
     "Strong EBITDA margins"
   ],
   "metadata": {
-    "generated_at": "2025-09-12T11:05:05.097783",
-    "etl_run_timestamp": "2025-09-12T04:05:05.097788+00:00",
+    "generated_at": "2025-09-12T04:31:30.269488+00:00",
+    "etl_run_timestamp": "2025-09-12T04:31:30.269492+00:00",
     "data_source": "ETL Pipeline Analysis",
     "version": "1.0"
   }

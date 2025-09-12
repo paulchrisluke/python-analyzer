@@ -52,11 +52,13 @@ class SalesTransformer(BaseTransformer):
         main_sales_normalized = None
         
         # Transform main sales data
-        if 'main_sales' in raw_data:
+        if 'main_sales' in raw_data and raw_data['main_sales'] is not None:
             main_sales_normalized, patient_data = self._transform_main_sales(raw_data['main_sales'])
             if main_sales_normalized is not None:
                 self.normalized_sales['main_sales'] = main_sales_normalized
                 self.patient_dimension_data = patient_data
+        else:
+            logger.info("No sales data provided - will set all sales metrics to 0")
         
         # Transform related sales data
         related_data = self._transform_related_sales_data(raw_data)
@@ -519,10 +521,45 @@ class SalesTransformer(BaseTransformer):
         if 'main_sales' in self.normalized_sales:
             df = self.normalized_sales['main_sales']
             
-            # Basic metrics
-            metrics['total_revenue'] = Decimal(str(df['total_price'].sum())).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
-            metrics['total_transactions'] = len(df)
-            metrics['average_transaction'] = Decimal(str(df['total_price'].mean())).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
+            # Check if we have actual transaction data (not financial statement data)
+            if df is not None and not df.empty and 'total_price' in df.columns:
+                # Basic metrics from actual transaction data
+                metrics['total_revenue'] = Decimal(str(df['total_price'].sum())).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
+                metrics['total_transactions'] = len(df)
+                metrics['average_transaction'] = Decimal(str(df['total_price'].mean())).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
+            else:
+                # No actual transaction data available
+                logger.warning("No actual sales transaction data available - setting metrics to 0")
+                metrics['total_revenue'] = Decimal('0.00')
+                metrics['total_transactions'] = 0
+                metrics['average_transaction'] = Decimal('0.00')
+        else:
+            # No sales data at all
+            logger.warning("No sales data available - setting metrics to 0")
+            metrics['total_revenue'] = Decimal('0.00')
+            metrics['total_transactions'] = 0
+            metrics['average_transaction'] = Decimal('0.00')
+            
+        # Set empty structures for all metrics when no data is available
+        if metrics['total_transactions'] == 0:
+            # No transaction data - set all metrics to empty structures
+            metrics['data_quality'] = {}
+            metrics['revenue_by_location'] = {
+                'revenue': {},
+                'transactions': {},
+                'average': {}
+            }
+            metrics['revenue_by_staff'] = {
+                'revenue': {},
+                'transactions': {},
+                'average': {}
+            }
+            metrics['revenue_by_year'] = {}
+            metrics['growth_rates'] = {}
+            metrics['revenue_by_product_category'] = {}
+        else:
+            # We have transaction data - calculate detailed metrics
+            df = self.normalized_sales['main_sales']
             
             # Data quality metrics for date columns
             metrics['data_quality'] = self._calculate_date_quality_metrics(df)

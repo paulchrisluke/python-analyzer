@@ -16,7 +16,7 @@ export function generateCalculationSteps(businessData: BusinessSaleData): Calcul
   // Revenue calculation steps
   if (businessData.sales.total_revenue > 0) {
     steps.push({
-      step: 1,
+      step: steps.length + 1,
       description: "Calculate Annual Revenue Projection",
       formula: "Total Revenue ÷ Analysis Period (months) × 12",
       input: businessData.sales.total_revenue,
@@ -28,7 +28,7 @@ export function generateCalculationSteps(businessData: BusinessSaleData): Calcul
   // EBITDA calculation steps
   if (businessData.financials.metrics.estimated_annual_ebitda > 0) {
     steps.push({
-      step: 2,
+      step: steps.length + 1,
       description: "Calculate Annual EBITDA",
       formula: "Annual Revenue × EBITDA Margin",
       input: businessData.financials.metrics.annual_revenue_projection,
@@ -40,7 +40,7 @@ export function generateCalculationSteps(businessData: BusinessSaleData): Calcul
   // ROI calculation steps
   if (businessData.financials.metrics.roi_percentage > 0) {
     steps.push({
-      step: 3,
+      step: steps.length + 1,
       description: "Calculate ROI Percentage",
       formula: "Annual EBITDA ÷ Asking Price × 100",
       input: businessData.financials.metrics.asking_price,
@@ -52,7 +52,7 @@ export function generateCalculationSteps(businessData: BusinessSaleData): Calcul
   // Payback period calculation steps
   if (businessData.financials.metrics.payback_period_years > 0) {
     steps.push({
-      step: 4,
+      step: steps.length + 1,
       description: "Calculate Payback Period",
       formula: "Asking Price ÷ Annual EBITDA",
       input: businessData.financials.metrics.asking_price,
@@ -120,9 +120,11 @@ export function generateDataQualityAlerts(
   // Check financial document completeness
   const financialScore = coverageData.financial.completeness_score
   if (financialScore < 100) {
+    const missingDocs = coverageData.financial.missing_documents ?? []
+    const missingSummary = missingDocs.length ? ` - missing: ${missingDocs.join(', ')}` : ''
     alerts.push({
       type: 'warning',
-      message: `Financial documents ${financialScore}% complete - missing: ${coverageData.financial.missing_documents.join(', ')}`,
+      message: `Financial documents ${financialScore}% complete${missingSummary}`,
       category: 'Financial',
       severity: financialScore < 50 ? 'high' : 'medium'
     })
@@ -132,9 +134,10 @@ export function generateDataQualityAlerts(
   const equipmentScore = coverageData.equipment.completeness_score
   if (equipmentScore < 100) {
     const missingCategories = coverageData.equipment.coverage_details?.categories_missing || []
+    const missingSummary = missingCategories.length ? ` - missing categories: ${missingCategories.join(', ')}` : ''
     alerts.push({
       type: 'warning',
-      message: `Equipment data ${equipmentScore}% complete - missing categories: ${missingCategories.join(', ')}`,
+      message: `Equipment data ${equipmentScore}% complete${missingSummary}`,
       category: 'Equipment',
       severity: equipmentScore < 50 ? 'high' : 'medium'
     })
@@ -155,15 +158,24 @@ export function generateDataQualityAlerts(
 
 // Format currency values
 export function formatCurrency(amount: number | undefined | null): string {
-  if (amount === undefined || amount === null || isNaN(amount)) {
+  if (amount === undefined || amount === null) {
     return '$0'
   }
+  
+  // Stricter numeric validation - check for non-finite numbers
+  if (typeof amount !== 'number' || !isFinite(amount)) {
+    return '$0'
+  }
+  
+  // Normalize -0 to 0
+  const normalizedAmount = amount === 0 ? 0 : amount
+  
   return new Intl.NumberFormat('en-US', {
     style: 'currency',
     currency: 'USD',
     minimumFractionDigits: 0,
     maximumFractionDigits: 0,
-  }).format(amount)
+  }).format(normalizedAmount)
 }
 
 // Format percentage values
@@ -189,13 +201,18 @@ export function formatTimeAgo(timestamp: string): string {
   // Handle future timestamps
   if (diffMs < 0) {
     const absDiffMs = Math.abs(diffMs)
-    const absDiffInHours = Math.floor(absDiffMs / (1000 * 60 * 60))
+    const minutes = Math.ceil(absDiffMs / (1000 * 60))
     
-    if (absDiffInHours < 24) {
-      return `In ${absDiffInHours} hour${absDiffInHours > 1 ? 's' : ''}`
+    if (minutes < 60) {
+      return `In ${minutes} minute${minutes > 1 ? 's' : ''}`
     } else {
-      const absDiffInDays = Math.floor(absDiffInHours / 24)
-      return `In ${absDiffInDays} day${absDiffInDays > 1 ? 's' : ''}`
+      const hours = Math.floor(minutes / 60)
+      if (hours < 24) {
+        return `In ${hours} hour${hours > 1 ? 's' : ''}`
+      } else {
+        const days = Math.floor(hours / 24)
+        return `In ${days} day${days > 1 ? 's' : ''}`
+      }
     }
   }
   

@@ -1,8 +1,8 @@
 {
   "metadata": {
     "business_name": "Cranberry Hearing and Balance Center",
-    "generated_at": "2025-09-12T11:05:05.092703",
-    "etl_run_timestamp": "2025-09-12T04:05:05.092714+00:00",
+    "generated_at": "2025-09-12T11:31:30.265916",
+    "etl_run_timestamp": "2025-09-12T04:31:30.265921+00:00",
     "data_period": "2023-01-01 to 2025-06-30",
     "months_analyzed": 30,
     "data_source": "ETL Pipeline - Real Business Data",
@@ -10,7 +10,7 @@
   },
   "sales": {
     "total_transactions": 0,
-    "total_revenue": 2331332.5749999993
+    "total_revenue": 0.0
   },
   "financials": {
     "documents": [
@@ -70,17 +70,29 @@
     }
   },
   "equipment": {
-    "total_value": "61727.50",
+    "total_value": {
+      "value": 61727.5,
+      "currency": "USD"
+    },
     "items": [
       {
         "name": "CL-12B LP Single Wall Room O.D. 6'2\"x4'4\"x7'2\" I.D.\n5'6\"x3'8\"x6'6\"",
         "part_number": "68068-004",
         "quantity": 1,
-        "unit_price": "8555.00",
-        "total_price": "8555.00",
+        "unit_price": {
+          "value": 8555.0,
+          "currency": "USD"
+        },
+        "total_price": {
+          "value": 8555.0,
+          "currency": "USD"
+        },
         "category": "Test Booth",
         "source_file": "2019-11-06_Celloaudiometer_Cosmetichearingsolutions.csv",
-        "value": "8555.00",
+        "value": {
+          "value": 8555.0,
+          "currency": "USD"
+        },
         "file_path": "docs/equipment/2019-11-06_Celloaudiometer_Cosmetichearingsolutions.csv",
         "status": true,
         "notes": "Equipment item from 2019-11-06_Celloaudiometer_Cosmetichearingsolutions.csv",
@@ -98,11 +110,20 @@
         "name": "20'' X 60\" Window In Door",
         "part_number": "68066-500",
         "quantity": 1,
-        "unit_price": "400.00",
-        "total_price": "400.00",
+        "unit_price": {
+          "value": 400.0,
+          "currency": "USD"
+        },
+        "total_price": {
+          "value": 400.0,
+          "currency": "USD"
+        },
         "category": "Other",
         "source_file": "2019-11-06_Celloaudiometer_Cosmetichearingsolutions.csv",
-        "value": "400.00",
+        "value": {
+          "value": 400.0,
+          "currency": "USD"
+        },
         "file_path": "docs/equipment/2019-11-06_Celloaudiometer_Cosmetichearingsolutions.csv",
         "status": true,
         "notes": "Equipment item from 2019-11-06_Celloaudiometer_Cosmetichearingsolutions.csv",
@@ -120,11 +141,20 @@
         "name": "CL12B LP standard Installation with Cello connections\nand FF calibration if needed",
         "part_number": "MISCEQU",
         "quantity": 1,
-        "unit_price": "4000.00",
-        "total_price": "4000.00",
+        "unit_price": {
+          "value": 4000.0,
+          "currency": "USD"
+        },
+        "total_price": {
+          "value": 4000.0,
+          "currency": "USD"
+        },
         "category": "Audiometer",
         "source_file": "2019-11-06_Celloaudiometer_Cosmetichearingsolutions.csv",
-        "value": "4000.00",
+        "value": {
+          "value": 4000.0,
+          "currency": "USD"
+        },
         "file_path": "docs/equipment/2019-11-06_Celloaudiometer_Cosmetichearingsolutions.csv",
         "status": true,
         "notes": "Equipment item from 2019-11-06_Celloaudiometer_Cosmetichearingsolutions.csv",
@@ -142,11 +172,20 @@
         "name": "Sound room freight",
         "part_number": "MISCEQU",
         "quantity": 1,
-        "unit_price": "1900.00",
-        "total_price": "1900.00",
+        "unit_price": {
+          "value": 1900.0,
+          "currency": "USD"
+        },
+        "total_price": {
+          "value": 1900.0,
+          "currency": "USD"
+        },
         "category": "Test Booth",
         "source_file": "2019-11-06_Celloaudiometer_Cosmetichearingsolutions.csv",
-        "value": "1900.00",
+        "value": {
+          "value": 1900.0,
+          "currency": "USD"
+        },
         "file_path": "docs/equipment/2019-11-06_Celloaudiometer_Cosmetichearingsolutions.csv",
         "status": true,
         "notes": "Equipment item from 2019-11-06_Celloaudiometer_Cosmetichearingsolutions.csv",
@@ -164,11 +203,20 @@
         "name": "Cello Computer Controled Diagnostic Audiometer",
         "part_number": "31243-051",
         "quantity": 1,
-        "unit_price": "3420.00",
-        "total_price": "3420.00",
+        "unit_price": {
+          "value": 3420.0,
+          "currency": "USD"
+        },
+        "total_price": {
+          "value": 3420.0,
+          "currency": "USD"
+        },
         "category": "Audiometer",
         "source_file": "2019-11-06_Celloaudiometer_Cosmetichearingsolutions.csv",
-        "value": "3420.00",
+        "value": {
+          "value": 3420.0,
+          "currency": "USD"
+        },
         "file_path": "docs/equipment/2019-11-06_Celloaudiometer_Cosmetichearingsolutions.csv",
         "status": true,
         "notes": "Equipment item from 2019-11-06_Celloaudiometer_Cosmetichearingsolutions.csv",
@@ -186,11 +234,20 @@
         "name": "ER 3C Insert Earphone",
         "part_number": "68001-080",
         "quantity": 1,
-        "unit_price": "450.00",
-        "total_price": "450.00",
+        "unit_price": {
+          "value": 450.0,
+          "currency": "USD"
+        },
+        "total_price": {
+          "value": 450.0,
+          "currency": "USD"
+        },
         "category": "Accessory",
         "source_file": "2019-11-06_Celloaudiometer_Cosmetichearingsolutions.csv",
-        "value": "450.00",
+        "value": {
+          "value": 450.0,
+          "currency": "USD"
+        },
         "file_path": "docs/equipment/2019-11-06_Celloaudiometer_Cosmetichearingsolutions.csv",
         "status": true,
         "notes": "Equipment item from 2019-11-06_Celloaudiometer_Cosmetichearingsolutions.csv",
@@ -208,11 +265,20 @@
         "name": "Cable Gray 3 Ft",
         "part_number": "19101-031",
         "quantity": 3,
-        "unit_price": "12.50",
-        "total_price": "37.50",
+        "unit_price": {
+          "value": 12.5,
+          "currency": "USD"
+        },
+        "total_price": {
+          "value": 37.5,
+          "currency": "USD"
+        },
         "category": "Accessory",
         "source_file": "2019-11-06_Celloaudiometer_Cosmetichearingsolutions.csv",
-        "value": "37.50",
+        "value": {
+          "value": 37.5,
+          "currency": "USD"
+        },
         "file_path": "docs/equipment/2019-11-06_Celloaudiometer_Cosmetichearingsolutions.csv",
         "status": true,
         "notes": "Equipment item from 2019-11-06_Celloaudiometer_Cosmetichearingsolutions.csv",
@@ -230,11 +296,20 @@
         "name": "Cable Red 3 Ft",
         "part_number": "19101-032",
         "quantity": 2,
-        "unit_price": "12.50",
-        "total_price": "25.00",
+        "unit_price": {
+          "value": 12.5,
+          "currency": "USD"
+        },
+        "total_price": {
+          "value": 25.0,
+          "currency": "USD"
+        },
         "category": "Accessory",
         "source_file": "2019-11-06_Celloaudiometer_Cosmetichearingsolutions.csv",
-        "value": "25.00",
+        "value": {
+          "value": 25.0,
+          "currency": "USD"
+        },
         "file_path": "docs/equipment/2019-11-06_Celloaudiometer_Cosmetichearingsolutions.csv",
         "status": true,
         "notes": "Equipment item from 2019-11-06_Celloaudiometer_Cosmetichearingsolutions.csv",
@@ -252,11 +327,20 @@
         "name": "Cable Blue 3 Ft",
         "part_number": "19101-033",
         "quantity": 2,
-        "unit_price": "12.50",
-        "total_price": "25.00",
+        "unit_price": {
+          "value": 12.5,
+          "currency": "USD"
+        },
+        "total_price": {
+          "value": 25.0,
+          "currency": "USD"
+        },
         "category": "Accessory",
         "source_file": "2019-11-06_Celloaudiometer_Cosmetichearingsolutions.csv",
-        "value": "25.00",
+        "value": {
+          "value": 25.0,
+          "currency": "USD"
+        },
         "file_path": "docs/equipment/2019-11-06_Celloaudiometer_Cosmetichearingsolutions.csv",
         "status": true,
         "notes": "Equipment item from 2019-11-06_Celloaudiometer_Cosmetichearingsolutions.csv",
@@ -274,11 +358,20 @@
         "name": "CL-12B LP Single Wall Room O.D. 6'2\"x4'4\"x7'2\" I.D.\n5'6\"x3'8\"x6'6\"",
         "part_number": "68068-004",
         "quantity": 1,
-        "unit_price": "8555.00",
-        "total_price": "8555.00",
+        "unit_price": {
+          "value": 8555.0,
+          "currency": "USD"
+        },
+        "total_price": {
+          "value": 8555.0,
+          "currency": "USD"
+        },
         "category": "Test Booth",
         "source_file": "2019-11-08_Celloaudiometer_Trumpetrem_Cranberryhearing.csv",
-        "value": "8555.00",
+        "value": {
+          "value": 8555.0,
+          "currency": "USD"
+        },
         "file_path": "docs/equipment/2019-11-08_Celloaudiometer_Trumpetrem_Cranberryhearing.csv",
         "status": true,
         "notes": "Equipment item from 2019-11-08_Celloaudiometer_Trumpetrem_Cranberryhearing.csv",
@@ -296,11 +389,20 @@
         "name": "20'' X 60\" Window In Door",
         "part_number": "68066-500",
         "quantity": 1,
-        "unit_price": "400.00",
-        "total_price": "400.00",
+        "unit_price": {
+          "value": 400.0,
+          "currency": "USD"
+        },
+        "total_price": {
+          "value": 400.0,
+          "currency": "USD"
+        },
         "category": "Other",
         "source_file": "2019-11-08_Celloaudiometer_Trumpetrem_Cranberryhearing.csv",
-        "value": "400.00",
+        "value": {
+          "value": 400.0,
+          "currency": "USD"
+        },
         "file_path": "docs/equipment/2019-11-08_Celloaudiometer_Trumpetrem_Cranberryhearing.csv",
         "status": true,
         "notes": "Equipment item from 2019-11-08_Celloaudiometer_Trumpetrem_Cranberryhearing.csv",
@@ -318,11 +420,20 @@
         "name": "CL12BLP Sound booth and audiometer install",
         "part_number": "MISCEQU",
         "quantity": 1,
-        "unit_price": "4000.00",
-        "total_price": "4000.00",
+        "unit_price": {
+          "value": 4000.0,
+          "currency": "USD"
+        },
+        "total_price": {
+          "value": 4000.0,
+          "currency": "USD"
+        },
         "category": "Audiometer",
         "source_file": "2019-11-08_Celloaudiometer_Trumpetrem_Cranberryhearing.csv",
-        "value": "4000.00",
+        "value": {
+          "value": 4000.0,
+          "currency": "USD"
+        },
         "file_path": "docs/equipment/2019-11-08_Celloaudiometer_Trumpetrem_Cranberryhearing.csv",
         "status": true,
         "notes": "Equipment item from 2019-11-08_Celloaudiometer_Trumpetrem_Cranberryhearing.csv",
@@ -340,11 +451,20 @@
         "name": "Sound Booth Freight",
         "part_number": "MISCEQU",
         "quantity": 1,
-        "unit_price": "1000.00",
-        "total_price": "1000.00",
+        "unit_price": {
+          "value": 1000.0,
+          "currency": "USD"
+        },
+        "total_price": {
+          "value": 1000.0,
+          "currency": "USD"
+        },
         "category": "Test Booth",
         "source_file": "2019-11-08_Celloaudiometer_Trumpetrem_Cranberryhearing.csv",
-        "value": "1000.00",
+        "value": {
+          "value": 1000.0,
+          "currency": "USD"
+        },
         "file_path": "docs/equipment/2019-11-08_Celloaudiometer_Trumpetrem_Cranberryhearing.csv",
         "status": true,
         "notes": "Equipment item from 2019-11-08_Celloaudiometer_Trumpetrem_Cranberryhearing.csv",
@@ -362,11 +482,20 @@
         "name": "Cello Computer Controled Diagnostic Audiometer\nIncludes QSIN License",
         "part_number": "31243-051",
         "quantity": 1,
-        "unit_price": "3420.00",
-        "total_price": "3420.00",
+        "unit_price": {
+          "value": 3420.0,
+          "currency": "USD"
+        },
+        "total_price": {
+          "value": 3420.0,
+          "currency": "USD"
+        },
         "category": "Audiometer",
         "source_file": "2019-11-08_Celloaudiometer_Trumpetrem_Cranberryhearing.csv",
-        "value": "3420.00",
+        "value": {
+          "value": 3420.0,
+          "currency": "USD"
+        },
         "file_path": "docs/equipment/2019-11-08_Celloaudiometer_Trumpetrem_Cranberryhearing.csv",
         "status": true,
         "notes": "Equipment item from 2019-11-08_Celloaudiometer_Trumpetrem_Cranberryhearing.csv",
@@ -384,11 +513,20 @@
         "name": "ER 3C Insert Earphone",
         "part_number": "68001-080",
         "quantity": 1,
-        "unit_price": "450.00",
-        "total_price": "450.00",
+        "unit_price": {
+          "value": 450.0,
+          "currency": "USD"
+        },
+        "total_price": {
+          "value": 450.0,
+          "currency": "USD"
+        },
         "category": "Accessory",
         "source_file": "2019-11-08_Celloaudiometer_Trumpetrem_Cranberryhearing.csv",
-        "value": "450.00",
+        "value": {
+          "value": 450.0,
+          "currency": "USD"
+        },
         "file_path": "docs/equipment/2019-11-08_Celloaudiometer_Trumpetrem_Cranberryhearing.csv",
         "status": true,
         "notes": "Equipment item from 2019-11-08_Celloaudiometer_Trumpetrem_Cranberryhearing.csv",
@@ -406,11 +544,20 @@
         "name": "Cable Gray 3 Ft",
         "part_number": "19101-031",
         "quantity": 3,
-        "unit_price": "12.50",
-        "total_price": "37.50",
+        "unit_price": {
+          "value": 12.5,
+          "currency": "USD"
+        },
+        "total_price": {
+          "value": 37.5,
+          "currency": "USD"
+        },
         "category": "Accessory",
         "source_file": "2019-11-08_Celloaudiometer_Trumpetrem_Cranberryhearing.csv",
-        "value": "37.50",
+        "value": {
+          "value": 37.5,
+          "currency": "USD"
+        },
         "file_path": "docs/equipment/2019-11-08_Celloaudiometer_Trumpetrem_Cranberryhearing.csv",
         "status": true,
         "notes": "Equipment item from 2019-11-08_Celloaudiometer_Trumpetrem_Cranberryhearing.csv",
@@ -428,11 +575,20 @@
         "name": "Cable Red 3 Ft",
         "part_number": "19101-032",
         "quantity": 2,
-        "unit_price": "12.50",
-        "total_price": "25.00",
+        "unit_price": {
+          "value": 12.5,
+          "currency": "USD"
+        },
+        "total_price": {
+          "value": 25.0,
+          "currency": "USD"
+        },
         "category": "Accessory",
         "source_file": "2019-11-08_Celloaudiometer_Trumpetrem_Cranberryhearing.csv",
-        "value": "25.00",
+        "value": {
+          "value": 25.0,
+          "currency": "USD"
+        },
         "file_path": "docs/equipment/2019-11-08_Celloaudiometer_Trumpetrem_Cranberryhearing.csv",
         "status": true,
         "notes": "Equipment item from 2019-11-08_Celloaudiometer_Trumpetrem_Cranberryhearing.csv",
@@ -450,11 +606,20 @@
         "name": "Cable Blue 3 Ft",
         "part_number": "19101-033",
         "quantity": 2,
-        "unit_price": "12.50",
-        "total_price": "25.00",
+        "unit_price": {
+          "value": 12.5,
+          "currency": "USD"
+        },
+        "total_price": {
+          "value": 25.0,
+          "currency": "USD"
+        },
         "category": "Accessory",
         "source_file": "2019-11-08_Celloaudiometer_Trumpetrem_Cranberryhearing.csv",
-        "value": "25.00",
+        "value": {
+          "value": 25.0,
+          "currency": "USD"
+        },
         "file_path": "docs/equipment/2019-11-08_Celloaudiometer_Trumpetrem_Cranberryhearing.csv",
         "status": true,
         "notes": "Equipment item from 2019-11-08_Celloaudiometer_Trumpetrem_Cranberryhearing.csv",
@@ -472,11 +637,20 @@
         "name": "Trumpet REM - Real-Ear Measurement system",
         "part_number": "31243-067",
         "quantity": 1,
-        "unit_price": "4090.00",
-        "total_price": "4090.00",
+        "unit_price": {
+          "value": 4090.0,
+          "currency": "USD"
+        },
+        "total_price": {
+          "value": 4090.0,
+          "currency": "USD"
+        },
         "category": "REM System",
         "source_file": "2019-11-08_Celloaudiometer_Trumpetrem_Cranberryhearing.csv",
-        "value": "4090.00",
+        "value": {
+          "value": 4090.0,
+          "currency": "USD"
+        },
         "file_path": "docs/equipment/2019-11-08_Celloaudiometer_Trumpetrem_Cranberryhearing.csv",
         "status": true,
         "notes": "Equipment item from 2019-11-08_Celloaudiometer_Trumpetrem_Cranberryhearing.csv",
@@ -494,11 +668,20 @@
         "name": "CL-12B LP Single Wall Room O.D. 6'2\"x4'4\"x7'2\" I.D.\n5'6\"x3'8\"x6'6\"",
         "part_number": "68068-004",
         "quantity": 1,
-        "unit_price": "8555.00",
-        "total_price": "8555.00",
+        "unit_price": {
+          "value": 8555.0,
+          "currency": "USD"
+        },
+        "total_price": {
+          "value": 8555.0,
+          "currency": "USD"
+        },
         "category": "Test Booth",
         "source_file": "2019-11-11_Trumpetrem_Audiometercombo_Cranberryhearing.csv",
-        "value": "8555.00",
+        "value": {
+          "value": 8555.0,
+          "currency": "USD"
+        },
         "file_path": "docs/equipment/2019-11-11_Trumpetrem_Audiometercombo_Cranberryhearing.csv",
         "status": true,
         "notes": "Equipment item from 2019-11-11_Trumpetrem_Audiometercombo_Cranberryhearing.csv",
@@ -516,11 +699,20 @@
         "name": "20'' X 60\" Window In Door",
         "part_number": "68066-500",
         "quantity": 1,
-        "unit_price": "400.00",
-        "total_price": "400.00",
+        "unit_price": {
+          "value": 400.0,
+          "currency": "USD"
+        },
+        "total_price": {
+          "value": 400.0,
+          "currency": "USD"
+        },
         "category": "Other",
         "source_file": "2019-11-11_Trumpetrem_Audiometercombo_Cranberryhearing.csv",
-        "value": "400.00",
+        "value": {
+          "value": 400.0,
+          "currency": "USD"
+        },
         "file_path": "docs/equipment/2019-11-11_Trumpetrem_Audiometercombo_Cranberryhearing.csv",
         "status": true,
         "notes": "Equipment item from 2019-11-11_Trumpetrem_Audiometercombo_Cranberryhearing.csv",
@@ -538,11 +730,20 @@
         "name": "CL12BLP Sound booth and audiometer install",
         "part_number": "MISCEQU",
         "quantity": 1,
-        "unit_price": "4000.00",
-        "total_price": "4000.00",
+        "unit_price": {
+          "value": 4000.0,
+          "currency": "USD"
+        },
+        "total_price": {
+          "value": 4000.0,
+          "currency": "USD"
+        },
         "category": "Audiometer",
         "source_file": "2019-11-11_Trumpetrem_Audiometercombo_Cranberryhearing.csv",
-        "value": "4000.00",
+        "value": {
+          "value": 4000.0,
+          "currency": "USD"
+        },
         "file_path": "docs/equipment/2019-11-11_Trumpetrem_Audiometercombo_Cranberryhearing.csv",
         "status": true,
         "notes": "Equipment item from 2019-11-11_Trumpetrem_Audiometercombo_Cranberryhearing.csv",
@@ -560,11 +761,20 @@
         "name": "Sound Booth Freight",
         "part_number": "MISCEQU",
         "quantity": 1,
-        "unit_price": "1000.00",
-        "total_price": "1000.00",
+        "unit_price": {
+          "value": 1000.0,
+          "currency": "USD"
+        },
+        "total_price": {
+          "value": 1000.0,
+          "currency": "USD"
+        },
         "category": "Test Booth",
         "source_file": "2019-11-11_Trumpetrem_Audiometercombo_Cranberryhearing.csv",
-        "value": "1000.00",
+        "value": {
+          "value": 1000.0,
+          "currency": "USD"
+        },
         "file_path": "docs/equipment/2019-11-11_Trumpetrem_Audiometercombo_Cranberryhearing.csv",
         "status": true,
         "notes": "Equipment item from 2019-11-11_Trumpetrem_Audiometercombo_Cranberryhearing.csv",
@@ -582,11 +792,20 @@
         "name": "Trumpet REM & Aud - Real-Ear Measurement system &\nDiagnostic Audiom",
         "part_number": "31243-071",
         "quantity": 1,
-        "unit_price": "6180.00",
-        "total_price": "6180.00",
+        "unit_price": {
+          "value": 6180.0,
+          "currency": "USD"
+        },
+        "total_price": {
+          "value": 6180.0,
+          "currency": "USD"
+        },
         "category": "REM System",
         "source_file": "2019-11-11_Trumpetrem_Audiometercombo_Cranberryhearing.csv",
-        "value": "6180.00",
+        "value": {
+          "value": 6180.0,
+          "currency": "USD"
+        },
         "file_path": "docs/equipment/2019-11-11_Trumpetrem_Audiometercombo_Cranberryhearing.csv",
         "status": true,
         "notes": "Equipment item from 2019-11-11_Trumpetrem_Audiometercombo_Cranberryhearing.csv",
@@ -604,11 +823,20 @@
         "name": "ER 3C Insert Earphone",
         "part_number": "68001-080",
         "quantity": 1,
-        "unit_price": "450.00",
-        "total_price": "450.00",
+        "unit_price": {
+          "value": 450.0,
+          "currency": "USD"
+        },
+        "total_price": {
+          "value": 450.0,
+          "currency": "USD"
+        },
         "category": "Accessory",
         "source_file": "2019-11-11_Trumpetrem_Audiometercombo_Cranberryhearing.csv",
-        "value": "450.00",
+        "value": {
+          "value": 450.0,
+          "currency": "USD"
+        },
         "file_path": "docs/equipment/2019-11-11_Trumpetrem_Audiometercombo_Cranberryhearing.csv",
         "status": true,
         "notes": "Equipment item from 2019-11-11_Trumpetrem_Audiometercombo_Cranberryhearing.csv",
@@ -626,11 +854,20 @@
         "name": "Cable Gray 3 Ft",
         "part_number": "19101-031",
         "quantity": 3,
-        "unit_price": "12.50",
-        "total_price": "37.50",
+        "unit_price": {
+          "value": 12.5,
+          "currency": "USD"
+        },
+        "total_price": {
+          "value": 37.5,
+          "currency": "USD"
+        },
         "category": "Accessory",
         "source_file": "2019-11-11_Trumpetrem_Audiometercombo_Cranberryhearing.csv",
-        "value": "37.50",
+        "value": {
+          "value": 37.5,
+          "currency": "USD"
+        },
         "file_path": "docs/equipment/2019-11-11_Trumpetrem_Audiometercombo_Cranberryhearing.csv",
         "status": true,
         "notes": "Equipment item from 2019-11-11_Trumpetrem_Audiometercombo_Cranberryhearing.csv",
@@ -648,11 +885,20 @@
         "name": "Cable Red 3 Ft",
         "part_number": "19101-032",
         "quantity": 2,
-        "unit_price": "12.50",
-        "total_price": "25.00",
+        "unit_price": {
+          "value": 12.5,
+          "currency": "USD"
+        },
+        "total_price": {
+          "value": 25.0,
+          "currency": "USD"
+        },
         "category": "Accessory",
         "source_file": "2019-11-11_Trumpetrem_Audiometercombo_Cranberryhearing.csv",
-        "value": "25.00",
+        "value": {
+          "value": 25.0,
+          "currency": "USD"
+        },
         "file_path": "docs/equipment/2019-11-11_Trumpetrem_Audiometercombo_Cranberryhearing.csv",
         "status": true,
         "notes": "Equipment item from 2019-11-11_Trumpetrem_Audiometercombo_Cranberryhearing.csv",
@@ -670,11 +916,20 @@
         "name": "Cable Blue 3 Ft",
         "part_number": "19101-033",
         "quantity": 2,
-        "unit_price": "12.50",
-        "total_price": "25.00",
+        "unit_price": {
+          "value": 12.5,
+          "currency": "USD"
+        },
+        "total_price": {
+          "value": 25.0,
+          "currency": "USD"
+        },
         "category": "Accessory",
         "source_file": "2019-11-11_Trumpetrem_Audiometercombo_Cranberryhearing.csv",
-        "value": "25.00",
+        "value": {
+          "value": 25.0,
+          "currency": "USD"
+        },
         "file_path": "docs/equipment/2019-11-11_Trumpetrem_Audiometercombo_Cranberryhearing.csv",
         "status": true,
         "notes": "Equipment item from 2019-11-11_Trumpetrem_Audiometercombo_Cranberryhearing.csv",
@@ -806,10 +1061,19 @@
     ]
   },
   "valuation": {
-    "asking_price": 650000.0,
-    "market_value": 987072.75,
+    "asking_price": {
+      "value": 650000.0,
+      "currency": "USD"
+    },
+    "market_value": {
+      "value": 987072.75,
+      "currency": "USD"
+    },
     "discount_percentage": 34.15,
-    "discount_amount": 337072.75
+    "discount_amount": {
+      "value": 337072.75,
+      "currency": "USD"
+    }
   },
   "locations": [],
   "highlights": [
@@ -821,12 +1085,14 @@
   ],
   "summary_cards": {
     "revenue_total": {
-      "value": 0,
+      "value": 0.0,
+      "currency": "USD",
       "label": "Total Revenue",
       "description": "2021-2025 Performance"
     },
     "annual_ebitda": {
       "value": 260403.12000000005,
+      "currency": "USD",
       "label": "Annual EBITDA",
       "description": "Projected Annual"
     },
@@ -836,7 +1102,8 @@
       "description": "Annual Return"
     },
     "equipment_value": {
-      "value": "61727.50",
+      "value": 61727.5,
+      "currency": "USD",
       "label": "Equipment Value",
       "description": "Included in Sale"
     }

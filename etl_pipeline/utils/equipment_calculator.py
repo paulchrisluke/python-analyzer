@@ -92,8 +92,8 @@ class EquipmentCalculator:
                 logger.error(f"Error processing {csv_file}: {e}")
                 continue
         
-        # Update metrics
-        equipment_metrics['total_value'] = total_value
+        # Update metrics - convert Decimal to float for JSON serialization
+        equipment_metrics['total_value'] = float(total_value)
         equipment_metrics['items'] = all_items
         equipment_metrics['categories'] = categories
         
@@ -148,8 +148,8 @@ class EquipmentCalculator:
                     'name': row.get('description', '').strip(),
                     'part_number': row.get('part_number', '').strip(),
                     'quantity': quantity,
-                    'unit_price': self._parse_unit_price(row.get('unit_price')),
-                    'total_price': price,
+                    'unit_price': float(self._parse_unit_price(row.get('unit_price'))),
+                    'total_price': float(price),
                     'category': self._categorize_equipment(row.get('description', '')),
                     'source_file': csv_file.name
                 }

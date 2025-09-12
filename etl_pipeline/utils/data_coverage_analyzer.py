@@ -67,7 +67,7 @@ class DataCoverageAnalyzer:
         """Analyze sales data coverage."""
         coverage = {
             'status': 'unknown',
-            'completeness_score': 0,
+            'completeness_score': 0.0,
             'missing_periods': [],
             'data_quality_issues': [],
             'coverage_details': {},
@@ -145,7 +145,6 @@ class DataCoverageAnalyzer:
         completeness_score = (actual_months_count / total_expected_months) * 100
         
         coverage['completeness_score'] = round(completeness_score, 1)
-        coverage['coverage_percentage'] = round(completeness_score, 1)  # Add mirror field for backward compatibility
         coverage['missing_periods'] = sorted([str(month) for month in missing_months])
         coverage['coverage_details'] = {
             'total_expected_months': total_expected_months,
@@ -187,7 +186,7 @@ class DataCoverageAnalyzer:
         """Analyze financial data coverage."""
         coverage = {
             'status': 'unknown',
-            'completeness_score': 0,
+            'completeness_score': 0.0,
             'missing_documents': [],
             'data_quality_issues': [],
             'coverage_details': {},
@@ -216,7 +215,7 @@ class DataCoverageAnalyzer:
             for key in doc_keys:
                 if key in financial_data and financial_data[key]:
                     found = True
-                    found_docs.append(f"{doc_type}_{key}")
+                    found_docs.append(doc_type)  # Use canonical document type name
                     break
             
             if not found:
@@ -228,7 +227,6 @@ class DataCoverageAnalyzer:
         completeness_score = (found_count / total_expected) * 100
         
         coverage['completeness_score'] = round(completeness_score, 1)
-        coverage['coverage_percentage'] = round(completeness_score, 1)  # Add mirror field for backward compatibility
         coverage['missing_documents'] = missing_docs
         coverage['coverage_details'] = {
             'found_documents': found_docs,
@@ -265,7 +263,7 @@ class DataCoverageAnalyzer:
         """Analyze equipment data coverage."""
         coverage = {
             'status': 'unknown',
-            'completeness_score': 0,
+            'completeness_score': 0.0,
             'missing_documents': [],
             'data_quality_issues': [],
             'coverage_details': {},
@@ -309,11 +307,9 @@ class DataCoverageAnalyzer:
         completeness_score = (len(found_categories) / len(expected_categories)) * 100
         
         coverage['completeness_score'] = round(completeness_score, 1)
-        coverage['coverage_percentage'] = round(completeness_score, 1)  # Add mirror field for backward compatibility
-        coverage['missing_documents'] = list(missing_categories)
         coverage['coverage_details'] = {
             'equipment_count': equipment_count,
-            'total_value': total_equipment_value,
+            'total_value': float(total_equipment_value),  # Ensure numeric type
             'found_categories': list(found_categories),
             'missing_categories': list(missing_categories)
         }
@@ -373,7 +369,7 @@ class DataCoverageAnalyzer:
             'readiness_level': readiness,
             'recommendation': recommendation,
             'category_scores': {
-                category: self.coverage_report[category].get('completeness_score', 0)
+                category: float(self.coverage_report[category].get('completeness_score', 0.0))
                 for category in ['sales', 'financial', 'equipment']
                 if category in self.coverage_report
             }
@@ -404,8 +400,9 @@ class DataCoverageAnalyzer:
             equipment_coverage = self.coverage_report['equipment']
             if equipment_coverage['status'] in ['poor', 'fair']:
                 recommendations.append('Complete equipment inventory for accurate valuation')
-                if equipment_coverage['missing_documents']:
-                    recommendations.append(f"Missing equipment categories: {', '.join(equipment_coverage['missing_documents'])}")
+                missing_categories = equipment_coverage.get('coverage_details', {}).get('missing_categories', [])
+                if missing_categories:
+                    recommendations.append(f"Missing equipment categories: {', '.join(missing_categories)}")
         
         # General recommendations based on overall score
         overall_score = self.coverage_report.get('due_diligence', {}).get('overall_score', 0)

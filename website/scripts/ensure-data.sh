@@ -13,6 +13,16 @@ echo "📁 Project root: $PROJECT_ROOT"
 
 # Check if data files exist in public/data/
 WEBSITE_DATA_DIR="$PROJECT_ROOT/website/public/data"
+
+# Handle case where artifact downloads into data/final/ subfolder
+if [ -d "$WEBSITE_DATA_DIR/data/final" ]; then
+    echo "🔄 Found data/final/ subfolder, flattening files to public/data/..."
+    # Move all JSON files from data/final/ to public/data/
+    find "$WEBSITE_DATA_DIR/data/final" -name "*.json" -exec mv {} "$WEBSITE_DATA_DIR/" \;
+    # Remove the now-empty data/final/ directory
+    rm -rf "$WEBSITE_DATA_DIR/data"
+    echo "✅ Flattened data files from data/final/ to public/data/"
+fi
 REQUIRED_FILES=(
     "business_sale_data.json"
     "due_diligence_coverage.json"

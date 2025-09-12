@@ -269,10 +269,12 @@ class ETLPipeline:
         logger.info("Initializing data extractors...")
         
         # Initialize sales extractor
-        sales_config = self.data_sources_config.get('data_sources', {}).get('sales', {})
+        sales_config = self.data_sources_config.get('data_sources', {}).get('sales_transactions', {})
         if sales_config:
             self.extractors['sales'] = SalesExtractor(sales_config)
             logger.info("Sales extractor initialized")
+        else:
+            logger.info("No sales transaction data source configured - sales metrics will be set to 0")
         
         # Initialize financial extractor
         financial_config = self.data_sources_config.get('data_sources', {})

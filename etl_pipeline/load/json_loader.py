@@ -374,8 +374,8 @@ class JsonLoader(BaseLoader):
                 "analysis_period": analysis_period
             },
             "sales": {
-                "total_transactions": sales_metrics.get('total_transactions', 0),
-                "total_revenue": financial_metrics.get('revenue_metrics', {}).get('total_revenue', 0)
+                "total_transactions": int(sales_metrics.get('total_transactions', 0)),
+                "total_revenue": float(sales_metrics.get('total_revenue', 0))
             },
             "financials": {
                 "documents": [
@@ -411,14 +411,17 @@ class JsonLoader(BaseLoader):
                     }
                 ],
                 "metrics": {
-                    "annual_revenue_projection": financial_metrics.get('revenue_metrics', {}).get('annual_revenue_projection', 0),
-                    "estimated_annual_ebitda": financial_metrics.get('profitability', {}).get('estimated_annual_ebitda', 0),
-                    "roi_percentage": financial_metrics.get('investment_metrics', {}).get('roi_percentage', 0),
+                    "annual_revenue_projection": float(financial_metrics.get('revenue_metrics', {}).get('annual_revenue_projection', 0)),
+                    "estimated_annual_ebitda": float(financial_metrics.get('profitability', {}).get('estimated_annual_ebitda', 0)),
+                    "roi_percentage": float(financial_metrics.get('investment_metrics', {}).get('roi_percentage', 0)),
                     "visibility": ["public", "nda", "buyer", "internal"]
                 }
             },
             "equipment": {
-                "total_value": equipment_metrics.get('total_value', 0),
+                "total_value": {
+                    "value": float(equipment_metrics.get('total_value', 0)),
+                    "currency": "USD"
+                },
                 "items": self._transform_equipment_items(equipment_metrics.get('items', []))
             },
             "legal": {
@@ -501,10 +504,19 @@ class JsonLoader(BaseLoader):
                 "visibility": ["buyer", "internal"]
             },
             "valuation": {
-                "asking_price": valuation_metrics.get('market_analysis', {}).get('asking_price', 650000),
-                "market_value": valuation_metrics.get('market_analysis', {}).get('estimated_market_value', 0),
-                "discount_percentage": valuation_metrics.get('market_analysis', {}).get('discount_from_market', 0),
-                "discount_amount": valuation_metrics.get('market_analysis', {}).get('discount_amount', 0)
+                "asking_price": {
+                    "value": float(valuation_metrics.get('market_analysis', {}).get('asking_price', 650000)),
+                    "currency": "USD"
+                },
+                "market_value": {
+                    "value": float(valuation_metrics.get('market_analysis', {}).get('estimated_market_value', 0)),
+                    "currency": "USD"
+                },
+                "discount_percentage": float(valuation_metrics.get('market_analysis', {}).get('discount_from_market', 0)),
+                "discount_amount": {
+                    "value": float(valuation_metrics.get('market_analysis', {}).get('discount_amount', 0)),
+                    "currency": "USD"
+                }
             },
             "locations": self._create_location_data(sales_metrics),
             "highlights": self._create_highlights(business_metrics),
@@ -523,7 +535,7 @@ class JsonLoader(BaseLoader):
             location_data = {
                 "name": location_name,
                 "type": "Primary location" if "Pittsburgh" in location_name else "Secondary location",
-                "estimated_revenue": metrics.get('total_revenue', 0),
+                "estimated_revenue": float(metrics.get('total_revenue', 0)),
                 "performance": "Strong performance" if metrics.get('total_revenue', 0) > 1000000 else "Consistent revenue"
             }
             locations.append(location_data)
@@ -571,22 +583,25 @@ class JsonLoader(BaseLoader):
         
         return {
             "revenue_total": {
-                "value": sales_metrics.get('total_revenue', 0),
+                "value": float(sales_metrics.get('total_revenue', 0)),
+                "currency": "USD",
                 "label": "Total Revenue",
                 "description": "2021-2025 Performance"
             },
             "annual_ebitda": {
-                "value": financial_metrics.get('profitability', {}).get('estimated_annual_ebitda', 0),
+                "value": float(financial_metrics.get('profitability', {}).get('estimated_annual_ebitda', 0)),
+                "currency": "USD",
                 "label": "Annual EBITDA",
                 "description": "Projected Annual"
             },
             "roi": {
-                "value": financial_metrics.get('investment_metrics', {}).get('roi_percentage', 0),
+                "value": float(financial_metrics.get('investment_metrics', {}).get('roi_percentage', 0)),
                 "label": "ROI",
                 "description": "Annual Return"
             },
             "equipment_value": {
-                "value": business_metrics.get('equipment', {}).get('total_value', 0),
+                "value": float(business_metrics.get('equipment', {}).get('total_value', 0)),
+                "currency": "USD",
                 "label": "Equipment Value",
                 "description": "Included in Sale"
             }
@@ -604,46 +619,80 @@ class JsonLoader(BaseLoader):
             revenue_metrics = financial_data['revenue_metrics']
             logger.info(f"  Revenue metrics: {revenue_metrics}")
         
+        # Normalize monetary fields in financial data
+        normalized_financial_data = self._normalize_financial_monetary_fields(financial_data)
+        
         return {
-            "summary": financial_data,
-            "generated_at": datetime.now().isoformat(),
+            "summary": normalized_financial_data,
+            "generated_at": datetime.now(timezone.utc).isoformat(),
             "etl_run_timestamp": datetime.now(timezone.utc).isoformat(),
             "data_source": "ETL Pipeline Analysis"
         }
     
     def _create_equipment_analysis(self, business_metrics: Dict[str, Any]) -> Dict[str, Any]:
-        """Create equipment analysis."""
+        """Create equipment analysis with deduplication and normalization."""
         equipment_metrics = business_metrics.get('equipment', {})
         
-        # Build items list from data-driven source
+        # Build items list from data-driven source with deduplication
         items = []
+        seen_items = {}  # Track unique items by normalized name + part_number
         equipment_items = equipment_metrics.get('items', [])
         
         if equipment_items:
-            # Use data from business metrics
             for item in equipment_items:
                 if isinstance(item, dict):
-                    items.append({
-                        "name": item.get('name', 'Unknown Equipment'),
-                        "description": item.get('description', 'Equipment description not available'),
-                        "category": item.get('category', 'Uncategorized')
-                    })
-        else:
-            # Fallback to empty list if no data available
-            items = []
+                    # Normalize name (remove newlines, fix typos)
+                    raw_name = item.get('name', 'Unknown Equipment')
+                    normalized_name = self._normalize_equipment_name(raw_name)
+                    
+                    # Create stable ID from part number or normalized name
+                    part_number = item.get('part_number', '')
+                    stable_id = part_number if part_number else self._generate_stable_id(normalized_name)
+                    
+                    # Create unique key for deduplication
+                    dedup_key = f"{normalized_name}|{part_number}"
+                    
+                    if dedup_key not in seen_items:
+                        # First occurrence - add to items
+                        equipment_item = {
+                            "id": stable_id,
+                            "name": normalized_name,
+                            "description": item.get('description', 'Equipment description not available'),
+                            "category": item.get('category', 'Uncategorized'),
+                            "part_number": part_number,
+                            "quantity": int(item.get('quantity', 1)),
+                            "unit_price": {
+                                "value": float(item.get('unit_price', 0)),
+                                "currency": "USD"
+                            },
+                            "total_price": {
+                                "value": float(item.get('total_price', 0)),
+                                "currency": "USD"
+                            }
+                        }
+                        items.append(equipment_item)
+                        seen_items[dedup_key] = equipment_item
+                    else:
+                        # Duplicate - aggregate quantities
+                        existing_item = seen_items[dedup_key]
+                        existing_item["quantity"] += int(item.get('quantity', 1))
+                        existing_item["total_price"]["value"] += float(item.get('total_price', 0))
         
         return {
             "equipment_summary": {
-                "total_value": equipment_metrics.get('total_value', 0),
+                "total_value": {
+                    "value": float(equipment_metrics.get('total_value', 0)),
+                    "currency": "USD"
+                },
                 "items": items
             },
-            "generated_at": datetime.now().isoformat(),
+            "generated_at": datetime.now(timezone.utc).isoformat(),
             "etl_run_timestamp": datetime.now(timezone.utc).isoformat(),
             "data_source": "ETL Pipeline Analysis"
         }
     
     def _create_landing_page_data(self, business_metrics: Dict[str, Any]) -> Dict[str, Any]:
-        """Create comprehensive landing page data structure."""
+        """Create comprehensive landing page data structure with normalized types and deduplication."""
         logger.info("Creating landing page data structure...")
         
         # Extract metrics
@@ -656,39 +705,62 @@ class JsonLoader(BaseLoader):
         profitability = financial_metrics.get('profitability', {})
         investment_metrics = financial_metrics.get('investment_metrics', {})
         
-        # Create landing page data structure
+        # Normalize insurance coverage to prevent staleness
+        insurance_coverage = self._normalize_insurance_coverage(landing_page_metrics.get('insurance_coverage', {}))
+        
+        # Create landing page data structure with normalized types
         landing_page_data = {
             "listing_details": {
                 "business_name": "Cranberry Hearing and Balance Center",
                 "business_type": "Audiology Practice",
-                "asking_price": investment_metrics.get('asking_price', 650000),
-                "established": "2010",  # TODO: Get actual founding date
+                "asking_price": {
+                    "value": float(investment_metrics.get('asking_price', {}).get('value', 650000) if isinstance(investment_metrics.get('asking_price'), dict) else investment_metrics.get('asking_price', 650000)),
+                    "currency": "USD"
+                },
+                "established": 2010,  # Convert to number
                 "locations": 2,
-                "state": "Pennsylvania"
+                "state": "PA"  # Use consistent state abbreviation
             },
             "financial_highlights": {
-                "asking_price": investment_metrics.get('asking_price', 650000),
-                "annual_revenue": revenue_metrics.get('annual_revenue_projection', 0),
-                "annual_ebitda": profitability.get('estimated_annual_ebitda', 0),
-                "sde": landing_page_metrics.get('sde', 0),
-                "monthly_cash_flow": landing_page_metrics.get('monthly_cash_flow', 0),
-                "roi": investment_metrics.get('roi_percentage', 0),
-                "payback_period": investment_metrics.get('payback_period_years', 0),
-                "ebitda_margin": profitability.get('ebitda_margin', 0)
+                "annual_revenue": {
+                    "value": float(revenue_metrics.get('annual_revenue_projection', {}).get('value', 0) if isinstance(revenue_metrics.get('annual_revenue_projection'), dict) else revenue_metrics.get('annual_revenue_projection', 0)),
+                    "currency": "USD"
+                },
+                "annual_ebitda": {
+                    "value": float(profitability.get('estimated_annual_ebitda', {}).get('value', 0) if isinstance(profitability.get('estimated_annual_ebitda'), dict) else profitability.get('estimated_annual_ebitda', 0)),
+                    "currency": "USD"
+                },
+                "monthly_cash_flow": {
+                    "value": float(landing_page_metrics.get('monthly_cash_flow', 0)),
+                    "currency": "USD"
+                },
+                "roi": round(float(investment_metrics.get('roi_percentage', 0)), 1),  # Round to 1 decimal
+                "payback_period": round(float(investment_metrics.get('payback_period_years', 0)), 1),  # Round to 1 decimal
+                "ebitda_margin": round(float(profitability.get('ebitda_margin', 0)), 1)  # Round to 1 decimal
             },
             "property_details": {
                 "primary_location": landing_page_metrics.get('location_info', {}).get('primary_location', {}),
                 "secondary_location": landing_page_metrics.get('location_info', {}).get('secondary_location', {}),
                 "lease_analysis": landing_page_metrics.get('lease_analysis', {}),
-                "total_locations": 2,
                 "property_type": "Leased"
             },
             "business_operations": {
                 "services": ["Hearing Tests", "Hearing Aid Sales", "Balance Testing", "Tinnitus Treatment"],
-                "insurance_coverage": landing_page_metrics.get('insurance_coverage', {}),
+                "insurance_coverage": insurance_coverage,
                 "payment_methods": ["Insurance billing (UPMC, Aetna)", "Private pay", "Cash payments"],
-                "equipment_value": equipment_metrics.get('total_value', 0),
-                "business_hours": "Monday-Friday 9AM-5PM"  # TODO: Get actual hours
+                "equipment_value": {
+                    "value": float(equipment_metrics.get('total_value', 0)),
+                    "currency": "USD"
+                },
+                "business_hours": {
+                    "monday": "9:00 AM - 5:00 PM",
+                    "tuesday": "9:00 AM - 5:00 PM", 
+                    "wednesday": "9:00 AM - 5:00 PM",
+                    "thursday": "9:00 AM - 5:00 PM",
+                    "friday": "9:00 AM - 5:00 PM",
+                    "saturday": "Closed",
+                    "sunday": "Closed"
+                }
             },
             "market_opportunity": {
                 "local_market": "Cranberry Township & Pittsburgh Metro Area",
@@ -712,7 +784,7 @@ class JsonLoader(BaseLoader):
                 "Strong EBITDA margins"
             ],
             "metadata": {
-                "generated_at": datetime.now().isoformat(),
+                "generated_at": datetime.now(timezone.utc).isoformat(),
                 "etl_run_timestamp": datetime.now(timezone.utc).isoformat(),
                 "data_source": "ETL Pipeline Analysis",
                 "version": "1.0"
@@ -920,11 +992,32 @@ class JsonLoader(BaseLoader):
             transformed_item = item.copy()
             # Add value field (use total_price if available, otherwise unit_price * quantity)
             if 'total_price' in item:
-                transformed_item['value'] = item['total_price']
+                transformed_item['value'] = {
+                    "value": float(item['total_price']),
+                    "currency": "USD"
+                }
             elif 'unit_price' in item and 'quantity' in item:
-                transformed_item['value'] = item['unit_price'] * item['quantity']
+                transformed_item['value'] = {
+                    "value": float(item['unit_price'] * item['quantity']),
+                    "currency": "USD"
+                }
             else:
-                transformed_item['value'] = 0
+                transformed_item['value'] = {
+                    "value": 0.0,
+                    "currency": "USD"
+                }
+            
+            # Ensure all monetary fields are properly formatted
+            if 'unit_price' in transformed_item:
+                transformed_item['unit_price'] = {
+                    "value": float(transformed_item['unit_price']),
+                    "currency": "USD"
+                }
+            if 'total_price' in transformed_item:
+                transformed_item['total_price'] = {
+                    "value": float(transformed_item['total_price']),
+                    "currency": "USD"
+                }
             
             # Add file_path field (use source_file if available)
             if 'source_file' in item:
@@ -945,6 +1038,81 @@ class JsonLoader(BaseLoader):
             transformed_items.append(transformed_item)
         
         return transformed_items
+    
+    def _normalize_equipment_name(self, name: str) -> str:
+        """Normalize equipment name by removing newlines and fixing typos."""
+        if not name:
+            return "Unknown Equipment"
+        
+        # Replace newlines with spaces and clean up
+        normalized = name.replace('\n', ' ').replace('\r', ' ')
+        
+        # Fix common typos
+        normalized = normalized.replace('Controled', 'Controlled')
+        normalized = normalized.replace('Diagnostic Audiom', 'Diagnostic Audiometer')
+        
+        # Clean up multiple spaces
+        normalized = ' '.join(normalized.split())
+        
+        return normalized.strip()
+    
+    def _generate_stable_id(self, name: str) -> str:
+        """Generate a stable ID from equipment name."""
+        import re
+        
+        # Convert to lowercase and replace spaces/special chars with underscores
+        stable_id = re.sub(r'[^a-zA-Z0-9]', '_', name.lower())
+        
+        # Remove multiple underscores and trim
+        stable_id = re.sub(r'_+', '_', stable_id).strip('_')
+        
+        # Limit length and add prefix
+        if len(stable_id) > 20:
+            stable_id = stable_id[:20]
+        
+        return f"EQ_{stable_id}"
+    
+    def _normalize_financial_monetary_fields(self, financial_data: Dict[str, Any]) -> Dict[str, Any]:
+        """Normalize monetary fields in financial data to include currency."""
+        normalized = financial_data.copy()
+        
+        # Define monetary field mappings
+        monetary_fields = {
+            'revenue_metrics': ['total_revenue', 'annual_revenue_projection', 'monthly_revenue_average'],
+            'profitability': ['estimated_ebitda', 'estimated_annual_ebitda'],
+            'investment_metrics': ['asking_price', 'estimated_market_value', 'discount_amount']
+        }
+        
+        # Normalize monetary fields
+        for section, fields in monetary_fields.items():
+            if section in normalized:
+                for field in fields:
+                    if field in normalized[section]:
+                        value = normalized[section][field]
+                        if isinstance(value, (int, float)):
+                            normalized[section][field] = {
+                                "value": float(value),
+                                "currency": "USD"
+                            }
+        
+        return normalized
+    
+    def _normalize_insurance_coverage(self, insurance_coverage: Dict[str, Any]) -> Dict[str, Any]:
+        """Normalize insurance coverage to prevent staleness by computing derived fields at render-time."""
+        if not insurance_coverage:
+            return {}
+        
+        # Keep only contract_date and compute derived fields at render-time
+        normalized = {
+            "insurers": insurance_coverage.get('insurers', [])
+        }
+        
+        # Remove stale derived fields that will drift over time
+        # These should be computed at render-time based on contract_date
+        # Removed: years_active, total_insurers, total_years_coverage, 
+        #          average_years_per_insurer, coverage_stability_score
+        
+        return normalized
     
     def load_patient_dimension_data(self, patient_data: Dict[str, Any], output_path: str) -> bool:
         """

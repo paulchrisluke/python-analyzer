@@ -72,7 +72,7 @@ jobs:
       uses: actions/download-artifact@v4
       with:
         name: etl-pipeline-data
-        path: ../data/final/
+        path: ./public/data/
     
     - name: Set up Python for ETL pipeline
       uses: actions/setup-python@v4
@@ -87,6 +87,7 @@ jobs:
     
     - name: Ensure data files are available
       run: |
+        set -euo pipefail
         echo "Ensuring data files are available for build..."
         ./scripts/ensure-data.sh
     

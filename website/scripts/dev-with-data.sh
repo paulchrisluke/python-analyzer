@@ -7,9 +7,24 @@ set -e  # Exit on any error
 
 echo "🚀 Starting development server with fresh ETL data..."
 
-# Get the project root directory (parent of website directory)
-PROJECT_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
-echo "📁 Project root: $PROJECT_ROOT"
+# Get the project root directory using git when available, fallback to script's parent
+SCRIPT_DIR="$(dirname "${BASH_SOURCE[0]}")"
+if command -v git >/dev/null 2>&1; then
+    # Try to get repository root from git
+    GIT_ROOT="$(cd "$SCRIPT_DIR" && git rev-parse --show-toplevel 2>/dev/null || true)"
+    if [ -n "$GIT_ROOT" ]; then
+        PROJECT_ROOT="$GIT_ROOT"
+        echo "📁 Project root (from git): $PROJECT_ROOT"
+    else
+        # Git not in a repository, fallback to script's parent directory
+        PROJECT_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+        echo "📁 Project root (from script parent): $PROJECT_ROOT"
+    fi
+else
+    # Git not available, fallback to script's parent directory
+    PROJECT_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+    echo "📁 Project root (from script parent, git not available): $PROJECT_ROOT"
+fi
 
 # Change to project root
 cd "$PROJECT_ROOT"

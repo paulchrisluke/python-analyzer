@@ -1,10 +1,10 @@
 {
   "sales": {
     "status": "no_data",
-    "completeness_score": 0,
+    "completeness_score": 0.0,
     "missing_periods": [],
     "data_quality_issues": [
-      "No sales data found"
+      "No main sales data found"
     ],
     "coverage_details": {},
     "fallback_strategies": []
@@ -20,9 +20,9 @@
     ],
     "coverage_details": {
       "found_documents": [
-        "balance_sheets_balance_sheets",
-        "general_ledger_general_ledger",
-        "cogs_cogs"
+        "balance_sheets",
+        "general_ledger",
+        "cogs"
       ],
       "missing_documents": [
         "profit_loss"
@@ -32,49 +32,45 @@
     },
     "fallback_strategies": [
       "Use sales data to estimate P&L based on industry margins"
-    ],
-    "coverage_percentage": 75.0
+    ]
   },
   "equipment": {
     "status": "good",
     "completeness_score": 50.0,
-    "missing_documents": [
-      "hearing_aid_programmer",
-      "audiometer"
-    ],
+    "missing_documents": [],
     "data_quality_issues": [
-      "Missing equipment categories: ['hearing_aid_programmer', 'audiometer']",
+      "Missing equipment categories: ['audiometer', 'hearing_aid_programmer']",
       "Equipment value seems low for audiology practice"
     ],
     "coverage_details": {
       "equipment_count": 3,
-      "total_value": "25665.00",
+      "total_value": 25665.0,
       "found_categories": [
-        "diagnostic_equipment",
-        "office_equipment"
+        "office_equipment",
+        "diagnostic_equipment"
       ],
       "missing_categories": [
-        "hearing_aid_programmer",
-        "audiometer"
+        "audiometer",
+        "hearing_aid_programmer"
       ]
     },
     "fallback_strategies": [
       "Use industry averages for missing equipment categories",
       "Estimate equipment value based on practice size and type"
-    ],
-    "coverage_percentage": 50.0
+    ]
   },
   "due_diligence": {
     "overall_score": 40.0,
     "readiness_level": "poor",
     "recommendation": "Not ready for due diligence",
     "category_scores": {
-      "sales": 0,
+      "sales": 0.0,
       "financial": 75.0,
       "equipment": 50.0
     }
   },
   "recommendations": [
     "Data coverage is poor - significant gaps need to be addressed"
-  ]
+  ],
+  "etl_run_timestamp": "2025-09-12T04:29:59.447883+00:00"
 }

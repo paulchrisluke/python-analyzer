@@ -63,3 +63,12 @@ data_sources:
     path: "docs/equipment/"
     pattern: "*.pdf"
     description: "Equipment quote PDFs"
+    
+  sales_transactions:
+    type: csv
+    path: "docs/operational/Heading_Aid_Sales_Data/"
+    pattern: "*Sales*.csv"
+    encoding: utf-8
+    delimiter: ","
+    has_header: true
+    description: "Individual sales transaction data"
