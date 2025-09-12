@@ -39,14 +39,21 @@ export function generateCalculationSteps(businessData: BusinessSaleData): Calcul
   
   // ROI calculation steps
   if (businessData.financials.metrics.roi_percentage > 0) {
-    steps.push({
-      step: steps.length + 1,
-      description: "Calculate ROI Percentage",
-      formula: "Annual EBITDA ÷ Asking Price × 100",
-      input: businessData.financials.metrics.asking_price,
-      result: businessData.financials.metrics.roi_percentage,
-      source: "Investment metrics from ETL pipeline"
-    })
+    // Get asking price from valuation section with fallback to metrics
+    const askingPrice = businessData.valuation?.asking_price || 
+                       businessData.financials.metrics.asking_price || 
+                       null
+    
+    if (askingPrice && askingPrice > 0) {
+      steps.push({
+        step: steps.length + 1,
+        description: "Calculate ROI Percentage",
+        formula: "Annual EBITDA ÷ Asking Price × 100",
+        input: askingPrice,
+        result: businessData.financials.metrics.roi_percentage,
+        source: "Investment metrics from ETL pipeline"
+      })
+    }
   }
   
   // Payback period calculation steps
@@ -133,7 +140,10 @@ export function generateDataQualityAlerts(
   // Check equipment completeness
   const equipmentScore = coverageData.equipment.completeness_score
   if (equipmentScore < 100) {
-    const missingCategories = coverageData.equipment.coverage_details?.categories_missing || []
+    // Support both key formats for backward compatibility
+    const missingCategories = coverageData.equipment.coverage_details?.categories_missing || 
+                             coverageData.equipment.coverage_details?.missing_categories || 
+                             []
     const missingSummary = missingCategories.length ? ` - missing categories: ${missingCategories.join(', ')}` : ''
     alerts.push({
       type: 'warning',

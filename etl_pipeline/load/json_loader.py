@@ -12,6 +12,7 @@ from pathlib import Path
 from datetime import datetime, timezone
 import re
 from decimal import Decimal, InvalidOperation
+import shutil
 from .base_loader import BaseLoader
 from ..utils.file_utils import FileUtils
 
@@ -63,6 +64,81 @@ def parse_price_value(price_raw):
             
     except (ValueError, TypeError, AttributeError, InvalidOperation):
         return Decimal('0.00')
+
+def normalize_money(value):
+    """
+    Normalize monetary values to a consistent format.
+    
+    Args:
+        value: Can be a dict with 'value'/'amount' key, a string with currency symbols,
+               a numeric value, or None/empty
+        
+    Returns:
+        Dict with 'value' (float) and 'currency' (str) keys
+    """
+    if value is None:
+        return {"value": 0.0, "currency": "USD"}
+    
+    # Handle dict format
+    if isinstance(value, dict):
+        if 'value' in value:
+            return {
+                "value": float(value['value']),
+                "currency": value.get('currency', 'USD')
+            }
+        elif 'amount' in value:
+            return {
+                "value": float(value['amount']),
+                "currency": value.get('currency', 'USD')
+            }
+        else:
+            return {"value": 0.0, "currency": "USD"}
+    
+    # Handle string format
+    if isinstance(value, str):
+        value = value.strip()
+        if not value or value.upper() in ['N/A', 'NA', 'NULL', 'NONE', '']:
+            return {"value": 0.0, "currency": "USD"}
+        
+        # Extract currency and numeric value
+        currency = "USD"  # default
+        numeric_value = value
+        
+        # Check for currency symbols at the beginning
+        if value.startswith('$'):
+            currency = "USD"
+            numeric_value = value[1:]
+        elif value.startswith('€'):
+            currency = "EUR"
+            numeric_value = value[1:]
+        elif value.startswith('£'):
+            currency = "GBP"
+            numeric_value = value[1:]
+        
+        # Check for currency codes at the end (3-letter codes)
+        if len(value) >= 4 and value[-3:].isupper() and value[-4] == ' ':
+            currency = value[-3:]
+            numeric_value = value[:-4]
+        
+        # Remove commas and parse numeric value
+        numeric_value = numeric_value.replace(',', '')
+        try:
+            return {
+                "value": float(numeric_value),
+                "currency": currency
+            }
+        except (ValueError, TypeError):
+            return {"value": 0.0, "currency": "USD"}
+    
+    # Handle numeric values
+    if isinstance(value, (int, float)):
+        return {
+            "value": float(value),
+            "currency": "USD"
+        }
+    
+    # Fallback
+    return {"value": 0.0, "currency": "USD"}
 
 class JsonLoader(BaseLoader):
     """Loader for saving data to JSON files."""
@@ -366,7 +442,7 @@ class JsonLoader(BaseLoader):
         business_sale_data = {
             "metadata": {
                 "business_name": financial_metrics.get('business_name') or 'Cranberry Hearing and Balance Center',
-                "generated_at": datetime.now().isoformat(),
+                "generated_at": datetime.now(timezone.utc).isoformat(),
                 "etl_run_timestamp": datetime.now(timezone.utc).isoformat(),
                 "data_period": data_period,
                 "months_analyzed": financial_metrics.get('revenue_metrics', {}).get('analysis_period_months', 30),
@@ -414,6 +490,10 @@ class JsonLoader(BaseLoader):
                     "annual_revenue_projection": float(financial_metrics.get('revenue_metrics', {}).get('annual_revenue_projection', 0)),
                     "estimated_annual_ebitda": float(financial_metrics.get('profitability', {}).get('estimated_annual_ebitda', 0)),
                     "roi_percentage": float(financial_metrics.get('investment_metrics', {}).get('roi_percentage', 0)),
+                    "ebitda_margin": float(financial_metrics.get('profitability', {}).get('ebitda_margin', 0)),
+                    "payback_period_years": float(financial_metrics.get('investment_metrics', {}).get('payback_period_years', 0)),
+                    "equipment_value": float(equipment_metrics.get('total_value', 0)),
+                    "asking_price": float(valuation_metrics.get('market_analysis', {}).get('asking_price', 0)),
                     "visibility": ["public", "nda", "buyer", "internal"]
                 }
             },
@@ -647,41 +727,66 @@ class JsonLoader(BaseLoader):
                     
                     # Create stable ID from part number or normalized name
                     part_number = item.get('part_number', '')
+                    # Sanitize part_number before using as ID
+                    if part_number:
+                        part_number = str(part_number).strip()
+                        # Remove control characters and invalid characters
+                        part_number = re.sub(r'[\x00-\x1f\x7f-\x9f]', '', part_number)
+                        part_number = re.sub(r'[^\w\-_.]', '_', part_number)
                     stable_id = part_number if part_number else self._generate_stable_id(normalized_name)
                     
-                    # Create unique key for deduplication
-                    dedup_key = f"{normalized_name}|{part_number}"
+                    # Create unique key for deduplication using stable_id as primary key
+                    dedup_key = stable_id
                     
                     if dedup_key not in seen_items:
                         # First occurrence - add to items
+                        # Parse prices robustly
+                        unit_price_raw = item.get('unit_price', 0)
+                        total_price_raw = item.get('total_price', 0)
+                        quantity = int(item.get('quantity', 1))
+                        
+                        # Normalize unit price
+                        unit_price_normalized = normalize_money(unit_price_raw)
+                        
+                        # Calculate total price if not provided or invalid
+                        if total_price_raw and total_price_raw != 0:
+                            total_price_normalized = normalize_money(total_price_raw)
+                        else:
+                            # Fallback: unit_price * quantity
+                            total_price_normalized = {
+                                "value": unit_price_normalized["value"] * quantity,
+                                "currency": unit_price_normalized["currency"]
+                            }
+                        
                         equipment_item = {
                             "id": stable_id,
                             "name": normalized_name,
                             "description": item.get('description', 'Equipment description not available'),
                             "category": item.get('category', 'Uncategorized'),
                             "part_number": part_number,
-                            "quantity": int(item.get('quantity', 1)),
-                            "unit_price": {
-                                "value": float(item.get('unit_price', 0)),
-                                "currency": "USD"
-                            },
-                            "total_price": {
-                                "value": float(item.get('total_price', 0)),
-                                "currency": "USD"
-                            }
+                            "quantity": quantity,
+                            "unit_price": unit_price_normalized,
+                            "total_price": total_price_normalized
                         }
                         items.append(equipment_item)
                         seen_items[dedup_key] = equipment_item
                     else:
                         # Duplicate - aggregate quantities
                         existing_item = seen_items[dedup_key]
-                        existing_item["quantity"] += int(item.get('quantity', 1))
-                        existing_item["total_price"]["value"] += float(item.get('total_price', 0))
+                        additional_quantity = int(item.get('quantity', 1))
+                        existing_item["quantity"] += additional_quantity
+                        
+                        # Aggregate total price using normalize_money
+                        additional_total_price = normalize_money(item.get('total_price', 0))
+                        existing_item["total_price"]["value"] += additional_total_price["value"]
+        
+        # Calculate total value from actual items
+        calculated_total_value = sum(item.get('total_price', {}).get('value', 0) for item in items)
         
         return {
             "equipment_summary": {
                 "total_value": {
-                    "value": float(equipment_metrics.get('total_value', 0)),
+                    "value": calculated_total_value,
                     "currency": "USD"
                 },
                 "items": items
@@ -797,7 +902,6 @@ class JsonLoader(BaseLoader):
     def _copy_files_to_website(self, final_dir: Path) -> None:
         """Copy essential JSON files to website public/data directory for Next.js integration."""
         try:
-            import shutil
             
             # Define website public/data directory (relative to project root)
             project_root = Path(__file__).parent.parent.parent
@@ -830,8 +934,8 @@ class JsonLoader(BaseLoader):
             else:
                 logger.warning("No files were copied to website public/data directory")
                 
-        except Exception as e:
-            logger.error(f"Failed to copy files to website public/data directory: {e}")
+        except (OSError, shutil.Error) as e:
+            logger.exception("Failed to copy files to website public/data directory")
             # Don't raise the exception - this is not critical for the main pipeline
     
     def _convert_dataframes_to_dict(self, data: Dict[str, Any]) -> Dict[str, Any]:
@@ -992,32 +1096,22 @@ class JsonLoader(BaseLoader):
             transformed_item = item.copy()
             # Add value field (use total_price if available, otherwise unit_price * quantity)
             if 'total_price' in item:
-                transformed_item['value'] = {
-                    "value": float(item['total_price']),
-                    "currency": "USD"
-                }
+                transformed_item['value'] = normalize_money(item['total_price'])
             elif 'unit_price' in item and 'quantity' in item:
+                unit_price = normalize_money(item['unit_price'])
+                quantity = int(item.get('quantity', 1))
                 transformed_item['value'] = {
-                    "value": float(item['unit_price'] * item['quantity']),
-                    "currency": "USD"
+                    "value": unit_price["value"] * quantity,
+                    "currency": unit_price["currency"]
                 }
             else:
-                transformed_item['value'] = {
-                    "value": 0.0,
-                    "currency": "USD"
-                }
+                transformed_item['value'] = {"value": 0.0, "currency": "USD"}
             
             # Ensure all monetary fields are properly formatted
             if 'unit_price' in transformed_item:
-                transformed_item['unit_price'] = {
-                    "value": float(transformed_item['unit_price']),
-                    "currency": "USD"
-                }
+                transformed_item['unit_price'] = normalize_money(transformed_item['unit_price'])
             if 'total_price' in transformed_item:
-                transformed_item['total_price'] = {
-                    "value": float(transformed_item['total_price']),
-                    "currency": "USD"
-                }
+                transformed_item['total_price'] = normalize_money(transformed_item['total_price'])
             
             # Add file_path field (use source_file if available)
             if 'source_file' in item:
@@ -1074,7 +1168,8 @@ class JsonLoader(BaseLoader):
     
     def _normalize_financial_monetary_fields(self, financial_data: Dict[str, Any]) -> Dict[str, Any]:
         """Normalize monetary fields in financial data to include currency."""
-        normalized = financial_data.copy()
+        import copy
+        normalized = copy.deepcopy(financial_data)
         
         # Define monetary field mappings
         monetary_fields = {
@@ -1089,11 +1184,11 @@ class JsonLoader(BaseLoader):
                 for field in fields:
                     if field in normalized[section]:
                         value = normalized[section][field]
-                        if isinstance(value, (int, float)):
-                            normalized[section][field] = {
-                                "value": float(value),
-                                "currency": "USD"
-                            }
+                        # Skip if already normalized (dict with value/currency)
+                        if isinstance(value, dict) and 'value' in value and 'currency' in value:
+                            continue
+                        # Normalize using the helper function
+                        normalized[section][field] = normalize_money(value)
         
         return normalized
     

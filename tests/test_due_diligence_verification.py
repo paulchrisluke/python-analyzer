@@ -100,7 +100,15 @@ MASTER_SCHEMA = {
                                 "oneOf": [
                                     {"type": "number"},
                                     {"type": "null"},
-                                    {"type": "string", "pattern": "^-?\\d+(?:\\.\\d+)?(?:[eE][+-]?\\d+)?$"}
+                                    {"type": "string", "pattern": "^-?\\d+(?:\\.\\d+)?(?:[eE][+-]?\\d+)?$"},
+                                    {
+                                        "type": "object",
+                                        "properties": {
+                                            "value": {"type": "number"},
+                                            "currency": {"type": "string"}
+                                        },
+                                        "required": ["value", "currency"]
+                                    }
                                 ]
                             }
                         }
@@ -109,7 +117,15 @@ MASTER_SCHEMA = {
                 "total_value": {
                     "oneOf": [
                         {"type": "number"},
-                        {"type": "string", "pattern": "^-?\\d+(?:\\.\\d+)?$"}
+                        {"type": "string", "pattern": "^-?\\d+(?:\\.\\d+)?$"},
+                        {
+                            "type": "object",
+                            "properties": {
+                                "value": {"type": "number"},
+                                "currency": {"type": "string"}
+                            },
+                            "required": ["value", "currency"]
+                        }
                     ]
                 },
                 "visibility": {"type": "array", "items": {"type": "string"}}
@@ -259,7 +275,12 @@ class TestDueDiligenceManager:
         if "equipment" in internal_data and "items" in internal_data["equipment"]:
             for item in internal_data["equipment"]["items"]:
                 assert "value" in item, f"Missing 'value' field in equipment item: {item.get('name')}"
-                assert isinstance(item["value"], (int, float, str, type(None))), f"Equipment value must be number, string, or None, got {type(item['value'])}"
+                # Accept number, string, None, or money object with value/currency
+                if isinstance(item["value"], dict):
+                    assert "value" in item["value"] and "currency" in item["value"], f"Money object must have 'value' and 'currency' keys, got {item['value']}"
+                    assert isinstance(item["value"]["value"], (int, float)), f"Money value must be numeric, got {type(item['value']['value'])}"
+                else:
+                    assert isinstance(item["value"], (int, float, str, type(None))), f"Equipment value must be number, string, None, or money object, got {type(item['value'])}"
     
     def test_stage_filtering_public(self, manager):
         """Test that public stage hides file paths and only shows high-level stats."""

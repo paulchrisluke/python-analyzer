@@ -15,8 +15,8 @@ function matchesRoute(pathname: string, route: string): boolean {
 // Simple authentication check using session cookie
 async function isAuthenticated(req: NextRequest): Promise<boolean> {
   try {
-    // In development, allow access for testing
-    if (process.env.NODE_ENV === 'development') {
+    // In development, allow access for testing, but not during Playwright tests
+    if (process.env.NODE_ENV === 'development' && !process.env.PLAYWRIGHT_TEST) {
       return true
     }
 
@@ -26,7 +26,7 @@ async function isAuthenticated(req: NextRequest): Promise<boolean> {
     const token = sessionCookie.value
     await jwtVerify(
       token,
-      new TextEncoder().encode(process.env.AUTH_SECRET as string),
+      new TextEncoder().encode(process.env.AUTH_SECRET || 'your-super-secret-jwt-key-here-minimum-32-characters'),
       { issuer: 'cranberry', audience: 'web' }
     )
     return true

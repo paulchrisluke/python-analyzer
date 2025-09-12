@@ -58,9 +58,10 @@ async function loadJsonFile<T>(filePath: string): Promise<T> {
     const fs = await import('fs/promises')
     const path = await import('path')
     
-    // Use public/data/ directory for bundled data (works in both dev and production)
-    const publicDataPath = path.join(process.cwd(), 'public', 'data', filePath)
-    const fileContent = await fs.readFile(publicDataPath, 'utf-8')
+    // Use ADMIN_DATA_DIR if set (for production builds), otherwise fall back to public/data/
+    const dataDir = process.env.ADMIN_DATA_DIR || path.join('public', 'data')
+    const fullDataPath = path.join(process.cwd(), dataDir, filePath)
+    const fileContent = await fs.readFile(fullDataPath, 'utf-8')
     return JSON.parse(fileContent) as T
   } catch (error) {
     console.error(`Error loading ${filePath}:`, error)

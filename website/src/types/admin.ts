@@ -91,6 +91,9 @@ export interface DueDiligenceCoverage {
       total_value: number;
       categories_found: string[];
       categories_missing: string[];
+      // Backward compatibility
+      found_categories?: string[];
+      missing_categories?: string[];
     };
     fallback_strategies: string[];
   };

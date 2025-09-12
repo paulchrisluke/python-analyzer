@@ -310,8 +310,8 @@ class DataCoverageAnalyzer:
         coverage['coverage_details'] = {
             'equipment_count': equipment_count,
             'total_value': float(total_equipment_value),  # Ensure numeric type
-            'found_categories': list(found_categories),
-            'missing_categories': list(missing_categories)
+            'categories_found': list(found_categories),
+            'categories_missing': list(missing_categories)
         }
         
         # Determine status

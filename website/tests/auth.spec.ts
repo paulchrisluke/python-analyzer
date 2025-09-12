@@ -27,8 +27,8 @@ test.describe('Simple Auth Flow', () => {
     
     // Should show business sale page
     await expect(page).toHaveURL('/');
-    // Check for the main business sale heading
-    await expect(page.locator('h1:has-text("Established Two-Location")')).toBeVisible();
+    // Check for the main business sale heading using a more specific selector
+    await expect(page.locator('h1.text-3xl')).toContainText('Established Two-Location');
   });
 
   test.skip('should allow form input without errors', async ({ page }) => {
@@ -115,8 +115,8 @@ test.describe('Simple Auth Flow', () => {
     // Wait a moment for any processing
     await page.waitForTimeout(1000);
     
-    // Should still be on login page (not redirected)
-    await expect(page).toHaveURL('/login/');
+    // Should still be on login page (not redirected) - may have query parameters
+    await expect(page).toHaveURL(/\/login\/\??/);
   });
 
   test('should protect dashboard route', async ({ page }) => {

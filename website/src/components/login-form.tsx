@@ -31,13 +31,27 @@ export function LoginForm({
     setError("")
 
     try {
-      const result = await signIn(email, password)
+      // Use server-side authentication
+      const response = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email, password }),
+      })
 
-      if (!result.success) {
-        setError(result.error || "Sign in failed")
+      if (!response.ok) {
+        const errorData = await response.json()
+        setError(errorData.error || "Sign in failed")
       } else {
-        // Redirect to dashboard after successful login
-        window.location.href = "/dashboard"
+        // Also update client-side session for consistency
+        const result = await signIn(email, password)
+        if (result.success) {
+          // Redirect to dashboard after successful login
+          window.location.href = "/dashboard"
+        } else {
+          setError(result.error || "Sign in failed")
+        }
       }
     } catch {
       setError("An unexpected error occurred")

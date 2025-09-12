@@ -40,12 +40,26 @@
 05_ANALYSIS_TOOLS/reports/
 
 # ETL Pipeline Generated Files (Contains real business data)
+# Allow ETL pipeline output for CI/CD builds
+!data/final/
 data/
 examples/data/
 reports/
 logs/
 
 # Exception: Allow website data directory (contains public business listing data)
+# Block raw export patterns in website/public/data/
+website/public/data/*.ndjson
+website/public/data/*.jsonl
+website/public/data/*_raw*.json
+website/public/data/exports/
+website/public/data/*.sql
+website/public/data/*.dump
+website/public/data/*.csv
+website/public/data/*.tar
+website/public/data/*.zip
+# Allow only explicitly sanitized JSON files
+!website/public/data/*.sanitized.json
 !website/src/data/
 !website/public/data/
 

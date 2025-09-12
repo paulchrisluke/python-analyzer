@@ -18,7 +18,7 @@ jobs:
       uses: actions/checkout@v4
       
     - name: Set up Python
-      uses: actions/setup-python@v4
+      uses: actions/setup-python@v5
       with:
         python-version: '3.11'
         
@@ -45,14 +45,27 @@ jobs:
         echo "Checking generated files..."
         ls -la data/final/
         echo "Checking website data directory..."
-        ls -la website/src/data/
+        ls -la website/public/data/
         
-    - name: Upload pipeline artifacts
+    - name: Upload public pipeline artifacts
       uses: actions/upload-artifact@v4
       with:
-        name: etl-pipeline-data
+        name: etl-public-data
         path: |
-          data/final/
+          data/final/landing_page_data.json
+          data/final/financial_summary.json
+          data/final/equipment_analysis.json
+          data/final/business_sale_data.json
+          data/final/due_diligence_coverage.json
+        retention-days: 7
+        if-no-files-found: warn
+        
+    - name: Upload admin pipeline artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: etl-admin-data
+        path: |
+          data/final/due_diligence_stages/
         retention-days: 7
         if-no-files-found: warn
 
@@ -68,14 +81,20 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v4
     
-    - name: Download ETL pipeline data
+    - name: Download public ETL pipeline data
       uses: actions/download-artifact@v4
       with:
-        name: etl-pipeline-data
+        name: etl-public-data
         path: ./public/data/
+        
+    - name: Download admin ETL pipeline data
+      uses: actions/download-artifact@v4
+      with:
+        name: etl-admin-data
+        path: ./.data/
     
     - name: Set up Python for ETL pipeline
-      uses: actions/setup-python@v4
+      uses: actions/setup-python@v5
       with:
         python-version: '3.11'
     
@@ -134,8 +153,10 @@ jobs:
         ls -la
         echo "Listing public directory contents:"
         ls -la public/
-        echo "Running static build..."
-        npm run build
+        echo "Listing admin data directory contents:"
+        ls -la .data/
+        echo "Running static build with admin data directory..."
+        ADMIN_DATA_DIR=.data npm run build
     
     - name: Deploy to Cloudflare Pages
       if: github.ref == 'refs/heads/main'

@@ -3,7 +3,8 @@
 # Development script that ensures data is available before starting Next.js dev server
 # This is useful for development when you want fresh data
 
-set -e  # Exit on any error
+set -euo pipefail  # Exit on any error, unset variables, and pipeline failures
+IFS=$'\n\t'  # Safe IFS for word splitting
 
 echo "🚀 Starting development server with fresh ETL data..."
 
@@ -31,10 +32,7 @@ cd "$PROJECT_ROOT"
 
 # Step 1: Run ETL pipeline to generate and copy data
 echo "📊 Running ETL pipeline for development..."
-python run_pipeline.py
-
-# Check if ETL pipeline succeeded
-if [ $? -eq 0 ]; then
+if python run_pipeline.py; then
     echo "✅ ETL pipeline completed successfully"
 else
     echo "❌ ETL pipeline failed"

@@ -38,7 +38,7 @@ class EquipmentCalculator:
             Dictionary containing equipment metrics
         """
         equipment_metrics = {
-            'total_value': Decimal('0.00'),
+            'total_value': 0.0,
             'items': [],
             'categories': {},
             'source_files': [],
@@ -60,7 +60,7 @@ class EquipmentCalculator:
             '2019-11-11_Trumpetrem_Audiometercombo_Cranberryhearing.csv': Decimal('20752.50')
         }
         
-        total_value = Decimal('0.00')
+        total_value = 0.0
         all_items = []
         categories = {}
         
@@ -76,7 +76,7 @@ class EquipmentCalculator:
                     logger.info(f"  Using correct total ${correct_total:,.2f} instead of calculated ${file_total:,.2f}")
                 
                 all_items.extend(file_items)
-                total_value += correct_total
+                total_value += float(correct_total)
                 equipment_metrics['source_files'].append(csv_file.name)
                 
                 # Count categories

@@ -67,7 +67,7 @@ data_sources:
   sales_transactions:
     type: csv
     path: "docs/operational/Heading_Aid_Sales_Data/"
-    pattern: "*Sales*.csv"
+    sales_pattern: "*[sS]ales*.csv"
     encoding: utf-8
     delimiter: ","
     has_header: true
