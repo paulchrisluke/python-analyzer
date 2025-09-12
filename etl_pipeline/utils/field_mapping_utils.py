@@ -85,7 +85,7 @@ class FieldMappingRegistry:
                     
                     # Initialize array column if it doesn't exist
                     if array_name not in df.columns:
-                        df[array_name] = df.apply(lambda row: [], axis=1)
+                        df[array_name] = [[] for _ in range(len(df))]
                         logger.debug(f"Created {array_name} column")
                     
                     # For each row, ensure the array has enough elements

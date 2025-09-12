@@ -67,7 +67,6 @@ class SchemaValidator:
         
         self.required_traceability_fields = [
             "field_mappings",
-            "calculation_lineage",
             "document_registry",
             "etl_pipeline_version",
             "traceability_enabled"
@@ -98,7 +97,7 @@ class SchemaValidator:
         
         # Validate metadata
         if "metadata" in data:
-            metadata_validation = self._validate_metadata(data["metadata"])
+            metadata_validation = self._validate_metadata(data["metadata"], "business_sale_data")
             validation_results["errors"].extend(metadata_validation["errors"])
             validation_results["warnings"].extend(metadata_validation["warnings"])
             if metadata_validation["errors"]:
@@ -110,6 +109,11 @@ class SchemaValidator:
             validation_results["errors"].extend(traceability_validation["errors"])
             validation_results["warnings"].extend(traceability_validation["warnings"])
             if traceability_validation["errors"]:
+                validation_results["valid"] = False
+            
+            # For business_sale_data, calculation_lineage is required
+            if "calculation_lineage" not in data["traceability"]:
+                validation_results["errors"].append("Missing required traceability field: calculation_lineage")
                 validation_results["valid"] = False
         
         # Validate business data structure
@@ -146,7 +150,7 @@ class SchemaValidator:
         
         # Validate metadata
         if "metadata" in data:
-            metadata_validation = self._validate_metadata(data["metadata"])
+            metadata_validation = self._validate_metadata(data["metadata"], "due_diligence_coverage")
             validation_results["errors"].extend(metadata_validation["errors"])
             validation_results["warnings"].extend(metadata_validation["warnings"])
             if metadata_validation["errors"]:
@@ -169,23 +173,41 @@ class SchemaValidator:
         
         return validation_results
     
-    def _validate_metadata(self, metadata: Dict[str, Any]) -> Dict[str, Any]:
-        """Validate metadata structure."""
+    def _validate_metadata(self, metadata: Dict[str, Any], file_type: str = "business_sale_data") -> Dict[str, Any]:
+        """Validate metadata structure based on file type."""
         validation = {"errors": [], "warnings": []}
         
-        required_metadata_fields = [
-            "business_name",
-            "generated_at",
-            "etl_run_timestamp",
-            "data_period"
-        ]
+        # Define required fields based on file type
+        if file_type == "business_sale_data":
+            required_metadata_fields = [
+                "business_name",
+                "generated_at",
+                "etl_run_timestamp",
+                "data_period"
+            ]
+            timestamp_fields = ["generated_at", "etl_run_timestamp"]
+        elif file_type == "due_diligence_coverage":
+            required_metadata_fields = [
+                "analysis_timestamp",
+                "generated_at",
+                "etl_run_timestamp"
+            ]
+            timestamp_fields = ["analysis_timestamp", "generated_at", "etl_run_timestamp"]
+        else:
+            # Default to business_sale_data requirements
+            required_metadata_fields = [
+                "business_name",
+                "generated_at",
+                "etl_run_timestamp",
+                "data_period"
+            ]
+            timestamp_fields = ["generated_at", "etl_run_timestamp"]
         
         for field in required_metadata_fields:
             if field not in metadata:
                 validation["errors"].append(f"Missing required metadata field: {field}")
         
         # Validate timestamp format
-        timestamp_fields = ["generated_at", "etl_run_timestamp"]
         for field in timestamp_fields:
             if field in metadata:
                 if not self._is_valid_timestamp(metadata[field]):

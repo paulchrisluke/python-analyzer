@@ -492,7 +492,7 @@ const summary = data?.traceability?.field_mappings?.traceability_summary || {};
 
 ```javascript
 // Get calculation steps for a specific metric with safe access
-const revenueCalculation = (data?.traceability?.calculation_lineage || [])
+const revenueCalculation = (data?.traceability?.calculation_lineage?.calculation_lineage || [])
   .find(calc => calc.metric_name === 'annual_revenue_projection');
 
 // Get all calculation steps with safe fallback

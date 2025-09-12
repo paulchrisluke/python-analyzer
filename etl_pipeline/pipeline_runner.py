@@ -390,14 +390,22 @@ class ETLPipeline:
             # Ensure due diligence manager is initialized to get document registry
             if self.due_diligence_manager is None:
                 self._initialize_due_diligence_manager()
-            # Initialize enhanced coverage analyzer with document registry
-            self.coverage_analyzer = EnhancedCoverageAnalyzer(
-                self.business_rules, 
-                self.due_diligence_manager.document_registry
-            )
-            logger.info("Enhanced coverage analyzer initialized")
+            
+            # Initialize enhanced coverage analyzer only if due diligence manager exists and has document_registry
+            if (self.due_diligence_manager is not None and 
+                hasattr(self.due_diligence_manager, 'document_registry') and 
+                self.due_diligence_manager.document_registry is not None):
+                self.coverage_analyzer = EnhancedCoverageAnalyzer(
+                    self.business_rules, 
+                    self.due_diligence_manager.document_registry
+                )
+                logger.info("Enhanced coverage analyzer initialized")
+            else:
+                logger.info("Due diligence manager or document registry not available, falling back to basic analyzer")
+                self.coverage_analyzer = DataCoverageAnalyzer(self.business_rules)
+                logger.info("Basic data coverage analyzer initialized as fallback")
         except Exception as e:
-            logger.warning(f"Failed to initialize enhanced coverage analyzer: {str(e)} - falling back to basic analyzer")
+            logger.exception("Failed to initialize enhanced coverage analyzer - falling back to basic analyzer")
             try:
                 self.coverage_analyzer = DataCoverageAnalyzer(self.business_rules)
                 logger.info("Basic data coverage analyzer initialized as fallback")
