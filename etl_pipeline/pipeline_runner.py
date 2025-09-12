@@ -387,9 +387,10 @@ class ETLPipeline:
         
         # Initialize enhanced coverage analyzer
         try:
-            # First initialize the due diligence manager to get document registry
-            self.due_diligence_manager = DueDiligenceManager()
-            # Then initialize enhanced coverage analyzer with document registry
+            # Ensure due diligence manager is initialized to get document registry
+            if self.due_diligence_manager is None:
+                self._initialize_due_diligence_manager()
+            # Initialize enhanced coverage analyzer with document registry
             self.coverage_analyzer = EnhancedCoverageAnalyzer(
                 self.business_rules, 
                 self.due_diligence_manager.document_registry

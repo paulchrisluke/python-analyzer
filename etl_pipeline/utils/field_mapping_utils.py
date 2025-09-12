@@ -4,6 +4,7 @@ Field mapping utilities for ETL pipeline traceability.
 
 import yaml
 import logging
+import pandas as pd
 from typing import Dict, Any, Optional, List
 from pathlib import Path
 from datetime import datetime, timezone
@@ -32,10 +33,15 @@ class FieldMappingRegistry:
         """Load field mappings from YAML config."""
         try:
             with open(self.config_path, 'r') as f:
-                return yaml.safe_load(f)
-        except Exception as e:
-            logger.error(f"Failed to load field mappings from {self.config_path}: {e}")
+                result = yaml.safe_load(f)
+                # Guard against None result from safe_load
+                return result if result is not None else {}
+        except (FileNotFoundError, PermissionError) as e:
+            logger.error(f"Failed to access field mappings file {self.config_path}: {e}")
             return {}
+        except yaml.YAMLError as e:
+            logger.error(f"Failed to parse YAML in field mappings file {self.config_path}: {e}")
+            raise
     
     def get_mapping(self, category: str, raw_field: str) -> Optional[str]:
         """
@@ -48,8 +54,55 @@ class FieldMappingRegistry:
         Returns:
             Normalized field name or None if not found
         """
-        category_mappings = self.mappings.get(category, {})
+        category_mappings = self.mappings.get('mappings', {}).get(category, {})
         return category_mappings.get(raw_field)
+    
+    def apply_array_mappings(self, df: pd.DataFrame, category: str) -> pd.DataFrame:
+        """
+        Apply field mappings that include array notation (e.g., discounts[0].type).
+        
+        Args:
+            df: DataFrame to apply mappings to
+            category: Mapping category
+            
+        Returns:
+            DataFrame with array-based fields properly structured
+        """
+        category_mappings = self.mappings.get('mappings', {}).get(category, {})
+        logger.debug(f"Processing {len(category_mappings)} mappings for category {category}")
+        
+        # Process array-based mappings
+        for raw_field, normalized_field in category_mappings.items():
+            if raw_field in df.columns and '[' in normalized_field and ']' in normalized_field:
+                logger.debug(f"Processing array mapping: {raw_field} -> {normalized_field}")
+                # Extract array name and index from normalized_field (e.g., "discounts[0].type")
+                import re
+                match = re.match(r'^(\w+)\[(\d+)\]\.(\w+)$', normalized_field)
+                if match:
+                    array_name, index, field_name = match.groups()
+                    index = int(index)
+                    logger.debug(f"Array: {array_name}, Index: {index}, Field: {field_name}")
+                    
+                    # Initialize array column if it doesn't exist
+                    if array_name not in df.columns:
+                        df[array_name] = df.apply(lambda row: [], axis=1)
+                        logger.debug(f"Created {array_name} column")
+                    
+                    # For each row, ensure the array has enough elements
+                    for idx in df.index:
+                        if not isinstance(df.at[idx, array_name], list):
+                            df.at[idx, array_name] = []
+                        
+                        # Extend array if needed
+                        while len(df.at[idx, array_name]) <= index:
+                            df.at[idx, array_name].append({})
+                        
+                        # Set the field value
+                        if pd.notna(df.at[idx, raw_field]) and df.at[idx, raw_field] != '':
+                            df.at[idx, array_name][index][field_name] = df.at[idx, raw_field]
+                            logger.debug(f"Set {array_name}[{index}].{field_name} = {df.at[idx, raw_field]} for row {idx}")
+        
+        return df
     
     def get_all_mappings(self, category: str) -> Dict[str, str]:
         """
@@ -61,7 +114,7 @@ class FieldMappingRegistry:
         Returns:
             Dictionary of raw_field -> normalized_field mappings
         """
-        return self.mappings.get(category, {})
+        return self.mappings.get('mappings', {}).get(category, {})
     
     def log_field_mapping(self, raw_field: str, normalized_field: str, 
                          source_file: str, transformation: str = "direct") -> None:
@@ -74,6 +127,16 @@ class FieldMappingRegistry:
             source_file: Source file path
             transformation: Transformation applied
         """
+        # Validate required inputs
+        if raw_field is None or (isinstance(raw_field, str) and raw_field.strip() == ""):
+            raise ValueError("raw_field cannot be None or empty string")
+        
+        if normalized_field is None or (isinstance(normalized_field, str) and normalized_field.strip() == ""):
+            raise ValueError("normalized_field cannot be None or empty string")
+        
+        if source_file is None or (isinstance(source_file, str) and source_file.strip() == ""):
+            raise ValueError("source_file cannot be None or empty string")
+        
         mapping_log = {
             "raw_field": raw_field,
             "normalized_field": normalized_field,

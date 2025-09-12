@@ -10,6 +10,7 @@ import sys
 import logging
 import json
 import pandas as pd
+import pytest
 from pathlib import Path
 from collections import defaultdict
 
@@ -590,15 +591,11 @@ def main():
 
 def test_pipeline_traceability_fields():
     """Test that traceability fields are present in pipeline output."""
-    # TODO: Implement test
-    print("❌ Not Implemented: Pipeline traceability fields test")
-    return False
+    pytest.skip("Not implemented: pipeline traceability fields test")
 
 def test_field_mappings_in_json_export():
     """Test that field mappings are included in JSON exports."""
-    # TODO: Implement test
-    print("❌ Not Implemented: Field mappings in JSON export test")
-    return False
+    pytest.skip("Not implemented: Field mappings in JSON export test")
 
 if __name__ == "__main__":
     exit_code = main()

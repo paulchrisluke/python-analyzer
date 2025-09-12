@@ -2,15 +2,15 @@
   "summary": {
     "revenue_metrics": {
       "total_revenue": {
-        "value": 2331332.5749999993,
+        "value": 2331332.7,
         "currency": "USD"
       },
       "annual_revenue_projection": {
-        "value": 932533.0299999996,
+        "value": 932533.08,
         "currency": "USD"
       },
       "monthly_revenue_average": {
-        "value": 77711.0858333333,
+        "value": 77711.09,
         "currency": "USD"
       },
       "analysis_period_months": 30
@@ -19,12 +19,12 @@
     "end_date": "2025-06-30",
     "profitability": {
       "estimated_ebitda": {
-        "value": 1121.152,
+        "value": 1121.15,
         "currency": "USD"
       },
       "ebitda_margin": 1.44,
       "estimated_annual_ebitda": {
-        "value": 13453.824,
+        "value": 13453.8,
         "currency": "USD"
       }
     },
@@ -34,14 +34,14 @@
         "currency": "USD"
       },
       "estimated_annual_ebitda": {
-        "value": 13453.824,
+        "value": 13453.8,
         "currency": "USD"
       },
       "roi_percentage": 2.07,
       "payback_period_years": 48.3
     }
   },
-  "generated_at": "2025-09-12T09:37:17.853Z",
-  "etl_run_timestamp": "2025-09-12T09:37:17.853Z",
+  "generated_at": "2025-09-12T11:23:54.831Z",
+  "etl_run_timestamp": "2025-09-12T11:23:54.831Z",
   "data_source": "ETL Pipeline Analysis"
 }

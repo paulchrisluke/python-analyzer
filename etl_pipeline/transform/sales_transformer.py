@@ -124,8 +124,25 @@ class SalesTransformer(BaseTransformer):
     
     def _standardize_column_names(self, df: pd.DataFrame, source_file: str = "sales_data") -> pd.DataFrame:
         """Standardize column names using field mapping registry."""
-        # Get sales mappings from config
-        sales_mappings = self.field_mapping_registry.get_all_mappings('sales_mappings')
+        # Get sales mappings from config with defensive handling
+        try:
+            sales_mappings = self.field_mapping_registry.get_all_mappings('sales_mappings')
+        except Exception as e:
+            logger.error("Failed to retrieve sales mappings from registry for source_file='%s': %s", 
+                        source_file, str(e))
+            sales_mappings = {}
+        
+        # Validate mappings result
+        if not isinstance(sales_mappings, dict):
+            logger.warning("Sales mappings for source_file='%s' is not a dict (got %s), falling back to empty dict", 
+                          source_file, type(sales_mappings).__name__)
+            sales_mappings = {}
+        
+        if not sales_mappings:
+            logger.warning("No sales mappings available for source_file='%s', skipping column renaming", source_file)
+            # Still proceed with lowercase conversion
+            df.columns = df.columns.str.lower()
+            return df
         
         # Log field mappings for traceability
         for raw_field, normalized_field in sales_mappings.items():
@@ -137,11 +154,18 @@ class SalesTransformer(BaseTransformer):
                     transformation="normalize_column_name"
                 )
         
-        # Rename columns using mappings
-        df = df.rename(columns=sales_mappings)
+        # Filter out array-based mappings for regular column renaming
+        regular_mappings = {k: v for k, v in sales_mappings.items() 
+                          if '[' not in v or ']' not in v}
+        
+        # Rename columns using regular mappings
+        df = df.rename(columns=regular_mappings)
         
         # Convert column names to lowercase
         df.columns = df.columns.str.lower()
+        
+        # Apply array-based mappings after column renaming (for discounts array)
+        df = self.field_mapping_registry.apply_array_mappings(df, 'sales_mappings')
         
         return df
     
@@ -292,6 +316,9 @@ class SalesTransformer(BaseTransformer):
             if col in df.columns:
                 df[col] = pd.to_numeric(df[col], errors='coerce')
         
+        # Convert old discount fields to new array structure
+        df = self._convert_discount_fields_to_array(df)
+        
         # Clean text columns
         text_columns = ['staff_name', 'patient_name', 'clinic_name', 'referral_source', 
                        'product', 'description', 'type']
@@ -351,12 +378,8 @@ class SalesTransformer(BaseTransformer):
         if 'product' in df.columns:
             df['product_category'] = df['product'].apply(self._categorize_product)
         
-        # Calculate total discounts
-        discount_columns = ['discount_amount_1', 'discount_amount_2', 'discount_amount_3']
-        df['total_discounts'] = 0
-        for col in discount_columns:
-            if col in df.columns:
-                df['total_discounts'] += df[col].fillna(0)
+        # Calculate total discounts from new array structure
+        df['total_discounts'] = df.apply(self._calculate_total_discounts, axis=1)
         
         # Add transaction ID
         df['transaction_id'] = df.index.astype(str)
@@ -653,3 +676,120 @@ class SalesTransformer(BaseTransformer):
             }
         
         return date_quality
+    
+    def _convert_discount_fields_to_array(self, df: pd.DataFrame) -> pd.DataFrame:
+        """
+        Convert old discount fields to new array structure while maintaining backward compatibility.
+        
+        Args:
+            df: DataFrame with old discount fields
+            
+        Returns:
+            DataFrame with new discounts array and backward-compatible fields
+        """
+        # Initialize discounts array for each row only if it doesn't exist
+        if 'discounts' not in df.columns:
+            df['discounts'] = df.apply(lambda row: [], axis=1)
+        else:
+            # Preserve existing discounts array, but ensure it's a list
+            df['discounts'] = df['discounts'].apply(lambda x: x if isinstance(x, list) else [])
+            # If discounts array already has data, skip the conversion to avoid duplication
+            has_existing_discounts = df['discounts'].apply(lambda x: len(x) > 0).any()
+            if has_existing_discounts:
+                logger.debug("Discounts array already populated, skipping conversion to avoid duplication")
+                return df
+        
+        # Convert old discount fields to new array structure
+        # Handle both original field names and field names after field mapping
+        for i in range(1, 4):  # discount_type_1, discount_type_2, discount_type_3
+            # Try different possible field name formats
+            possible_type_cols = [
+                f'discount_type_{i}',  # Original format
+                f'discount type {i}',  # After field mapping
+                f'Discount Type {i}'   # Original CSV format
+            ]
+            possible_amount_cols = [
+                f'discount_amount_{i}',  # Original format
+                f'discount amount {i}',  # After field mapping
+                f'Discount Amount {i}'   # Original CSV format
+            ]
+            
+            type_col = None
+            amount_col = None
+            
+            # Find the actual column names that exist
+            for col in possible_type_cols:
+                if col in df.columns:
+                    type_col = col
+                    break
+            
+            for col in possible_amount_cols:
+                if col in df.columns:
+                    amount_col = col
+                    break
+            
+            if type_col and amount_col:
+                # Create mask for rows that have both type and amount
+                has_discount = (
+                    df[type_col].notna() & 
+                    df[amount_col].notna() & 
+                    (df[type_col] != '') & 
+                    (df[amount_col] != 0)
+                )
+                
+                # For rows with discounts, add to the array
+                for idx in df[has_discount].index:
+                    discount_obj = {
+                        'type': str(df.loc[idx, type_col]).strip(),
+                        'amount': float(df.loc[idx, amount_col])
+                    }
+                    df.at[idx, 'discounts'].append(discount_obj)
+        
+        # Ensure backward compatibility by keeping old fields populated
+        # This allows existing consumers to continue working
+        for i in range(1, 4):
+            type_col = f'discount_type_{i}'
+            amount_col = f'discount_amount_{i}'
+            
+            if type_col not in df.columns:
+                df[type_col] = None
+            if amount_col not in df.columns:
+                df[amount_col] = None
+            
+            # Populate from discounts array if available
+            for idx in df.index:
+                discounts = df.at[idx, 'discounts']
+                if isinstance(discounts, list) and len(discounts) >= i:
+                    discount = discounts[i-1]
+                    if isinstance(discount, dict):
+                        df.at[idx, type_col] = discount.get('type', '')
+                        df.at[idx, amount_col] = discount.get('amount', 0)
+        
+        return df
+    
+    def _calculate_total_discounts(self, row) -> float:
+        """
+        Calculate total discounts from the new array structure.
+        
+        Args:
+            row: DataFrame row containing discounts array
+            
+        Returns:
+            Total discount amount
+        """
+        total = 0.0
+        
+        # First try the new discounts array
+        if 'discounts' in row and isinstance(row['discounts'], list):
+            for discount in row['discounts']:
+                if isinstance(discount, dict) and 'amount' in discount:
+                    total += float(discount['amount'])
+        
+        # Fallback to old individual fields if discounts array is empty
+        if total == 0.0:
+            for i in range(1, 4):
+                amount_col = f'discount_amount_{i}'
+                if amount_col in row and pd.notna(row[amount_col]):
+                    total += float(row[amount_col])
+        
+        return total

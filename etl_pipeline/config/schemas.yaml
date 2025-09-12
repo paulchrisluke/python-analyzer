@@ -24,6 +24,16 @@ schemas:
       cpt_code: string
       gross_price: decimal
       discount: decimal
+      # New flexible discount structure - array of discount objects
+      discounts:
+        type: array
+        items:
+          type: object
+          properties:
+            type: string
+            amount: decimal
+        description: "Array of discount objects with type and amount"
+      # Backward compatibility - these fields will be populated from discounts array
       discount_type_1: string
       discount_amount_1: decimal
       discount_type_2: string

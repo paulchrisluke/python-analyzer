@@ -12,6 +12,7 @@ from decimal import Decimal, ROUND_HALF_UP
 import os
 from ..utils.field_mapping_utils import FieldMappingRegistry
 from ..utils.calculation_lineage import CalculationLineageTracker
+from ..utils.currency_utils import round_currency, safe_currency_division, safe_currency_multiplication
 
 logger = logging.getLogger(__name__)
 
@@ -130,7 +131,7 @@ class BusinessMetricsCalculator:
         Returns:
             float: Monthly cash flow
         """
-        monthly_cash_flow = annual_ebitda / 12
+        monthly_cash_flow = safe_currency_division(annual_ebitda, 12)
         logger.info(f"Calculated monthly cash flow: ${annual_ebitda:,.2f} ÷ 12 = ${monthly_cash_flow:,.2f}")
         return monthly_cash_flow
     
@@ -458,25 +459,25 @@ class BusinessMetricsCalculator:
         # Determine revenue source and calculate metrics
         if pnl_monthly_revenue_avg > 0:
             # Use P&L-based revenue calculation (preferred - has missing data detection)
-            monthly_revenue_avg = pnl_monthly_revenue_avg
-            total_revenue = monthly_revenue_avg * months_in_period
+            monthly_revenue_avg = round_currency(pnl_monthly_revenue_avg)
+            total_revenue = safe_currency_multiplication(monthly_revenue_avg, months_in_period)
             logger.info(f"Using P&L-based revenue calculation with missing data detection: ${total_revenue:,.2f} total (${monthly_revenue_avg:,.2f} monthly avg * {months_in_period} months)")
         elif sales_metrics:
             # Fallback to sales-based revenue calculation
             sales_revenue = sales_metrics.get('total_revenue', 0)
-            total_revenue = sales_revenue
-            monthly_revenue_avg = total_revenue / months_in_period if total_revenue > 0 else 0
+            total_revenue = round_currency(sales_revenue)
+            monthly_revenue_avg = safe_currency_division(total_revenue, months_in_period)
             logger.info(f"Using sales-based revenue calculation: ${total_revenue:,.2f} total (${monthly_revenue_avg:,.2f} monthly avg)")
         else:
             # No revenue data available
-            total_revenue = 0
-            monthly_revenue_avg = 0
+            total_revenue = 0.0
+            monthly_revenue_avg = 0.0
             logger.warning("No revenue data available from P&L or sales data")
         
         # Calculate revenue metrics (consolidated logic)
         financial_metrics['revenue_metrics'] = {
             'total_revenue': total_revenue,
-            'annual_revenue_projection': monthly_revenue_avg * 12 if monthly_revenue_avg > 0 else 0,
+            'annual_revenue_projection': safe_currency_multiplication(monthly_revenue_avg, 12) if monthly_revenue_avg > 0 else 0.0,
             'monthly_revenue_average': monthly_revenue_avg,
             'analysis_period_months': months_in_period
         }
@@ -499,11 +500,11 @@ class BusinessMetricsCalculator:
         else:
             ebitda_margin = self.business_rules.get('financial_metrics', {}).get('ebitda_margin_target', 0.25)
             monthly_revenue_avg = total_revenue / months_in_period if months_in_period > 0 else 0
-            estimated_ebitda = monthly_revenue_avg * ebitda_margin
+            estimated_ebitda = safe_currency_multiplication(monthly_revenue_avg, ebitda_margin)
             logger.info(f"Using estimated EBITDA with {ebitda_margin:.1%} margin: ${estimated_ebitda:,.2f} monthly")
         
         # Calculate annual EBITDA projection
-        annual_ebitda = estimated_ebitda * 12
+        annual_ebitda = safe_currency_multiplication(estimated_ebitda, 12)
         
         financial_metrics['profitability'] = {
             'estimated_ebitda': estimated_ebitda,
@@ -679,7 +680,7 @@ class BusinessMetricsCalculator:
                 monthly_revenue = df.groupby(df['sale_date'].dt.to_period('M'))['total_price'].sum()
                 
                 if len(monthly_revenue) > 0:
-                    avg_monthly_revenue = self._safe_float_conversion(monthly_revenue.mean())
+                    avg_monthly_revenue = round_currency(monthly_revenue.mean())
                     logger.info(f"Average monthly revenue from sales data: ${avg_monthly_revenue:,.2f}")
                     
                     # Log the revenue calculation step
@@ -688,7 +689,7 @@ class BusinessMetricsCalculator:
                     
                     # Use the EBITDA margin from business rules (website shows 25.6%)
                     ebitda_margin = self.business_rules.get('financial_metrics', {}).get('ebitda_margin_target', 0.256)
-                    calculated_monthly_ebitda = avg_monthly_revenue * ebitda_margin
+                    calculated_monthly_ebitda = safe_currency_multiplication(avg_monthly_revenue, ebitda_margin)
                     
                     # Log the EBITDA calculation step
                     self.lineage_tracker.add_multiply_step(
@@ -703,6 +704,9 @@ class BusinessMetricsCalculator:
                     # Finish calculation
                     self.lineage_tracker.finish_calculation(calculated_monthly_ebitda)
                     return calculated_monthly_ebitda
+                else:
+                    logger.warning("No sales data available for EBITDA calculation")
+                    return None
             
             # Fallback to P&L calculation if sales data not available
             logger.info("Falling back to P&L calculation...")
@@ -892,6 +896,10 @@ class BusinessMetricsCalculator:
         except Exception as e:
             logger.exception("Error calculating real EBITDA from financial data")
             return None
+        finally:
+            # Ensure calculation is always finished, but guard against double-finishing
+            if self.lineage_tracker.current_calculation is not None:
+                self.lineage_tracker.finish_calculation(0)
     
     def _generate_expected_months(self, start_date: pd.Timestamp, end_date: pd.Timestamp) -> List[str]:
         """Generate list of expected months in YYYY-MM format for the analysis period."""
@@ -1060,12 +1068,12 @@ class BusinessMetricsCalculator:
                     
                     # Calculate average monthly revenue from available data
                     if monthly_revenues:
-                        avg_monthly_revenue = sum(monthly_revenues.values()) / len(monthly_revenues)
+                        avg_monthly_revenue = safe_currency_division(sum(monthly_revenues.values()), len(monthly_revenues))
                         logger.info(f"Using average monthly revenue (${avg_monthly_revenue:,.2f}) for {len(missing_months)} missing months")
                         
                         # Add estimated revenue for missing months
-                        estimated_missing_revenue = avg_monthly_revenue * len(missing_months)
-                        total_revenue += estimated_missing_revenue
+                        estimated_missing_revenue = safe_currency_multiplication(avg_monthly_revenue, len(missing_months))
+                        total_revenue = round_currency(total_revenue + estimated_missing_revenue)
                         month_count += len(missing_months)
                         
                         logger.info(f"Added estimated revenue: ${estimated_missing_revenue:,.2f} for missing months")
@@ -1076,10 +1084,10 @@ class BusinessMetricsCalculator:
                     logger.info("All expected months found in P&L data")
             
             # Calculate monthly average from actual data
-            monthly_revenue_avg = total_revenue / month_count if month_count > 0 else 0.0
+            monthly_revenue_avg = safe_currency_division(total_revenue, month_count)
             logger.info(f"P&L monthly revenue average calculation complete: ${total_revenue:,.2f} total from {month_count} months (processed {processed_count}, skipped {skipped_count})")
             logger.info(f"Monthly revenue average: ${monthly_revenue_avg:,.2f}")
-            return float(monthly_revenue_avg)
+            return monthly_revenue_avg
             
         except Exception as e:
             logger.exception("Error estimating revenue from P&L data")
@@ -1169,7 +1177,7 @@ class BusinessMetricsCalculator:
         self.lineage_tracker.add_step("input", "months_in_period", months_in_period, "Number of months in analysis period")
         
         # Calculate monthly revenue average from total revenue and months
-        monthly_revenue_average = total_revenue / months_in_period if total_revenue > 0 else 0
+        monthly_revenue_average = safe_currency_division(total_revenue, months_in_period)
         
         self.lineage_tracker.add_divide_step(
             "total_revenue", 
@@ -1179,7 +1187,7 @@ class BusinessMetricsCalculator:
         )
         
         # Annual projection = monthly average * 12
-        annual_projection = monthly_revenue_average * 12
+        annual_projection = safe_currency_multiplication(monthly_revenue_average, 12)
         
         self.lineage_tracker.add_annualize_step(
             "monthly_revenue_average",

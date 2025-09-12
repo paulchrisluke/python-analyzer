@@ -148,7 +148,7 @@ class DueDiligenceManager:
             "financials": ["financials", "Balance_Sheets", "Bank_Statements", "COGS", "General_Ledger", "Profit_and_Loss", "Tax_Documents"],
             "legal": ["legal", "Insurance_Contracts", "Leases"],
             "equipment": ["equipment"],
-            "operational": ["operational", "Heading_Aid_Sales_Data"],
+            "operational": ["operational", "Hearing_Aid_Sales_Data"],
             "corporate": ["corporate"],
             "other": ["other"]
         }

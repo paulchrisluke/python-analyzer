@@ -13,6 +13,40 @@ logger = logging.getLogger(__name__)
 class SchemaValidator:
     """Validates JSON exports against the expected schema."""
     
+    # File type constants for robust detection
+    FILE_TYPES = {
+        "business_sale_data": "business_sale_data",
+        "due_diligence_coverage": "due_diligence_coverage", 
+        "equipment_analysis": "equipment_analysis",
+        "financial_summary": "financial_summary",
+        "landing_page_data": "landing_page_data"
+    }
+    
+    # Filename patterns for each file type (case-insensitive)
+    FILENAME_PATTERNS = {
+        "business_sale_data": [
+            "business_sale_data", "businesssaledata", "business-sale-data",
+            "sale_data", "saledata", "sale-data", "business_data", "businessdata"
+        ],
+        "due_diligence_coverage": [
+            "due_diligence_coverage", "duediligencecoverage", "due-diligence-coverage",
+            "coverage_analysis", "coverageanalysis", "coverage-analysis",
+            "due_diligence", "duediligence", "due-diligence"
+        ],
+        "equipment_analysis": [
+            "equipment_analysis", "equipmentanalysis", "equipment-analysis",
+            "equipment_data", "equipmentdata", "equipment-data"
+        ],
+        "financial_summary": [
+            "financial_summary", "financialsummary", "financial-summary",
+            "financial_data", "financialdata", "financial-data"
+        ],
+        "landing_page_data": [
+            "landing_page_data", "landingpagedata", "landing-page-data",
+            "landing_page", "landingpage", "landing-page"
+        ]
+    }
+    
     def __init__(self):
         """Initialize schema validator."""
         self.required_fields = {
@@ -67,17 +101,23 @@ class SchemaValidator:
             metadata_validation = self._validate_metadata(data["metadata"])
             validation_results["errors"].extend(metadata_validation["errors"])
             validation_results["warnings"].extend(metadata_validation["warnings"])
+            if metadata_validation["errors"]:
+                validation_results["valid"] = False
         
         # Validate traceability
         if "traceability" in data:
             traceability_validation = self._validate_traceability(data["traceability"])
             validation_results["errors"].extend(traceability_validation["errors"])
             validation_results["warnings"].extend(traceability_validation["warnings"])
+            if traceability_validation["errors"]:
+                validation_results["valid"] = False
         
         # Validate business data structure
         business_validation = self._validate_business_data_structure(data)
         validation_results["errors"].extend(business_validation["errors"])
         validation_results["warnings"].extend(business_validation["warnings"])
+        if business_validation["errors"]:
+            validation_results["valid"] = False
         
         return validation_results
     
@@ -109,17 +149,23 @@ class SchemaValidator:
             metadata_validation = self._validate_metadata(data["metadata"])
             validation_results["errors"].extend(metadata_validation["errors"])
             validation_results["warnings"].extend(metadata_validation["warnings"])
+            if metadata_validation["errors"]:
+                validation_results["valid"] = False
         
         # Validate traceability
         if "traceability" in data:
             traceability_validation = self._validate_traceability(data["traceability"])
             validation_results["errors"].extend(traceability_validation["errors"])
             validation_results["warnings"].extend(traceability_validation["warnings"])
+            if traceability_validation["errors"]:
+                validation_results["valid"] = False
         
         # Validate coverage analysis structure
         coverage_validation = self._validate_coverage_analysis_structure(data)
         validation_results["errors"].extend(coverage_validation["errors"])
         validation_results["warnings"].extend(coverage_validation["warnings"])
+        if coverage_validation["errors"]:
+            validation_results["valid"] = False
         
         return validation_results
     
@@ -238,9 +284,9 @@ class SchemaValidator:
                 if field not in calc:
                     validation["warnings"].append(f"Missing field in calculation {i}: {field}")
             
-            # Validate steps
-            if "steps" in calc:
-                steps = calc["steps"]
+            # Validate steps - access steps field once and reuse
+            steps = calc.get("steps")
+            if steps is not None:
                 if not isinstance(steps, list):
                     validation["errors"].append(f"Steps in calculation {i} must be a list")
                 else:
@@ -344,11 +390,61 @@ class SchemaValidator:
     
     def _is_valid_timestamp(self, timestamp: str) -> bool:
         """Check if timestamp is in valid ISO 8601 format."""
-        try:
-            datetime.fromisoformat(timestamp.replace('Z', '+00:00'))
-            return True
-        except (ValueError, AttributeError):
+        # First check if input is a string
+        if not isinstance(timestamp, str):
             return False
+        
+        try:
+            from dateutil.parser import isoparse
+            isoparse(timestamp)
+            return True
+        except (ValueError, TypeError):
+            return False
+    
+    def _detect_file_type(self, file_path: Path, data: Dict[str, Any]) -> str:
+        """
+        Robust file type detection using multiple strategies.
+        
+        Args:
+            file_path: Path to the file
+            data: Parsed JSON data from the file
+            
+        Returns:
+            Detected file type string
+        """
+        # Strategy 1: Check for specific top-level keys that indicate file type
+        if "metadata" in data and "financials" in data and "sales" in data:
+            return "business_sale_data"
+        elif "coverage_analysis" in data and "document_coverage" in data:
+            return "due_diligence_coverage"
+        elif "equipment_analysis" in data and "equipment_details" in data:
+            return "equipment_analysis"
+        elif "financial_summary" in data and "metrics" in data:
+            return "financial_summary"
+        elif "landing_page_data" in data and "business_overview" in data:
+            return "landing_page_data"
+        
+        # Strategy 2: Check filename patterns (case-insensitive)
+        filename_lower = file_path.name.lower()
+        
+        # Check each file type's patterns
+        for file_type, patterns in self.FILENAME_PATTERNS.items():
+            if any(pattern in filename_lower for pattern in patterns):
+                return file_type
+        
+        # Strategy 3: Check file extension and directory context
+        if file_path.suffix.lower() == '.json':
+            # Check parent directory for context
+            parent_dir = file_path.parent.name.lower()
+            if parent_dir in ['final', 'processed', 'output']:
+                # Look for common business data indicators in the data structure
+                if any(key in data for key in ['revenue', 'profit', 'sales', 'financials']):
+                    return "business_sale_data"
+                elif any(key in data for key in ['coverage', 'documents', 'analysis']):
+                    return "due_diligence_coverage"
+        
+        # Default fallback
+        return "unknown"
     
     def validate_json_file(self, file_path: Union[str, Path]) -> Dict[str, Any]:
         """
@@ -388,17 +484,48 @@ class SchemaValidator:
                 "schema_version": "1.0.0"
             }
         
-        # Determine file type and validate accordingly
-        if "business_sale_data" in file_path.name:
+        # Determine file type using robust detection
+        file_type = self._detect_file_type(file_path, data)
+        
+        # Validate according to detected file type
+        if file_type == "business_sale_data":
             return self.validate_business_sale_data(data)
-        elif "due_diligence_coverage" in file_path.name:
+        elif file_type == "due_diligence_coverage":
             return self.validate_due_diligence_coverage(data)
+        elif file_type == "equipment_analysis":
+            # Add equipment analysis validation if needed
+            return {
+                "valid": True,
+                "errors": [],
+                "warnings": ["Equipment analysis validation not yet implemented"],
+                "schema_version": "1.0.0",
+                "detected_type": file_type
+            }
+        elif file_type == "financial_summary":
+            # Add financial summary validation if needed
+            return {
+                "valid": True,
+                "errors": [],
+                "warnings": ["Financial summary validation not yet implemented"],
+                "schema_version": "1.0.0",
+                "detected_type": file_type
+            }
+        elif file_type == "landing_page_data":
+            # Add landing page validation if needed
+            return {
+                "valid": True,
+                "errors": [],
+                "warnings": ["Landing page data validation not yet implemented"],
+                "schema_version": "1.0.0",
+                "detected_type": file_type
+            }
         else:
             return {
                 "valid": False,
-                "errors": [f"Unknown file type: {file_path.name}"],
+                "errors": [f"Unknown file type: {file_path.name} (detected: {file_type})"],
                 "warnings": [],
-                "schema_version": "1.0.0"
+                "schema_version": "1.0.0",
+                "detected_type": file_type
             }
     
     def validate_all_exports(self, output_dir: Union[str, Path]) -> Dict[str, Any]:

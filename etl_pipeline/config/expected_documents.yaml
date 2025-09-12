@@ -1,0 +1,108 @@
+# Expected Documents Configuration for Business Sale Due Diligence
+# This file defines the expected document types and requirements for comprehensive due diligence analysis
+
+financials:
+  - name: "Profit & Loss Statements"
+    required: true
+    frequency: "monthly"
+    period: "24_months"
+  - name: "Balance Sheets"
+    required: true
+    frequency: "monthly"
+    period: "24_months"
+  - name: "Bank Statements"
+    required: true
+    frequency: "monthly"
+    period: "12_months"
+  - name: "Tax Returns"
+    required: true
+    frequency: "annual"
+    period: "3_years"
+  - name: "General Ledger"
+    required: false
+    frequency: "monthly"
+    period: "12_months"
+  - name: "COGS Analysis"
+    required: false
+    frequency: "monthly"
+    period: "12_months"
+
+legal:
+  - name: "Lease Agreements"
+    required: true
+    frequency: "as_needed"
+    period: "current"
+  - name: "Insurance Policies"
+    required: true
+    frequency: "annual"
+    period: "current"
+  - name: "Employee Agreements"
+    required: false
+    frequency: "as_needed"
+    period: "current"
+  - name: "Supplier Contracts"
+    required: false
+    frequency: "as_needed"
+    period: "current"
+  - name: "Business Licenses"
+    required: true
+    frequency: "annual"
+    period: "current"
+  - name: "Professional Licenses"
+    required: true
+    frequency: "annual"
+    period: "current"
+
+equipment:
+  - name: "Equipment Inventory"
+    required: true
+    frequency: "as_needed"
+    period: "current"
+  - name: "Equipment Quotes"
+    required: false
+    frequency: "as_needed"
+    period: "2_years"
+  - name: "Equipment Maintenance Records"
+    required: false
+    frequency: "as_needed"
+    period: "2_years"
+  - name: "Equipment Warranties"
+    required: false
+    frequency: "as_needed"
+    period: "current"
+
+operational:
+  - name: "Sales Data"
+    required: true
+    frequency: "monthly"
+    period: "24_months"
+  - name: "Customer Records"
+    required: false
+    frequency: "as_needed"
+    period: "current"
+  - name: "Staff Records"
+    required: false
+    frequency: "as_needed"
+    period: "current"
+  - name: "Marketing Materials"
+    required: false
+    frequency: "as_needed"
+    period: "current"
+
+corporate:
+  - name: "Articles of Incorporation"
+    required: true
+    frequency: "as_needed"
+    period: "current"
+  - name: "Bylaws"
+    required: true
+    frequency: "as_needed"
+    period: "current"
+  - name: "Board Minutes"
+    required: false
+    frequency: "quarterly"
+    period: "2_years"
+  - name: "Shareholder Agreements"
+    required: false
+    frequency: "as_needed"
+    period: "current"

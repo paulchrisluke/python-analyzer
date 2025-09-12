@@ -394,32 +394,30 @@ Enhanced coverage analysis with document tracking.
 
 ```json
 {
-  "calculation_lineage": {
-    "calculation_lineage": [
-      {
-        "metric_name": "string",
-        "description": "string",
-        "steps": [
-          {
-            "step": "number",
-            "operation": "string",
-            "field": "string",
-            "value": "number",
-            "description": "string",
-            "timestamp": "ISO 8601 timestamp",
-            "additional_metadata": "object"
-          }
-        ],
-        "start_time": "ISO 8601 timestamp",
-        "final_value": "number",
-        "end_time": "ISO 8601 timestamp"
-      }
-    ],
-    "lineage_summary": {
-      "total_calculations": "number",
-      "metrics_calculated": ["string"],
-      "total_steps": "number"
+  "calculation_lineage": [
+    {
+      "metric_name": "string",
+      "description": "string",
+      "steps": [
+        {
+          "step": "number",
+          "operation": "string",
+          "field": "string",
+          "value": "number",
+          "description": "string",
+          "timestamp": "ISO 8601 timestamp",
+          "additional_metadata": "object"
+        }
+      ],
+      "start_time": "ISO 8601 timestamp",
+      "final_value": "number",
+      "end_time": "ISO 8601 timestamp"
     }
+  ],
+  "lineage_summary": {
+    "total_calculations": "number",
+    "metrics_calculated": ["string"],
+    "total_steps": "number"
   }
 }
 ```
@@ -494,7 +492,7 @@ const summary = data.traceability.field_mappings.traceability_summary;
 
 ```javascript
 // Get calculation steps for a specific metric
-const revenueCalculation = data.traceability.calculation_lineage.calculation_lineage
+const revenueCalculation = data.traceability.calculation_lineage
   .find(calc => calc.metric_name === 'annual_revenue_projection');
 
 // Get all calculation steps

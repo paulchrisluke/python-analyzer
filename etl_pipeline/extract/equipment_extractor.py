@@ -192,20 +192,34 @@ class EquipmentExtractor(BaseExtractor):
         }
         
         # Use config-based equipment name mapping
-        for pattern, equipment_name in equipment_mappings.items():
-            if pattern in filename:
-                equipment_info['equipment_name'] = equipment_name
-                equipment_info['category'] = self._get_equipment_category(equipment_name)
-                equipment_info['description'] = self._get_equipment_description(equipment_name)
-                
-                # Log field mapping for traceability
-                self.field_mapping_registry.log_field_mapping(
-                    raw_field=pattern,
-                    normalized_field=equipment_name,
-                    source_file=pdf_path,
-                    transformation="equipment_name_mapping"
-                )
-                break
+        if not equipment_mappings:
+            # Log warning when no equipment mappings are configured
+            self.logger.warning(
+                f"No equipment mappings configured for file: {pdf_path}. "
+                f"Filename: {filename}. Equipment will remain as 'Unknown'."
+            )
+            # Log to field mapping registry for traceability
+            self.field_mapping_registry.log_field_mapping(
+                raw_field=filename,
+                normalized_field="Unknown",
+                source_file=pdf_path,
+                transformation="equipment_name_mapping_missing"
+            )
+        else:
+            for pattern, equipment_name in equipment_mappings.items():
+                if pattern in filename:
+                    equipment_info['equipment_name'] = equipment_name
+                    equipment_info['category'] = self._get_equipment_category(equipment_name)
+                    equipment_info['description'] = self._get_equipment_description(equipment_name)
+                    
+                    # Log field mapping for traceability
+                    self.field_mapping_registry.log_field_mapping(
+                        raw_field=pattern,
+                        normalized_field=equipment_name,
+                        source_file=pdf_path,
+                        transformation="equipment_name_mapping"
+                    )
+                    break
         
         # Try to extract price from text
         price = self._extract_price_from_text(text)
