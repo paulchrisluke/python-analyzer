@@ -1250,19 +1250,48 @@ class JsonLoader(BaseLoader):
         Validate and fix equipment pricing consistency.
         
         Args:
-            unit_price: Normalized unit price dict with 'amount' and 'currency'
+            unit_price: Unit price dict (can have 'amount' or 'value' key)
             total_price_raw: Raw total price value (can be dict, number, string, etc.)
             quantity: Item quantity
             item_id: Item identifier for logging
             
         Returns:
-            Dict with 'unit_price' and 'total_price' both normalized and consistent
+            Dict with 'unit_price' and 'total_price' both normalized to consistent shape with 'amount' and 'currency'
         """
+        # Normalize unit price to consistent shape with 'amount' and 'currency'
+        if isinstance(unit_price, dict):
+            if 'amount' in unit_price:
+                unit_price_normalized = {
+                    "amount": float(unit_price["amount"]),
+                    "currency": unit_price.get("currency", "USD")
+                }
+            elif 'value' in unit_price:
+                unit_price_normalized = {
+                    "amount": float(unit_price["value"]),
+                    "currency": unit_price.get("currency", "USD")
+                }
+            else:
+                # Fallback for unexpected unit_price format
+                unit_price_normalized = {"amount": 0.0, "currency": "USD"}
+        else:
+            # If unit_price is not a dict, normalize it
+            unit_price_normalized = normalize_money(unit_price)
+            # Convert from 'value' to 'amount' shape
+            unit_price_normalized = {
+                "amount": unit_price_normalized["value"],
+                "currency": unit_price_normalized["currency"]
+            }
+        
         # Normalize total price
         total_price_normalized = normalize_money(total_price_raw)
+        # Convert from 'value' to 'amount' shape for consistency
+        total_price_normalized = {
+            "amount": total_price_normalized["value"],
+            "currency": total_price_normalized["currency"]
+        }
         
         # Calculate expected total price
-        expected_total = unit_price["amount"] * quantity
+        expected_total = unit_price_normalized["amount"] * quantity
         
         # Check if total_price is valid and consistent
         if (total_price_raw is None or 
@@ -1272,22 +1301,22 @@ class JsonLoader(BaseLoader):
             # Total price is invalid - calculate from unit_price * quantity
             total_price_normalized = {
                 "amount": expected_total,
-                "currency": unit_price["currency"]
+                "currency": unit_price_normalized["currency"]
             }
-            logger.info(f"Fixed invalid total_price for {item_id}: calculated {expected_total} from unit_price {unit_price['amount']} × quantity {quantity}")
+            logger.info(f"Fixed invalid total_price for {item_id}: calculated {expected_total} from unit_price {unit_price_normalized['amount']} * quantity {quantity}")
         else:
             # Total price exists - check for consistency
             actual_total = total_price_normalized["amount"]
             if abs(actual_total - expected_total) > 0.01:  # Allow for small floating point differences
                 # Inconsistent pricing - log warning and fix
-                logger.warning(f"Pricing inconsistency detected for {item_id}: unit_price {unit_price['amount']} × quantity {quantity} = {expected_total}, but total_price = {actual_total}. Auto-correcting to {expected_total}")
+                logger.warning(f"Pricing inconsistency detected for {item_id}: unit_price {unit_price_normalized['amount']} * quantity {quantity} = {expected_total}, but total_price = {actual_total}. Auto-correcting to {expected_total}")
                 total_price_normalized = {
                     "amount": expected_total,
-                    "currency": unit_price["currency"]
+                    "currency": unit_price_normalized["currency"]
                 }
         
         return {
-            "unit_price": unit_price,
+            "unit_price": unit_price_normalized,
             "total_price": total_price_normalized
         }
     

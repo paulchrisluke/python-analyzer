@@ -84,7 +84,7 @@ analysis_period:
   start_date: "2023-01-01"
   end_date: "2025-06-30"  # End of Q2 2025
   description: "Website analysis period: Jan 1, 2023 to end of Q2 2025"
-  # Annual projection calculation: (Total Revenue ÷ Months in Period) × 12
+  # Annual projection calculation: (Total Revenue ÷ Months in Period) * 12
   # This ensures consistent monthly averages based on the specified date range
 
 # P&L data filtering rules

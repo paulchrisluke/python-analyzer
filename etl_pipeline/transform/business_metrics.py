@@ -456,7 +456,7 @@ class BusinessMetricsCalculator:
             # Use P&L-based revenue calculation (preferred - has missing data detection)
             monthly_revenue_avg = pnl_monthly_revenue_avg
             total_revenue = monthly_revenue_avg * months_in_period
-            logger.info(f"Using P&L-based revenue calculation with missing data detection: ${total_revenue:,.2f} total (${monthly_revenue_avg:,.2f} monthly avg × {months_in_period} months)")
+            logger.info(f"Using P&L-based revenue calculation with missing data detection: ${total_revenue:,.2f} total (${monthly_revenue_avg:,.2f} monthly avg * {months_in_period} months)")
         elif sales_metrics:
             # Fallback to sales-based revenue calculation
             sales_revenue = sales_metrics.get('total_revenue', 0)
@@ -1124,10 +1124,10 @@ class BusinessMetricsCalculator:
         # Calculate monthly revenue average from total revenue and months
         monthly_revenue_average = total_revenue / months_in_period if total_revenue > 0 else 0
         
-        # Annual projection = monthly average × 12
+        # Annual projection = monthly average * 12
         annual_projection = monthly_revenue_average * 12
         
-        logger.info(f"Annual projection calculation: ${monthly_revenue_average:,.2f} monthly avg × 12 = ${annual_projection:,.2f}")
+        logger.info(f"Annual projection calculation: ${monthly_revenue_average:,.2f} monthly avg * 12 = ${annual_projection:,.2f}")
         
         return annual_projection
     
