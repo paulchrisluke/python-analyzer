@@ -7,11 +7,11 @@ import pandas as pd
 import sys
 from pathlib import Path
 
-# Add the etl_pipeline to the path
-sys.path.insert(0, str(Path(__file__).parent.parent / "etl_pipeline"))
+# Add the project root to the path
+sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from utils.field_mapping_utils import FieldMappingRegistry
-from transform.sales_transformer import SalesTransformer
+from etl_pipeline.utils.field_mapping_utils import FieldMappingRegistry
+from etl_pipeline.transform.sales_transformer import SalesTransformer
 
 
 class TestDiscountMapping:
@@ -225,5 +225,5 @@ class TestDiscountMapping:
         discounts_1 = result.iloc[1]['discounts']
         assert len(discounts_1) == 2
         # Empty discounts should still have the structure but with empty values
-        assert discounts_1[0].get('type', '') == ''
+        assert discounts_1[0]['type'] == ''
         assert discounts_1[0]['amount'] == 0.0

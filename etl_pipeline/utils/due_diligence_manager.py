@@ -163,7 +163,8 @@ class DueDiligenceManager:
                         category_path,
                         category=category,
                         file_extensions=['.pdf', '.csv', '.xlsx', '.xls', '.doc', '.docx', '.txt'],
-                        recursive=True
+                        recursive=True,
+                        base_path=self.docs_dir
                     )
         
         # Also register any CSV files in the data directory
@@ -172,7 +173,8 @@ class DueDiligenceManager:
                 self.data_dir,
                 category="data",
                 file_extensions=['.csv', '.json'],
-                recursive=True
+                recursive=True,
+                base_path=self.data_dir
             )
         
         logger.info(f"Document registry initialized with {len(self.document_registry.documents)} documents")

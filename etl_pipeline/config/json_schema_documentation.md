@@ -477,43 +477,43 @@ Enhanced coverage analysis with document tracking.
 ### Accessing Field Mappings
 
 ```javascript
-// Get all sales field mappings
-const salesMappings = data.traceability.field_mappings.sales_mappings;
+// Get all sales field mappings with safe fallback
+const salesMappings = data?.traceability?.field_mappings?.sales_mappings || {};
 
-// Get traceability log for a specific field
-const fieldLog = data.traceability.field_mappings.traceability_log
+// Get traceability log for a specific field with safe array handling
+const fieldLog = (data?.traceability?.field_mappings?.traceability_log || [])
   .filter(log => log.normalized_field === 'sale_date');
 
-// Get transformation summary
-const summary = data.traceability.field_mappings.traceability_summary;
+// Get transformation summary with safe fallback
+const summary = data?.traceability?.field_mappings?.traceability_summary || {};
 ```
 
 ### Accessing Calculation Lineage
 
 ```javascript
-// Get calculation steps for a specific metric
-const revenueCalculation = data.traceability.calculation_lineage
+// Get calculation steps for a specific metric with safe access
+const revenueCalculation = (data?.traceability?.calculation_lineage || [])
   .find(calc => calc.metric_name === 'annual_revenue_projection');
 
-// Get all calculation steps
-const allSteps = revenueCalculation.steps;
+// Get all calculation steps with safe fallback
+const allSteps = revenueCalculation?.steps || [];
 
-// Get final value
-const finalValue = revenueCalculation.final_value;
+// Get final value with safe fallback
+const finalValue = revenueCalculation?.final_value || null;
 ```
 
 ### Accessing Document Registry
 
 ```javascript
-// Get all documents in a category
-const financialDocs = data.traceability.document_registry.documents
+// Get all documents in a category with safe access
+const financialDocs = (data?.traceability?.document_registry?.documents || [])
   .filter(doc => doc.category === 'financials');
 
-// Get coverage analysis
-const coverage = data.traceability.document_registry.coverage_analysis;
+// Get coverage analysis with safe fallback
+const coverage = data?.traceability?.document_registry?.coverage_analysis || {};
 
-// Get missing documents
-const missingDocs = coverage.financials.missing;
+// Get missing documents with safe fallback
+const missingDocs = coverage?.financials?.missing || [];
 ```
 
 ## Migration Notes

@@ -4,11 +4,65 @@ Calculation lineage tracking utilities for ETL pipeline.
 
 import logging
 import threading
+import base64
+import copy
 from typing import Dict, Any, List, Optional, Union
-from datetime import datetime, timezone
+from datetime import datetime, timezone, date, time
 from decimal import Decimal
 
 logger = logging.getLogger(__name__)
+
+def _recursive_sanitize_for_json(value: Any) -> Any:
+    """
+    Recursively sanitize values for JSON serialization.
+    
+    Handles nested structures (dicts, lists, tuples, sets) and converts:
+    - Decimal to str (preserves precision)
+    - datetime/date/time to ISO8601 strings
+    - bytes to base64 encoded strings
+    - Leaves None/ints/floats/strings as-is
+    
+    Args:
+        value: Value to sanitize (can be any type)
+        
+    Returns:
+        JSON-serializable value
+    """
+    if value is None:
+        return None
+    elif isinstance(value, (int, float, str, bool)):
+        # Basic types that are already JSON-serializable
+        return value
+    elif isinstance(value, Decimal):
+        # Convert Decimal to string to preserve precision
+        return str(value)
+    elif isinstance(value, (datetime, date, time)):
+        # Convert datetime objects to ISO8601 strings
+        if isinstance(value, datetime):
+            return value.isoformat()
+        elif isinstance(value, date):
+            return value.isoformat()
+        elif isinstance(value, time):
+            return value.isoformat()
+    elif isinstance(value, bytes):
+        # Convert bytes to base64 encoded string
+        return base64.b64encode(value).decode('utf-8')
+    elif isinstance(value, dict):
+        # Recursively sanitize dictionary values
+        return {key: _recursive_sanitize_for_json(val) for key, val in value.items()}
+    elif isinstance(value, (list, tuple)):
+        # Recursively sanitize list/tuple elements
+        return [_recursive_sanitize_for_json(item) for item in value]
+    elif isinstance(value, set):
+        # Convert set to list and recursively sanitize
+        return [_recursive_sanitize_for_json(item) for item in value]
+    else:
+        # For unknown types, try to convert to string
+        try:
+            return str(value)
+        except Exception:
+            # If even string conversion fails, return a placeholder
+            return f"<unserializable: {type(value).__name__}>"
 
 def _safe_convert_value(value: Union[float, int, Decimal, None]) -> Union[float, int, str, None]:
     """
@@ -107,7 +161,7 @@ class CalculationLineageTracker:
                 "value": _safe_convert_value(value),
                 "description": description,
                 "timestamp": datetime.now(timezone.utc).isoformat(),
-                **kwargs
+                **_recursive_sanitize_for_json(kwargs)
             }
             
             self.current_calculation["steps"].append(step)
@@ -131,6 +185,22 @@ class CalculationLineageTracker:
                        description: str = None) -> None:
         """Add a divide operation step."""
         with self._lock:
+            # Guard against None numerator and string-zero denominator
+            if value is None:
+                logger.warning(f"Division step skipped: numerator is None for field {field}")
+                return
+            
+            # Convert divisor to Decimal for safe comparison
+            if divisor is not None:
+                try:
+                    divisor_decimal = Decimal(str(divisor))
+                    if divisor_decimal == 0:
+                        logger.warning(f"Division step skipped: divisor is zero for field {field}")
+                        return
+                except (ValueError, TypeError):
+                    logger.warning(f"Division step skipped: invalid divisor {divisor} for field {field}")
+                    return
+            
             self.add_step("divide", field, value, description, divisor=divisor)
     
     def add_annualize_step(self, field: str, value: Union[float, int, Decimal], 
@@ -165,8 +235,8 @@ class CalculationLineageTracker:
             self.current_calculation["final_value"] = _safe_convert_value(final_value)
             self.current_calculation["end_time"] = datetime.now(timezone.utc).isoformat()
             
-            # Store the completed calculation
-            calculation_lineage = self.current_calculation.copy()
+            # Store the completed calculation using deep copy
+            calculation_lineage = copy.deepcopy(self.current_calculation)
             self.calculation_steps.append(calculation_lineage)
             
             logger.debug(f"Finished calculation for {calculation_lineage['metric_name']}: {final_value}")
@@ -175,19 +245,19 @@ class CalculationLineageTracker:
             self.current_calculation = None
             self.step_counter = 0
             
-            return calculation_lineage
+            return copy.deepcopy(calculation_lineage)
     
     def get_all_calculations(self) -> List[Dict[str, Any]]:
         """Get all completed calculations."""
         with self._lock:
-            return self.calculation_steps.copy()
+            return copy.deepcopy(self.calculation_steps)
     
     def get_calculation_by_name(self, metric_name: str) -> Optional[Dict[str, Any]]:
         """Get a specific calculation by metric name."""
         with self._lock:
             for calc in self.calculation_steps:
                 if calc["metric_name"] == metric_name:
-                    return calc
+                    return copy.deepcopy(calc)
             return None
     
     def clear_calculations(self) -> None:
@@ -206,7 +276,7 @@ class CalculationLineageTracker:
         """
         with self._lock:
             return {
-                "calculation_lineage": self.calculation_steps,
+                "calculation_lineage": copy.deepcopy(self.calculation_steps),
                 "lineage_summary": {
                     "total_calculations": len(self.calculation_steps),
                     "metrics_calculated": [calc["metric_name"] for calc in self.calculation_steps],

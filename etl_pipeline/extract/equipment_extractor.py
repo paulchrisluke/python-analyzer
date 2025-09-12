@@ -194,7 +194,7 @@ class EquipmentExtractor(BaseExtractor):
         # Use config-based equipment name mapping
         if not equipment_mappings:
             # Log warning when no equipment mappings are configured
-            self.logger.warning(
+            logger.warning(
                 f"No equipment mappings configured for file: {pdf_path}. "
                 f"Filename: {filename}. Equipment will remain as 'Unknown'."
             )

@@ -236,7 +236,8 @@ class JsonLoader(BaseLoader):
                         category_path,
                         category=category,
                         file_extensions=['.pdf', '.csv', '.xlsx', '.xls', '.doc', '.docx', '.txt'],
-                        recursive=True
+                        recursive=True,
+                        base_path=docs_dir.resolve()
                     )
         
         logger.info(f"Document registry initialized with {len(self.document_registry.documents)} documents")

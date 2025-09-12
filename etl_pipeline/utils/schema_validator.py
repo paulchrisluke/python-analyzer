@@ -261,15 +261,22 @@ class SchemaValidator:
         
         return validation
     
-    def _validate_calculation_lineage(self, calculation_lineage: Dict[str, Any]) -> Dict[str, Any]:
+    def _validate_calculation_lineage(self, calculation_lineage: Union[Dict[str, Any], List[Dict[str, Any]]]) -> Dict[str, Any]:
         """Validate calculation lineage structure."""
         validation = {"errors": [], "warnings": []}
         
-        if "calculation_lineage" not in calculation_lineage:
-            validation["errors"].append("Missing calculation_lineage array")
+        # Handle both list and dict inputs
+        if isinstance(calculation_lineage, list):
+            calculations = calculation_lineage
+        elif isinstance(calculation_lineage, dict):
+            if "calculation_lineage" in calculation_lineage:
+                calculations = calculation_lineage["calculation_lineage"]
+            else:
+                validation["errors"].append("Missing calculation_lineage array in dict or calculation_lineage is not a list")
+                return validation
+        else:
+            validation["errors"].append("calculation_lineage must be either a list or a dict containing 'calculation_lineage' key")
             return validation
-        
-        calculations = calculation_lineage["calculation_lineage"]
         if not isinstance(calculations, list):
             validation["errors"].append("calculation_lineage must be a list")
             return validation
@@ -414,6 +421,12 @@ class SchemaValidator:
         """
         # Strategy 1: Check for specific top-level keys that indicate file type
         if "metadata" in data and "financials" in data and "sales" in data:
+            return "business_sale_data"
+        elif "summary" in data and "listing_details" in data:
+            return "business_sale_data"
+        elif "summary" in data:
+            return "business_sale_data"
+        elif "listing_details" in data:
             return "business_sale_data"
         elif "coverage_analysis" in data and "document_coverage" in data:
             return "due_diligence_coverage"

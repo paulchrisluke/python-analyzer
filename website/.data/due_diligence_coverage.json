@@ -1,98 +1,52 @@
 {
   "metadata": {
-    "analysis_timestamp": "2025-09-12T11:23:19.487021+00:00",
+    "analysis_timestamp": "2025-09-12T12:02:46.076349+00:00",
     "analyzer_version": "enhanced_v1.0",
-    "total_documents_analyzed": 136
+    "total_documents_analyzed": 0
   },
   "base_coverage": {
     "sales": {
-      "status": "good",
-      "completeness_score": 86.7,
-      "missing_periods": [
-        "2023-02",
-        "2023-03",
-        "2023-04",
-        "2024-02"
-      ],
+      "status": "no_data",
+      "completeness_score": 0.0,
+      "missing_periods": [],
       "data_quality_issues": [
-        "Missing 4 months of data",
-        "26 months with unusually low transaction volume"
+        "No sales data found"
       ],
-      "coverage_details": {
-        "total_expected_months": 30,
-        "actual_months": 26,
-        "missing_months": 4,
-        "date_range": "2023-01-12 to 2025-06-19",
-        "total_transactions": 124,
-        "total_revenue": 4732.0
-      },
-      "fallback_strategies": [
-        "Use available months to calculate averages",
-        "Apply seasonal adjustments based on available data"
-      ]
+      "coverage_details": {},
+      "fallback_strategies": []
     },
     "financial": {
-      "status": "good",
-      "completeness_score": 75.0,
-      "missing_documents": [
-        "profit_loss"
-      ],
-      "data_quality_issues": [
-        "Missing 1 critical financial document"
-      ],
-      "coverage_details": {
-        "found_documents": [
-          "balance_sheets",
-          "general_ledger",
-          "cogs"
-        ],
-        "missing_documents": [
-          "profit_loss"
-        ],
-        "total_expected": 4,
-        "found_count": 3
-      },
-      "fallback_strategies": [
-        "Use sales data to estimate P&L based on industry margins"
-      ]
-    },
-    "equipment": {
-      "status": "good",
-      "completeness_score": 50.0,
+      "status": "no_data",
+      "completeness_score": 0.0,
       "missing_documents": [],
       "data_quality_issues": [
-        "Missing equipment categories: ['audiometer', 'hearing_aid_programmer']",
-        "Equipment value seems low for audiology practice"
+        "No financial data found"
       ],
-      "coverage_details": {
-        "equipment_count": 3,
-        "total_value": 25665.0,
-        "categories_found": [
-          "diagnostic_equipment",
-          "office_equipment"
-        ],
-        "categories_missing": [
-          "audiometer",
-          "hearing_aid_programmer"
-        ]
-      },
-      "fallback_strategies": [
-        "Use industry averages for missing equipment categories",
-        "Estimate equipment value based on practice size and type"
-      ]
+      "coverage_details": {},
+      "fallback_strategies": []
+    },
+    "equipment": {
+      "status": "no_data",
+      "completeness_score": 0.0,
+      "missing_documents": [],
+      "data_quality_issues": [
+        "No equipment data found"
+      ],
+      "coverage_details": {},
+      "fallback_strategies": []
     },
     "due_diligence": {
-      "overall_score": 74.7,
-      "readiness_level": "fair",
-      "recommendation": "Significant gaps, address before due diligence",
+      "overall_score": 0.0,
+      "readiness_level": "poor",
+      "recommendation": "Not ready for due diligence",
       "category_scores": {
-        "sales": 86.7,
-        "financial": 75.0,
-        "equipment": 50.0
+        "sales": 0.0,
+        "financial": 0.0,
+        "equipment": 0.0
       }
     },
     "recommendations": [
-      "Data coverage is fair - address gaps before due diligence"
+      "Data coverage is poor - significant gaps need to be addressed"
     ]
   },
   "document_coverage": {
@@ -100,284 +54,95 @@
       "financials": {
         "category": "financials",
         "total_expected": 6,
-        "total_found": 6,
+        "total_found": 0,
         "required_expected": 4,
-        "required_found": 4,
-        "coverage_percentage": 100.0,
-        "required_coverage_percentage": 100.0,
-        "found_documents": [
+        "required_found": 0,
+        "coverage_percentage": 0.0,
+        "required_coverage_percentage": 0.0,
+        "found_documents": [],
+        "missing_documents": [
           {
             "name": "Profit & Loss Statements",
             "required": true,
             "frequency": "monthly",
             "period": "24_months",
-            "found_documents": [
-              "2023-03-01_to_2023-03-31_ProfitAndLoss_CranberryHearing.CSV",
-              "2023-04-01_to_2023-04-30_ProfitAndLoss_CranberryHearing.CSV",
-              "2023-02-01_to_2023-02-28_ProfitAndLoss_CranberryHearing.CSV",
-              "2024-11-01_to_2024-11-30_ProfitAndLoss_CranberryHearing.CSV",
-              "2023-06-01_to_2023-06-30_ProfitAndLoss_CranberryHearing.CSV",
-              "2024-12-01_to_2024-12-31_ProfitAndLoss_CranberryHearing.CSV",
-              "2025-07-01_to_2025-07-31_ProfitAndLoss_CranberryHearing.CSV",
-              "2023-07-01_to_2023-07-31_ProfitAndLoss_CranberryHearing.CSV",
-              "2024-02-01_to_2024-02-29_ProfitAndLoss_CranberryHearing.CSV",
-              "2023-05-01_to_2023-05-31_ProfitAndLoss_CranberryHearing.CSV",
-              "2023-09-01_to_2023-09-30_ProfitAndLoss_CranberryHearing.CSV",
-              "2024-06-01_to_2024-06-30_ProfitAndLoss_CranberryHearing.CSV",
-              "2024-10-01_to_2024-10-31_ProfitAndLoss_CranberryHearing.CSV",
-              "2025-02-01_to_2025-02-28_ProfitAndLoss_CranberryHearing.CSV",
-              "2023-08-01_to_2023-08-31_ProfitAndLoss_CranberryHearing.CSV",
-              "2025-04-01_to_2025-04-30_ProfitAndLoss_CranberryHearing.CSV",
-              "2023-10-01_to_2023-10-31_ProfitAndLoss_CranberryHearing.CSV",
-              "2024-04-01_to_2024-04-30_ProfitAndLoss_CranberryHearing.CSV",
-              "2023-11-01_to_2023-11-30_ProfitAndLoss_CranberryHearing.CSV",
-              "2025-06-01_to_2025-06-30_ProfitAndLoss_CranberryHearing.CSV",
-              "2023-01-01_to_2023-01-31_ProfitAndLoss_CranberryHearing.CSV",
-              "2025-03-01_to_2025-03-31_ProfitAndLoss_CranberryHearing.CSV",
-              "2023-12-01_to_2023-12-31_ProfitAndLoss_CranberryHearing.CSV",
-              "2024-08-01_to_2024-08-31_ProfitAndLoss_CranberryHearing.CSV",
-              "2025-01-01_to_2025-01-31_ProfitAndLoss_CranberryHearing.CSV",
-              "2024-03-01_to_2024-03-31_ProfitAndLoss_CranberryHearing.CSV",
-              "2024-09-01_to_2024-09-30_ProfitAndLoss_CranberryHearing.CSV",
-              "2025-05-01_to_2025-05-31_ProfitAndLoss_CranberryHearing.CSV",
-              "2024-01-01_to_2024-01-31_ProfitAndLoss_CranberryHearing.CSV",
-              "2024-07-01_to_2024-07-31_ProfitAndLoss_CranberryHearing.CSV",
-              "2021-05-01_to_2021-05-28_Chase_BusinessChecking_CranberryHearing.pdf",
-              "2024-03-01_to_2024-03-29_Chase_BusinessChecking_CranberryHearing.pdf",
-              "2021-12-01_to_2021-12-31_Chase_BusinessChecking_CranberryHearing.pdf",
-              "2021-04-01_to_2021-04-30_Chase_BusinessChecking_CranberryHearing.pdf",
-              "2023-12-01_to_2023-12-29_Chase_BusinessChecking_CranberryHearing.pdf",
-              "2024-08-31_to_2024-09-30_Chase_BusinessChecking_CranberryHearing.pdf",
-              "2024-11-01_to_2024-11-29_Chase_BusinessChecking_CranberryHearing.pdf",
-              "2025-04-01_to_2025-04-30_Chase_BusinessChecking_CranberryHearing.pdf",
-              "2025-01-01_to_2025-01-31_Chase_BusinessChecking_CranberryHearing.pdf",
-              "2024-06-01_to_2024-06-28_Chase_BusinessChecking_CranberryHearing.pdf",
-              "2024-02-01_to_2024-02-29_Chase_BusinessChecking_CranberryHearing.pdf",
-              "2023-09-01_to_2023-09-29_Chase_BusinessChecking_CranberryHearing.pdf",
-              "2021-02-27_to_2021-03-31_Chase_BusinessChecking_CranberryHearing.pdf",
-              "2023-03-01_to_2023-03-31_Chase_BusinessChecking_CranberryHearing.pdf",
-              "2021-05-29_to_2021-06-30_Chase_BusinessChecking_CranberryHearing.pdf",
-              "2024-10-01_to_2024-10-31_Chase_BusinessChecking_CranberryHearing.pdf",
-              "2023-12-30_to_2024-01-31_Chase_BusinessChecking_CranberryHearing.pdf",
-              "2023-04-29_to_2023-05-31_Chase_BusinessChecking_CranberryHearing.pdf",
-              "2024-03-30_to_2024-04-30_Chase_BusinessChecking_CranberryHearing.pdf",
-              "2023-02-01_to_2023-02-28_Chase_BusinessChecking_CranberryHearing.pdf",
-              "2025-02-01_to_2025-02-28_Chase_BusinessChecking_CranberryHearing.pdf",
-              "2021-07-31_to_2021-08-31_Chase_BusinessChecking_CranberryHearing.pdf",
-              "2021-10-01_to_2021-10-29_Chase_BusinessChecking_CranberryHearing.pdf",
-              "2023-11-01_to_2023-11-30_Chase_BusinessChecking_CranberryHearing.pdf",
-              "2023-09-30_to_2023-10-31_Chase_BusinessChecking_CranberryHearing.pdf",
-              "2023-07-01_to_2023-07-31_Chase_BusinessChecking_CranberryHearing.pdf",
-              "2023-06-01_to_2023-06-30_Chase_BusinessChecking_CranberryHearing.pdf",
-              "2025-05-01_to_2025-05-30_Chase_BusinessChecking_CranberryHearing.pdf",
-              "2021-09-01_to_2021-09-30_Chase_BusinessChecking_CranberryHearing.pdf",
-              "2024-12-31_PNCStatement_CranberryHearing.pdf",
-              "2024-08-01_to_2024-08-30_Chase_BusinessChecking_CranberryHearing.pdf",
-              "2023-04-01_to_2023-04-28_Chase_BusinessChecking_CranberryHearing.pdf",
-              "2021-07-01_to_2021-07-30_Chase_BusinessChecking_CranberryHearing.pdf",
-              "2024-11-30_to_2024-12-31_Chase_BusinessChecking_CranberryHearing.pdf",
-              "2024-06-29_to_2024-07-31_Chase_BusinessChecking_CranberryHearing.pdf",
-              "2022-12-31_to_2023-01-31_Chase_BusinessChecking_CranberryHearing.pdf",
-              "2021-10-30_to_2021-11-30_Chase_BusinessChecking_CranberryHearing.pdf",
-              "2021-01-30_to_2021-02-26_Chase_BusinessChecking_CranberryHearing.pdf",
-              "2024-01-01_to_2024-12-31_VAIncomeTaxSummary_CranberryHearing.pdf"
-            ],
-            "count": 69
+            "impact": "critical"
           },
           {
             "name": "Balance Sheets",
             "required": true,
             "frequency": "monthly",
             "period": "24_months",
-            "found_documents": [
-              "2022-01-01_to_2022-12-31_BalanceSheet_CranberryHearing.CSV",
-              "2022-02-01_to_2022-02-28_BalanceSheet_CranberryHearing.CSV",
-              "2022-11-01_to_2022-11-30_BalanceSheet_CranberryHearing.CSV",
-              "2022-07-01_to_2022-07-31_BalanceSheet_CranberryHearing.CSV",
-              "2022-06-01_to_2022-06-30_BalanceSheet_CranberryHearing.CSV",
-              "2022-08-01_to_2022-08-31_BalanceSheet_CranberryHearing.CSV",
-              "2022-05-01_to_2022-05-31_BalanceSheet_CranberryHearing.CSV",
-              "2022-12-01_to_2022-12-31_BalanceSheet_CranberryHearing.CSV",
-              "2022-10-01_to_2022-10-31_BalanceSheet_CranberryHearing.CSV",
-              "2022-03-01_to_2022-03-31_BalanceSheet_CranberryHearing.CSV",
-              "2022-09-01_to_2022-09-30_BalanceSheet_CranberryHearing.CSV",
-              "2022-04-01_to_2022-04-30_BalanceSheet_CranberryHearing.CSV",
-              "2022-01-01_to_2022-01-31_BalanceSheet_CranberryHearing.CSV"
-            ],
-            "count": 13
+            "impact": "critical"
           },
           {
             "name": "Bank Statements",
             "required": true,
             "frequency": "monthly",
             "period": "12_months",
-            "found_documents": [
-              "2024-12-31_PNCStatement_CranberryHearing.pdf",
-              "2023-03-01_to_2023-03-31_ProfitAndLoss_CranberryHearing.CSV",
-              "2023-04-01_to_2023-04-30_ProfitAndLoss_CranberryHearing.CSV",
-              "2023-02-01_to_2023-02-28_ProfitAndLoss_CranberryHearing.CSV",
-              "2024-11-01_to_2024-11-30_ProfitAndLoss_CranberryHearing.CSV",
-              "2023-06-01_to_2023-06-30_ProfitAndLoss_CranberryHearing.CSV",
-              "2024-12-01_to_2024-12-31_ProfitAndLoss_CranberryHearing.CSV",
-              "2025-07-01_to_2025-07-31_ProfitAndLoss_CranberryHearing.CSV",
-              "2023-07-01_to_2023-07-31_ProfitAndLoss_CranberryHearing.CSV",
-              "2024-02-01_to_2024-02-29_ProfitAndLoss_CranberryHearing.CSV",
-              "2023-05-01_to_2023-05-31_ProfitAndLoss_CranberryHearing.CSV",
-              "2023-09-01_to_2023-09-30_ProfitAndLoss_CranberryHearing.CSV",
-              "2024-06-01_to_2024-06-30_ProfitAndLoss_CranberryHearing.CSV",
-              "2024-10-01_to_2024-10-31_ProfitAndLoss_CranberryHearing.CSV",
-              "2025-02-01_to_2025-02-28_ProfitAndLoss_CranberryHearing.CSV",
-              "2023-08-01_to_2023-08-31_ProfitAndLoss_CranberryHearing.CSV",
-              "2025-04-01_to_2025-04-30_ProfitAndLoss_CranberryHearing.CSV",
-              "2023-10-01_to_2023-10-31_ProfitAndLoss_CranberryHearing.CSV",
-              "2024-04-01_to_2024-04-30_ProfitAndLoss_CranberryHearing.CSV",
-              "2023-11-01_to_2023-11-30_ProfitAndLoss_CranberryHearing.CSV",
-              "2025-06-01_to_2025-06-30_ProfitAndLoss_CranberryHearing.CSV",
-              "2023-01-01_to_2023-01-31_ProfitAndLoss_CranberryHearing.CSV",
-              "2025-03-01_to_2025-03-31_ProfitAndLoss_CranberryHearing.CSV",
-              "2023-12-01_to_2023-12-31_ProfitAndLoss_CranberryHearing.CSV",
-              "2024-08-01_to_2024-08-31_ProfitAndLoss_CranberryHearing.CSV",
-              "2025-01-01_to_2025-01-31_ProfitAndLoss_CranberryHearing.CSV",
-              "2024-03-01_to_2024-03-31_ProfitAndLoss_CranberryHearing.CSV",
-              "2024-09-01_to_2024-09-30_ProfitAndLoss_CranberryHearing.CSV",
-              "2025-05-01_to_2025-05-31_ProfitAndLoss_CranberryHearing.CSV",
-              "2024-01-01_to_2024-01-31_ProfitAndLoss_CranberryHearing.CSV",
-              "2024-07-01_to_2024-07-31_ProfitAndLoss_CranberryHearing.CSV",
-              "2021-05-01_to_2021-05-28_Chase_BusinessChecking_CranberryHearing.pdf",
-              "2024-03-01_to_2024-03-29_Chase_BusinessChecking_CranberryHearing.pdf",
-              "2021-12-01_to_2021-12-31_Chase_BusinessChecking_CranberryHearing.pdf",
-              "2021-04-01_to_2021-04-30_Chase_BusinessChecking_CranberryHearing.pdf",
-              "2023-12-01_to_2023-12-29_Chase_BusinessChecking_CranberryHearing.pdf",
-              "2024-08-31_to_2024-09-30_Chase_BusinessChecking_CranberryHearing.pdf",
-              "2024-11-01_to_2024-11-29_Chase_BusinessChecking_CranberryHearing.pdf",
-              "2025-04-01_to_2025-04-30_Chase_BusinessChecking_CranberryHearing.pdf",
-              "2025-01-01_to_2025-01-31_Chase_BusinessChecking_CranberryHearing.pdf",
-              "2024-06-01_to_2024-06-28_Chase_BusinessChecking_CranberryHearing.pdf",
-              "2024-02-01_to_2024-02-29_Chase_BusinessChecking_CranberryHearing.pdf",
-              "2023-09-01_to_2023-09-29_Chase_BusinessChecking_CranberryHearing.pdf",
-              "2021-02-27_to_2021-03-31_Chase_BusinessChecking_CranberryHearing.pdf",
-              "2023-03-01_to_2023-03-31_Chase_BusinessChecking_CranberryHearing.pdf",
-              "2021-05-29_to_2021-06-30_Chase_BusinessChecking_CranberryHearing.pdf",
-              "2024-10-01_to_2024-10-31_Chase_BusinessChecking_CranberryHearing.pdf",
-              "2023-12-30_to_2024-01-31_Chase_BusinessChecking_CranberryHearing.pdf",
-              "2023-04-29_to_2023-05-31_Chase_BusinessChecking_CranberryHearing.pdf",
-              "2024-03-30_to_2024-04-30_Chase_BusinessChecking_CranberryHearing.pdf",
-              "2023-02-01_to_2023-02-28_Chase_BusinessChecking_CranberryHearing.pdf",
-              "2025-02-01_to_2025-02-28_Chase_BusinessChecking_CranberryHearing.pdf",
-              "2021-07-31_to_2021-08-31_Chase_BusinessChecking_CranberryHearing.pdf",
-              "2021-10-01_to_2021-10-29_Chase_BusinessChecking_CranberryHearing.pdf",
-              "2023-11-01_to_2023-11-30_Chase_BusinessChecking_CranberryHearing.pdf",
-              "2023-09-30_to_2023-10-31_Chase_BusinessChecking_CranberryHearing.pdf",
-              "2023-07-01_to_2023-07-31_Chase_BusinessChecking_CranberryHearing.pdf",
-              "2023-06-01_to_2023-06-30_Chase_BusinessChecking_CranberryHearing.pdf",
-              "2025-05-01_to_2025-05-30_Chase_BusinessChecking_CranberryHearing.pdf",
-              "2021-09-01_to_2021-09-30_Chase_BusinessChecking_CranberryHearing.pdf",
-              "2024-08-01_to_2024-08-30_Chase_BusinessChecking_CranberryHearing.pdf",
-              "2023-04-01_to_2023-04-28_Chase_BusinessChecking_CranberryHearing.pdf",
-              "2021-07-01_to_2021-07-30_Chase_BusinessChecking_CranberryHearing.pdf",
-              "2024-11-30_to_2024-12-31_Chase_BusinessChecking_CranberryHearing.pdf",
-              "2024-06-29_to_2024-07-31_Chase_BusinessChecking_CranberryHearing.pdf",
-              "2022-12-31_to_2023-01-31_Chase_BusinessChecking_CranberryHearing.pdf",
-              "2021-10-30_to_2021-11-30_Chase_BusinessChecking_CranberryHearing.pdf",
-              "2021-01-30_to_2021-02-26_Chase_BusinessChecking_CranberryHearing.pdf",
-              "2024-01-01_to_2024-12-31_VAIncomeTaxSummary_CranberryHearing.pdf"
-            ],
-            "count": 69
+            "impact": "critical"
           },
           {
             "name": "Tax Returns",
             "required": true,
             "frequency": "annual",
             "period": "3_years",
-            "found_documents": [
-              "2024-01-01_to_2024-12-31_VAIncomeTaxSummary_CranberryHearing.pdf",
-              "2024-01-01_to_2024-12-31_W3_TaxYear_CranberryHearing.pdf"
-            ],
-            "count": 2
+            "impact": "critical"
           },
           {
             "name": "General Ledger",
             "required": false,
             "frequency": "monthly",
             "period": "12_months",
-            "found_documents": [
-              "2022-01-01_to_2022-12-31_GeneralLedger_CranberryHearing.CSV",
-              "2021-01-01_to_2021-12-31_GeneralLedger_CranberryHearing.CSV",
-              "2025-01-01_to_2025-12-31_GeneralLedger_CranberryHearing.CSV",
-              "2024-01-01_to_2024-12-31_GeneralLedger_CranberryHearing.CSV",
-              "2023-01-01_to_2023-12-31_GeneralLedger_CranberryHearing.CSV"
-            ],
-            "count": 5
+            "impact": "optional"
           },
           {
             "name": "COGS Analysis",
             "required": false,
             "frequency": "monthly",
             "period": "12_months",
-            "found_documents": [
-              "2025-01-01_to_2025-08-31_StarkeyCOGS_CranberryHearing.csv",
-              "2021-01-01_to_2021-12-31_StarkeyCOGS_CranberryHearing.csv",
-              "2022-01-01_to_2022-12-31_StarkeyCOGS_CranberryHearing.csv",
-              "2024-01-01_to_2024-12-31_StarkeyCOGS_CranberryHearing.csv",
-              "2023-01-01_to_2023-12-31_StarkeyCOGS_CranberryHearing.csv"
-            ],
-            "count": 5
+            "impact": "optional"
           }
         ],
-        "missing_documents": [],
-        "status": "complete"
+        "status": "incomplete"
       },
       "legal": {
         "category": "legal",
         "total_expected": 6,
-        "total_found": 3,
+        "total_found": 0,
         "required_expected": 4,
-        "required_found": 1,
-        "coverage_percentage": 50.0,
-        "required_coverage_percentage": 25.0,
-        "found_documents": [
+        "required_found": 0,
+        "coverage_percentage": 0.0,
+        "required_coverage_percentage": 0.0,
+        "found_documents": [],
+        "missing_documents": [
           {
             "name": "Lease Agreements",
             "required": true,
             "frequency": "as_needed",
             "period": "current",
-            "found_documents": [
-              "2006-08-31_UPMC_AncillaryProviderAgreement.pdf",
-              "2022-01-01_to_2030-12-31_BDNPL_CommercialLease_CranberryHearing.pdf",
-              "2022-01-01_to_2030-12-31_BDNPL_CommercialLease_CranberryHearing.csv"
-            ],
-            "count": 3
+            "impact": "critical"
           },
-          {
-            "name": "Employee Agreements",
-            "required": false,
-            "frequency": "as_needed",
-            "period": "current",
-            "found_documents": [
-              "2006-08-31_UPMC_AncillaryProviderAgreement.pdf",
-              "2022-01-01_to_2030-12-31_BDNPL_CommercialLease_CranberryHearing.pdf",
-              "2022-01-01_to_2030-12-31_BDNPL_CommercialLease_CranberryHearing.csv"
-            ],
-            "count": 3
-          },
-          {
-            "name": "Supplier Contracts",
-            "required": false,
-            "frequency": "as_needed",
-            "period": "current",
-            "found_documents": [
-              "2006-08-31_UPMC_AncillaryProviderAgreement.pdf"
-            ],
-            "count": 1
-          }
-        ],
-        "missing_documents": [
           {
             "name": "Insurance Policies",
             "required": true,
             "frequency": "annual",
             "period": "current",
             "impact": "critical"
+          },
+          {
+            "name": "Employee Agreements",
+            "required": false,
+            "frequency": "as_needed",
+            "period": "current",
+            "impact": "optional"
+          },
+          {
+            "name": "Supplier Contracts",
+            "required": false,
+            "frequency": "as_needed",
+            "period": "current",
+            "impact": "optional"
           },
           {
             "name": "Business Licenses",
@@ -399,90 +164,61 @@
       "equipment": {
         "category": "equipment",
         "total_expected": 4,
-        "total_found": 4,
+        "total_found": 0,
         "required_expected": 1,
-        "required_found": 1,
-        "coverage_percentage": 100.0,
-        "required_coverage_percentage": 100.0,
-        "found_documents": [
+        "required_found": 0,
+        "coverage_percentage": 0.0,
+        "required_coverage_percentage": 0.0,
+        "found_documents": [],
+        "missing_documents": [
           {
             "name": "Equipment Inventory",
             "required": true,
             "frequency": "as_needed",
             "period": "current",
-            "found_documents": [
-              "2019-11-06_Starkey_EquipmentQuotation_CelloAudiometer_CosmeticHearingSolutions.pdf",
-              "2019-11-11_Starkey_EquipmentQuotation_TrumpetREM_AudiometerCombo_CranberryHearing.pdf",
-              "2019-11-08_Starkey_EquipmentQuotation_CelloAudiometer_TrumpetREM_CranberryHearing.pdf"
-            ],
-            "count": 3
+            "impact": "critical"
           },
           {
             "name": "Equipment Quotes",
             "required": false,
             "frequency": "as_needed",
             "period": "2_years",
-            "found_documents": [
-              "2019-11-06_Starkey_EquipmentQuotation_CelloAudiometer_CosmeticHearingSolutions.pdf",
-              "2019-11-11_Starkey_EquipmentQuotation_TrumpetREM_AudiometerCombo_CranberryHearing.pdf",
-              "2019-11-08_Starkey_EquipmentQuotation_CelloAudiometer_TrumpetREM_CranberryHearing.pdf"
-            ],
-            "count": 3
+            "impact": "optional"
           },
           {
             "name": "Equipment Maintenance Records",
             "required": false,
             "frequency": "as_needed",
             "period": "2_years",
-            "found_documents": [
-              "2019-11-06_Starkey_EquipmentQuotation_CelloAudiometer_CosmeticHearingSolutions.pdf",
-              "2019-11-11_Starkey_EquipmentQuotation_TrumpetREM_AudiometerCombo_CranberryHearing.pdf",
-              "2019-11-08_Starkey_EquipmentQuotation_CelloAudiometer_TrumpetREM_CranberryHearing.pdf"
-            ],
-            "count": 3
+            "impact": "optional"
           },
           {
             "name": "Equipment Warranties",
             "required": false,
             "frequency": "as_needed",
             "period": "current",
-            "found_documents": [
-              "2019-11-06_Starkey_EquipmentQuotation_CelloAudiometer_CosmeticHearingSolutions.pdf",
-              "2019-11-11_Starkey_EquipmentQuotation_TrumpetREM_AudiometerCombo_CranberryHearing.pdf",
-              "2019-11-08_Starkey_EquipmentQuotation_CelloAudiometer_TrumpetREM_CranberryHearing.pdf"
-            ],
-            "count": 3
+            "impact": "optional"
           }
         ],
-        "missing_documents": [],
-        "status": "complete"
+        "status": "incomplete"
       },
       "operational": {
         "category": "operational",
         "total_expected": 4,
-        "total_found": 1,
+        "total_found": 0,
         "required_expected": 1,
-        "required_found": 1,
-        "coverage_percentage": 25.0,
-        "required_coverage_percentage": 100.0,
-        "found_documents": [
+        "required_found": 0,
+        "coverage_percentage": 0.0,
+        "required_coverage_percentage": 0.0,
+        "found_documents": [],
+        "missing_documents": [
           {
             "name": "Sales Data",
             "required": true,
             "frequency": "monthly",
             "period": "24_months",
-            "found_documents": [
-              "2021-05-20_to_2024-12-05_HearingAidSalesReplacements_CranberryHearing.csv",
-              "2021-01-01_to_2024-12-31_HearingAidSalesLedger_CranberryHearing.xlsx",
-              "2021-05-20_to_2024-12-05_HearingAidSalesCancellations_CranberryHearing.xlsx.csv",
-              "2021-05-20_to_2024-12-05_HearingAidSales_CranberryHearing.csv",
-              "2021-05-20_to_2024-12-05_HearingAidSales_Exchanges_CranberryHearing.csv",
-              "2021-05-20_to_2024-12-05_HearingAidSalesReturns_CranberryHearing.csv"
-            ],
-            "count": 6
-          }
-        ],
-        "missing_documents": [
+            "impact": "critical"
+          },
           {
             "name": "Customer Records",
             "required": false,
@@ -505,7 +241,7 @@
             "impact": "optional"
           }
         ],
-        "status": "complete"
+        "status": "incomplete"
       },
       "corporate": {
         "category": "corporate",
@@ -552,18 +288,58 @@
     "by_requirement": {
       "required": {
         "expected": 12,
-        "found": 7,
-        "missing": 5,
-        "coverage_percentage": 58.333333333333336
+        "found": 0,
+        "missing": 12,
+        "coverage_percentage": 0.0
       },
       "optional": {
         "expected": 12,
-        "found": 7,
-        "missing": 5,
-        "coverage_percentage": 58.333333333333336
+        "found": 0,
+        "missing": 12,
+        "coverage_percentage": 0.0
       }
     },
     "missing_critical": [
+      {
+        "name": "Profit & Loss Statements",
+        "category": "financials",
+        "frequency": "monthly",
+        "period": "24_months",
+        "impact": "critical",
+        "recommendation": "Obtain Profit & Loss Statements for financials category"
+      },
+      {
+        "name": "Balance Sheets",
+        "category": "financials",
+        "frequency": "monthly",
+        "period": "24_months",
+        "impact": "critical",
+        "recommendation": "Obtain Balance Sheets for financials category"
+      },
+      {
+        "name": "Bank Statements",
+        "category": "financials",
+        "frequency": "monthly",
+        "period": "12_months",
+        "impact": "critical",
+        "recommendation": "Obtain Bank Statements for financials category"
+      },
+      {
+        "name": "Tax Returns",
+        "category": "financials",
+        "frequency": "annual",
+        "period": "3_years",
+        "impact": "critical",
+        "recommendation": "Obtain Tax Returns for financials category"
+      },
+      {
+        "name": "Lease Agreements",
+        "category": "legal",
+        "frequency": "as_needed",
+        "period": "current",
+        "impact": "critical",
+        "recommendation": "Obtain Lease Agreements for legal category"
+      },
       {
         "name": "Insurance Policies",
         "category": "legal",
@@ -589,6 +365,22 @@
         "recommendation": "Obtain Professional Licenses for legal category"
       },
       {
+        "name": "Equipment Inventory",
+        "category": "equipment",
+        "frequency": "as_needed",
+        "period": "current",
+        "impact": "critical",
+        "recommendation": "Obtain Equipment Inventory for equipment category"
+      },
+      {
+        "name": "Sales Data",
+        "category": "operational",
+        "frequency": "monthly",
+        "period": "24_months",
+        "impact": "critical",
+        "recommendation": "Obtain Sales Data for operational category"
+      },
+      {
         "name": "Articles of Incorporation",
         "category": "corporate",
         "frequency": "as_needed",
@@ -607,11 +399,75 @@
     ],
     "missing_optional": [
       {
+        "name": "General Ledger",
+        "category": "financials",
+        "frequency": "monthly",
+        "period": "12_months",
+        "impact": "optional",
+        "status": true,
+        "recommendation": "Consider obtaining General Ledger for financials category"
+      },
+      {
+        "name": "COGS Analysis",
+        "category": "financials",
+        "frequency": "monthly",
+        "period": "12_months",
+        "impact": "optional",
+        "status": true,
+        "recommendation": "Consider obtaining COGS Analysis for financials category"
+      },
+      {
+        "name": "Employee Agreements",
+        "category": "legal",
+        "frequency": "as_needed",
+        "period": "current",
+        "impact": "optional",
+        "status": true,
+        "recommendation": "Consider obtaining Employee Agreements for legal category"
+      },
+      {
+        "name": "Supplier Contracts",
+        "category": "legal",
+        "frequency": "as_needed",
+        "period": "current",
+        "impact": "optional",
+        "status": true,
+        "recommendation": "Consider obtaining Supplier Contracts for legal category"
+      },
+      {
+        "name": "Equipment Quotes",
+        "category": "equipment",
+        "frequency": "as_needed",
+        "period": "2_years",
+        "impact": "optional",
+        "status": true,
+        "recommendation": "Consider obtaining Equipment Quotes for equipment category"
+      },
+      {
+        "name": "Equipment Maintenance Records",
+        "category": "equipment",
+        "frequency": "as_needed",
+        "period": "2_years",
+        "impact": "optional",
+        "status": true,
+        "recommendation": "Consider obtaining Equipment Maintenance Records for equipment category"
+      },
+      {
+        "name": "Equipment Warranties",
+        "category": "equipment",
+        "frequency": "as_needed",
+        "period": "current",
+        "impact": "optional",
+        "status": true,
+        "recommendation": "Consider obtaining Equipment Warranties for equipment category"
+      },
+      {
         "name": "Customer Records",
         "category": "operational",
         "frequency": "as_needed",
         "period": "current",
         "impact": "optional",
+        "status": true,
         "recommendation": "Consider obtaining Customer Records for operational category"
       },
       {
@@ -620,6 +476,7 @@
         "frequency": "as_needed",
         "period": "current",
         "impact": "optional",
+        "status": true,
         "recommendation": "Consider obtaining Staff Records for operational category"
       },
       {
@@ -628,6 +485,7 @@
         "frequency": "as_needed",
         "period": "current",
         "impact": "optional",
+        "status": true,
         "recommendation": "Consider obtaining Marketing Materials for operational category"
       },
       {
@@ -636,6 +494,7 @@
         "frequency": "quarterly",
         "period": "2_years",
         "impact": "optional",
+        "status": true,
         "recommendation": "Consider obtaining Board Minutes for corporate category"
       },
       {
@@ -644,32 +503,36 @@
         "frequency": "as_needed",
         "period": "current",
         "impact": "optional",
+        "status": true,
         "recommendation": "Consider obtaining Shareholder Agreements for corporate category"
       }
     ],
     "coverage_summary": {
       "total_expected_documents": 24,
-      "total_found_documents": 14,
-      "total_missing_documents": 10,
-      "overall_coverage_percentage": 58.333333333333336,
+      "total_found_documents": 0,
+      "total_missing_documents": 24,
+      "overall_coverage_percentage": 0.0,
       "required_expected_documents": 12,
-      "required_found_documents": 7,
-      "required_missing_documents": 5,
-      "required_coverage_percentage": 58.333333333333336,
-      "due_diligence_readiness": "fair"
+      "required_found_documents": 0,
+      "required_missing_documents": 12,
+      "required_coverage_percentage": 0.0,
+      "due_diligence_readiness": "poor"
     }
   },
   "overall_assessment": {
-    "overall_score": 63.2,
-    "due_diligence_readiness": "fair",
-    "critical_gaps": 5,
-    "optional_gaps": 5,
+    "overall_score": 0.0,
+    "due_diligence_readiness": "poor",
+    "critical_gaps": 12,
+    "optional_gaps": 12,
     "recommendations": [
       "URGENT: Obtain missing critical documents to proceed with due diligence",
-      "- Obtain Insurance Policies for legal category",
-      "- Obtain Business Licenses for legal category",
-      "- Obtain Professional Licenses for legal category",
-      "Improve legal document coverage (currently 50.0%)",
+      "- Obtain Profit & Loss Statements for financials category",
+      "- Obtain Balance Sheets for financials category",
+      "- Obtain Bank Statements for financials category",
+      "Improve financials document coverage (currently 0.0%)",
+      "Improve legal document coverage (currently 0.0%)",
+      "Improve equipment document coverage (currently 0.0%)",
+      "Improve operational document coverage (currently 0.0%)",
       "Improve corporate document coverage (currently 0.0%)",
       "Overall document coverage is below 75% - consider additional document collection"
     ],
@@ -680,13 +543,92 @@
       "4. Identify additional sources for missing document types"
     ]
   },
-  "etl_run_timestamp": "2025-09-12T11:23:21.663Z",
+  "etl_run_timestamp": "2025-09-12T12:02:46.084Z",
   "traceability": {
     "field_mappings": {
       "field_mappings": {
-        "sales_mappings": {},
-        "financial_mappings": {},
-        "equipment_mappings": {}
+        "sales_mappings": {
+          "Sale Date": "sale_date",
+          "Delivery Date": "delivery_date",
+          "Return Date": "return_date",
+          "Staff Name": "staff_name",
+          "Patient Name": "patient_name",
+          "Patient ID": "patient_id",
+          "Patient ZIP": "patient_zip",
+          "Clinic Name": "clinic_name",
+          "Referral Source": "referral_source",
+          "Subcategory": "subcategory",
+          "Ref Description": "ref_description",
+          "Campaign": "campaign",
+          "Units": "units",
+          "Type": "type",
+          "Product": "product",
+          "Description": "description",
+          "S/N": "serial_number",
+          "Notes": "notes",
+          "Invoice No.": "invoice_no",
+          "CPT Code": "cpt_code",
+          "Gross Price": "gross_price",
+          "Discount": "discount",
+          "discount type 1": "discounts[0].type",
+          "discount amount 1": "discounts[0].amount",
+          "discount type 2": "discounts[1].type",
+          "discount amount 2": "discounts[1].amount",
+          "discount type 3": "discounts[2].type",
+          "discount amount 3": "discounts[2].amount",
+          "discount_type_1": "discounts[0].type",
+          "discount_amount_1": "discounts[0].amount",
+          "discount_type_2": "discounts[1].type",
+          "discount_amount_2": "discounts[1].amount",
+          "discount_type_3": "discounts[2].type",
+          "discount_amount_3": "discounts[2].amount",
+          "Net Price": "net_price",
+          "Sales Tax": "sales_tax",
+          "Total Price": "total_price",
+          "Receipt Paid": "receipt_paid"
+        },
+        "financial_mappings": {
+          "5017 · Sales": "sales_revenue",
+          "5017 · Sales - Other": "sales_revenue_other",
+          "Total 5017 · Sales": "total_sales_revenue",
+          "Investment Income": "investment_income",
+          "Total Revenue": "total_revenue",
+          "Salaries": "salaries_expense",
+          "Wages": "wages_expense",
+          "Rent": "rent_expense",
+          "Insurance": "insurance_expense",
+          "Utilities": "utilities_expense",
+          "Office Supplies": "office_supplies_expense",
+          "Marketing": "marketing_expense",
+          "Professional Services": "professional_services_expense",
+          "Payroll Tax": "payroll_tax_expense",
+          "Employee Benefits": "employee_benefits_expense",
+          "Equipment": "equipment_expense",
+          "Supplies": "supplies_expense",
+          "Telephone": "telephone_expense",
+          "Travel": "travel_expense",
+          "Training": "training_expense",
+          "Legal": "legal_expense",
+          "Accounting": "accounting_expense",
+          "Interest": "interest_expense",
+          "Income Tax": "income_tax_expense",
+          "Corporate Tax": "corporate_tax_expense",
+          "Depreciation": "depreciation_expense",
+          "Amortization": "amortization_expense",
+          "COGS": "cost_of_goods_sold",
+          "Cost of Goods Sold": "cost_of_goods_sold"
+        },
+        "equipment_mappings": {
+          "Cello": "cello_audiometer",
+          "Trumpet": "trumpet_rem",
+          "CL12BLP": "cl12blp_equipment",
+          "AUD": "aud_system",
+          "Audiometer": "audiometer_system",
+          "Test Booth": "test_booth",
+          "Hearing Aid": "hearing_aid_equipment",
+          "Diagnostic": "diagnostic_equipment",
+          "Measurement": "measurement_equipment"
+        }
       },
       "traceability_log": [],
       "traceability_summary": {
@@ -721,7 +663,7 @@
           "status": true,
           "expected": true,
           "notes": null,
-          "registered_at": "2025-09-12T11:23:18.190296+00:00"
+          "registered_at": "2025-09-12T12:02:46.044880+00:00"
         },
         {
           "name": "2024-07-01_to_2024-07-31_ProfitAndLoss_CranberryHearing.CSV",
@@ -736,7 +678,7 @@
           "status": true,
           "expected": true,
           "notes": null,
-          "registered_at": "2025-09-12T11:23:18.190345+00:00"
+          "registered_at": "2025-09-12T12:02:46.044977+00:00"
         },
         {
           "name": "2024-08-01_to_2024-08-31_ProfitAndLoss_CranberryHearing.CSV",
@@ -751,7 +693,7 @@
           "status": true,
           "expected": true,
           "notes": null,
-          "registered_at": "2025-09-12T11:23:18.190387+00:00"
+          "registered_at": "2025-09-12T12:02:46.045067+00:00"
         },
         {
           "name": "2024-10-01_to_2024-10-31_ProfitAndLoss_CranberryHearing.CSV",
@@ -766,7 +708,7 @@
           "status": true,
           "expected": true,
           "notes": null,
-          "registered_at": "2025-09-12T11:23:18.190427+00:00"
+          "registered_at": "2025-09-12T12:02:46.045155+00:00"
         },
         {
           "name": "2024-09-01_to_2024-09-30_ProfitAndLoss_CranberryHearing.CSV",
@@ -781,7 +723,7 @@
           "status": true,
           "expected": true,
           "notes": null,
-          "registered_at": "2025-09-12T11:23:18.190467+00:00"
+          "registered_at": "2025-09-12T12:02:46.045244+00:00"
         },
         {
           "name": "2024-06-01_to_2024-06-30_ProfitAndLoss_CranberryHearing.CSV",
@@ -796,7 +738,7 @@
           "status": true,
           "expected": true,
           "notes": null,
-          "registered_at": "2025-09-12T11:23:18.190508+00:00"
+          "registered_at": "2025-09-12T12:02:46.045335+00:00"
         },
         {
           "name": "2024-11-01_to_2024-11-30_ProfitAndLoss_CranberryHearing.CSV",
@@ -811,7 +753,7 @@
           "status": true,
           "expected": true,
           "notes": null,
-          "registered_at": "2025-09-12T11:23:18.190547+00:00"
+          "registered_at": "2025-09-12T12:02:46.045421+00:00"
         },
         {
           "name": "2025-05-01_to_2025-05-31_ProfitAndLoss_CranberryHearing.CSV",
@@ -826,7 +768,7 @@
           "status": true,
           "expected": true,
           "notes": null,
-          "registered_at": "2025-09-12T11:23:18.190585+00:00"
+          "registered_at": "2025-09-12T12:02:46.045516+00:00"
         },
         {
           "name": "2024-03-01_to_2024-03-31_ProfitAndLoss_CranberryHearing.CSV",
@@ -841,7 +783,7 @@
           "status": true,
           "expected": true,
           "notes": null,
-          "registered_at": "2025-09-12T11:23:18.190624+00:00"
+          "registered_at": "2025-09-12T12:02:46.045605+00:00"
         },
         {
           "name": "2024-12-01_to_2024-12-31_ProfitAndLoss_CranberryHearing.CSV",
@@ -856,7 +798,7 @@
           "status": true,
           "expected": true,
           "notes": null,
-          "registered_at": "2025-09-12T11:23:18.190662+00:00"
+          "registered_at": "2025-09-12T12:02:46.045696+00:00"
         },
         {
           "name": "2024-02-01_to_2024-02-29_ProfitAndLoss_CranberryHearing.CSV",
@@ -871,7 +813,7 @@
           "status": true,
           "expected": true,
           "notes": null,
-          "registered_at": "2025-09-12T11:23:18.190702+00:00"
+          "registered_at": "2025-09-12T12:02:46.045782+00:00"
         },
         {
           "name": "2024-04-01_to_2024-04-30_ProfitAndLoss_CranberryHearing.CSV",
@@ -886,7 +828,7 @@
           "status": true,
           "expected": true,
           "notes": null,
-          "registered_at": "2025-09-12T11:23:18.190742+00:00"
+          "registered_at": "2025-09-12T12:02:46.045866+00:00"
         },
         {
           "name": "2023-07-01_to_2023-07-31_ProfitAndLoss_CranberryHearing.CSV",
@@ -901,7 +843,7 @@
           "status": true,
           "expected": true,
           "notes": null,
-          "registered_at": "2025-09-12T11:23:18.190781+00:00"
+          "registered_at": "2025-09-12T12:02:46.045953+00:00"
         },
         {
           "name": "2023-08-01_to_2023-08-31_ProfitAndLoss_CranberryHearing.CSV",
@@ -916,7 +858,7 @@
           "status": true,
           "expected": true,
           "notes": null,
-          "registered_at": "2025-09-12T11:23:18.190821+00:00"
+          "registered_at": "2025-09-12T12:02:46.046038+00:00"
         },
         {
           "name": "2023-01-01_to_2023-01-31_ProfitAndLoss_CranberryHearing.CSV",
@@ -931,7 +873,7 @@
           "status": true,
           "expected": true,
           "notes": null,
-          "registered_at": "2025-09-12T11:23:18.190860+00:00"
+          "registered_at": "2025-09-12T12:02:46.046123+00:00"
         },
         {
           "name": "2023-10-01_to_2023-10-31_ProfitAndLoss_CranberryHearing.CSV",
@@ -946,7 +888,7 @@
           "status": true,
           "expected": true,
           "notes": null,
-          "registered_at": "2025-09-12T11:23:18.190900+00:00"
+          "registered_at": "2025-09-12T12:02:46.046207+00:00"
         },
         {
           "name": "2023-09-01_to_2023-09-30_ProfitAndLoss_CranberryHearing.CSV",
@@ -961,7 +903,7 @@
           "status": true,
           "expected": true,
           "notes": null,
-          "registered_at": "2025-09-12T11:23:18.190939+00:00"
+          "registered_at": "2025-09-12T12:02:46.046293+00:00"
         },
         {
           "name": "2023-06-01_to_2023-06-30_ProfitAndLoss_CranberryHearing.CSV",
@@ -976,7 +918,7 @@
           "status": true,
           "expected": true,
           "notes": null,
-          "registered_at": "2025-09-12T11:23:18.190979+00:00"
+          "registered_at": "2025-09-12T12:02:46.046389+00:00"
         },
         {
           "name": "2023-11-01_to_2023-11-30_ProfitAndLoss_CranberryHearing.CSV",
@@ -991,7 +933,7 @@
           "status": true,
           "expected": true,
           "notes": null,
-          "registered_at": "2025-09-12T11:23:18.191076+00:00"
+          "registered_at": "2025-09-12T12:02:46.046478+00:00"
         },
         {
           "name": "2023-03-01_to_2023-03-31_ProfitAndLoss_CranberryHearing.CSV",
@@ -1006,7 +948,7 @@
           "status": true,
           "expected": true,
           "notes": null,
-          "registered_at": "2025-09-12T11:23:18.191151+00:00"
+          "registered_at": "2025-09-12T12:02:46.046565+00:00"
         },
         {
           "name": "2023-05-01_to_2023-05-31_ProfitAndLoss_CranberryHearing.CSV",
@@ -1021,7 +963,7 @@
           "status": true,
           "expected": true,
           "notes": null,
-          "registered_at": "2025-09-12T11:23:18.191204+00:00"
+          "registered_at": "2025-09-12T12:02:46.046657+00:00"
         },
         {
           "name": "2023-02-01_to_2023-02-28_ProfitAndLoss_CranberryHearing.CSV",
@@ -1036,7 +978,7 @@
           "status": true,
           "expected": true,
           "notes": null,
-          "registered_at": "2025-09-12T11:23:18.191248+00:00"
+          "registered_at": "2025-09-12T12:02:46.046742+00:00"
         },
         {
           "name": "2023-12-01_to_2023-12-31_ProfitAndLoss_CranberryHearing.CSV",
@@ -1051,7 +993,7 @@
           "status": true,
           "expected": true,
           "notes": null,
-          "registered_at": "2025-09-12T11:23:18.191311+00:00"
+          "registered_at": "2025-09-12T12:02:46.046830+00:00"
         },
         {
           "name": "2023-04-01_to_2023-04-30_ProfitAndLoss_CranberryHearing.CSV",
@@ -1066,7 +1008,7 @@
           "status": true,
           "expected": true,
           "notes": null,
-          "registered_at": "2025-09-12T11:23:18.191361+00:00"
+          "registered_at": "2025-09-12T12:02:46.046914+00:00"
         },
         {
           "name": "2025-04-01_to_2025-04-30_ProfitAndLoss_CranberryHearing.CSV",
@@ -1081,7 +1023,7 @@
           "status": true,
           "expected": true,
           "notes": null,
-          "registered_at": "2025-09-12T11:23:18.191488+00:00"
+          "registered_at": "2025-09-12T12:02:46.047002+00:00"
         },
         {
           "name": "2025-03-01_to_2025-03-31_ProfitAndLoss_CranberryHearing.CSV",
@@ -1096,7 +1038,7 @@
           "status": true,
           "expected": true,
           "notes": null,
-          "registered_at": "2025-09-12T11:23:18.191539+00:00"
+          "registered_at": "2025-09-12T12:02:46.047090+00:00"
         },
         {
           "name": "2025-05-01_to_2025-05-31_ProfitAndLoss_CranberryHearing.CSV",
@@ -1111,7 +1053,7 @@
           "status": true,
           "expected": true,
           "notes": null,
-          "registered_at": "2025-09-12T11:23:18.191580+00:00"
+          "registered_at": "2025-09-12T12:02:46.047179+00:00"
         },
         {
           "name": "2025-02-01_to_2025-02-28_ProfitAndLoss_CranberryHearing.CSV",
@@ -1126,7 +1068,7 @@
           "status": true,
           "expected": true,
           "notes": null,
-          "registered_at": "2025-09-12T11:23:18.191619+00:00"
+          "registered_at": "2025-09-12T12:02:46.047263+00:00"
         },
         {
           "name": "2025-06-01_to_2025-06-30_ProfitAndLoss_CranberryHearing.CSV",
@@ -1141,7 +1083,7 @@
           "status": true,
           "expected": true,
           "notes": null,
-          "registered_at": "2025-09-12T11:23:18.191659+00:00"
+          "registered_at": "2025-09-12T12:02:46.047348+00:00"
         },
         {
           "name": "2025-07-01_to_2025-07-31_ProfitAndLoss_CranberryHearing.CSV",
@@ -1156,7 +1098,7 @@
           "status": true,
           "expected": true,
           "notes": null,
-          "registered_at": "2025-09-12T11:23:18.191697+00:00"
+          "registered_at": "2025-09-12T12:02:46.047431+00:00"
         },
         {
           "name": "2025-01-01_to_2025-01-31_ProfitAndLoss_CranberryHearing.CSV",
@@ -1171,7 +1113,7 @@
           "status": true,
           "expected": true,
           "notes": null,
-          "registered_at": "2025-09-12T11:23:18.191736+00:00"
+          "registered_at": "2025-09-12T12:02:46.047513+00:00"
         },
         {
           "name": "2023-12-30_to_2024-01-31_Chase_BusinessChecking_CranberryHearing.pdf",
@@ -1186,7 +1128,7 @@
           "status": true,
           "expected": true,
           "notes": null,
-          "registered_at": "2025-09-12T11:23:18.191849+00:00"
+          "registered_at": "2025-09-12T12:02:46.047686+00:00"
         },
         {
           "name": "2023-04-01_to_2023-04-28_Chase_BusinessChecking_CranberryHearing.pdf",
@@ -1201,7 +1143,7 @@
           "status": true,
           "expected": true,
           "notes": null,
-          "registered_at": "2025-09-12T11:23:18.191965+00:00"
+          "registered_at": "2025-09-12T12:02:46.047845+00:00"
         },
         {
           "name": "2021-10-01_to_2021-10-29_Chase_BusinessChecking_CranberryHearing.pdf",
@@ -1216,7 +1158,7 @@
           "status": true,
           "expected": true,
           "notes": null,
-          "registered_at": "2025-09-12T11:23:18.192078+00:00"
+          "registered_at": "2025-09-12T12:02:46.047999+00:00"
         },
         {
           "name": "2023-07-01_to_2023-07-31_Chase_BusinessChecking_CranberryHearing.pdf",
@@ -1231,7 +1173,7 @@
           "status": true,
           "expected": true,
           "notes": null,
-          "registered_at": "2025-09-12T11:23:18.192198+00:00"
+          "registered_at": "2025-09-12T12:02:46.048163+00:00"
         },
         {
           "name": "2024-03-30_to_2024-04-30_Chase_BusinessChecking_CranberryHearing.pdf",
@@ -1246,7 +1188,7 @@
           "status": true,
           "expected": true,
           "notes": null,
-          "registered_at": "2025-09-12T11:23:18.192325+00:00"
+          "registered_at": "2025-09-12T12:02:46.048339+00:00"
         },
         {
           "name": "2024-11-30_to_2024-12-31_Chase_BusinessChecking_CranberryHearing.pdf",
@@ -1261,7 +1203,7 @@
           "status": true,
           "expected": true,
           "notes": null,
-          "registered_at": "2025-09-12T11:23:18.192556+00:00"
+          "registered_at": "2025-09-12T12:02:46.048553+00:00"
         },
         {
           "name": "2021-07-01_to_2021-07-30_Chase_BusinessChecking_CranberryHearing.pdf",
@@ -1276,7 +1218,7 @@
           "status": true,
           "expected": true,
           "notes": null,
-          "registered_at": "2025-09-12T11:23:18.192688+00:00"
+          "registered_at": "2025-09-12T12:02:46.048786+00:00"
         },
         {
           "name": "2023-09-01_to_2023-09-29_Chase_BusinessChecking_CranberryHearing.pdf",
@@ -1291,7 +1233,7 @@
           "status": true,
           "expected": true,
           "notes": null,
-          "registered_at": "2025-09-12T11:23:18.192826+00:00"
+          "registered_at": "2025-09-12T12:02:46.048944+00:00"
         },
         {
           "name": "2021-09-01_to_2021-09-30_Chase_BusinessChecking_CranberryHearing.pdf",
@@ -1306,7 +1248,7 @@
           "status": true,
           "expected": true,
           "notes": null,
-          "registered_at": "2025-09-12T11:23:18.192961+00:00"
+          "registered_at": "2025-09-12T12:02:46.049101+00:00"
         },
         {
           "name": "2024-06-29_to_2024-07-31_Chase_BusinessChecking_CranberryHearing.pdf",
@@ -1321,7 +1263,7 @@
           "status": true,
           "expected": true,
           "notes": null,
-          "registered_at": "2025-09-12T11:23:18.193123+00:00"
+          "registered_at": "2025-09-12T12:02:46.049302+00:00"
         },
         {
           "name": "2021-02-27_to_2021-03-31_Chase_BusinessChecking_CranberryHearing.pdf",
@@ -1336,7 +1278,7 @@
           "status": true,
           "expected": true,
           "notes": null,
-          "registered_at": "2025-09-12T11:23:18.193236+00:00"
+          "registered_at": "2025-09-12T12:02:46.049454+00:00"
         },
         {
           "name": "2021-01-30_to_2021-02-26_Chase_BusinessChecking_CranberryHearing.pdf",
@@ -1351,7 +1293,7 @@
           "status": true,
           "expected": true,
           "notes": null,
-          "registered_at": "2025-09-12T11:23:18.193364+00:00"
+          "registered_at": "2025-09-12T12:02:46.049627+00:00"
         },
         {
           "name": "2022-12-31_to_2023-01-31_Chase_BusinessChecking_CranberryHearing.pdf",
@@ -1366,7 +1308,7 @@
           "status": true,
           "expected": true,
           "notes": null,
-          "registered_at": "2025-09-12T11:23:18.193558+00:00"
+          "registered_at": "2025-09-12T12:02:46.049790+00:00"
         },
         {
           "name": "2023-11-01_to_2023-11-30_Chase_BusinessChecking_CranberryHearing.pdf",
@@ -1381,7 +1323,7 @@
           "status": true,
           "expected": true,
           "notes": null,
-          "registered_at": "2025-09-12T11:23:18.193694+00:00"
+          "registered_at": "2025-09-12T12:02:46.049945+00:00"
         },
         {
           "name": "2021-10-30_to_2021-11-30_Chase_BusinessChecking_CranberryHearing.pdf",
@@ -1396,7 +1338,7 @@
           "status": true,
           "expected": true,
           "notes": null,
-          "registered_at": "2025-09-12T11:23:18.193825+00:00"
+          "registered_at": "2025-09-12T12:02:46.050114+00:00"
         },
         {
           "name": "2024-08-31_to_2024-09-30_Chase_BusinessChecking_CranberryHearing.pdf",
@@ -1411,7 +1353,7 @@
           "status": true,
           "expected": true,
           "notes": null,
-          "registered_at": "2025-09-12T11:23:18.193997+00:00"
+          "registered_at": "2025-09-12T12:02:46.050326+00:00"
         },
         {
           "name": "2023-02-01_to_2023-02-28_Chase_BusinessChecking_CranberryHearing.pdf",
@@ -1426,7 +1368,7 @@
           "status": true,
           "expected": true,
           "notes": null,
-          "registered_at": "2025-09-12T11:23:18.194122+00:00"
+          "registered_at": "2025-09-12T12:02:46.050525+00:00"
         },
         {
           "name": "2023-12-01_to_2023-12-29_Chase_BusinessChecking_CranberryHearing.pdf",
@@ -1441,7 +1383,7 @@
           "status": true,
           "expected": true,
           "notes": null,
-          "registered_at": "2025-09-12T11:23:18.194232+00:00"
+          "registered_at": "2025-09-12T12:02:46.050736+00:00"
         },
         {
           "name": "2024-08-01_to_2024-08-30_Chase_BusinessChecking_CranberryHearing.pdf",
@@ -1456,7 +1398,7 @@
           "status": true,
           "expected": true,
           "notes": null,
-          "registered_at": "2025-09-12T11:23:18.194419+00:00"
+          "registered_at": "2025-09-12T12:02:46.050991+00:00"
         },
         {
           "name": "2021-05-29_to_2021-06-30_Chase_BusinessChecking_CranberryHearing.pdf",
@@ -1471,7 +1413,7 @@
           "status": true,
           "expected": true,
           "notes": null,
-          "registered_at": "2025-09-12T11:23:18.194544+00:00"
+          "registered_at": "2025-09-12T12:02:46.051188+00:00"
         },
         {
           "name": "2025-01-01_to_2025-01-31_Chase_BusinessChecking_CranberryHearing.pdf",
@@ -1486,7 +1428,7 @@
           "status": true,
           "expected": true,
           "notes": null,
-          "registered_at": "2025-09-12T11:23:18.194712+00:00"
+          "registered_at": "2025-09-12T12:02:46.051405+00:00"
         },
         {
           "name": "2025-02-01_to_2025-02-28_Chase_BusinessChecking_CranberryHearing.pdf",
@@ -1501,7 +1443,7 @@
           "status": true,
           "expected": true,
           "notes": null,
-          "registered_at": "2025-09-12T11:23:18.194886+00:00"
+          "registered_at": "2025-09-12T12:02:46.051616+00:00"
         },
         {
           "name": "2023-04-29_to_2023-05-31_Chase_BusinessChecking_CranberryHearing.pdf",
@@ -1516,7 +1458,7 @@
           "status": true,
           "expected": true,
           "notes": null,
-          "registered_at": "2025-09-12T11:23:18.194997+00:00"
+          "registered_at": "2025-09-12T12:02:46.051779+00:00"
         },
         {
           "name": "2025-05-01_to_2025-05-30_Chase_BusinessChecking_CranberryHearing.pdf",
@@ -1531,7 +1473,7 @@
           "status": true,
           "expected": true,
           "notes": null,
-          "registered_at": "2025-09-12T11:23:18.195158+00:00"
+          "registered_at": "2025-09-12T12:02:46.051991+00:00"
         },
         {
           "name": "2023-03-01_to_2023-03-31_Chase_BusinessChecking_CranberryHearing.pdf",
@@ -1546,7 +1488,7 @@
           "status": true,
           "expected": true,
           "notes": null,
-          "registered_at": "2025-09-12T11:23:18.195270+00:00"
+          "registered_at": "2025-09-12T12:02:46.052153+00:00"
         },
         {
           "name": "2021-04-01_to_2021-04-30_Chase_BusinessChecking_CranberryHearing.pdf",
@@ -1561,7 +1503,7 @@
           "status": true,
           "expected": true,
           "notes": null,
-          "registered_at": "2025-09-12T11:23:18.195384+00:00"
+          "registered_at": "2025-09-12T12:02:46.052315+00:00"
         },
         {
           "name": "2024-06-01_to_2024-06-28_Chase_BusinessChecking_CranberryHearing.pdf",
@@ -1576,7 +1518,7 @@
           "status": true,
           "expected": true,
           "notes": null,
-          "registered_at": "2025-09-12T11:23:18.195507+00:00"
+          "registered_at": "2025-09-12T12:02:46.052486+00:00"
         },
         {
           "name": "2024-02-01_to_2024-02-29_Chase_BusinessChecking_CranberryHearing.pdf",
@@ -1591,7 +1533,7 @@
           "status": true,
           "expected": true,
           "notes": null,
-          "registered_at": "2025-09-12T11:23:18.195614+00:00"
+          "registered_at": "2025-09-12T12:02:46.052644+00:00"
         },
         {
           "name": "2024-11-01_to_2024-11-29_Chase_BusinessChecking_CranberryHearing.pdf",
@@ -1606,7 +1548,7 @@
           "status": true,
           "expected": true,
           "notes": null,
-          "registered_at": "2025-09-12T11:23:18.195759+00:00"
+          "registered_at": "2025-09-12T12:02:46.052842+00:00"
         },
         {
           "name": "2021-05-01_to_2021-05-28_Chase_BusinessChecking_CranberryHearing.pdf",
@@ -1621,7 +1563,7 @@
           "status": true,
           "expected": true,
           "notes": null,
-          "registered_at": "2025-09-12T11:23:18.195866+00:00"
+          "registered_at": "2025-09-12T12:02:46.052996+00:00"
         },
         {
           "name": "2023-06-01_to_2023-06-30_Chase_BusinessChecking_CranberryHearing.pdf",
@@ -1636,7 +1578,7 @@
           "status": true,
           "expected": true,
           "notes": null,
-          "registered_at": "2025-09-12T11:23:18.195978+00:00"
+          "registered_at": "2025-09-12T12:02:46.053156+00:00"
         },
         {
           "name": "2021-12-01_to_2021-12-31_Chase_BusinessChecking_CranberryHearing.pdf",
@@ -1651,7 +1593,7 @@
           "status": true,
           "expected": true,
           "notes": null,
-          "registered_at": "2025-09-12T11:23:18.196087+00:00"
+          "registered_at": "2025-09-12T12:02:46.053314+00:00"
         },
         {
           "name": "2021-07-31_to_2021-08-31_Chase_BusinessChecking_CranberryHearing.pdf",
@@ -1666,7 +1608,7 @@
           "status": true,
           "expected": true,
           "notes": null,
-          "registered_at": "2025-09-12T11:23:18.196192+00:00"
+          "registered_at": "2025-09-12T12:02:46.053465+00:00"
         },
         {
           "name": "2024-10-01_to_2024-10-31_Chase_BusinessChecking_CranberryHearing.pdf",
@@ -1681,7 +1623,7 @@
           "status": true,
           "expected": true,
           "notes": null,
-          "registered_at": "2025-09-12T11:23:18.196354+00:00"
+          "registered_at": "2025-09-12T12:02:46.053676+00:00"
         },
         {
           "name": "2024-03-01_to_2024-03-29_Chase_BusinessChecking_CranberryHearing.pdf",
@@ -1696,7 +1638,7 @@
           "status": true,
           "expected": true,
           "notes": null,
-          "registered_at": "2025-09-12T11:23:18.196467+00:00"
+          "registered_at": "2025-09-12T12:02:46.053837+00:00"
         },
         {
           "name": "2023-09-30_to_2023-10-31_Chase_BusinessChecking_CranberryHearing.pdf",
@@ -1711,7 +1653,7 @@
           "status": true,
           "expected": true,
           "notes": null,
-          "registered_at": "2025-09-12T11:23:18.196571+00:00"
+          "registered_at": "2025-09-12T12:02:46.053991+00:00"
         },
         {
           "name": "2025-04-01_to_2025-04-30_Chase_BusinessChecking_CranberryHearing.pdf",
@@ -1726,7 +1668,7 @@
           "status": true,
           "expected": true,
           "notes": null,
-          "registered_at": "2025-09-12T11:23:18.196730+00:00"
+          "registered_at": "2025-09-12T12:02:46.054199+00:00"
         },
         {
           "name": "2022-08-01_to_2022-08-31_BalanceSheet_CranberryHearing.CSV",
@@ -1741,7 +1683,7 @@
           "status": true,
           "expected": true,
           "notes": null,
-          "registered_at": "2025-09-12T11:23:18.196776+00:00"
+          "registered_at": "2025-09-12T12:02:46.054293+00:00"
         },
         {
           "name": "2022-10-01_to_2022-10-31_BalanceSheet_CranberryHearing.CSV",
@@ -1756,7 +1698,7 @@
           "status": true,
           "expected": true,
           "notes": null,
-          "registered_at": "2025-09-12T11:23:18.196821+00:00"
+          "registered_at": "2025-09-12T12:02:46.054377+00:00"
         },
         {
           "name": "2022-05-01_to_2022-05-31_BalanceSheet_CranberryHearing.CSV",
@@ -1771,7 +1713,7 @@
           "status": true,
           "expected": true,
           "notes": null,
-          "registered_at": "2025-09-12T11:23:18.196858+00:00"
+          "registered_at": "2025-09-12T12:02:46.054461+00:00"
         },
         {
           "name": "2022-12-01_to_2022-12-31_BalanceSheet_CranberryHearing.CSV",
@@ -1786,7 +1728,7 @@
           "status": true,
           "expected": true,
           "notes": null,
-          "registered_at": "2025-09-12T11:23:18.196894+00:00"
+          "registered_at": "2025-09-12T12:02:46.054545+00:00"
         },
         {
           "name": "2022-07-01_to_2022-07-31_BalanceSheet_CranberryHearing.CSV",
@@ -1801,7 +1743,7 @@
           "status": true,
           "expected": true,
           "notes": null,
-          "registered_at": "2025-09-12T11:23:18.196930+00:00"
+          "registered_at": "2025-09-12T12:02:46.054630+00:00"
         },
         {
           "name": "2022-01-01_to_2022-12-31_BalanceSheet_CranberryHearing.CSV",
@@ -1816,7 +1758,7 @@
           "status": true,
           "expected": true,
           "notes": null,
-          "registered_at": "2025-09-12T11:23:18.196965+00:00"
+          "registered_at": "2025-09-12T12:02:46.054715+00:00"
         },
         {
           "name": "2022-06-01_to_2022-06-30_BalanceSheet_CranberryHearing.CSV",
@@ -1831,7 +1773,7 @@
           "status": true,
           "expected": true,
           "notes": null,
-          "registered_at": "2025-09-12T11:23:18.197000+00:00"
+          "registered_at": "2025-09-12T12:02:46.054798+00:00"
         },
         {
           "name": "2022-01-01_to_2022-01-31_BalanceSheet_CranberryHearing.CSV",
@@ -1846,7 +1788,7 @@
           "status": true,
           "expected": true,
           "notes": null,
-          "registered_at": "2025-09-12T11:23:18.197036+00:00"
+          "registered_at": "2025-09-12T12:02:46.054881+00:00"
         },
         {
           "name": "2022-04-01_to_2022-04-30_BalanceSheet_CranberryHearing.CSV",
@@ -1861,7 +1803,7 @@
           "status": true,
           "expected": true,
           "notes": null,
-          "registered_at": "2025-09-12T11:23:18.197071+00:00"
+          "registered_at": "2025-09-12T12:02:46.054966+00:00"
         },
         {
           "name": "2022-02-01_to_2022-02-28_BalanceSheet_CranberryHearing.CSV",
@@ -1876,7 +1818,7 @@
           "status": true,
           "expected": true,
           "notes": null,
-          "registered_at": "2025-09-12T11:23:18.197108+00:00"
+          "registered_at": "2025-09-12T12:02:46.055053+00:00"
         },
         {
           "name": "2022-03-01_to_2022-03-31_BalanceSheet_CranberryHearing.CSV",
@@ -1891,7 +1833,7 @@
           "status": true,
           "expected": true,
           "notes": null,
-          "registered_at": "2025-09-12T11:23:18.197144+00:00"
+          "registered_at": "2025-09-12T12:02:46.055137+00:00"
         },
         {
           "name": "2022-09-01_to_2022-09-30_BalanceSheet_CranberryHearing.CSV",
@@ -1906,7 +1848,7 @@
           "status": true,
           "expected": true,
           "notes": null,
-          "registered_at": "2025-09-12T11:23:18.197180+00:00"
+          "registered_at": "2025-09-12T12:02:46.055220+00:00"
         },
         {
           "name": "2022-11-01_to_2022-11-30_BalanceSheet_CranberryHearing.CSV",
@@ -1921,7 +1863,7 @@
           "status": true,
           "expected": true,
           "notes": null,
-          "registered_at": "2025-09-12T11:23:18.197236+00:00"
+          "registered_at": "2025-09-12T12:02:46.055304+00:00"
         },
         {
           "name": "2023-01-01_to_2023-12-31_GeneralLedger_CranberryHearing.CSV",
@@ -1936,7 +1878,7 @@
           "status": true,
           "expected": true,
           "notes": null,
-          "registered_at": "2025-09-12T11:23:18.197347+00:00"
+          "registered_at": "2025-09-12T12:02:46.055463+00:00"
         },
         {
           "name": "2024-01-01_to_2024-12-31_GeneralLedger_CranberryHearing.CSV",
@@ -1951,7 +1893,7 @@
           "status": true,
           "expected": true,
           "notes": null,
-          "registered_at": "2025-09-12T11:23:18.197842+00:00"
+          "registered_at": "2025-09-12T12:02:46.056031+00:00"
         },
         {
           "name": "2025-01-01_to_2025-12-31_GeneralLedger_CranberryHearing.CSV",
@@ -1966,7 +1908,7 @@
           "status": true,
           "expected": true,
           "notes": null,
-          "registered_at": "2025-09-12T11:23:18.198122+00:00"
+          "registered_at": "2025-09-12T12:02:46.056362+00:00"
         },
         {
           "name": "2022-01-01_to_2022-12-31_GeneralLedger_CranberryHearing.CSV",
@@ -1981,7 +1923,7 @@
           "status": true,
           "expected": true,
           "notes": null,
-          "registered_at": "2025-09-12T11:23:18.198621+00:00"
+          "registered_at": "2025-09-12T12:02:46.057223+00:00"
         },
         {
           "name": "2021-01-01_to_2021-12-31_GeneralLedger_CranberryHearing.CSV",
@@ -1996,7 +1938,7 @@
           "status": true,
           "expected": true,
           "notes": null,
-          "registered_at": "2025-09-12T11:23:18.201094+00:00"
+          "registered_at": "2025-09-12T12:02:46.060133+00:00"
         },
         {
           "name": "2024-01-01_to_2024-12-31_W2Information_CranberryHearing.pdf",
@@ -2011,7 +1953,7 @@
           "status": true,
           "expected": true,
           "notes": null,
-          "registered_at": "2025-09-12T11:23:18.201329+00:00"
+          "registered_at": "2025-09-12T12:02:46.060513+00:00"
         },
         {
           "name": "2024-01-01_to_2024-12-31_VAIncomeTaxSummary_CranberryHearing.pdf",
@@ -2026,7 +1968,7 @@
           "status": true,
           "expected": true,
           "notes": null,
-          "registered_at": "2025-09-12T11:23:18.201378+00:00"
+          "registered_at": "2025-09-12T12:02:46.060660+00:00"
         },
         {
           "name": "2024-12-01_to_2024-12-31_Chase2015_Activity_CranberryHearing.pdf",
@@ -2041,7 +1983,7 @@
           "status": true,
           "expected": true,
           "notes": null,
-          "registered_at": "2025-09-12T11:23:18.201505+00:00"
+          "registered_at": "2025-09-12T12:02:46.060824+00:00"
         },
         {
           "name": "2024-12-01_to_2024-12-31_Chase5330_Activity_CranberryHearing.pdf",
@@ -2056,7 +1998,7 @@
           "status": true,
           "expected": true,
           "notes": null,
-          "registered_at": "2025-09-12T11:23:18.201648+00:00"
+          "registered_at": "2025-09-12T12:02:46.061002+00:00"
         },
         {
           "name": "2024-10-01_to_2024-12-31_Form941_Q4_CranberryHearing.pdf",
@@ -2071,7 +2013,7 @@
           "status": true,
           "expected": true,
           "notes": null,
-          "registered_at": "2025-09-12T11:23:18.201716+00:00"
+          "registered_at": "2025-09-12T12:02:46.061108+00:00"
         },
         {
           "name": "2024-01-01_to_2024-12-31_W3_TaxYear_CranberryHearing.pdf",
@@ -2086,7 +2028,7 @@
           "status": true,
           "expected": true,
           "notes": null,
-          "registered_at": "2025-09-12T11:23:18.201766+00:00"
+          "registered_at": "2025-09-12T12:02:46.061201+00:00"
         },
         {
           "name": "2024-12-01_to_2024-12-31_CapitalOne_Activity_CranberryHearing.pdf",
@@ -2101,7 +2043,7 @@
           "status": true,
           "expected": true,
           "notes": null,
-          "registered_at": "2025-09-12T11:23:18.202230+00:00"
+          "registered_at": "2025-09-12T12:02:46.061707+00:00"
         },
         {
           "name": "2024-04-01_to_2024-06-30_Form941_Q2_CranberryHearing.pdf",
@@ -2116,7 +2058,7 @@
           "status": true,
           "expected": true,
           "notes": null,
-          "registered_at": "2025-09-12T11:23:18.202302+00:00"
+          "registered_at": "2025-09-12T12:02:46.061825+00:00"
         },
         {
           "name": "2024-01-01_to_2024-12-31_W2R_PAAnnualReconciliation_CranberryHearing.pdf",
@@ -2131,7 +2073,7 @@
           "status": true,
           "expected": true,
           "notes": null,
-          "registered_at": "2025-09-12T11:23:18.202397+00:00"
+          "registered_at": "2025-09-12T12:02:46.061933+00:00"
         },
         {
           "name": "2024-01-01_to_2024-12-31_PAAnnualReconciliation_CranberryHearing.pdf",
@@ -2146,7 +2088,7 @@
           "status": true,
           "expected": true,
           "notes": null,
-          "registered_at": "2025-09-12T11:23:18.202546+00:00"
+          "registered_at": "2025-09-12T12:02:46.062033+00:00"
         },
         {
           "name": "2024-07-01_to_2024-09-30_Form941_Q3_CranberryHearing.pdf",
@@ -2161,7 +2103,7 @@
           "status": true,
           "expected": true,
           "notes": null,
-          "registered_at": "2025-09-12T11:23:18.202624+00:00"
+          "registered_at": "2025-09-12T12:02:46.062139+00:00"
         },
         {
           "name": "2024-12-31_PNCStatement_CranberryHearing.pdf",
@@ -2176,7 +2118,7 @@
           "status": true,
           "expected": true,
           "notes": null,
-          "registered_at": "2025-09-12T11:23:18.202813+00:00"
+          "registered_at": "2025-09-12T12:02:46.062359+00:00"
         },
         {
           "name": "2024-01-01_to_2024-03-31_Form941_Q1_CranberryHearing.pdf",
@@ -2191,7 +2133,7 @@
           "status": true,
           "expected": true,
           "notes": null,
-          "registered_at": "2025-09-12T11:23:18.202883+00:00"
+          "registered_at": "2025-09-12T12:02:46.062465+00:00"
         },
         {
           "name": "2024-01-01_to_2024-12-31_ColoradoStateW2_CranberryHearing.pdf",
@@ -2206,7 +2148,7 @@
           "status": true,
           "expected": true,
           "notes": null,
-          "registered_at": "2025-09-12T11:23:18.202935+00:00"
+          "registered_at": "2025-09-12T12:02:46.062550+00:00"
         },
         {
           "name": "2021-01-01_to_2021-12-31_StarkeyCOGS_CranberryHearing.csv",
@@ -2221,7 +2163,7 @@
           "status": true,
           "expected": true,
           "notes": null,
-          "registered_at": "2025-09-12T11:23:18.203037+00:00"
+          "registered_at": "2025-09-12T12:02:46.062690+00:00"
         },
         {
           "name": "2023-01-01_to_2023-12-31_StarkeyCOGS_CranberryHearing.csv",
@@ -2236,7 +2178,7 @@
           "status": true,
           "expected": true,
           "notes": null,
-          "registered_at": "2025-09-12T11:23:18.203131+00:00"
+          "registered_at": "2025-09-12T12:02:46.062812+00:00"
         },
         {
           "name": "2024-01-01_to_2024-12-31_StarkeyCOGS_CranberryHearing.csv",
@@ -2251,7 +2193,7 @@
           "status": true,
           "expected": true,
           "notes": null,
-          "registered_at": "2025-09-12T11:23:18.203215+00:00"
+          "registered_at": "2025-09-12T12:02:46.062942+00:00"
         },
         {
           "name": "2025-01-01_to_2025-08-31_StarkeyCOGS_CranberryHearing.csv",
@@ -2266,7 +2208,7 @@
           "status": true,
           "expected": true,
           "notes": null,
-          "registered_at": "2025-09-12T11:23:18.203291+00:00"
+          "registered_at": "2025-09-12T12:02:46.063058+00:00"
         },
         {
           "name": "2022-01-01_to_2022-12-31_StarkeyCOGS_CranberryHearing.csv",
@@ -2281,7 +2223,7 @@
           "status": true,
           "expected": true,
           "notes": null,
-          "registered_at": "2025-09-12T11:23:18.203377+00:00"
+          "registered_at": "2025-09-12T12:02:46.063184+00:00"
         },
         {
           "name": "2006-08-31_UPMC_AncillaryProviderAgreement.pdf",
@@ -2296,7 +2238,7 @@
           "status": true,
           "expected": true,
           "notes": null,
-          "registered_at": "2025-09-12T11:23:18.204694+00:00"
+          "registered_at": "2025-09-12T12:02:46.064862+00:00"
         },
         {
           "name": "2015-09-28_Aetna.pdf",
@@ -2311,7 +2253,7 @@
           "status": true,
           "expected": true,
           "notes": null,
-          "registered_at": "2025-09-12T11:23:18.208442+00:00"
+          "registered_at": "2025-09-12T12:02:46.068572+00:00"
         },
         {
           "name": "2022-01-01_to_2030-12-31_BDNPL_CommercialLease_CranberryHearing.pdf",
@@ -2326,7 +2268,7 @@
           "status": true,
           "expected": true,
           "notes": null,
-          "registered_at": "2025-09-12T11:23:18.208635+00:00"
+          "registered_at": "2025-09-12T12:02:46.068855+00:00"
         },
         {
           "name": "2022-01-01_to_2030-12-31_BDNPL_CommercialLease_CranberryHearing.csv",
@@ -2341,7 +2283,7 @@
           "status": true,
           "expected": true,
           "notes": null,
-          "registered_at": "2025-09-12T11:23:18.208681+00:00"
+          "registered_at": "2025-09-12T12:02:46.068951+00:00"
         },
         {
           "name": "2019-11-08_Starkey_EquipmentQuotation_CelloAudiometer_TrumpetREM_CranberryHearing.pdf",
@@ -2356,7 +2298,7 @@
           "status": true,
           "expected": true,
           "notes": null,
-          "registered_at": "2025-09-12T11:23:18.209110+00:00"
+          "registered_at": "2025-09-12T12:02:46.069390+00:00"
         },
         {
           "name": "2019-11-06_Starkey_EquipmentQuotation_CelloAudiometer_CosmeticHearingSolutions.pdf",
@@ -2371,7 +2313,7 @@
           "status": true,
           "expected": true,
           "notes": null,
-          "registered_at": "2025-09-12T11:23:18.209349+00:00"
+          "registered_at": "2025-09-12T12:02:46.069678+00:00"
         },
         {
           "name": "2019-11-06_Celloaudiometer_Cosmetichearingsolutions.csv",
@@ -2386,7 +2328,7 @@
           "status": true,
           "expected": true,
           "notes": null,
-          "registered_at": "2025-09-12T11:23:18.209404+00:00"
+          "registered_at": "2025-09-12T12:02:46.069753+00:00"
         },
         {
           "name": "2019-11-11_Starkey_EquipmentQuotation_TrumpetREM_AudiometerCombo_CranberryHearing.pdf",
@@ -2401,7 +2343,7 @@
           "status": true,
           "expected": true,
           "notes": null,
-          "registered_at": "2025-09-12T11:23:18.209638+00:00"
+          "registered_at": "2025-09-12T12:02:46.070023+00:00"
         },
         {
           "name": "2019-11-08_Celloaudiometer_Trumpetrem_Cranberryhearing.csv",
@@ -2416,7 +2358,7 @@
           "status": true,
           "expected": true,
           "notes": null,
-          "registered_at": "2025-09-12T11:23:18.209693+00:00"
+          "registered_at": "2025-09-12T12:02:46.070102+00:00"
         },
         {
           "name": "2019-11-11_Trumpetrem_Audiometercombo_Cranberryhearing.csv",
@@ -2431,7 +2373,7 @@
           "status": true,
           "expected": true,
           "notes": null,
-          "registered_at": "2025-09-12T11:23:18.209734+00:00"
+          "registered_at": "2025-09-12T12:02:46.070180+00:00"
         },
         {
           "name": "2021-05-20_to_2024-12-05_HearingAidSalesCancellations_CranberryHearing.xlsx.csv",
@@ -2446,7 +2388,7 @@
           "status": true,
           "expected": true,
           "notes": null,
-          "registered_at": "2025-09-12T11:23:18.209929+00:00"
+          "registered_at": "2025-09-12T12:02:46.070425+00:00"
         },
         {
           "name": "2021-05-20_to_2024-12-05_HearingAidSalesReplacements_CranberryHearing.csv",
@@ -2461,7 +2403,7 @@
           "status": true,
           "expected": true,
           "notes": null,
-          "registered_at": "2025-09-12T11:23:18.210026+00:00"
+          "registered_at": "2025-09-12T12:02:46.070599+00:00"
         },
         {
           "name": "2021-05-20_to_2024-12-05_HearingAidSales_CranberryHearing.csv",
@@ -2476,7 +2418,7 @@
           "status": true,
           "expected": true,
           "notes": null,
-          "registered_at": "2025-09-12T11:23:18.212704+00:00"
+          "registered_at": "2025-09-12T12:02:46.073439+00:00"
         },
         {
           "name": "2021-01-01_to_2024-12-31_HearingAidSalesLedger_CranberryHearing.xlsx",
@@ -2491,7 +2433,7 @@
           "status": true,
           "expected": true,
           "notes": null,
-          "registered_at": "2025-09-12T11:23:18.212861+00:00"
+          "registered_at": "2025-09-12T12:02:46.073677+00:00"
         },
         {
           "name": "2021-05-20_to_2024-12-05_HearingAidSalesReturns_CranberryHearing.csv",
@@ -2506,7 +2448,7 @@
           "status": true,
           "expected": true,
           "notes": null,
-          "registered_at": "2025-09-12T11:23:18.212925+00:00"
+          "registered_at": "2025-09-12T12:02:46.073802+00:00"
         },
         {
           "name": "2021-05-20_to_2024-12-05_HearingAidSales_Exchanges_CranberryHearing.csv",
@@ -2521,7 +2463,7 @@
           "status": true,
           "expected": true,
           "notes": null,
-          "registered_at": "2025-09-12T11:23:18.213000+00:00"
+          "registered_at": "2025-09-12T12:02:46.073923+00:00"
         }
       ],
       "coverage_analysis": {

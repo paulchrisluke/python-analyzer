@@ -706,6 +706,8 @@ class BusinessMetricsCalculator:
                     return calculated_monthly_ebitda
                 else:
                     logger.warning("No sales data available for EBITDA calculation")
+                    # Finish calculation before returning None to maintain consistent state
+                    self.lineage_tracker.finish_calculation(None)
                     return None
             
             # Fallback to P&L calculation if sales data not available
@@ -897,9 +899,12 @@ class BusinessMetricsCalculator:
             logger.exception("Error calculating real EBITDA from financial data")
             return None
         finally:
-            # Ensure calculation is always finished, but guard against double-finishing
-            if self.lineage_tracker.current_calculation is not None:
+            # Ensure calculation is always finished, using safe call to avoid race conditions
+            try:
                 self.lineage_tracker.finish_calculation(0)
+            except RuntimeError:
+                # Ignore RuntimeError from double-finishing or race conditions
+                pass
     
     def _generate_expected_months(self, start_date: pd.Timestamp, end_date: pd.Timestamp) -> List[str]:
         """Generate list of expected months in YYYY-MM format for the analysis period."""

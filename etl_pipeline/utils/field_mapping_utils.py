@@ -207,11 +207,14 @@ class FieldMappingRegistry:
         """
         traceability_summary = self.get_traceability_summary()
         
+        # Get the nested mappings root
+        mappings_root = self.mappings.get("mappings", {})
+        
         return {
             "field_mappings": {
-                "sales_mappings": self.mappings.get("sales_mappings", {}),
-                "financial_mappings": self.mappings.get("financial_mappings", {}),
-                "equipment_mappings": self.mappings.get("equipment_mappings", {})
+                "sales_mappings": mappings_root.get("sales_mappings", {}),
+                "financial_mappings": mappings_root.get("financial_mappings", {}),
+                "equipment_mappings": mappings_root.get("equipment_mappings", {})
             },
             "traceability_log": self.traceability_log,
             "traceability_summary": traceability_summary,

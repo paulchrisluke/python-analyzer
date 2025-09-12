@@ -751,13 +751,18 @@ class ETLPipeline:
             # Analyze data coverage for due diligence
             logger.info("Analyzing data coverage...")
             try:
-                # Use enhanced coverage analysis if available, otherwise fall back to basic
-                if hasattr(self.coverage_analyzer, 'analyze_enhanced_coverage'):
-                    coverage_analysis = self.coverage_analyzer.analyze_enhanced_coverage(self.raw_data)
+                # Check if coverage analyzer exists and is not None
+                if self.coverage_analyzer is not None:
+                    # Use enhanced coverage analysis if available, otherwise fall back to basic
+                    if hasattr(self.coverage_analyzer, 'analyze_enhanced_coverage'):
+                        coverage_analysis = self.coverage_analyzer.analyze_enhanced_coverage(self.raw_data)
+                    else:
+                        coverage_analysis = self.coverage_analyzer.analyze_comprehensive_coverage(self.raw_data)
+                    self.final_data['coverage_analysis'] = coverage_analysis
+                    logger.info("Data coverage analysis completed")
                 else:
-                    coverage_analysis = self.coverage_analyzer.analyze_comprehensive_coverage(self.raw_data)
-                self.final_data['coverage_analysis'] = coverage_analysis
-                logger.info("Data coverage analysis completed")
+                    logger.info("No coverage analyzer available - using default coverage analysis")
+                    self.final_data['coverage_analysis'] = self._get_default_coverage_analysis()
             except Exception as e:
                 logger.warning(f"Data coverage analysis failed: {str(e)} - will use default values")
                 self.final_data['coverage_analysis'] = self._get_default_coverage_analysis()

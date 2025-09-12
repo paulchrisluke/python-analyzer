@@ -252,8 +252,9 @@ class EnhancedCoverageAnalyzer:
         Returns:
             Dictionary with category coverage analysis
         """
-        # Get actual documents in this category
+        # Get actual documents in this category, filtering by status=True
         actual_docs = self.document_registry.get_documents_by_category(category)
+        actual_docs = [doc for doc in actual_docs if doc.get("status") is True]
         actual_doc_names = {doc["name"] for doc in actual_docs}
         
         # Analyze each expected document type
@@ -472,6 +473,7 @@ class EnhancedCoverageAnalyzer:
         
         for category, expected_docs in self.expected_documents.items():
             actual_docs = self.document_registry.get_documents_by_category(category)
+            actual_docs = [doc for doc in actual_docs if doc.get("status") is True]
             actual_doc_names = {doc["name"] for doc in actual_docs}
             
             for expected_doc in expected_docs:
@@ -505,6 +507,7 @@ class EnhancedCoverageAnalyzer:
                             "frequency": expected_doc["frequency"],
                             "period": expected_doc["period"],
                             "impact": "optional",
+                            "status": True,
                             "recommendation": f"Consider obtaining {expected_doc['name']} for {category} category"
                         })
         
@@ -519,6 +522,7 @@ class EnhancedCoverageAnalyzer:
         
         for category, expected_docs in self.expected_documents.items():
             actual_docs = self.document_registry.get_documents_by_category(category)
+            actual_docs = [doc for doc in actual_docs if doc.get("status") is True]
             actual_doc_names = {doc["name"] for doc in actual_docs}
             
             for expected_doc in expected_docs:
