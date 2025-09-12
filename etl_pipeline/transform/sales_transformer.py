@@ -13,6 +13,7 @@ from datetime import datetime, timezone
 from decimal import Decimal, ROUND_HALF_UP
 from .base_transformer import BaseTransformer
 from ..utils.file_utils import FileUtils
+from ..utils.field_mapping_utils import FieldMappingRegistry
 
 logger = logging.getLogger(__name__)
 
@@ -29,6 +30,7 @@ class SalesTransformer(BaseTransformer):
         super().__init__(business_rules)
         self.normalized_sales = {}
         self.patient_dimension_data = {}
+        self.field_mapping_registry = FieldMappingRegistry()
         
     def transform(self, raw_data: Dict[str, Any]) -> Dict[str, Any]:
         """
@@ -120,45 +122,23 @@ class SalesTransformer(BaseTransformer):
                 logger.exception("Unexpected error in main sales transformation: %s", str(e))
                 return None, {}
     
-    def _standardize_column_names(self, df: pd.DataFrame) -> pd.DataFrame:
-        """Standardize column names."""
-        column_mapping = {
-            'Sale Date': 'sale_date',
-            'Delivery Date': 'delivery_date',
-            'Return Date': 'return_date',
-            'Staff Name': 'staff_name',
-            'Patient Name': 'patient_name',
-            'Patient ID': 'patient_id',
-            'Patient ZIP': 'patient_zip',
-            'Clinic Name': 'clinic_name',
-            'Referral Source': 'referral_source',
-            'Subcategory': 'subcategory',
-            'Ref Description': 'ref_description',
-            'Campaign': 'campaign',
-            'Units': 'units',
-            'Type': 'type',
-            'Product': 'product',
-            'Description': 'description',
-            'S/N': 'serial_number',
-            'Notes': 'notes',
-            'Invoice No.': 'invoice_no',
-            'CPT Code': 'cpt_code',
-            'Gross Price': 'gross_price',
-            'Discount': 'discount',
-            'Discount Type 1': 'discount_type_1',
-            'Discount Amount 1': 'discount_amount_1',
-            'Discount Type 2': 'discount_type_2',
-            'Discount Amount 2': 'discount_amount_2',
-            'Discount Type 3': 'discount_type_3',
-            'Discount Amount 3': 'discount_amount_3',
-            'Net Price': 'net_price',
-            'Sales Tax': 'sales_tax',
-            'Total Price': 'total_price',
-            'Receipt Paid': 'receipt_paid'
-        }
+    def _standardize_column_names(self, df: pd.DataFrame, source_file: str = "sales_data") -> pd.DataFrame:
+        """Standardize column names using field mapping registry."""
+        # Get sales mappings from config
+        sales_mappings = self.field_mapping_registry.get_all_mappings('sales_mappings')
         
-        # Rename columns
-        df = df.rename(columns=column_mapping)
+        # Log field mappings for traceability
+        for raw_field, normalized_field in sales_mappings.items():
+            if raw_field in df.columns:
+                self.field_mapping_registry.log_field_mapping(
+                    raw_field=raw_field,
+                    normalized_field=normalized_field,
+                    source_file=source_file,
+                    transformation="normalize_column_name"
+                )
+        
+        # Rename columns using mappings
+        df = df.rename(columns=sales_mappings)
         
         # Convert column names to lowercase
         df.columns = df.columns.str.lower()

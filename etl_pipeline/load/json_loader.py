@@ -15,6 +15,9 @@ from decimal import Decimal, InvalidOperation
 import shutil
 from .base_loader import BaseLoader
 from ..utils.file_utils import FileUtils
+from ..utils.field_mapping_utils import FieldMappingRegistry
+from ..utils.calculation_lineage import CalculationLineageTracker
+from ..utils.document_registry import DocumentRegistry
 
 logger = logging.getLogger(__name__)
 
@@ -197,6 +200,46 @@ class JsonLoader(BaseLoader):
         """
         super().__init__(output_dir)
         self.load_results = {}
+        self.field_mapping_registry = FieldMappingRegistry()
+        self.document_registry = DocumentRegistry()
+        
+        # Scan and register documents
+        self._scan_documents()
+    
+    def _scan_documents(self) -> None:
+        """Scan and register documents in the docs directory."""
+        # Get the docs directory (assuming it's at the project root)
+        project_root = Path(__file__).parent.parent.parent
+        docs_dir = project_root / "docs"
+        
+        if not docs_dir.exists():
+            logger.warning(f"Docs directory not found: {docs_dir}")
+            return
+        
+        # Define document categories and their directories
+        categories = {
+            "financials": ["financials", "Balance_Sheets", "Bank_Statements", "COGS", "General_Ledger", "Profit_and_Loss", "Tax_Documents"],
+            "legal": ["legal", "Insurance_Contracts", "Leases"],
+            "equipment": ["equipment"],
+            "operational": ["operational", "Heading_Aid_Sales_Data"],
+            "corporate": ["corporate"],
+            "other": ["other"]
+        }
+        
+        # Register documents in each category
+        for category, subdirs in categories.items():
+            for subdir in subdirs:
+                category_path = docs_dir / subdir
+                if category_path.exists():
+                    # Register all files in this directory
+                    self.document_registry.register_directory(
+                        category_path,
+                        category=category,
+                        file_extensions=['.pdf', '.csv', '.xlsx', '.xls', '.doc', '.docx', '.txt'],
+                        recursive=True
+                    )
+        
+        logger.info(f"Document registry initialized with {len(self.document_registry.documents)} documents")
         
     def load(self, transformed_data: Dict[str, Any]) -> Dict[str, Any]:
         """
@@ -439,9 +482,17 @@ class JsonLoader(BaseLoader):
         # Sanitize coverage analysis before JSON serialization
         sanitized_coverage = self._sanitize_for_json(coverage_analysis)
         
-        # Add ETL run timestamp to coverage analysis
+        # Add ETL run timestamp and traceability to coverage analysis
         if isinstance(sanitized_coverage, dict):
             sanitized_coverage['etl_run_timestamp'] = FileUtils.get_js_compatible_timestamp()
+            
+            # Add comprehensive traceability metadata
+            sanitized_coverage['traceability'] = {
+                "field_mappings": self.field_mapping_registry.export_traceability_for_json(),
+                "document_registry": self.document_registry.export_registry_for_json(),
+                "etl_pipeline_version": "1.0.0",
+                "traceability_enabled": True
+            }
         
         # Save coverage analysis
         coverage_file = final_dir / "due_diligence_coverage.json"
@@ -493,6 +544,14 @@ class JsonLoader(BaseLoader):
                 "months_analyzed": financial_metrics.get('revenue_metrics', {}).get('analysis_period_months', 30),
                 "data_source": "ETL Pipeline - Real Business Data",
                 "analysis_period": analysis_period
+            },
+            # Add comprehensive traceability metadata
+            "traceability": {
+                "field_mappings": self.field_mapping_registry.export_traceability_for_json(),
+                "calculation_lineage": business_metrics.get('calculation_lineage', {}),
+                "document_registry": self.document_registry.export_registry_for_json(),
+                "etl_pipeline_version": "1.0.0",
+                "traceability_enabled": True
             },
             "sales": {
                 "total_transactions": int(sales_metrics.get('total_transactions', 0)),

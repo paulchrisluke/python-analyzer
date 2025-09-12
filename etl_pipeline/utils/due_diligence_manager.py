@@ -15,6 +15,7 @@ from pathlib import Path
 from typing import Dict, Any, List, Optional, Union
 import os
 from .file_utils import FileUtils
+from .document_registry import DocumentRegistry
 
 logger = logging.getLogger(__name__)
 
@@ -106,6 +107,9 @@ class DueDiligenceManager:
         # Load business rules configuration
         self.business_rules = self._load_business_rules()
         
+        # Initialize document registry
+        self.document_registry = DocumentRegistry()
+        
         # Ensure directories exist
         self.docs_dir.mkdir(exist_ok=True)
         (self.docs_dir / "legal").mkdir(exist_ok=True)
@@ -121,6 +125,9 @@ class DueDiligenceManager:
         
         logger.info(f"DueDiligenceManager initialized with data_dir: {self.data_dir}, docs_dir: {self.docs_dir}")
         logger.info(f"Loaded business rules from: {self.config_dir / 'business_rules.yaml'}")
+        
+        # Scan and register all documents
+        self._scan_and_register_documents()
     
     def _load_business_rules(self) -> Dict[str, Any]:
         """Load business rules from configuration file."""
@@ -131,6 +138,48 @@ class DueDiligenceManager:
         else:
             logger.warning(f"Business rules file not found: {business_rules_path}")
             return {}
+    
+    def _scan_and_register_documents(self) -> None:
+        """Scan and register all documents in the docs directory."""
+        logger.info("Scanning and registering documents...")
+        
+        # Define document categories and their directories
+        categories = {
+            "financials": ["financials", "Balance_Sheets", "Bank_Statements", "COGS", "General_Ledger", "Profit_and_Loss", "Tax_Documents"],
+            "legal": ["legal", "Insurance_Contracts", "Leases"],
+            "equipment": ["equipment"],
+            "operational": ["operational", "Heading_Aid_Sales_Data"],
+            "corporate": ["corporate"],
+            "other": ["other"]
+        }
+        
+        # Register documents in each category
+        for category, subdirs in categories.items():
+            for subdir in subdirs:
+                category_path = self.docs_dir / subdir
+                if category_path.exists():
+                    # Register all files in this directory
+                    self.document_registry.register_directory(
+                        category_path,
+                        category=category,
+                        file_extensions=['.pdf', '.csv', '.xlsx', '.xls', '.doc', '.docx', '.txt'],
+                        recursive=True
+                    )
+        
+        # Also register any CSV files in the data directory
+        if self.data_dir.exists():
+            self.document_registry.register_directory(
+                self.data_dir,
+                category="data",
+                file_extensions=['.csv', '.json'],
+                recursive=True
+            )
+        
+        logger.info(f"Document registry initialized with {len(self.document_registry.documents)} documents")
+    
+    def get_document_registry(self) -> Dict[str, Any]:
+        """Get the document registry for export."""
+        return self.document_registry.export_registry_for_json()
     
     def load_existing_data(self, business_data_path: str = None, coverage_data_path: str = None) -> None:
         """

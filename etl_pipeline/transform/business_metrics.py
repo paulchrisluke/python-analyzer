@@ -10,6 +10,8 @@ import numpy as np
 from collections import defaultdict
 from decimal import Decimal, ROUND_HALF_UP
 import os
+from ..utils.field_mapping_utils import FieldMappingRegistry
+from ..utils.calculation_lineage import CalculationLineageTracker
 
 logger = logging.getLogger(__name__)
 
@@ -25,6 +27,8 @@ class BusinessMetricsCalculator:
         """
         self.business_rules = business_rules
         self.metrics = {}
+        self.field_mapping_registry = FieldMappingRegistry()
+        self.lineage_tracker = CalculationLineageTracker()
         
     def _parse_asking_price(self) -> float:
         """
@@ -641,12 +645,19 @@ class BusinessMetricsCalculator:
     def _calculate_real_ebitda_from_financial_data(self, normalized_data: Dict[str, Any]) -> Optional[float]:
         """Calculate real EBITDA from actual financial data."""
         try:
+            # Start tracking this calculation
+            self.lineage_tracker.start_calculation(
+                "monthly_ebitda",
+                "Calculate monthly EBITDA from financial data"
+            )
+            
             # Debug: Log what data we're receiving
             logger.info(f"Normalized data keys: {list(normalized_data.keys())}")
             
             # Check if we have P&L data (it's directly under normalized_data, not under 'financial')
             if 'profit_loss' not in normalized_data:
                 logger.warning("No P&L data available for real EBITDA calculation")
+                self.lineage_tracker.finish_calculation(0)
                 return None
             
             pnl_data = normalized_data.get('profit_loss', {})
@@ -654,6 +665,7 @@ class BusinessMetricsCalculator:
             
             if not pnl_data:
                 logger.warning("No P&L data available for real EBITDA calculation")
+                self.lineage_tracker.finish_calculation(0)
                 return None
             
             # Since P&L data is company-wide but we only want sale locations,
@@ -670,11 +682,26 @@ class BusinessMetricsCalculator:
                     avg_monthly_revenue = self._safe_float_conversion(monthly_revenue.mean())
                     logger.info(f"Average monthly revenue from sales data: ${avg_monthly_revenue:,.2f}")
                     
+                    # Log the revenue calculation step
+                    self.lineage_tracker.add_step("aggregate", "total_price", avg_monthly_revenue, 
+                                                "Calculate average monthly revenue from sales data")
+                    
                     # Use the EBITDA margin from business rules (website shows 25.6%)
                     ebitda_margin = self.business_rules.get('financial_metrics', {}).get('ebitda_margin_target', 0.256)
                     calculated_monthly_ebitda = avg_monthly_revenue * ebitda_margin
+                    
+                    # Log the EBITDA calculation step
+                    self.lineage_tracker.add_multiply_step(
+                        "avg_monthly_revenue", 
+                        calculated_monthly_ebitda, 
+                        factor=ebitda_margin,
+                        description=f"Apply EBITDA margin of {ebitda_margin:.1%}"
+                    )
+                    
                     logger.info(f"Calculated monthly EBITDA using {ebitda_margin:.1%} margin: ${calculated_monthly_ebitda:,.2f}")
                     
+                    # Finish calculation
+                    self.lineage_tracker.finish_calculation(calculated_monthly_ebitda)
                     return calculated_monthly_ebitda
             
             # Fallback to P&L calculation if sales data not available
@@ -1104,12 +1131,30 @@ class BusinessMetricsCalculator:
         
         return performance_metrics
     
+    def get_calculation_lineage(self) -> Dict[str, Any]:
+        """Get calculation lineage for export to JSON."""
+        return self.lineage_tracker.export_lineage_for_json()
+    
+    def clear_calculation_lineage(self) -> None:
+        """Clear calculation lineage history."""
+        self.lineage_tracker.clear_calculations()
+    
     def _calculate_annual_projection(self, sales_metrics: Dict[str, Any]) -> float:
         """Calculate annual revenue projection based on configurable date range."""
+        # Start tracking this calculation
+        self.lineage_tracker.start_calculation(
+            "annual_revenue_projection",
+            "Calculate annual revenue projection from sales data"
+        )
+        
         # Get the monthly average from the analysis period
         monthly_average = sales_metrics.get('average_transaction_value', 0)
         total_revenue = sales_metrics.get('total_revenue', 0)
         total_transactions = sales_metrics.get('total_transactions', 0)
+        
+        # Log input values
+        self.lineage_tracker.add_step("input", "total_revenue", total_revenue, "Total revenue from sales data")
+        self.lineage_tracker.add_step("input", "total_transactions", total_transactions, "Total number of transactions")
         
         # Calculate monthly revenue average (not transaction average)
         analysis_period = self.business_rules.get('analysis_period', {})
@@ -1121,11 +1166,30 @@ class BusinessMetricsCalculator:
         else:
             months_in_period = 12  # Default fallback changed from 30 to 12
         
+        self.lineage_tracker.add_step("input", "months_in_period", months_in_period, "Number of months in analysis period")
+        
         # Calculate monthly revenue average from total revenue and months
         monthly_revenue_average = total_revenue / months_in_period if total_revenue > 0 else 0
         
+        self.lineage_tracker.add_divide_step(
+            "total_revenue", 
+            monthly_revenue_average, 
+            divisor=months_in_period,
+            description="Calculate monthly revenue average"
+        )
+        
         # Annual projection = monthly average * 12
         annual_projection = monthly_revenue_average * 12
+        
+        self.lineage_tracker.add_annualize_step(
+            "monthly_revenue_average",
+            annual_projection,
+            factor=12,
+            description="Annualize monthly revenue average"
+        )
+        
+        # Finish calculation and log result
+        self.lineage_tracker.finish_calculation(annual_projection)
         
         logger.info(f"Annual projection calculation: ${monthly_revenue_average:,.2f} monthly avg * 12 = ${annual_projection:,.2f}")
         

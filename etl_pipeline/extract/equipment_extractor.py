@@ -12,6 +12,7 @@ import re
 from decimal import Decimal, InvalidOperation
 from .base_extractor import BaseExtractor
 from ..utils.file_utils import FileUtils
+from ..utils.field_mapping_utils import FieldMappingRegistry
 
 logger = logging.getLogger(__name__)
 
@@ -27,6 +28,7 @@ class EquipmentExtractor(BaseExtractor):
         """
         super().__init__(config)
         self.equipment_data = {}
+        self.field_mapping_registry = FieldMappingRegistry()
         
     def extract(self) -> Dict[str, Any]:
         """
@@ -171,8 +173,11 @@ class EquipmentExtractor(BaseExtractor):
             return None
     
     def _parse_equipment_text(self, text: str, pdf_path: str) -> Dict[str, Any]:
-        """Parse equipment information from extracted text."""
+        """Parse equipment information from extracted text with field mapping traceability."""
         filename = Path(pdf_path).name
+        
+        # Get equipment mappings from config
+        equipment_mappings = self.field_mapping_registry.get_all_mappings('equipment_mappings')
         
         # Initialize equipment info
         equipment_info = {
@@ -186,23 +191,21 @@ class EquipmentExtractor(BaseExtractor):
             'raw_text': text[:500]  # Store first 500 characters for reference
         }
         
-        # Parse equipment name from filename
-        if 'Cello' in filename:
-            equipment_info['equipment_name'] = 'Cello Audiometer System'
-            equipment_info['category'] = 'Diagnostic Equipment'
-            equipment_info['description'] = 'Advanced hearing testing equipment'
-        elif 'Trumpet' in filename:
-            equipment_info['equipment_name'] = 'Trumpet REM System'
-            equipment_info['category'] = 'Measurement Equipment'
-            equipment_info['description'] = 'Real ear measurement system'
-        elif 'CL12BLP' in filename:
-            equipment_info['equipment_name'] = 'CL12BLP Equipment'
-            equipment_info['category'] = 'Diagnostic Equipment'
-            equipment_info['description'] = 'Professional diagnostic tools'
-        elif 'AUD' in filename:
-            equipment_info['equipment_name'] = 'AUD System'
-            equipment_info['category'] = 'Complete System'
-            equipment_info['description'] = 'Complete audiology suite'
+        # Use config-based equipment name mapping
+        for pattern, equipment_name in equipment_mappings.items():
+            if pattern in filename:
+                equipment_info['equipment_name'] = equipment_name
+                equipment_info['category'] = self._get_equipment_category(equipment_name)
+                equipment_info['description'] = self._get_equipment_description(equipment_name)
+                
+                # Log field mapping for traceability
+                self.field_mapping_registry.log_field_mapping(
+                    raw_field=pattern,
+                    normalized_field=equipment_name,
+                    source_file=pdf_path,
+                    transformation="equipment_name_mapping"
+                )
+                break
         
         # Try to extract price from text
         price = self._extract_price_from_text(text)
@@ -215,6 +218,32 @@ class EquipmentExtractor(BaseExtractor):
             equipment_info['quote_date'] = quote_date
         
         return equipment_info
+    
+    def _get_equipment_category(self, equipment_name: str) -> str:
+        """Get equipment category based on normalized name."""
+        if 'audiometer' in equipment_name.lower():
+            return 'Diagnostic Equipment'
+        elif 'rem' in equipment_name.lower():
+            return 'Measurement Equipment'
+        elif 'test' in equipment_name.lower() or 'booth' in equipment_name.lower():
+            return 'Test Equipment'
+        elif 'system' in equipment_name.lower():
+            return 'Complete System'
+        else:
+            return 'Equipment'
+    
+    def _get_equipment_description(self, equipment_name: str) -> str:
+        """Get equipment description based on normalized name."""
+        if 'audiometer' in equipment_name.lower():
+            return 'Advanced hearing testing equipment'
+        elif 'rem' in equipment_name.lower():
+            return 'Real ear measurement system'
+        elif 'test' in equipment_name.lower() or 'booth' in equipment_name.lower():
+            return 'Professional test booth equipment'
+        elif 'system' in equipment_name.lower():
+            return 'Complete audiology suite'
+        else:
+            return 'Professional audiology equipment'
     
     def _extract_price_from_text(self, text: str) -> Optional[float]:
         """Extract price information from text."""

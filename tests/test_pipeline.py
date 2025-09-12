@@ -588,6 +588,18 @@ def main():
         print("Please fix configuration and setup issues before running pipeline")
         return 1
 
+def test_pipeline_traceability_fields():
+    """Test that traceability fields are present in pipeline output."""
+    # TODO: Implement test
+    print("❌ Not Implemented: Pipeline traceability fields test")
+    return False
+
+def test_field_mappings_in_json_export():
+    """Test that field mappings are included in JSON exports."""
+    # TODO: Implement test
+    print("❌ Not Implemented: Field mappings in JSON export test")
+    return False
+
 if __name__ == "__main__":
     exit_code = main()
     sys.exit(exit_code)

@@ -18,6 +18,7 @@ from .load.json_loader import JsonLoader
 from .load.report_generator import ReportGenerator
 from .utils.logging_config import setup_logging
 from .utils.data_coverage_analyzer import DataCoverageAnalyzer
+from .utils.enhanced_coverage_analyzer import EnhancedCoverageAnalyzer
 from .utils.due_diligence_manager import DueDiligenceManager
 from .utils.file_utils import FileUtils
 from .utils.data_validation import DataValidator
@@ -46,8 +47,9 @@ class ETLPipeline:
         self.transformers = {}
         self.loaders = {}
         
-        # Due diligence manager
+        # Due diligence manager and coverage analyzer
         self.due_diligence_manager = None
+        self.coverage_analyzer = None
         
         # Pipeline data
         self.raw_data = {}
@@ -383,12 +385,23 @@ class ETLPipeline:
         except Exception as e:
             logger.warning(f"Failed to initialize business metrics calculator: {str(e)} - will use default values")
         
-        # Initialize data coverage analyzer
+        # Initialize enhanced coverage analyzer
         try:
-            self.coverage_analyzer = DataCoverageAnalyzer(self.business_rules)
-            logger.info("Data coverage analyzer initialized")
+            # First initialize the due diligence manager to get document registry
+            self.due_diligence_manager = DueDiligenceManager()
+            # Then initialize enhanced coverage analyzer with document registry
+            self.coverage_analyzer = EnhancedCoverageAnalyzer(
+                self.business_rules, 
+                self.due_diligence_manager.document_registry
+            )
+            logger.info("Enhanced coverage analyzer initialized")
         except Exception as e:
-            logger.warning(f"Failed to initialize data coverage analyzer: {str(e)} - will use default values")
+            logger.warning(f"Failed to initialize enhanced coverage analyzer: {str(e)} - falling back to basic analyzer")
+            try:
+                self.coverage_analyzer = DataCoverageAnalyzer(self.business_rules)
+                logger.info("Basic data coverage analyzer initialized as fallback")
+            except Exception as e2:
+                logger.warning(f"Failed to initialize basic coverage analyzer: {str(e2)} - will use default values")
     
     def _initialize_loaders(self) -> None:
         """Initialize data loaders with graceful handling of missing directories."""
@@ -720,6 +733,11 @@ class ETLPipeline:
                     logger.info(f"P&L data count: {len(combined_data.get('profit_loss', {}))}")
                     
                     business_metrics = self.transformers['business_metrics'].calculate_comprehensive_metrics(combined_data)
+                    
+                    # Add calculation lineage to business metrics
+                    calculation_lineage = self.transformers['business_metrics'].get_calculation_lineage()
+                    business_metrics['calculation_lineage'] = calculation_lineage
+                    
                     self.final_data['business_metrics'] = business_metrics
                     logger.info("Business metrics calculation completed")
                 except Exception as e:
@@ -732,7 +750,11 @@ class ETLPipeline:
             # Analyze data coverage for due diligence
             logger.info("Analyzing data coverage...")
             try:
-                coverage_analysis = self.coverage_analyzer.analyze_comprehensive_coverage(self.raw_data)
+                # Use enhanced coverage analysis if available, otherwise fall back to basic
+                if hasattr(self.coverage_analyzer, 'analyze_enhanced_coverage'):
+                    coverage_analysis = self.coverage_analyzer.analyze_enhanced_coverage(self.raw_data)
+                else:
+                    coverage_analysis = self.coverage_analyzer.analyze_comprehensive_coverage(self.raw_data)
                 self.final_data['coverage_analysis'] = coverage_analysis
                 logger.info("Data coverage analysis completed")
             except Exception as e:
