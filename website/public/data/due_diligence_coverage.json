@@ -1,3 +1,92 @@
 {
-  "etl_run_timestamp": "2025-09-12T06:17:59.752Z"
+  "sales": {
+    "status": "good",
+    "completeness_score": 86.7,
+    "missing_periods": [
+      "2023-02",
+      "2023-03",
+      "2023-04",
+      "2024-02"
+    ],
+    "data_quality_issues": [
+      "Missing 4 months of data",
+      "26 months with unusually low transaction volume"
+    ],
+    "coverage_details": {
+      "total_expected_months": 30,
+      "actual_months": 26,
+      "missing_months": 4,
+      "date_range": "2023-01-12 to 2025-06-19",
+      "total_transactions": 124,
+      "total_revenue": "4732.00"
+    },
+    "fallback_strategies": [
+      "Use available months to calculate averages",
+      "Apply seasonal adjustments based on available data"
+    ]
+  },
+  "financial": {
+    "status": "good",
+    "completeness_score": 75.0,
+    "missing_documents": [
+      "profit_loss"
+    ],
+    "data_quality_issues": [
+      "Missing 1 critical financial documents"
+    ],
+    "coverage_details": {
+      "found_documents": [
+        "balance_sheets",
+        "general_ledger",
+        "cogs"
+      ],
+      "missing_documents": [
+        "profit_loss"
+      ],
+      "total_expected": 4,
+      "found_count": 3
+    },
+    "fallback_strategies": [
+      "Use sales data to estimate P&L based on industry margins"
+    ]
+  },
+  "equipment": {
+    "status": "good",
+    "completeness_score": 50.0,
+    "missing_documents": [],
+    "data_quality_issues": [
+      "Missing equipment categories: ['hearing_aid_programmer', 'audiometer']",
+      "Equipment value seems low for audiology practice"
+    ],
+    "coverage_details": {
+      "equipment_count": 3,
+      "total_value": 25665.0,
+      "categories_found": [
+        "office_equipment",
+        "diagnostic_equipment"
+      ],
+      "categories_missing": [
+        "hearing_aid_programmer",
+        "audiometer"
+      ]
+    },
+    "fallback_strategies": [
+      "Use industry averages for missing equipment categories",
+      "Estimate equipment value based on practice size and type"
+    ]
+  },
+  "due_diligence": {
+    "overall_score": 74.7,
+    "readiness_level": "fair",
+    "recommendation": "Significant gaps, address before due diligence",
+    "category_scores": {
+      "sales": 86.7,
+      "financial": 75.0,
+      "equipment": 50.0
+    }
+  },
+  "recommendations": [
+    "Data coverage is fair - address gaps before due diligence"
+  ],
+  "etl_run_timestamp": "2025-09-12T06:44:15.161Z"
 }

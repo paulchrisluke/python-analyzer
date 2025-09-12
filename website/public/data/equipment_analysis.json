@@ -1,7 +1,7 @@
 {
   "equipment_summary": {
     "total_value": {
-      "value": 61487.5,
+      "amount": 61487.5,
       "currency": "USD"
     },
     "items": [
@@ -13,11 +13,11 @@
         "part_number": "68068-004",
         "quantity": 3,
         "unit_price": {
-          "value": 8555.0,
+          "amount": 8555.0,
           "currency": "USD"
         },
         "total_price": {
-          "value": 25665.0,
+          "amount": 25665.0,
           "currency": "USD"
         }
       },
@@ -29,11 +29,11 @@
         "part_number": "68066-500",
         "quantity": 3,
         "unit_price": {
-          "value": 400.0,
+          "amount": 400.0,
           "currency": "USD"
         },
         "total_price": {
-          "value": 1200.0,
+          "amount": 1200.0,
           "currency": "USD"
         }
       },
@@ -43,29 +43,45 @@
         "description": "Equipment description not available",
         "category": "Audiometer",
         "part_number": "MISCEQU",
-        "quantity": 6,
+        "quantity": 1,
         "unit_price": {
-          "value": 4000.0,
+          "amount": 4000.0,
           "currency": "USD"
         },
         "total_price": {
-          "value": 15900.0,
+          "amount": 4000.0,
+          "currency": "USD"
+        }
+      },
+      {
+        "id": "MISCEQU",
+        "name": "Sound room freight",
+        "description": "Equipment description not available",
+        "category": "Test Booth",
+        "part_number": "MISCEQU",
+        "quantity": 1,
+        "unit_price": {
+          "amount": 1900.0,
+          "currency": "USD"
+        },
+        "total_price": {
+          "amount": 1900.0,
           "currency": "USD"
         }
       },
       {
         "id": "31243-051",
-        "name": "Cello Computer Controlled Diagnostic Audiometereter",
+        "name": "Cello Computer Controlled Diagnostic Audiometer",
         "description": "Equipment description not available",
         "category": "Audiometer",
         "part_number": "31243-051",
-        "quantity": 2,
+        "quantity": 1,
         "unit_price": {
-          "value": 3420.0,
+          "amount": 3420.0,
           "currency": "USD"
         },
         "total_price": {
-          "value": 6840.0,
+          "amount": 3420.0,
           "currency": "USD"
         }
       },
@@ -77,11 +93,11 @@
         "part_number": "68001-080",
         "quantity": 3,
         "unit_price": {
-          "value": 450.0,
+          "amount": 450.0,
           "currency": "USD"
         },
         "total_price": {
-          "value": 1350.0,
+          "amount": 1350.0,
           "currency": "USD"
         }
       },
@@ -93,11 +109,11 @@
         "part_number": "19101-031",
         "quantity": 9,
         "unit_price": {
-          "value": 12.5,
+          "amount": 12.5,
           "currency": "USD"
         },
         "total_price": {
-          "value": 112.5,
+          "amount": 112.5,
           "currency": "USD"
         }
       },
@@ -109,11 +125,11 @@
         "part_number": "19101-032",
         "quantity": 6,
         "unit_price": {
-          "value": 12.5,
+          "amount": 12.5,
           "currency": "USD"
         },
         "total_price": {
-          "value": 75.0,
+          "amount": 75.0,
           "currency": "USD"
         }
       },
@@ -125,11 +141,59 @@
         "part_number": "19101-033",
         "quantity": 6,
         "unit_price": {
-          "value": 12.5,
+          "amount": 12.5,
           "currency": "USD"
         },
         "total_price": {
-          "value": 75.0,
+          "amount": 75.0,
+          "currency": "USD"
+        }
+      },
+      {
+        "id": "MISCEQU",
+        "name": "CL12BLP Sound booth and audiometer install",
+        "description": "Equipment description not available",
+        "category": "Audiometer",
+        "part_number": "MISCEQU",
+        "quantity": 2,
+        "unit_price": {
+          "amount": 4000.0,
+          "currency": "USD"
+        },
+        "total_price": {
+          "amount": 8000.0,
+          "currency": "USD"
+        }
+      },
+      {
+        "id": "MISCEQU",
+        "name": "Sound Booth Freight",
+        "description": "Equipment description not available",
+        "category": "Test Booth",
+        "part_number": "MISCEQU",
+        "quantity": 2,
+        "unit_price": {
+          "amount": 1000.0,
+          "currency": "USD"
+        },
+        "total_price": {
+          "amount": 2000.0,
+          "currency": "USD"
+        }
+      },
+      {
+        "id": "31243-051",
+        "name": "Cello Computer Controlled Diagnostic Audiometer Includes QSIN License",
+        "description": "Equipment description not available",
+        "category": "Audiometer",
+        "part_number": "31243-051",
+        "quantity": 1,
+        "unit_price": {
+          "amount": 3420.0,
+          "currency": "USD"
+        },
+        "total_price": {
+          "amount": 3420.0,
           "currency": "USD"
         }
       },
@@ -141,11 +205,11 @@
         "part_number": "31243-067",
         "quantity": 1,
         "unit_price": {
-          "value": 4090.0,
+          "amount": 4090.0,
           "currency": "USD"
         },
         "total_price": {
-          "value": 4090.0,
+          "amount": 4090.0,
           "currency": "USD"
         }
       },
@@ -157,17 +221,17 @@
         "part_number": "31243-071",
         "quantity": 1,
         "unit_price": {
-          "value": 6180.0,
+          "amount": 6180.0,
           "currency": "USD"
         },
         "total_price": {
-          "value": 6180.0,
+          "amount": 6180.0,
           "currency": "USD"
         }
       }
     ]
   },
-  "generated_at": "2025-09-12T06:18:12.411Z",
-  "etl_run_timestamp": "2025-09-12T06:18:12.411Z",
+  "generated_at": "2025-09-12T06:45:16.300Z",
+  "etl_run_timestamp": "2025-09-12T06:45:16.300Z",
   "data_source": "ETL Pipeline Analysis"
 }

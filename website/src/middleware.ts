@@ -24,8 +24,16 @@ async function isAuthenticated(req: NextRequest): Promise<boolean> {
     }
 
     // Security: Fail closed if AUTH_SECRET is not configured
-    if (!process.env.AUTH_SECRET || process.env.AUTH_SECRET.trim() === '') {
+    const authSecret = process.env.AUTH_SECRET?.trim()
+    const MIN_SECRET_LENGTH = 32
+    
+    if (!authSecret) {
       console.error('AUTH_SECRET is not configured - authentication disabled for security')
+      return false
+    }
+    
+    if (authSecret.length < MIN_SECRET_LENGTH) {
+      console.error(`AUTH_SECRET is too short (${authSecret.length} chars, minimum ${MIN_SECRET_LENGTH}) - authentication disabled for security`)
       return false
     }
 
@@ -35,7 +43,7 @@ async function isAuthenticated(req: NextRequest): Promise<boolean> {
     const token = sessionCookie.value
     await jwtVerify(
       token,
-      new TextEncoder().encode(process.env.AUTH_SECRET),
+      new TextEncoder().encode(authSecret),
       { issuer: 'cranberry', audience: 'web' }
     )
     return true

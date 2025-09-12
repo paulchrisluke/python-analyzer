@@ -66,14 +66,22 @@ async function loadJsonFile<T>(filePath: string): Promise<T> {
       path.join('data')
     ].filter((dir): dir is string => Boolean(dir)) // Remove undefined values and type guard
     
-    let fileContent: string
+    let fileContent: string | null = null
     let lastError: Error | null = null
     
     // Try each possible directory until we find the file
     for (const dataDir of possibleDataDirs) {
       try {
-        const fullDataPath = path.join(process.cwd(), dataDir, filePath)
-        fileContent = await fs.readFile(fullDataPath, 'utf-8')
+        // Handle absolute vs relative paths properly
+        const fullDataPath = path.isAbsolute(dataDir) 
+          ? path.resolve(dataDir, filePath)
+          : path.resolve(process.cwd(), dataDir, filePath)
+        
+        // Normalize the final path and log the attempt
+        const normalizedPath = path.normalize(fullDataPath)
+        console.log(`Attempting to load data file: ${normalizedPath}`)
+        
+        fileContent = await fs.readFile(normalizedPath, 'utf-8')
         break // Success, exit the loop
       } catch (error) {
         lastError = error as Error
@@ -81,7 +89,7 @@ async function loadJsonFile<T>(filePath: string): Promise<T> {
       }
     }
     
-    if (!fileContent!) {
+    if (!fileContent) {
       throw lastError || new Error(`File not found in any data directory: ${filePath}`)
     }
     

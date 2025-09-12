@@ -315,29 +315,49 @@ class TestDueDiligenceRegression:
         # Assertion
         assert cash_flow_diff <= TOLERANCE, f"Monthly cash flow difference {cash_flow_diff:.4%} exceeds tolerance {TOLERANCE:.4%}"
     
-    def test_asking_price_matches(self, manager):
+    def test_asking_price_matches(self):
         """Test that asking price matches known-good values within tolerance."""
         # Get the calculated values from business data directly
         import json
         from pathlib import Path
-        business_data_path = Path(__file__).parent.parent / "data" / "final" / "business_sale_data.json"
         
-        # Check if business data file exists and is readable
-        if not business_data_path.exists():
-            pytest.skip(f"Business data file not found: {business_data_path}")
+        # Try primary path first, then fallback to website/public/data
+        primary_path = Path(__file__).parent.parent / "data" / "final" / "business_sale_data.json"
+        fallback_path = Path(__file__).parent.parent / "website" / "public" / "data" / "business_sale_data.json"
         
-        if not business_data_path.is_file():
-            pytest.skip(f"Business data path is not a file: {business_data_path}")
+        business_data_path = None
+        business_data = None
         
-        try:
-            with open(business_data_path, 'r') as f:
-                business_data = json.load(f)
-        except (json.JSONDecodeError, UnicodeDecodeError) as e:
-            pytest.skip(f"Business data file is malformed or unreadable: {e}")
-        except PermissionError:
-            pytest.skip(f"Business data file is not readable: {business_data_path}")
+        # Try primary path first
+        if primary_path.exists() and primary_path.is_file():
+            try:
+                with open(primary_path, 'r') as f:
+                    business_data = json.load(f)
+                    business_data_path = primary_path
+            except (json.JSONDecodeError, UnicodeDecodeError, PermissionError):
+                pass  # Will try fallback
         
-        calculated_asking_price = business_data["financials"]["metrics"]["asking_price"]
+        # Try fallback path if primary failed
+        if business_data is None and fallback_path.exists() and fallback_path.is_file():
+            try:
+                with open(fallback_path, 'r') as f:
+                    business_data = json.load(f)
+                    business_data_path = fallback_path
+            except (json.JSONDecodeError, UnicodeDecodeError, PermissionError):
+                pass
+        
+        # Skip if both paths failed
+        if business_data is None:
+            pytest.skip(f"Business data file not found or unreadable in both locations: {primary_path} and {fallback_path}")
+        
+        # Extract asking price, handling Money-style objects
+        asking_price_raw = business_data["financials"]["metrics"]["asking_price"]
+        
+        # Handle Money-style objects (dict with value/amount) or plain numbers
+        if isinstance(asking_price_raw, dict):
+            calculated_asking_price = float(asking_price_raw.get("value", asking_price_raw.get("amount", 0.0)))
+        else:
+            calculated_asking_price = float(asking_price_raw)
         
         # Known-good value
         expected_asking_price = KNOWN_GOOD_VALUES["valuation"]["asking_price"]
@@ -347,6 +367,7 @@ class TestDueDiligenceRegression:
         
         # Print comparison
         print(f"\n=== ASKING PRICE COMPARISON ===")
+        print(f"Data source: {business_data_path}")
         print(f"Expected Asking Price: ${expected_asking_price:,.2f}")
         print(f"Calculated Asking Price: ${calculated_asking_price:,.2f}")
         print(f"Difference: ${abs(calculated_asking_price - expected_asking_price):,.2f}")

@@ -123,10 +123,10 @@ class ETLPipeline:
                 logger.info("Configuration files loaded successfully")
             except Exception as e:
                 error_msg = f"Failed to load configuration files: {str(e)}"
-                logger.error(error_msg)
+                logger.exception(error_msg)
                 self.pipeline_metadata['errors'].append(error_msg)
                 if self.early_exit_on_critical_failure:
-                    raise RuntimeError(error_msg)
+                    raise RuntimeError(error_msg) from e
                 else:
                     logger.warning("Early exit disabled - will continue with default configurations")
                     # Initialize safe empty defaults to prevent AttributeErrors
@@ -245,10 +245,10 @@ class ETLPipeline:
                     logger.error(f"ETL pipeline failed after {duration}")
                     logger.error(f"Errors encountered: {self.pipeline_metadata['errors']}")
             
-            # Return True if pipeline completed (even with warnings) when early exit is disabled
-            if not self.early_exit_on_critical_failure and self.pipeline_metadata['status'] in ['completed', 'completed_with_warnings']:
-                return True
-            return success
+            # Don't return here - let the method return after finally block
+        
+        # Return success status after finally block
+        return success
     
     def _handle_critical_failure(self, error_msg: str, phase: str = None) -> None:
         """
@@ -770,7 +770,7 @@ class ETLPipeline:
             if 'json' in self.loaders:
                 logger.info("Loading data to JSON files...")
                 try:
-                    json_results = self.loaders['json'].load(load_data)
+                    self.loaders['json'].load(load_data)
                     logger.info("JSON data loading completed")
                 except Exception as e:
                     logger.warning(f"JSON data loading failed: {str(e)} - will continue with other outputs")
@@ -798,7 +798,7 @@ class ETLPipeline:
             if 'reports' in self.loaders:
                 logger.info("Generating reports...")
                 try:
-                    report_results = self.loaders['reports'].load(load_data)
+                    self.loaders['reports'].load(load_data)
                     logger.info("Report generation completed")
                 except Exception as e:
                     logger.warning(f"Report generation failed: {str(e)} - will continue")
@@ -819,7 +819,7 @@ class ETLPipeline:
                 logger.info("No due diligence manager available - skipping due diligence processing")
             
             logger.info("Data loading phase completed")
-            return True  # Always return True to continue pipeline
+            return loading_success  # Return actual loading success status
             
         except Exception as e:
             logger.error(f"Data loading failed: {str(e)}")

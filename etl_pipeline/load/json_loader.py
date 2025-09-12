@@ -74,31 +74,47 @@ def normalize_money(value):
                a numeric value, or None/empty
         
     Returns:
-        Dict with 'value' (float) and 'currency' (str) keys
+        Dict with 'amount' (float) and 'currency' (str) keys
     """
     if value is None:
-        return {"value": 0.0, "currency": "USD"}
+        return {"amount": 0.0, "currency": "USD"}
     
     # Handle dict format
     if isinstance(value, dict):
         if 'value' in value:
-            return {
-                "value": float(value['value']),
-                "currency": value.get('currency', 'USD')
-            }
+            # If value is a string, parse it with parse_price_value
+            if isinstance(value['value'], str):
+                parsed_value = parse_price_value(value['value'])
+                return {
+                    "amount": float(parsed_value),
+                    "currency": value.get('currency', 'USD')
+                }
+            else:
+                return {
+                    "amount": float(value['value']),
+                    "currency": value.get('currency', 'USD')
+                }
         elif 'amount' in value:
-            return {
-                "value": float(value['amount']),
-                "currency": value.get('currency', 'USD')
-            }
+            # If amount is a string, parse it with parse_price_value
+            if isinstance(value['amount'], str):
+                parsed_value = parse_price_value(value['amount'])
+                return {
+                    "amount": float(parsed_value),
+                    "currency": value.get('currency', 'USD')
+                }
+            else:
+                return {
+                    "amount": float(value['amount']),
+                    "currency": value.get('currency', 'USD')
+                }
         else:
-            return {"value": 0.0, "currency": "USD"}
+            return {"amount": 0.0, "currency": "USD"}
     
     # Handle string format
     if isinstance(value, str):
         value = value.strip()
         if not value or value.upper() in ['N/A', 'NA', 'NULL', 'NONE', '']:
-            return {"value": 0.0, "currency": "USD"}
+            return {"amount": 0.0, "currency": "USD"}
         
         # Extract currency and numeric value
         currency = "USD"  # default
@@ -120,25 +136,25 @@ def normalize_money(value):
             currency = value[-3:]
             numeric_value = value[:-4]
         
-        # Remove commas and parse numeric value
-        numeric_value = numeric_value.replace(',', '')
+        # Use parse_price_value to handle all numeric parsing including negatives and parentheses
         try:
+            parsed_value = parse_price_value(numeric_value)
             return {
-                "value": float(numeric_value),
+                "amount": float(parsed_value),
                 "currency": currency
             }
         except (ValueError, TypeError):
-            return {"value": 0.0, "currency": "USD"}
+            return {"amount": 0.0, "currency": "USD"}
     
     # Handle numeric values
     if isinstance(value, (int, float)):
         return {
-            "value": float(value),
+            "amount": float(value),
             "currency": "USD"
         }
     
     # Fallback
-    return {"value": 0.0, "currency": "USD"}
+    return {"amount": 0.0, "currency": "USD"}
 
 class JsonLoader(BaseLoader):
     """Loader for saving data to JSON files."""
@@ -710,7 +726,7 @@ class JsonLoader(BaseLoader):
         }
     
     def _create_equipment_analysis(self, business_metrics: Dict[str, Any]) -> Dict[str, Any]:
-        """Create equipment analysis with deduplication and normalization."""
+        """Create equipment analysis with deduplication, normalization, and pricing validation."""
         equipment_metrics = business_metrics.get('equipment', {})
         
         # Build items list from data-driven source with deduplication
@@ -733,10 +749,11 @@ class JsonLoader(BaseLoader):
                         # Remove control characters and invalid characters
                         part_number = re.sub(r'[\x00-\x1f\x7f-\x9f]', '', part_number)
                         part_number = re.sub(r'[^\w\-_.]', '_', part_number)
-                    stable_id = part_number if part_number else self._generate_stable_id(normalized_name)
                     
-                    # Create unique key for deduplication using stable_id as primary key
-                    dedup_key = stable_id
+                    # For deduplication, use both part_number and normalized name to avoid combining different items
+                    # with the same part_number (like MISCEQU items that are actually different)
+                    dedup_key = f"{part_number}_{normalized_name}" if part_number else normalized_name
+                    stable_id = part_number if part_number else self._generate_stable_id(normalized_name)
                     
                     if dedup_key not in seen_items:
                         # First occurrence - add to items
@@ -748,18 +765,10 @@ class JsonLoader(BaseLoader):
                         # Normalize unit price
                         unit_price_normalized = normalize_money(unit_price_raw)
                         
-                        # Calculate total price if not provided or invalid
-                        # Check if total_price is valid (not None, not empty string, not "N/A", not "0", not 0)
-                        total_price_normalized = normalize_money(total_price_raw)
-                        if (total_price_raw is None or 
-                            total_price_raw == "" or 
-                            str(total_price_raw).strip().upper() in ['N/A', 'NA', 'NULL', 'NONE', '0'] or
-                            total_price_normalized["value"] == 0.0):
-                            # Fallback: unit_price * quantity
-                            total_price_normalized = {
-                                "value": unit_price_normalized["value"] * quantity,
-                                "currency": unit_price_normalized["currency"]
-                            }
+                        # Validate and fix pricing consistency
+                        validated_prices = self._validate_and_fix_equipment_pricing(
+                            unit_price_normalized, total_price_raw, quantity, stable_id
+                        )
                         
                         equipment_item = {
                             "id": stable_id,
@@ -768,8 +777,8 @@ class JsonLoader(BaseLoader):
                             "category": item.get('category', 'Uncategorized'),
                             "part_number": part_number,
                             "quantity": quantity,
-                            "unit_price": unit_price_normalized,
-                            "total_price": total_price_normalized
+                            "unit_price": validated_prices["unit_price"],
+                            "total_price": validated_prices["total_price"]
                         }
                         items.append(equipment_item)
                         seen_items[dedup_key] = equipment_item
@@ -779,31 +788,22 @@ class JsonLoader(BaseLoader):
                         additional_quantity = int(item.get('quantity', 1))
                         existing_item["quantity"] += additional_quantity
                         
-                        # Aggregate total price - use unit_price * quantity if total_price is invalid
+                        # Validate and fix pricing for duplicate item
+                        additional_unit_price = normalize_money(item.get('unit_price', 0))
                         additional_total_price_raw = item.get('total_price', 0)
-                        additional_total_price = normalize_money(additional_total_price_raw)
+                        validated_prices = self._validate_and_fix_equipment_pricing(
+                            additional_unit_price, additional_total_price_raw, additional_quantity, stable_id
+                        )
                         
-                        # If total_price is invalid, calculate from unit_price * quantity
-                        if (additional_total_price_raw is None or 
-                            additional_total_price_raw == "" or 
-                            str(additional_total_price_raw).strip().upper() in ['N/A', 'NA', 'NULL', 'NONE', '0'] or
-                            additional_total_price["value"] == 0.0):
-                            # Use unit_price * quantity for this duplicate item
-                            additional_unit_price = normalize_money(item.get('unit_price', 0))
-                            additional_total_price = {
-                                "value": additional_unit_price["value"] * additional_quantity,
-                                "currency": additional_unit_price["currency"]
-                            }
-                        
-                        existing_item["total_price"]["value"] += additional_total_price["value"]
+                        existing_item["total_price"]["amount"] += validated_prices["total_price"]["amount"]
         
         # Calculate total value from actual items
-        calculated_total_value = sum(item.get('total_price', {}).get('value', 0) for item in items)
+        calculated_total_value = sum(item.get('total_price', {}).get('amount', 0) for item in items)
         
         return {
             "equipment_summary": {
                 "total_value": {
-                    "value": calculated_total_value,
+                    "amount": calculated_total_value,
                     "currency": "USD"
                 },
                 "items": items
@@ -1166,6 +1166,7 @@ class JsonLoader(BaseLoader):
         # Fix common typos
         normalized = normalized.replace('Controled', 'Controlled')
         normalized = normalized.replace('Diagnostic Audiom', 'Diagnostic Audiometer')
+        normalized = normalized.replace('Audiometereter', 'Audiometer')  # Fix the specific typo mentioned
         
         # Clean up multiple spaces
         normalized = ' '.join(normalized.split())
@@ -1188,6 +1189,52 @@ class JsonLoader(BaseLoader):
         
         return f"EQ_{stable_id}"
     
+    def _validate_and_fix_equipment_pricing(self, unit_price: Dict[str, Any], total_price_raw: Any, quantity: int, item_id: str) -> Dict[str, Any]:
+        """
+        Validate and fix equipment pricing consistency.
+        
+        Args:
+            unit_price: Normalized unit price dict with 'amount' and 'currency'
+            total_price_raw: Raw total price value (can be dict, number, string, etc.)
+            quantity: Item quantity
+            item_id: Item identifier for logging
+            
+        Returns:
+            Dict with 'unit_price' and 'total_price' both normalized and consistent
+        """
+        # Normalize total price
+        total_price_normalized = normalize_money(total_price_raw)
+        
+        # Calculate expected total price
+        expected_total = unit_price["amount"] * quantity
+        
+        # Check if total_price is valid and consistent
+        if (total_price_raw is None or 
+            total_price_raw == "" or 
+            str(total_price_raw).strip().upper() in ['N/A', 'NA', 'NULL', 'NONE', '0'] or
+            total_price_normalized["amount"] == 0.0):
+            # Total price is invalid - calculate from unit_price * quantity
+            total_price_normalized = {
+                "amount": expected_total,
+                "currency": unit_price["currency"]
+            }
+            logger.info(f"Fixed invalid total_price for {item_id}: calculated {expected_total} from unit_price {unit_price['amount']} × quantity {quantity}")
+        else:
+            # Total price exists - check for consistency
+            actual_total = total_price_normalized["amount"]
+            if abs(actual_total - expected_total) > 0.01:  # Allow for small floating point differences
+                # Inconsistent pricing - log warning and fix
+                logger.warning(f"Pricing inconsistency detected for {item_id}: unit_price {unit_price['amount']} × quantity {quantity} = {expected_total}, but total_price = {actual_total}. Auto-correcting to {expected_total}")
+                total_price_normalized = {
+                    "amount": expected_total,
+                    "currency": unit_price["currency"]
+                }
+        
+        return {
+            "unit_price": unit_price,
+            "total_price": total_price_normalized
+        }
+    
     def _normalize_financial_monetary_fields(self, financial_data: Dict[str, Any]) -> Dict[str, Any]:
         """Normalize monetary fields in financial data to include currency."""
         import copy
@@ -1197,7 +1244,7 @@ class JsonLoader(BaseLoader):
         monetary_fields = {
             'revenue_metrics': ['total_revenue', 'annual_revenue_projection', 'monthly_revenue_average'],
             'profitability': ['estimated_ebitda', 'estimated_annual_ebitda'],
-            'investment_metrics': ['asking_price', 'estimated_market_value', 'discount_amount']
+            'investment_metrics': ['asking_price', 'estimated_market_value', 'discount_amount', 'estimated_annual_ebitda']
         }
         
         # Normalize monetary fields
@@ -1208,6 +1255,10 @@ class JsonLoader(BaseLoader):
                         value = normalized[section][field]
                         # Skip if already normalized (dict with value/currency)
                         if isinstance(value, dict) and 'value' in value and 'currency' in value:
+                            # Fix inconsistent Money shape: change 'value' to 'amount' if needed
+                            if 'value' in value and 'amount' not in value:
+                                value['amount'] = value['value']
+                                del value['value']
                             continue
                         # Normalize using the helper function
                         normalized[section][field] = normalize_money(value)

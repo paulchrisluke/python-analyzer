@@ -1,8 +1,8 @@
 {
   "metadata": {
     "business_name": "Cranberry Hearing and Balance Center",
-    "generated_at": "2025-09-12T06:18:12.408Z",
-    "etl_run_timestamp": "2025-09-12T06:18:12.408Z",
+    "generated_at": "2025-09-12T06:45:16.298Z",
+    "etl_run_timestamp": "2025-09-12T06:45:16.298Z",
     "data_period": "2023-01-01 to 2025-06-30",
     "months_analyzed": 30,
     "data_source": "ETL Pipeline - Real Business Data",
@@ -84,17 +84,17 @@
         "part_number": "68068-004",
         "quantity": 1,
         "unit_price": {
-          "value": 8555.0,
+          "amount": 8555.0,
           "currency": "USD"
         },
         "total_price": {
-          "value": 8555.0,
+          "amount": 8555.0,
           "currency": "USD"
         },
         "category": "Test Booth",
         "source_file": "2019-11-06_Celloaudiometer_Cosmetichearingsolutions.csv",
         "value": {
-          "value": 8555.0,
+          "amount": 8555.0,
           "currency": "USD"
         },
         "file_path": "docs/equipment/2019-11-06_Celloaudiometer_Cosmetichearingsolutions.csv",
@@ -115,17 +115,17 @@
         "part_number": "68066-500",
         "quantity": 1,
         "unit_price": {
-          "value": 400.0,
+          "amount": 400.0,
           "currency": "USD"
         },
         "total_price": {
-          "value": 400.0,
+          "amount": 400.0,
           "currency": "USD"
         },
         "category": "Other",
         "source_file": "2019-11-06_Celloaudiometer_Cosmetichearingsolutions.csv",
         "value": {
-          "value": 400.0,
+          "amount": 400.0,
           "currency": "USD"
         },
         "file_path": "docs/equipment/2019-11-06_Celloaudiometer_Cosmetichearingsolutions.csv",
@@ -146,17 +146,17 @@
         "part_number": "MISCEQU",
         "quantity": 1,
         "unit_price": {
-          "value": 4000.0,
+          "amount": 4000.0,
           "currency": "USD"
         },
         "total_price": {
-          "value": 4000.0,
+          "amount": 4000.0,
           "currency": "USD"
         },
         "category": "Audiometer",
         "source_file": "2019-11-06_Celloaudiometer_Cosmetichearingsolutions.csv",
         "value": {
-          "value": 4000.0,
+          "amount": 4000.0,
           "currency": "USD"
         },
         "file_path": "docs/equipment/2019-11-06_Celloaudiometer_Cosmetichearingsolutions.csv",
@@ -177,17 +177,17 @@
         "part_number": "MISCEQU",
         "quantity": 1,
         "unit_price": {
-          "value": 1900.0,
+          "amount": 1900.0,
           "currency": "USD"
         },
         "total_price": {
-          "value": 1900.0,
+          "amount": 1900.0,
           "currency": "USD"
         },
         "category": "Test Booth",
         "source_file": "2019-11-06_Celloaudiometer_Cosmetichearingsolutions.csv",
         "value": {
-          "value": 1900.0,
+          "amount": 1900.0,
           "currency": "USD"
         },
         "file_path": "docs/equipment/2019-11-06_Celloaudiometer_Cosmetichearingsolutions.csv",
@@ -208,17 +208,17 @@
         "part_number": "31243-051",
         "quantity": 1,
         "unit_price": {
-          "value": 3420.0,
+          "amount": 3420.0,
           "currency": "USD"
         },
         "total_price": {
-          "value": 3420.0,
+          "amount": 3420.0,
           "currency": "USD"
         },
         "category": "Audiometer",
         "source_file": "2019-11-06_Celloaudiometer_Cosmetichearingsolutions.csv",
         "value": {
-          "value": 3420.0,
+          "amount": 3420.0,
           "currency": "USD"
         },
         "file_path": "docs/equipment/2019-11-06_Celloaudiometer_Cosmetichearingsolutions.csv",
@@ -239,17 +239,17 @@
         "part_number": "68001-080",
         "quantity": 1,
         "unit_price": {
-          "value": 450.0,
+          "amount": 450.0,
           "currency": "USD"
         },
         "total_price": {
-          "value": 450.0,
+          "amount": 450.0,
           "currency": "USD"
         },
         "category": "Accessory",
         "source_file": "2019-11-06_Celloaudiometer_Cosmetichearingsolutions.csv",
         "value": {
-          "value": 450.0,
+          "amount": 450.0,
           "currency": "USD"
         },
         "file_path": "docs/equipment/2019-11-06_Celloaudiometer_Cosmetichearingsolutions.csv",
@@ -270,17 +270,17 @@
         "part_number": "19101-031",
         "quantity": 3,
         "unit_price": {
-          "value": 12.5,
+          "amount": 12.5,
           "currency": "USD"
         },
         "total_price": {
-          "value": 37.5,
+          "amount": 37.5,
           "currency": "USD"
         },
         "category": "Accessory",
         "source_file": "2019-11-06_Celloaudiometer_Cosmetichearingsolutions.csv",
         "value": {
-          "value": 37.5,
+          "amount": 37.5,
           "currency": "USD"
         },
         "file_path": "docs/equipment/2019-11-06_Celloaudiometer_Cosmetichearingsolutions.csv",
@@ -301,17 +301,17 @@
         "part_number": "19101-032",
         "quantity": 2,
         "unit_price": {
-          "value": 12.5,
+          "amount": 12.5,
           "currency": "USD"
         },
         "total_price": {
-          "value": 25.0,
+          "amount": 25.0,
           "currency": "USD"
         },
         "category": "Accessory",
         "source_file": "2019-11-06_Celloaudiometer_Cosmetichearingsolutions.csv",
         "value": {
-          "value": 25.0,
+          "amount": 25.0,
           "currency": "USD"
         },
         "file_path": "docs/equipment/2019-11-06_Celloaudiometer_Cosmetichearingsolutions.csv",
@@ -332,17 +332,17 @@
         "part_number": "19101-033",
         "quantity": 2,
         "unit_price": {
-          "value": 12.5,
+          "amount": 12.5,
           "currency": "USD"
         },
         "total_price": {
-          "value": 25.0,
+          "amount": 25.0,
           "currency": "USD"
         },
         "category": "Accessory",
         "source_file": "2019-11-06_Celloaudiometer_Cosmetichearingsolutions.csv",
         "value": {
-          "value": 25.0,
+          "amount": 25.0,
           "currency": "USD"
         },
         "file_path": "docs/equipment/2019-11-06_Celloaudiometer_Cosmetichearingsolutions.csv",
@@ -363,17 +363,17 @@
         "part_number": "68068-004",
         "quantity": 1,
         "unit_price": {
-          "value": 8555.0,
+          "amount": 8555.0,
           "currency": "USD"
         },
         "total_price": {
-          "value": 8555.0,
+          "amount": 8555.0,
           "currency": "USD"
         },
         "category": "Test Booth",
         "source_file": "2019-11-08_Celloaudiometer_Trumpetrem_Cranberryhearing.csv",
         "value": {
-          "value": 8555.0,
+          "amount": 8555.0,
           "currency": "USD"
         },
         "file_path": "docs/equipment/2019-11-08_Celloaudiometer_Trumpetrem_Cranberryhearing.csv",
@@ -394,17 +394,17 @@
         "part_number": "68066-500",
         "quantity": 1,
         "unit_price": {
-          "value": 400.0,
+          "amount": 400.0,
           "currency": "USD"
         },
         "total_price": {
-          "value": 400.0,
+          "amount": 400.0,
           "currency": "USD"
         },
         "category": "Other",
         "source_file": "2019-11-08_Celloaudiometer_Trumpetrem_Cranberryhearing.csv",
         "value": {
-          "value": 400.0,
+          "amount": 400.0,
           "currency": "USD"
         },
         "file_path": "docs/equipment/2019-11-08_Celloaudiometer_Trumpetrem_Cranberryhearing.csv",
@@ -425,17 +425,17 @@
         "part_number": "MISCEQU",
         "quantity": 1,
         "unit_price": {
-          "value": 4000.0,
+          "amount": 4000.0,
           "currency": "USD"
         },
         "total_price": {
-          "value": 4000.0,
+          "amount": 4000.0,
           "currency": "USD"
         },
         "category": "Audiometer",
         "source_file": "2019-11-08_Celloaudiometer_Trumpetrem_Cranberryhearing.csv",
         "value": {
-          "value": 4000.0,
+          "amount": 4000.0,
           "currency": "USD"
         },
         "file_path": "docs/equipment/2019-11-08_Celloaudiometer_Trumpetrem_Cranberryhearing.csv",
@@ -456,17 +456,17 @@
         "part_number": "MISCEQU",
         "quantity": 1,
         "unit_price": {
-          "value": 1000.0,
+          "amount": 1000.0,
           "currency": "USD"
         },
         "total_price": {
-          "value": 1000.0,
+          "amount": 1000.0,
           "currency": "USD"
         },
         "category": "Test Booth",
         "source_file": "2019-11-08_Celloaudiometer_Trumpetrem_Cranberryhearing.csv",
         "value": {
-          "value": 1000.0,
+          "amount": 1000.0,
           "currency": "USD"
         },
         "file_path": "docs/equipment/2019-11-08_Celloaudiometer_Trumpetrem_Cranberryhearing.csv",
@@ -487,17 +487,17 @@
         "part_number": "31243-051",
         "quantity": 1,
         "unit_price": {
-          "value": 3420.0,
+          "amount": 3420.0,
           "currency": "USD"
         },
         "total_price": {
-          "value": 3420.0,
+          "amount": 3420.0,
           "currency": "USD"
         },
         "category": "Audiometer",
         "source_file": "2019-11-08_Celloaudiometer_Trumpetrem_Cranberryhearing.csv",
         "value": {
-          "value": 3420.0,
+          "amount": 3420.0,
           "currency": "USD"
         },
         "file_path": "docs/equipment/2019-11-08_Celloaudiometer_Trumpetrem_Cranberryhearing.csv",
@@ -518,17 +518,17 @@
         "part_number": "68001-080",
         "quantity": 1,
         "unit_price": {
-          "value": 450.0,
+          "amount": 450.0,
           "currency": "USD"
         },
         "total_price": {
-          "value": 450.0,
+          "amount": 450.0,
           "currency": "USD"
         },
         "category": "Accessory",
         "source_file": "2019-11-08_Celloaudiometer_Trumpetrem_Cranberryhearing.csv",
         "value": {
-          "value": 450.0,
+          "amount": 450.0,
           "currency": "USD"
         },
         "file_path": "docs/equipment/2019-11-08_Celloaudiometer_Trumpetrem_Cranberryhearing.csv",
@@ -549,17 +549,17 @@
         "part_number": "19101-031",
         "quantity": 3,
         "unit_price": {
-          "value": 12.5,
+          "amount": 12.5,
           "currency": "USD"
         },
         "total_price": {
-          "value": 37.5,
+          "amount": 37.5,
           "currency": "USD"
         },
         "category": "Accessory",
         "source_file": "2019-11-08_Celloaudiometer_Trumpetrem_Cranberryhearing.csv",
         "value": {
-          "value": 37.5,
+          "amount": 37.5,
           "currency": "USD"
         },
         "file_path": "docs/equipment/2019-11-08_Celloaudiometer_Trumpetrem_Cranberryhearing.csv",
@@ -580,17 +580,17 @@
         "part_number": "19101-032",
         "quantity": 2,
         "unit_price": {
-          "value": 12.5,
+          "amount": 12.5,
           "currency": "USD"
         },
         "total_price": {
-          "value": 25.0,
+          "amount": 25.0,
           "currency": "USD"
         },
         "category": "Accessory",
         "source_file": "2019-11-08_Celloaudiometer_Trumpetrem_Cranberryhearing.csv",
         "value": {
-          "value": 25.0,
+          "amount": 25.0,
           "currency": "USD"
         },
         "file_path": "docs/equipment/2019-11-08_Celloaudiometer_Trumpetrem_Cranberryhearing.csv",
@@ -611,17 +611,17 @@
         "part_number": "19101-033",
         "quantity": 2,
         "unit_price": {
-          "value": 12.5,
+          "amount": 12.5,
           "currency": "USD"
         },
         "total_price": {
-          "value": 25.0,
+          "amount": 25.0,
           "currency": "USD"
         },
         "category": "Accessory",
         "source_file": "2019-11-08_Celloaudiometer_Trumpetrem_Cranberryhearing.csv",
         "value": {
-          "value": 25.0,
+          "amount": 25.0,
           "currency": "USD"
         },
         "file_path": "docs/equipment/2019-11-08_Celloaudiometer_Trumpetrem_Cranberryhearing.csv",
@@ -642,17 +642,17 @@
         "part_number": "31243-067",
         "quantity": 1,
         "unit_price": {
-          "value": 4090.0,
+          "amount": 4090.0,
           "currency": "USD"
         },
         "total_price": {
-          "value": 4090.0,
+          "amount": 4090.0,
           "currency": "USD"
         },
         "category": "REM System",
         "source_file": "2019-11-08_Celloaudiometer_Trumpetrem_Cranberryhearing.csv",
         "value": {
-          "value": 4090.0,
+          "amount": 4090.0,
           "currency": "USD"
         },
         "file_path": "docs/equipment/2019-11-08_Celloaudiometer_Trumpetrem_Cranberryhearing.csv",
@@ -673,17 +673,17 @@
         "part_number": "68068-004",
         "quantity": 1,
         "unit_price": {
-          "value": 8555.0,
+          "amount": 8555.0,
           "currency": "USD"
         },
         "total_price": {
-          "value": 8555.0,
+          "amount": 8555.0,
           "currency": "USD"
         },
         "category": "Test Booth",
         "source_file": "2019-11-11_Trumpetrem_Audiometercombo_Cranberryhearing.csv",
         "value": {
-          "value": 8555.0,
+          "amount": 8555.0,
           "currency": "USD"
         },
         "file_path": "docs/equipment/2019-11-11_Trumpetrem_Audiometercombo_Cranberryhearing.csv",
@@ -704,17 +704,17 @@
         "part_number": "68066-500",
         "quantity": 1,
         "unit_price": {
-          "value": 400.0,
+          "amount": 400.0,
           "currency": "USD"
         },
         "total_price": {
-          "value": 400.0,
+          "amount": 400.0,
           "currency": "USD"
         },
         "category": "Other",
         "source_file": "2019-11-11_Trumpetrem_Audiometercombo_Cranberryhearing.csv",
         "value": {
-          "value": 400.0,
+          "amount": 400.0,
           "currency": "USD"
         },
         "file_path": "docs/equipment/2019-11-11_Trumpetrem_Audiometercombo_Cranberryhearing.csv",
@@ -735,17 +735,17 @@
         "part_number": "MISCEQU",
         "quantity": 1,
         "unit_price": {
-          "value": 4000.0,
+          "amount": 4000.0,
           "currency": "USD"
         },
         "total_price": {
-          "value": 4000.0,
+          "amount": 4000.0,
           "currency": "USD"
         },
         "category": "Audiometer",
         "source_file": "2019-11-11_Trumpetrem_Audiometercombo_Cranberryhearing.csv",
         "value": {
-          "value": 4000.0,
+          "amount": 4000.0,
           "currency": "USD"
         },
         "file_path": "docs/equipment/2019-11-11_Trumpetrem_Audiometercombo_Cranberryhearing.csv",
@@ -766,17 +766,17 @@
         "part_number": "MISCEQU",
         "quantity": 1,
         "unit_price": {
-          "value": 1000.0,
+          "amount": 1000.0,
           "currency": "USD"
         },
         "total_price": {
-          "value": 1000.0,
+          "amount": 1000.0,
           "currency": "USD"
         },
         "category": "Test Booth",
         "source_file": "2019-11-11_Trumpetrem_Audiometercombo_Cranberryhearing.csv",
         "value": {
-          "value": 1000.0,
+          "amount": 1000.0,
           "currency": "USD"
         },
         "file_path": "docs/equipment/2019-11-11_Trumpetrem_Audiometercombo_Cranberryhearing.csv",
@@ -797,17 +797,17 @@
         "part_number": "31243-071",
         "quantity": 1,
         "unit_price": {
-          "value": 6180.0,
+          "amount": 6180.0,
           "currency": "USD"
         },
         "total_price": {
-          "value": 6180.0,
+          "amount": 6180.0,
           "currency": "USD"
         },
         "category": "REM System",
         "source_file": "2019-11-11_Trumpetrem_Audiometercombo_Cranberryhearing.csv",
         "value": {
-          "value": 6180.0,
+          "amount": 6180.0,
           "currency": "USD"
         },
         "file_path": "docs/equipment/2019-11-11_Trumpetrem_Audiometercombo_Cranberryhearing.csv",
@@ -828,17 +828,17 @@
         "part_number": "68001-080",
         "quantity": 1,
         "unit_price": {
-          "value": 450.0,
+          "amount": 450.0,
           "currency": "USD"
         },
         "total_price": {
-          "value": 450.0,
+          "amount": 450.0,
           "currency": "USD"
         },
         "category": "Accessory",
         "source_file": "2019-11-11_Trumpetrem_Audiometercombo_Cranberryhearing.csv",
         "value": {
-          "value": 450.0,
+          "amount": 450.0,
           "currency": "USD"
         },
         "file_path": "docs/equipment/2019-11-11_Trumpetrem_Audiometercombo_Cranberryhearing.csv",
@@ -859,17 +859,17 @@
         "part_number": "19101-031",
         "quantity": 3,
         "unit_price": {
-          "value": 12.5,
+          "amount": 12.5,
           "currency": "USD"
         },
         "total_price": {
-          "value": 37.5,
+          "amount": 37.5,
           "currency": "USD"
         },
         "category": "Accessory",
         "source_file": "2019-11-11_Trumpetrem_Audiometercombo_Cranberryhearing.csv",
         "value": {
-          "value": 37.5,
+          "amount": 37.5,
           "currency": "USD"
         },
         "file_path": "docs/equipment/2019-11-11_Trumpetrem_Audiometercombo_Cranberryhearing.csv",
@@ -890,17 +890,17 @@
         "part_number": "19101-032",
         "quantity": 2,
         "unit_price": {
-          "value": 12.5,
+          "amount": 12.5,
           "currency": "USD"
         },
         "total_price": {
-          "value": 25.0,
+          "amount": 25.0,
           "currency": "USD"
         },
         "category": "Accessory",
         "source_file": "2019-11-11_Trumpetrem_Audiometercombo_Cranberryhearing.csv",
         "value": {
-          "value": 25.0,
+          "amount": 25.0,
           "currency": "USD"
         },
         "file_path": "docs/equipment/2019-11-11_Trumpetrem_Audiometercombo_Cranberryhearing.csv",
@@ -921,17 +921,17 @@
         "part_number": "19101-033",
         "quantity": 2,
         "unit_price": {
-          "value": 12.5,
+          "amount": 12.5,
           "currency": "USD"
         },
         "total_price": {
-          "value": 25.0,
+          "amount": 25.0,
           "currency": "USD"
         },
         "category": "Accessory",
         "source_file": "2019-11-11_Trumpetrem_Audiometercombo_Cranberryhearing.csv",
         "value": {
-          "value": 25.0,
+          "amount": 25.0,
           "currency": "USD"
         },
         "file_path": "docs/equipment/2019-11-11_Trumpetrem_Audiometercombo_Cranberryhearing.csv",
