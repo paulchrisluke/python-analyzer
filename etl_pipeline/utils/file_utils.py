@@ -10,11 +10,25 @@ from pathlib import Path
 from typing import Dict, Any, List, Optional
 import logging
 from urllib.parse import urlparse
+from datetime import datetime, timezone
 
 logger = logging.getLogger(__name__)
 
 class FileUtils:
     """Utility class for file operations."""
+    
+    @staticmethod
+    def get_js_compatible_timestamp() -> str:
+        """
+        Generate a JavaScript-compatible timestamp in RFC 3339 format.
+        
+        Returns:
+            Timestamp string in format: YYYY-MM-DDTHH:MM:SS.sssZ
+            This format is compatible with JavaScript's Date.parse() method.
+        """
+        now = datetime.now(timezone.utc)
+        # Format with milliseconds (3 digits) and Z suffix for JavaScript compatibility
+        return now.strftime('%Y-%m-%dT%H:%M:%S.%f')[:-3] + 'Z'
     
     @staticmethod
     def is_url(raw: str) -> bool:

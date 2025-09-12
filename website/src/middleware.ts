@@ -15,8 +15,11 @@ function matchesRoute(pathname: string, route: string): boolean {
 // Simple authentication check using session cookie
 async function isAuthenticated(req: NextRequest): Promise<boolean> {
   try {
-    // In development, allow access for testing, but not during Playwright tests
-    if (process.env.NODE_ENV === 'development' && !process.env.PLAYWRIGHT_TEST) {
+    // Development bypass: only when explicitly enabled and not in production
+    if (process.env.NODE_ENV !== 'production' && 
+        process.env.DEV_AUTH_BYPASS === 'true' && 
+        !process.env.PLAYWRIGHT_TEST) {
+      console.warn('⚠️  DEV_AUTH_BYPASS is active - authentication is disabled for development')
       return true
     }
 

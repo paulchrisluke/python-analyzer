@@ -64,7 +64,7 @@ class ReportGenerator(BaseLoader):
             
             # Add session metadata
             self.load_results['session_id'] = id(self)
-            self.load_results['generated_at'] = datetime.now().isoformat()
+            self.load_results['generated_at'] = FileUtils.get_js_compatible_timestamp()
             self.load_results['status'] = 'completed'
             self.load_results['reports_generated'] = len(self.load_results) - 3  # Exclude metadata fields
             

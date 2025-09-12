@@ -400,9 +400,9 @@ class DataCoverageAnalyzer:
             equipment_coverage = self.coverage_report['equipment']
             if equipment_coverage['status'] in ['poor', 'fair']:
                 recommendations.append('Complete equipment inventory for accurate valuation')
-                missing_categories = equipment_coverage.get('coverage_details', {}).get('missing_categories', [])
+                missing_categories = equipment_coverage.get('coverage_details', {}).get('categories_missing', [])
                 if missing_categories:
-                    recommendations.append(f"Missing equipment categories: {', '.join(missing_categories)}")
+                    recommendations.append(f"Missing equipment categories: {', '.join(sorted(missing_categories))}")
         
         # General recommendations based on overall score
         overall_score = self.coverage_report.get('due_diligence', {}).get('overall_score', 0)

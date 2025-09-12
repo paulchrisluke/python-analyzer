@@ -99,5 +99,5 @@ class BaseExtractor(ABC):
         self.metadata.update({
             'record_count': data_count,
             'source': source,
-            'extraction_timestamp': pd.Timestamp.now().isoformat()
+            'extraction_timestamp': FileUtils.get_js_compatible_timestamp()
         })

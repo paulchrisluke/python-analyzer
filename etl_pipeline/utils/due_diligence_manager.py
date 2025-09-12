@@ -14,6 +14,7 @@ from datetime import datetime, date
 from pathlib import Path
 from typing import Dict, Any, List, Optional, Union
 import os
+from .file_utils import FileUtils
 
 logger = logging.getLogger(__name__)
 
@@ -227,7 +228,7 @@ class DueDiligenceManager:
         self.data.meta = {
             "business_name": "Cranberry Hearing & Balance Center",
             "analysis_period": business_data.get("metadata", {}).get("analysis_period", business_data.get("meta", {}).get("analysis_period", "2023-01 to 2025-06")),
-            "generated_at": datetime.now().isoformat()
+            "generated_at": FileUtils.get_js_compatible_timestamp()
         }
         
         # Integrate financials

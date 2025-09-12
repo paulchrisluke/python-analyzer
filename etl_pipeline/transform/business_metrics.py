@@ -56,7 +56,7 @@ class BusinessMetricsCalculator:
                 logger.info(f"Using asking price from investment config: ${asking_price:,.2f}")
                 return asking_price
             
-            # Default fallback
+            # Default fallback - consistent with valuation
             default_price = 650000.0
             logger.info(f"Using default asking price: ${default_price:,.2f}")
             return default_price
@@ -507,12 +507,12 @@ class BusinessMetricsCalculator:
             'estimated_annual_ebitda': annual_ebitda
         }
         
-        # ROI calculation
+        # ROI calculation - use consistent asking price
         asking_price = self._parse_asking_price()
         roi = (annual_ebitda / asking_price) * 100 if asking_price > 0 else 0
         
         financial_metrics['investment_metrics'] = {
-            'asking_price': asking_price,
+            'asking_price': asking_price,  # Single source of truth
             'estimated_annual_ebitda': annual_ebitda,
             'roi_percentage': roi,
             'payback_period_years': asking_price / annual_ebitda if annual_ebitda > 0 else 0
@@ -599,7 +599,8 @@ class BusinessMetricsCalculator:
         profitability = financial_metrics.get('profitability', {})
         investment = financial_metrics.get('investment_metrics', {})
         
-        asking_price = investment.get('asking_price', self._parse_asking_price())
+        # Use consistent asking price from single source
+        asking_price = self._parse_asking_price()
         annual_revenue = revenue_metrics.get('annual_revenue_projection', 0)
         annual_ebitda = profitability.get('estimated_annual_ebitda', 0)
         

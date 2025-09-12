@@ -6,26 +6,31 @@
       "value": 650000.0,
       "currency": "USD"
     },
-    "established": 2010,
+    "asking_price_numeric": 650000.0,
+    "established": "2010",
+    "established_year": 2010,
     "locations": 2,
     "state": "PA"
   },
   "financial_highlights": {
     "annual_revenue": {
-      "value": 0.0,
-      "currency": "USD"
+      "value": null,
+      "currency": "USD",
+      "status": "unknown"
     },
     "annual_ebitda": {
-      "value": 0.0,
-      "currency": "USD"
+      "value": null,
+      "currency": "USD",
+      "status": "unknown"
     },
     "monthly_cash_flow": {
-      "value": 0.0,
-      "currency": "USD"
+      "value": null,
+      "currency": "USD",
+      "status": "unknown"
     },
-    "roi": 0.0,
-    "payback_period": 0.0,
-    "ebitda_margin": 0.0
+    "roi": null,
+    "payback_period": null,
+    "ebitda_margin": null
   },
   "property_details": {
     "primary_location": {},
@@ -40,15 +45,33 @@
       "Balance Testing",
       "Tinnitus Treatment"
     ],
-    "insurance_coverage": {},
+    "insurance_coverage": {
+      "insurers": [
+        {
+          "name": "UPMC",
+          "years_active": 19,
+          "contract_date": "2006-08-31",
+          "status": "Active",
+          "coverage_type": "Primary Insurance"
+        },
+        {
+          "name": "Aetna",
+          "years_active": 10,
+          "contract_date": "2015-09-28",
+          "status": "Active",
+          "coverage_type": "Primary Insurance"
+        }
+      ]
+    },
     "payment_methods": [
       "Insurance billing (UPMC, Aetna)",
       "Private pay",
       "Cash payments"
     ],
     "equipment_value": {
-      "value": 0.0,
-      "currency": "USD"
+      "value": null,
+      "currency": "USD",
+      "status": "unknown"
     },
     "business_hours": {
       "monday": "9:00 AM - 5:00 PM",
@@ -82,8 +105,8 @@
     "Strong EBITDA margins"
   ],
   "metadata": {
-    "generated_at": "2025-09-12T05:11:49.592351+00:00",
-    "etl_run_timestamp": "2025-09-12T05:11:49.592358+00:00",
+    "generated_at": "2025-09-12T05:40:48.708Z",
+    "etl_run_timestamp": "2025-09-12T05:40:48.708Z",
     "data_source": "ETL Pipeline Analysis",
     "version": "1.0"
   }

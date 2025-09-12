@@ -112,11 +112,11 @@ test.describe('Simple Auth Flow', () => {
     // Submit the form
     await page.click('button[type="submit"]');
     
-    // Wait a moment for any processing
-    await page.waitForTimeout(1000);
+    // Wait for URL to be on login page (not redirected) - may have query parameters
+    await page.waitForURL(/\/login(?:\/|\?.*)?$/);
     
     // Should still be on login page (not redirected) - may have query parameters
-    await expect(page).toHaveURL(/\/login\/\??/);
+    await expect(page).toHaveURL(/\/login(?:\/|\?.*)?$/);
   });
 
   test('should protect dashboard route', async ({ page }) => {

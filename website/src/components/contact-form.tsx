@@ -66,7 +66,7 @@ export function ContactForm() {
             <CheckCircle className="h-12 w-12 text-green-500 mx-auto mb-4" />
             <h3 className="text-lg font-semibold mb-2">Thank you for your interest!</h3>
             <p className="text-muted-foreground">
-              We'll be in touch soon with more information about this business opportunity.
+              We&apos;ll be in touch soon with more information about this business opportunity.
             </p>
             <Button 
               onClick={() => setIsSubmitted(false)}

@@ -58,7 +58,7 @@ jobs:
           data/final/business_sale_data.json
           data/final/due_diligence_coverage.json
         retention-days: 7
-        if-no-files-found: warn
+        if-no-files-found: error
         
     - name: Upload admin pipeline artifacts
       uses: actions/upload-artifact@v4
@@ -67,7 +67,7 @@ jobs:
         path: |
           data/final/due_diligence_stages/
         retention-days: 7
-        if-no-files-found: warn
+        if-no-files-found: error
 
   deploy:
     runs-on: ubuntu-latest
@@ -85,13 +85,13 @@ jobs:
       uses: actions/download-artifact@v4
       with:
         name: etl-public-data
-        path: ./public/data/
+        path: ./website/public/data/
         
     - name: Download admin ETL pipeline data
       uses: actions/download-artifact@v4
       with:
         name: etl-admin-data
-        path: ./.data/
+        path: ./website/.data/
     
     - name: Set up Python for ETL pipeline
       uses: actions/setup-python@v5

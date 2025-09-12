@@ -9,7 +9,13 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Content-Type must be application/json' }, { status: 400 })
     }
 
-    const body = await request.json()
+    let body
+    try {
+      body = await request.json()
+    } catch (error) {
+      return NextResponse.json({ error: 'Invalid JSON in request body' }, { status: 400 })
+    }
+    
     if (!body || typeof body !== 'object') {
       return NextResponse.json({ error: 'Invalid request body' }, { status: 400 })
     }
@@ -21,37 +27,71 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Email and password are required' }, { status: 400 })
     }
 
-    // Get admin credentials from environment
-    const adminEmails = process.env.ADMIN_EMAILS?.split(',') || ['admin@example.com', 'test@example.com']
-    const adminPasswords = process.env.ADMIN_PASSWORD_HASHES?.split(',') || []
+    // Validate and normalize email
+    if (typeof email !== 'string') {
+      return NextResponse.json({ error: 'Email must be a string' }, { status: 400 })
+    }
+    
+    const normalizedEmail = email.trim().toLowerCase()
+    if (!normalizedEmail) {
+      return NextResponse.json({ error: 'Email cannot be empty' }, { status: 400 })
+    }
 
-    // For development/testing, use simple password comparison
-    // In production, you'd verify against hashed passwords
+    // Get admin credentials from environment
+    const adminEmails = process.env.ADMIN_EMAILS?.split(',') || []
+    const adminPasswords = process.env.ADMIN_PASSWORD_HASHES?.split(',') || []
+    const isDevelopment = process.env.NODE_ENV === 'development'
+
+    // Security: Require explicit admin emails configuration
+    if (adminEmails.length === 0) {
+      console.error('ADMIN_EMAILS not configured')
+      return NextResponse.json({ error: 'Authentication not configured' }, { status: 500 })
+    }
+
+    // Security: Require explicit password hashes unless in development
+    if (adminPasswords.length === 0 && !isDevelopment) {
+      console.error('ADMIN_PASSWORD_HASHES not configured and not in development mode')
+      return NextResponse.json({ error: 'Authentication not configured' }, { status: 500 })
+    }
+
+    // Security: Require explicit JWT secret configuration
+    if (!process.env.AUTH_SECRET) {
+      console.error('AUTH_SECRET not configured')
+      return NextResponse.json({ error: 'Authentication not configured' }, { status: 500 })
+    }
+
+    // Find admin email index
     const adminIndex = adminEmails.findIndex(adminEmail => 
-      adminEmail.trim().toLowerCase() === email.toLowerCase()
+      adminEmail.trim().toLowerCase() === normalizedEmail
     )
 
     if (adminIndex === -1) {
       return NextResponse.json({ error: 'Invalid credentials' }, { status: 401 })
     }
 
-    // For testing, allow any password if no hashes are configured
-    const correctPassword = adminPasswords[adminIndex]?.trim()
-    if (adminPasswords.length > 0 && (!correctPassword || correctPassword !== password)) {
-      return NextResponse.json({ error: 'Invalid credentials' }, { status: 401 })
+    // Development bypass: allow any password when in development and no hashes configured
+    if (isDevelopment && adminPasswords.length === 0) {
+      console.warn('Development mode: Allowing authentication without password verification')
+    } else {
+      // Production mode: require explicit password verification
+      const correctPassword = adminPasswords[adminIndex]?.trim()
+      if (!correctPassword || correctPassword !== password) {
+        return NextResponse.json({ error: 'Invalid credentials' }, { status: 401 })
+      }
     }
 
     // Create JWT token
-    const secret = new TextEncoder().encode(process.env.AUTH_SECRET || 'your-super-secret-jwt-key-here-minimum-32-characters')
+    const secret = new TextEncoder().encode(process.env.AUTH_SECRET)
     const token = await new SignJWT({ 
-      email: email.toLowerCase(),
-      name: email.split('@')[0]
+      email: normalizedEmail,
+      name: normalizedEmail.split('@')[0]
     })
       .setProtectedHeader({ alg: 'HS256' })
       .setIssuedAt()
       .setExpirationTime('7d')
       .setIssuer('cranberry')
       .setAudience('web')
+      .setSubject(normalizedEmail)
       .sign(secret)
 
     // Set cookie

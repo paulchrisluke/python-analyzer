@@ -30,15 +30,25 @@ export function LoginForm({
     setIsLoading(true)
     setError("")
 
+    // Create AbortController for timeout handling
+    const controller = new AbortController()
+    const timeoutId = setTimeout(() => controller.abort(), 10000) // 10 second timeout
+
     try {
+      
       // Use server-side authentication
       const response = await fetch('/api/auth/login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Accept': 'application/json',
         },
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify({ email: email.trim(), password }),
+        signal: controller.signal,
       })
+      
+      // Clear timeout on successful completion
+      clearTimeout(timeoutId)
 
       if (!response.ok) {
         const errorData = await response.json()
@@ -53,8 +63,15 @@ export function LoginForm({
           setError(result.error || "Sign in failed")
         }
       }
-    } catch {
-      setError("An unexpected error occurred")
+    } catch (error) {
+      // Clear timeout in case of error
+      clearTimeout(timeoutId)
+      
+      if (error instanceof Error && error.name === 'AbortError') {
+        setError("Request timed out. Please try again.")
+      } else {
+        setError("An unexpected error occurred")
+      }
     } finally {
       setIsLoading(false)
     }

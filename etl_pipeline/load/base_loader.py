@@ -9,6 +9,7 @@ from pathlib import Path
 from datetime import datetime, timezone
 from threading import Lock
 from copy import deepcopy
+from ..utils.file_utils import FileUtils
 
 logger = logging.getLogger(__name__)
 
@@ -111,7 +112,7 @@ class BaseLoader(ABC):
                 'data_type': data_type,
                 'record_count': record_count,
                 'output_path': output_path,
-                'timestamp': datetime.utcnow().isoformat() + 'Z'
+                'timestamp': FileUtils.get_js_compatible_timestamp()
             })
             
             # Update totals atomically
@@ -148,7 +149,7 @@ class BaseLoader(ABC):
         event = {
             'event_type': event_type,
             'message': message,
-            'timestamp': datetime.utcnow().isoformat() + 'Z',
+            'timestamp': FileUtils.get_js_compatible_timestamp(),
             **filtered_kwargs
         }
         
@@ -183,13 +184,13 @@ class BaseLoader(ABC):
             self.load_metadata['errors'] = []
             self.load_metadata['total_records_processed'] = 0
             
-            self.load_metadata['start_time'] = datetime.utcnow().isoformat() + 'Z'
+            self.load_metadata['start_time'] = FileUtils.get_js_compatible_timestamp()
         
         self.add_load_event('session_started', 'Load session started')
     
     def end_load_session(self) -> None:
         """End the current load session."""
         with self._lock:
-            self.load_metadata['end_time'] = datetime.utcnow().isoformat() + 'Z'
+            self.load_metadata['end_time'] = FileUtils.get_js_compatible_timestamp()
         
         self.add_load_event('session_ended', 'Load session completed')

@@ -12,6 +12,7 @@ import logging
 from datetime import datetime, timezone
 from decimal import Decimal, ROUND_HALF_UP
 from .base_transformer import BaseTransformer
+from ..utils.file_utils import FileUtils
 
 logger = logging.getLogger(__name__)
 
@@ -205,8 +206,8 @@ class SalesTransformer(BaseTransformer):
                     # Start with required fields
                     patient_record = {
                         'patient_id_hash': patient_id_hash,
-                        'created_date': datetime.now(timezone.utc).isoformat(),
-                        'last_updated': datetime.now(timezone.utc).isoformat()
+                        'created_date': FileUtils.get_js_compatible_timestamp(),
+                        'last_updated': FileUtils.get_js_compatible_timestamp()
                     }
                     
                     # Add allowed PII fields only if explicitly permitted

@@ -1,8 +1,8 @@
 {
   "metadata": {
     "business_name": "Cranberry Hearing and Balance Center",
-    "generated_at": "2025-09-12T05:11:49.590132+00:00",
-    "etl_run_timestamp": "2025-09-12T05:11:49.590138+00:00",
+    "generated_at": "2025-09-12T05:40:48.707Z",
+    "etl_run_timestamp": "2025-09-12T05:40:48.707Z",
     "data_period": "2023-03-12 to 2025-09-12",
     "months_analyzed": 30,
     "data_source": "ETL Pipeline - Real Business Data",
@@ -64,7 +64,7 @@
       "ebitda_margin": 0.0,
       "payback_period_years": 0.0,
       "equipment_value": 0.0,
-      "asking_price": 0.0,
+      "asking_price": 650000.0,
       "visibility": [
         "public",
         "nda",

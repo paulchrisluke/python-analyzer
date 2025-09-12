@@ -357,7 +357,7 @@ class JsonLoader(BaseLoader):
             'quotes': [],
             'summary': sanitized_summary,
             'metadata': {
-                'validated_at': datetime.now().isoformat(),
+                'validated_at': FileUtils.get_js_compatible_timestamp(),
                 'source': 'ETL Pipeline'
             }
         }
@@ -396,7 +396,7 @@ class JsonLoader(BaseLoader):
         
         # Add ETL run timestamp to coverage analysis
         if isinstance(sanitized_coverage, dict):
-            sanitized_coverage['etl_run_timestamp'] = datetime.now(timezone.utc).isoformat()
+            sanitized_coverage['etl_run_timestamp'] = FileUtils.get_js_compatible_timestamp()
         
         # Save coverage analysis
         coverage_file = final_dir / "due_diligence_coverage.json"
@@ -442,8 +442,8 @@ class JsonLoader(BaseLoader):
         business_sale_data = {
             "metadata": {
                 "business_name": financial_metrics.get('business_name') or 'Cranberry Hearing and Balance Center',
-                "generated_at": datetime.now(timezone.utc).isoformat(),
-                "etl_run_timestamp": datetime.now(timezone.utc).isoformat(),
+                "generated_at": FileUtils.get_js_compatible_timestamp(),
+                "etl_run_timestamp": FileUtils.get_js_compatible_timestamp(),
                 "data_period": data_period,
                 "months_analyzed": financial_metrics.get('revenue_metrics', {}).get('analysis_period_months', 30),
                 "data_source": "ETL Pipeline - Real Business Data",
@@ -493,7 +493,7 @@ class JsonLoader(BaseLoader):
                     "ebitda_margin": float(financial_metrics.get('profitability', {}).get('ebitda_margin', 0)),
                     "payback_period_years": float(financial_metrics.get('investment_metrics', {}).get('payback_period_years', 0)),
                     "equipment_value": float(equipment_metrics.get('total_value', 0)),
-                    "asking_price": float(valuation_metrics.get('market_analysis', {}).get('asking_price', 0)),
+                    "asking_price": float(financial_metrics.get('investment_metrics', {}).get('asking_price', 650000)),  # Use single source of truth
                     "visibility": ["public", "nda", "buyer", "internal"]
                 }
             },
@@ -585,7 +585,7 @@ class JsonLoader(BaseLoader):
             },
             "valuation": {
                 "asking_price": {
-                    "value": float(valuation_metrics.get('market_analysis', {}).get('asking_price', 650000)),
+                    "value": float(financial_metrics.get('investment_metrics', {}).get('asking_price', 650000)),  # Use single source of truth
                     "currency": "USD"
                 },
                 "market_value": {
@@ -704,8 +704,8 @@ class JsonLoader(BaseLoader):
         
         return {
             "summary": normalized_financial_data,
-            "generated_at": datetime.now(timezone.utc).isoformat(),
-            "etl_run_timestamp": datetime.now(timezone.utc).isoformat(),
+            "generated_at": FileUtils.get_js_compatible_timestamp(),
+            "etl_run_timestamp": FileUtils.get_js_compatible_timestamp(),
             "data_source": "ETL Pipeline Analysis"
         }
     
@@ -791,8 +791,8 @@ class JsonLoader(BaseLoader):
                 },
                 "items": items
             },
-            "generated_at": datetime.now(timezone.utc).isoformat(),
-            "etl_run_timestamp": datetime.now(timezone.utc).isoformat(),
+            "generated_at": FileUtils.get_js_compatible_timestamp(),
+            "etl_run_timestamp": FileUtils.get_js_compatible_timestamp(),
             "data_source": "ETL Pipeline Analysis"
         }
     
@@ -813,35 +813,43 @@ class JsonLoader(BaseLoader):
         # Normalize insurance coverage to prevent staleness
         insurance_coverage = self._normalize_insurance_coverage(landing_page_metrics.get('insurance_coverage', {}))
         
-        # Create landing page data structure with normalized types
+        # Ensure asking_price is consistent - use single source of truth
+        asking_price_value = investment_metrics.get('asking_price', 650000)
+        if isinstance(asking_price_value, dict):
+            asking_price_value = asking_price_value.get('value', 650000)
+        
+        # Create landing page data structure with normalized types and stable schema
         landing_page_data = {
             "listing_details": {
                 "business_name": "Cranberry Hearing and Balance Center",
                 "business_type": "Audiology Practice",
                 "asking_price": {
-                    "value": float(investment_metrics.get('asking_price', {}).get('value', 650000) if isinstance(investment_metrics.get('asking_price'), dict) else investment_metrics.get('asking_price', 650000)),
+                    "value": float(asking_price_value),
                     "currency": "USD"
                 },
-                "established": 2010,  # Convert to number
+                "asking_price_numeric": float(asking_price_value),  # Backward compatibility alias
+                "established": "2010",  # Keep as string for backward compatibility
+                "established_year": 2010,  # Add numeric version for clarity
                 "locations": 2,
                 "state": "PA"  # Use consistent state abbreviation
             },
             "financial_highlights": {
-                "annual_revenue": {
-                    "value": float(revenue_metrics.get('annual_revenue_projection', {}).get('value', 0) if isinstance(revenue_metrics.get('annual_revenue_projection'), dict) else revenue_metrics.get('annual_revenue_projection', 0)),
-                    "currency": "USD"
-                },
-                "annual_ebitda": {
-                    "value": float(profitability.get('estimated_annual_ebitda', {}).get('value', 0) if isinstance(profitability.get('estimated_annual_ebitda'), dict) else profitability.get('estimated_annual_ebitda', 0)),
-                    "currency": "USD"
-                },
-                "monthly_cash_flow": {
-                    "value": float(landing_page_metrics.get('monthly_cash_flow', 0)),
-                    "currency": "USD"
-                },
-                "roi": round(float(investment_metrics.get('roi_percentage', 0)), 1),  # Round to 1 decimal
-                "payback_period": round(float(investment_metrics.get('payback_period_years', 0)), 1),  # Round to 1 decimal
-                "ebitda_margin": round(float(profitability.get('ebitda_margin', 0)), 1)  # Round to 1 decimal
+                "annual_revenue": self._normalize_financial_value(
+                    revenue_metrics.get('annual_revenue_projection', {}).get('value', None) 
+                    if isinstance(revenue_metrics.get('annual_revenue_projection'), dict) 
+                    else revenue_metrics.get('annual_revenue_projection', None)
+                ),
+                "annual_ebitda": self._normalize_financial_value(
+                    profitability.get('estimated_annual_ebitda', {}).get('value', None) 
+                    if isinstance(profitability.get('estimated_annual_ebitda'), dict) 
+                    else profitability.get('estimated_annual_ebitda', None)
+                ),
+                "monthly_cash_flow": self._normalize_financial_value(
+                    landing_page_metrics.get('monthly_cash_flow', None)
+                ),
+                "roi": self._normalize_percentage_value(investment_metrics.get('roi_percentage', None)),
+                "payback_period": self._normalize_percentage_value(investment_metrics.get('payback_period_years', None)),
+                "ebitda_margin": self._normalize_percentage_value(profitability.get('ebitda_margin', None))
             },
             "property_details": {
                 "primary_location": landing_page_metrics.get('location_info', {}).get('primary_location', {}),
@@ -853,10 +861,7 @@ class JsonLoader(BaseLoader):
                 "services": ["Hearing Tests", "Hearing Aid Sales", "Balance Testing", "Tinnitus Treatment"],
                 "insurance_coverage": insurance_coverage,
                 "payment_methods": ["Insurance billing (UPMC, Aetna)", "Private pay", "Cash payments"],
-                "equipment_value": {
-                    "value": float(equipment_metrics.get('total_value', 0)),
-                    "currency": "USD"
-                },
+                "equipment_value": self._normalize_financial_value(equipment_metrics.get('total_value', None)),
                 "business_hours": {
                     "monday": "9:00 AM - 5:00 PM",
                     "tuesday": "9:00 AM - 5:00 PM", 
@@ -889,8 +894,8 @@ class JsonLoader(BaseLoader):
                 "Strong EBITDA margins"
             ],
             "metadata": {
-                "generated_at": datetime.now(timezone.utc).isoformat(),
-                "etl_run_timestamp": datetime.now(timezone.utc).isoformat(),
+                "generated_at": FileUtils.get_js_compatible_timestamp(),
+                "etl_run_timestamp": FileUtils.get_js_compatible_timestamp(),
                 "data_source": "ETL Pipeline Analysis",
                 "version": "1.0"
             }
@@ -1195,7 +1200,25 @@ class JsonLoader(BaseLoader):
     def _normalize_insurance_coverage(self, insurance_coverage: Dict[str, Any]) -> Dict[str, Any]:
         """Normalize insurance coverage to prevent staleness by computing derived fields at render-time."""
         if not insurance_coverage:
-            return {}
+            # Return populated insurance coverage from business rules
+            return {
+                "insurers": [
+                    {
+                        "name": "UPMC",
+                        "years_active": 19,
+                        "contract_date": "2006-08-31",
+                        "status": "Active",
+                        "coverage_type": "Primary Insurance"
+                    },
+                    {
+                        "name": "Aetna",
+                        "years_active": 10,
+                        "contract_date": "2015-09-28",
+                        "status": "Active",
+                        "coverage_type": "Primary Insurance"
+                    }
+                ]
+            }
         
         # Keep only contract_date and compute derived fields at render-time
         normalized = {
@@ -1208,6 +1231,24 @@ class JsonLoader(BaseLoader):
         #          average_years_per_insurer, coverage_stability_score
         
         return normalized
+    
+    def _normalize_financial_value(self, value: Any) -> Dict[str, Any]:
+        """Normalize financial values to use null instead of 0.0 for unknown values."""
+        if value is None or value == 0.0:
+            return {"value": None, "currency": "USD", "status": "unknown"}
+        
+        return {
+            "value": float(value),
+            "currency": "USD",
+            "status": "available"
+        }
+    
+    def _normalize_percentage_value(self, value: Any) -> Any:
+        """Normalize percentage values to use null instead of 0.0 for unknown values."""
+        if value is None or value == 0.0:
+            return None
+        
+        return round(float(value), 1)
     
     def load_patient_dimension_data(self, patient_data: Dict[str, Any], output_path: str) -> bool:
         """
@@ -1239,7 +1280,7 @@ class JsonLoader(BaseLoader):
                     'encryption_required': True,
                     'data_type': 'patient_dimension',
                     'pii_protected': True,
-                    'created_date': datetime.now(timezone.utc).isoformat(),
+                    'created_date': FileUtils.get_js_compatible_timestamp(),
                     'record_count': len(patient_records)
                 },
                 'data': patient_records

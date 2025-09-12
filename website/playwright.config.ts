@@ -34,6 +34,7 @@ export default defineConfig({
     port: 3000,
     reuseExistingServer: !process.env.CI,
     env: {
+      ...process.env,
       PLAYWRIGHT_TEST: 'true',
     },
   },

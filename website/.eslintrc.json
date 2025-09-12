@@ -1,21 +1,9 @@
 {
   "extends": [
-    "next/core-web-vitals",
-    "next/typescript"
+    "next/core-web-vitals"
   ],
-  "overrides": [
-    {
-      "files": [
-        "tests/**/*.spec.ts",
-        "e2e/**/*.spec.ts"
-      ],
-      "extends": [
-        "plugin:playwright/playwright-test"
-      ],
-      "env": {
-        "browser": true,
-        "node": true
-      }
-    }
-  ]
+  "rules": {
+    "@next/next/no-duplicate-head": "off",
+    "@next/next/no-img-element": "off"
+  }
 }

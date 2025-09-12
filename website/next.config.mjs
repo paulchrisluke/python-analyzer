@@ -13,6 +13,8 @@ const nextConfig = {
     unoptimized: true,
     domains: ['localhost'],
   },
+  // Set the workspace root to avoid lockfile conflicts
+  outputFileTracingRoot: __dirname,
   webpack: (config) => {
     config.resolve.alias = {
       ...config.resolve.alias,

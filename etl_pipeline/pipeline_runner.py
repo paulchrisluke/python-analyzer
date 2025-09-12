@@ -129,6 +129,14 @@ class ETLPipeline:
                     raise RuntimeError(error_msg)
                 else:
                     logger.warning("Early exit disabled - will continue with default configurations")
+                    # Initialize safe empty defaults to prevent AttributeErrors
+                    self.data_sources_config = {}
+                    self.business_rules = {}
+                    self.schemas = {}
+                    # Ensure pipeline_metadata has all required keys
+                    self.pipeline_metadata.setdefault('warnings', [])
+                    self.pipeline_metadata.setdefault('errors', [])
+                    logger.info("Initialized safe empty defaults for configurations")
             
             # Initialize due diligence manager - Continue even if this fails
             logger.info("Initializing due diligence manager...")

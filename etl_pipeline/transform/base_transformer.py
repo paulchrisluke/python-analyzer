@@ -7,6 +7,7 @@ from typing import Dict, Any, List, Optional
 import pandas as pd
 import logging
 from datetime import datetime, timezone
+from ..utils.file_utils import FileUtils
 
 logger = logging.getLogger(__name__)
 
@@ -74,5 +75,5 @@ class BaseTransformer(ABC):
             'input_count': input_count,
             'output_count': output_count,
             'transformation_type': transformation_type,
-            'transformation_timestamp': datetime.now(timezone.utc).isoformat()
+            'transformation_timestamp': FileUtils.get_js_compatible_timestamp()
         })
