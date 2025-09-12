@@ -1,9 +1,44 @@
 #!/bin/bash
 
 # Build script that runs ETL pipeline and then builds Next.js website
-# This ensures data is available in public/data/ before the build
+# This ensures data is available in admin data directory before the build
 
 set -e  # Exit on any error
+
+# Use ADMIN_DATA_DIR environment variable or default to .data
+ADMIN_DATA_DIR="${ADMIN_DATA_DIR:-.data}"
+
+# Function to validate file paths and prevent directory traversal
+validate_file_path() {
+    local file_path="$1"
+    
+    # Check for directory traversal patterns
+    if [[ "$file_path" == *".."* ]] || [[ "$file_path" == *"~"* ]] || [[ "$file_path" == /* ]]; then
+        echo "❌ Invalid file path: $file_path. Directory traversal not allowed."
+        return 1
+    fi
+    
+    # Note: Null byte checking is handled at the application level
+    
+    # Ensure file has .json extension
+    if [[ "$file_path" != *.json ]]; then
+        echo "❌ Invalid file path: $file_path. Only .json files are allowed."
+        return 1
+    fi
+    
+    # Check for suspicious patterns
+    local lower_path=$(echo "$file_path" | tr '[:upper:]' '[:lower:]')
+    local suspicious_patterns=("/etc/" "/proc/" "/sys/" "/dev/" "config" "secret" "password")
+    
+    for pattern in "${suspicious_patterns[@]}"; do
+        if [[ "$lower_path" == *"$pattern"* ]]; then
+            echo "❌ Invalid file path: $file_path. Suspicious pattern detected."
+            return 1
+        fi
+    done
+    
+    return 0
+}
 
 echo "🚀 Starting build process with ETL data pipeline..."
 
@@ -26,9 +61,9 @@ else
     exit 1
 fi
 
-# Step 2: Verify data files exist in website/public/data/
+# Step 2: Verify data files exist in admin data directory
 echo "🔍 Verifying data files..."
-WEBSITE_DATA_DIR="$PROJECT_ROOT/website/public/data"
+WEBSITE_DATA_DIR="$PROJECT_ROOT/website/$ADMIN_DATA_DIR"
 REQUIRED_FILES=(
     "business_sale_data.json"
     "due_diligence_coverage.json"
@@ -38,6 +73,12 @@ REQUIRED_FILES=(
 )
 
 for file in "${REQUIRED_FILES[@]}"; do
+    # SECURITY: Validate file path before processing
+    if ! validate_file_path "$file"; then
+        echo "❌ Invalid file path: $file"
+        exit 1
+    fi
+    
     if [ -f "$WEBSITE_DATA_DIR/$file" ]; then
         echo "✅ Found: $file"
     else

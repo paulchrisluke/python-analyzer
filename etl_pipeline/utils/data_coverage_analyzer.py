@@ -152,7 +152,7 @@ class DataCoverageAnalyzer:
             'missing_months': len(missing_months),
             'date_range': f"{df_filtered['sale_date'].min().date()} to {df_filtered['sale_date'].max().date()}",
             'total_transactions': len(df_filtered),
-            'total_revenue': Decimal(str(self._get_total_revenue(df_filtered))).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
+            'total_revenue': float(Decimal(str(self._get_total_revenue(df_filtered))).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP))
         }
         
         # Determine status
@@ -247,7 +247,9 @@ class DataCoverageAnalyzer:
         
         # Data quality issues
         if missing_docs:
-            coverage['data_quality_issues'].append(f'Missing {len(missing_docs)} critical financial documents')
+            doc_count = len(missing_docs)
+            doc_text = "document" if doc_count == 1 else "documents"
+            coverage['data_quality_issues'].append(f'Missing {doc_count} critical financial {doc_text}')
         
         # Fallback strategies
         if 'profit_loss' in missing_docs:

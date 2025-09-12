@@ -5,23 +5,58 @@
 
 set -e  # Exit on any error
 
-echo "🔍 Checking for data files in public/data/..."
+# Use ADMIN_DATA_DIR environment variable or default to .data
+ADMIN_DATA_DIR="${ADMIN_DATA_DIR:-.data}"
+
+# Function to validate file paths and prevent directory traversal
+validate_file_path() {
+    local file_path="$1"
+    
+    # Check for directory traversal patterns
+    if [[ "$file_path" == *".."* ]] || [[ "$file_path" == *"~"* ]] || [[ "$file_path" == /* ]]; then
+        echo "❌ Invalid file path: $file_path. Directory traversal not allowed."
+        return 1
+    fi
+    
+    # Note: Null byte checking is handled at the application level
+    
+    # Ensure file has .json extension
+    if [[ "$file_path" != *.json ]]; then
+        echo "❌ Invalid file path: $file_path. Only .json files are allowed."
+        return 1
+    fi
+    
+    # Check for suspicious patterns
+    local lower_path=$(echo "$file_path" | tr '[:upper:]' '[:lower:]')
+    local suspicious_patterns=("/etc/" "/proc/" "/sys/" "/dev/" "config" "secret" "password")
+    
+    for pattern in "${suspicious_patterns[@]}"; do
+        if [[ "$lower_path" == *"$pattern"* ]]; then
+            echo "❌ Invalid file path: $file_path. Suspicious pattern detected."
+            return 1
+        fi
+    done
+    
+    return 0
+}
+
+echo "🔍 Checking for data files in $ADMIN_DATA_DIR/..."
 
 # Get the project root directory (parent of website directory)
 PROJECT_ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
 echo "📁 Project root: $PROJECT_ROOT"
 
-# Check if data files exist in public/data/
-WEBSITE_DATA_DIR="$PROJECT_ROOT/website/public/data"
+# Check if data files exist in admin data directory
+WEBSITE_DATA_DIR="$PROJECT_ROOT/website/$ADMIN_DATA_DIR"
 
 # Handle case where artifact downloads into data/final/ subfolder
 if [ -d "$WEBSITE_DATA_DIR/data/final" ]; then
-    echo "🔄 Found data/final/ subfolder, flattening files to public/data/..."
-    # Move all JSON files from data/final/ to public/data/
+    echo "🔄 Found data/final/ subfolder, flattening files to $ADMIN_DATA_DIR/..."
+    # Move all JSON files from data/final/ to admin data directory
     find "$WEBSITE_DATA_DIR/data/final" -name "*.json" -exec mv {} "$WEBSITE_DATA_DIR/" \;
     # Remove the now-empty data/final/ directory
     rm -rf "$WEBSITE_DATA_DIR/data"
-    echo "✅ Flattened data files from data/final/ to public/data/"
+    echo "✅ Flattened data files from data/final/ to $ADMIN_DATA_DIR/"
 fi
 REQUIRED_FILES=(
     "business_sale_data.json"
@@ -33,13 +68,20 @@ REQUIRED_FILES=(
 
 missing_files=()
 for file in "${REQUIRED_FILES[@]}"; do
+    # SECURITY: Validate file path before processing
+    if ! validate_file_path "$file"; then
+        echo "❌ Skipping invalid file: $file"
+        missing_files+=("$file")
+        continue
+    fi
+    
     if [ ! -f "$WEBSITE_DATA_DIR/$file" ]; then
         missing_files+=("$file")
     fi
 done
 
 if [ ${#missing_files[@]} -eq 0 ]; then
-    echo "✅ All required data files found in public/data/"
+    echo "✅ All required data files found in $ADMIN_DATA_DIR/"
     exit 0
 fi
 

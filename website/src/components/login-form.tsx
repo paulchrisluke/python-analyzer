@@ -59,8 +59,8 @@ export function LoginForm({
         // Redirect to dashboard after successful login
         window.location.href = "/dashboard"
       }
-    } catch (error) {
-      if (error instanceof Error && error.name === 'AbortError') {
+    } catch (err) {
+      if ((err as any)?.name === 'AbortError' || err instanceof DOMException || (err as any)?.code === 'ERR_ABORTED') {
         setError("Request timed out. Please try again.")
       } else {
         setError("An unexpected error occurred")

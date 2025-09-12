@@ -1,0 +1,243 @@
+{
+  "metadata": {
+    "business_name": "Cranberry Hearing and Balance Center",
+    "generated_at": "2025-09-12T07:16:27.920Z",
+    "etl_run_timestamp": "2025-09-12T07:16:27.920Z",
+    "data_period": "2023-03-12 to 2025-09-12",
+    "months_analyzed": 30,
+    "data_source": "ETL Pipeline - Real Business Data",
+    "analysis_period": "2023-03-12 to 2025-09-12"
+  },
+  "sales": {
+    "total_transactions": 0,
+    "total_revenue": 0.0
+  },
+  "financials": {
+    "documents": [
+      {
+        "name": "Profit and Loss Statements 2023-2024",
+        "file_path": "docs/financials/Profit_and_Loss/",
+        "status": true,
+        "notes": "Monthly P&L statements for 2023-2024",
+        "due_date": null,
+        "file_type": "CSV",
+        "file_size": "2.5MB",
+        "visibility": [
+          "public",
+          "nda",
+          "buyer",
+          "internal"
+        ]
+      },
+      {
+        "name": "Balance Sheets 2022",
+        "file_path": "docs/financials/Balance_Sheets/",
+        "status": true,
+        "notes": "Monthly balance sheets for 2022",
+        "due_date": null,
+        "file_type": "CSV",
+        "file_size": "1.8MB",
+        "visibility": [
+          "nda",
+          "buyer",
+          "internal"
+        ]
+      },
+      {
+        "name": "General Ledger 2021-2025",
+        "file_path": "docs/financials/General_Ledger/",
+        "status": true,
+        "notes": "Complete general ledger entries",
+        "due_date": null,
+        "file_type": "CSV",
+        "file_size": "15.2MB",
+        "visibility": [
+          "buyer",
+          "internal"
+        ]
+      }
+    ],
+    "metrics": {
+      "annual_revenue_projection": 0.0,
+      "estimated_annual_ebitda": 0.0,
+      "roi_percentage": 0.0,
+      "ebitda_margin": 0.0,
+      "payback_period_years": 0.0,
+      "equipment_value": 0.0,
+      "asking_price": 650000.0,
+      "visibility": [
+        "public",
+        "nda",
+        "buyer",
+        "internal"
+      ]
+    }
+  },
+  "equipment": {
+    "total_value": {
+      "amount": 0.0,
+      "currency": "USD"
+    },
+    "items": []
+  },
+  "legal": {
+    "documents": [
+      {
+        "name": "Business License",
+        "file_path": "docs/legal/business_license.pdf",
+        "status": true,
+        "notes": "Current business license",
+        "due_date": "2025-12-31",
+        "file_type": "PDF",
+        "file_size": "2.1MB",
+        "visibility": [
+          "public",
+          "nda",
+          "buyer",
+          "internal"
+        ]
+      },
+      {
+        "name": "Insurance Policies",
+        "file_path": "docs/legal/insurance_policies.pdf",
+        "status": true,
+        "notes": "General liability and professional insurance",
+        "due_date": "2025-06-30",
+        "file_type": "PDF",
+        "file_size": "5.3MB",
+        "visibility": [
+          "nda",
+          "buyer",
+          "internal"
+        ]
+      }
+    ],
+    "visibility": [
+      "public",
+      "nda",
+      "buyer",
+      "internal"
+    ]
+  },
+  "operational": {
+    "documents": [
+      {
+        "name": "Standard Operating Procedures",
+        "file_path": "docs/operational/sop.pdf",
+        "status": true,
+        "notes": "Complete SOP documentation",
+        "due_date": null,
+        "file_type": "PDF",
+        "file_size": "3.2MB",
+        "visibility": [
+          "nda",
+          "buyer",
+          "internal"
+        ]
+      }
+    ],
+    "visibility": [
+      "nda",
+      "buyer",
+      "internal"
+    ]
+  },
+  "closing": {
+    "documents": [
+      {
+        "name": "Purchase Agreement",
+        "file_path": "docs/closing/purchase_agreement.pdf",
+        "status": false,
+        "notes": "Draft purchase agreement",
+        "due_date": "2025-10-15",
+        "file_type": "PDF",
+        "file_size": "1.5MB",
+        "visibility": [
+          "buyer",
+          "internal"
+        ]
+      },
+      {
+        "name": "Closing Checklist",
+        "file_path": "docs/closing/closing_checklist.pdf",
+        "status": false,
+        "notes": "Pre-closing checklist",
+        "due_date": "2025-10-30",
+        "file_type": "PDF",
+        "file_size": "0.8MB",
+        "visibility": [
+          "internal"
+        ]
+      }
+    ],
+    "milestones": [
+      {
+        "name": "Due Diligence Complete",
+        "status": true,
+        "date": "2025-09-07",
+        "visibility": [
+          "buyer",
+          "internal"
+        ]
+      },
+      {
+        "name": "Purchase Agreement Signed",
+        "status": false,
+        "date": null,
+        "visibility": [
+          "buyer",
+          "internal"
+        ]
+      }
+    ],
+    "visibility": [
+      "buyer",
+      "internal"
+    ]
+  },
+  "valuation": {
+    "asking_price": {
+      "value": 650000.0,
+      "currency": "USD"
+    },
+    "market_value": {
+      "value": 0.0,
+      "currency": "USD"
+    },
+    "discount_percentage": 0.0,
+    "discount_amount": {
+      "value": 0.0,
+      "currency": "USD"
+    }
+  },
+  "locations": [],
+  "highlights": [
+    "Healthcare Industry: Recession-resistant business",
+    "Turnkey Operation: Complete infrastructure included"
+  ],
+  "summary_cards": {
+    "revenue_total": {
+      "value": 0.0,
+      "currency": "USD",
+      "label": "Total Revenue",
+      "description": "2023-2025 Performance"
+    },
+    "annual_ebitda": {
+      "value": 0.0,
+      "currency": "USD",
+      "label": "Annual EBITDA",
+      "description": "Projected Annual"
+    },
+    "roi": {
+      "value": 0.0,
+      "label": "ROI",
+      "description": "Annual Return"
+    },
+    "equipment_value": {
+      "value": 0.0,
+      "currency": "USD",
+      "label": "Equipment Value",
+      "description": "Included in Sale"
+    }
+  }
+}

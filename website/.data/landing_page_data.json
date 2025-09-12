@@ -1,0 +1,112 @@
+{
+  "listing_details": {
+    "business_name": "Cranberry Hearing and Balance Center",
+    "business_type": "Audiology Practice",
+    "asking_price": {
+      "value": 650000.0,
+      "currency": "USD"
+    },
+    "established": 2010,
+    "established_year": 2010,
+    "locations": 2,
+    "state": "PA"
+  },
+  "financial_highlights": {
+    "annual_revenue": {
+      "value": null,
+      "currency": "USD",
+      "status": "unknown"
+    },
+    "annual_ebitda": {
+      "value": null,
+      "currency": "USD",
+      "status": "unknown"
+    },
+    "monthly_cash_flow": {
+      "value": null,
+      "currency": "USD",
+      "status": "unknown"
+    },
+    "roi": 0.0,
+    "payback_period_years": 0.0,
+    "ebitda_margin": 0.0
+  },
+  "property_details": {
+    "primary_location": {},
+    "secondary_location": {},
+    "lease_analysis": {},
+    "property_type": "Leased"
+  },
+  "business_operations": {
+    "services": [
+      "Hearing Tests",
+      "Hearing Aid Sales",
+      "Balance Testing",
+      "Tinnitus Treatment"
+    ],
+    "insurance_coverage": {
+      "insurers": [
+        {
+          "name": "UPMC",
+          "years_active": 19,
+          "contract_date": "2006-08-31",
+          "status": "Active",
+          "coverage_type": "Primary Insurance"
+        },
+        {
+          "name": "Aetna",
+          "years_active": 10,
+          "contract_date": "2015-09-28",
+          "status": "Active",
+          "coverage_type": "Primary Insurance"
+        }
+      ]
+    },
+    "payment_methods": [
+      "Insurance billing (UPMC, Aetna)",
+      "Private pay",
+      "Cash payments"
+    ],
+    "equipment_value": {
+      "value": null,
+      "currency": "USD",
+      "status": "unknown"
+    },
+    "business_hours": {
+      "monday": "9:00 AM - 5:00 PM",
+      "tuesday": "9:00 AM - 5:00 PM",
+      "wednesday": "9:00 AM - 5:00 PM",
+      "thursday": "9:00 AM - 5:00 PM",
+      "friday": "9:00 AM - 5:00 PM",
+      "saturday": "Closed",
+      "sunday": "Closed"
+    }
+  },
+  "market_opportunity": {
+    "local_market": "Cranberry Township & Pittsburgh Metro Area",
+    "competition": "Limited local competition",
+    "growth_potential": "High - aging population demographics",
+    "market_advantage": "Established insurance relationships"
+  },
+  "transaction_terms": {
+    "financing_available": true,
+    "seller_financing": "20% down, seller carryback available",
+    "training_period": "30 days",
+    "reason_for_sale": "Owner retirement",
+    "transition_support": "Available for smooth transition"
+  },
+  "key_benefits": [
+    "Established insurance relationships (UPMC since 2006, Aetna since 2015)",
+    "Two prime locations in growing markets",
+    "Professional audiology equipment included",
+    "Steady cash flow from insurance payments",
+    "Absentee owner opportunity",
+    "Strong EBITDA margins"
+  ],
+  "metadata": {
+    "generated_at": "2025-09-12T07:16:27.922Z",
+    "etl_run_timestamp": "2025-09-12T07:16:27.922Z",
+    "data_source": "ETL Pipeline Analysis",
+    "version": "1.0"
+  }
+}

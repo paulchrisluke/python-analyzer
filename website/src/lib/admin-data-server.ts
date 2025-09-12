@@ -52,17 +52,50 @@ export async function loadAdminData(): Promise<AdminDashboardData> {
   }
 }
 
+// Validate file path to prevent directory traversal attacks
+function validateFilePath(filePath: string): void {
+  const path = require('path')
+  
+  // Check for directory traversal patterns
+  if (filePath.includes('..') || filePath.includes('~') || path.isAbsolute(filePath)) {
+    throw new Error(`Invalid file path: ${filePath}. Directory traversal not allowed.`)
+  }
+  
+  // Check for null bytes (potential injection)
+  if (filePath.includes('\0')) {
+    throw new Error(`Invalid file path: ${filePath}. Null bytes not allowed.`)
+  }
+  
+  // Ensure file has .json extension
+  if (!filePath.endsWith('.json')) {
+    throw new Error(`Invalid file path: ${filePath}. Only .json files are allowed.`)
+  }
+  
+  // Check for suspicious patterns
+  const suspiciousPatterns = ['/etc/', '/proc/', '/sys/', '/dev/', 'config', 'secret', 'password']
+  const lowerPath = filePath.toLowerCase()
+  for (const pattern of suspiciousPatterns) {
+    if (lowerPath.includes(pattern)) {
+      throw new Error(`Invalid file path: ${filePath}. Suspicious pattern detected.`)
+    }
+  }
+}
+
 // Load individual JSON file with error handling
 async function loadJsonFile<T>(filePath: string): Promise<T> {
   try {
     const fs = await import('fs/promises')
     const path = await import('path')
     
+    // SECURITY: Validate file path to prevent directory traversal
+    validateFilePath(filePath)
+    
     // Try multiple possible data directory locations
+    // SECURITY: Never include public directories in fallback paths
     const possibleDataDirs = [
       process.env.ADMIN_DATA_DIR,
-      path.join('public', 'data'),
       path.join('.data'),
+      path.join('data', 'admin'),
       path.join('data')
     ].filter((dir): dir is string => Boolean(dir)) // Remove undefined values and type guard
     
@@ -77,8 +110,21 @@ async function loadJsonFile<T>(filePath: string): Promise<T> {
           ? path.resolve(dataDir, filePath)
           : path.resolve(process.cwd(), dataDir, filePath)
         
-        // Normalize the final path and log the attempt
+        // Normalize the final path and validate it's within allowed directories
         const normalizedPath = path.normalize(fullDataPath)
+        
+        // SECURITY: Ensure the resolved path is within one of our allowed data directories
+        const isWithinAllowedDir = possibleDataDirs.some(allowedDir => {
+          const allowedPath = path.isAbsolute(allowedDir) 
+            ? path.resolve(allowedDir)
+            : path.resolve(process.cwd(), allowedDir)
+          return normalizedPath.startsWith(allowedPath + path.sep) || normalizedPath === allowedPath
+        })
+        
+        if (!isWithinAllowedDir) {
+          throw new Error(`Path traversal detected: ${normalizedPath} is outside allowed directories`)
+        }
+        
         console.log(`Attempting to load data file: ${normalizedPath}`)
         
         fileContent = await fs.readFile(normalizedPath, 'utf-8')

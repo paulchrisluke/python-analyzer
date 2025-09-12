@@ -37,27 +37,43 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Email cannot be empty' }, { status: 400 })
     }
 
-    // Get admin credentials from environment
-    const adminEmails = process.env.ADMIN_EMAILS?.split(',') || []
-    const adminPasswords = process.env.ADMIN_PASSWORD_HASHES?.split(',') || []
+    // Get admin credentials from environment with proper parsing
+    const adminEmails = process.env.ADMIN_EMAILS?.split(/[,\n]/).map(s => s.trim()).filter(Boolean) || []
+    const adminPasswords = process.env.ADMIN_PASSWORD_HASHES?.split(/[,\n]/).map(s => s.trim()).filter(Boolean) || []
     const isDevelopment = process.env.NODE_ENV === 'development'
 
     // Security: Require explicit admin emails configuration
     if (adminEmails.length === 0) {
-      console.error('ADMIN_EMAILS not configured')
+      console.error('ADMIN_EMAILS not configured or contains no valid entries')
       return NextResponse.json({ error: 'Authentication not configured' }, { status: 500 })
     }
 
     // Security: Require explicit password hashes unless in development
     if (adminPasswords.length === 0 && !isDevelopment) {
-      console.error('ADMIN_PASSWORD_HASHES not configured and not in development mode')
+      console.error('ADMIN_PASSWORD_HASHES not configured or contains no valid entries and not in development mode')
       return NextResponse.json({ error: 'Authentication not configured' }, { status: 500 })
+    }
+
+    // Security: Ensure email and password arrays align when not in development
+    if (!isDevelopment && adminEmails.length !== adminPasswords.length) {
+      console.error(`ADMIN_EMAILS (${adminEmails.length} entries) and ADMIN_PASSWORD_HASHES (${adminPasswords.length} entries) length mismatch`)
+      return NextResponse.json({ error: 'Authentication configuration mismatch' }, { status: 500 })
     }
 
     // Security: Require explicit JWT secret configuration
     if (!process.env.AUTH_SECRET) {
       console.error('AUTH_SECRET not configured')
       return NextResponse.json({ error: 'Authentication not configured' }, { status: 500 })
+    }
+
+    // Security: Validate AUTH_SECRET strength
+    const authSecret = process.env.AUTH_SECRET
+    const secretBytes = new TextEncoder().encode(authSecret)
+    if (secretBytes.length < 32) {
+      console.error(`AUTH_SECRET is too weak: ${secretBytes.length} bytes (minimum 32 required)`)
+      return NextResponse.json({ 
+        error: 'Authentication configuration error: JWT secret is too weak. Please use a secret with at least 32 characters or consider migrating to asymmetric signing (RS256) for enhanced security.' 
+      }, { status: 500 })
     }
 
     // Find admin email index
@@ -81,7 +97,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Create JWT token
-    const secret = new TextEncoder().encode(process.env.AUTH_SECRET)
+    const secret = new TextEncoder().encode(authSecret)
     const token = await new SignJWT({ 
       email: normalizedEmail,
       name: normalizedEmail.split('@')[0]

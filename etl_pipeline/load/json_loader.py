@@ -18,6 +18,35 @@ from ..utils.file_utils import FileUtils
 
 logger = logging.getLogger(__name__)
 
+def validate_file_path(file_path: str) -> None:
+    """
+    Validate file path to prevent directory traversal attacks.
+    
+    Args:
+        file_path: The file path to validate
+        
+    Raises:
+        ValueError: If the file path is invalid or potentially malicious
+    """
+    # Check for directory traversal patterns
+    if '..' in file_path or '~' in file_path or os.path.isabs(file_path):
+        raise ValueError(f"Invalid file path: {file_path}. Directory traversal not allowed.")
+    
+    # Check for null bytes (potential injection)
+    if '\0' in file_path:
+        raise ValueError(f"Invalid file path: {file_path}. Null bytes not allowed.")
+    
+    # Ensure file has .json extension
+    if not file_path.endswith('.json'):
+        raise ValueError(f"Invalid file path: {file_path}. Only .json files are allowed.")
+    
+    # Check for suspicious patterns
+    suspicious_patterns = ['/etc/', '/proc/', '/sys/', '/dev/', 'config', 'secret', 'password']
+    lower_path = file_path.lower()
+    for pattern in suspicious_patterns:
+        if pattern in lower_path:
+            raise ValueError(f"Invalid file path: {file_path}. Suspicious pattern detected.")
+
 def parse_price_value(price_raw):
     """
     Robust price parser that handles currency strings, N/A values, negatives, and parentheses.
@@ -74,10 +103,10 @@ def normalize_money(value):
                a numeric value, or None/empty
         
     Returns:
-        Dict with 'amount' (float) and 'currency' (str) keys
+        Dict with 'value' (float) and 'currency' (str) keys
     """
     if value is None:
-        return {"amount": 0.0, "currency": "USD"}
+        return {"value": 0.0, "currency": "USD"}
     
     # Handle dict format
     if isinstance(value, dict):
@@ -86,12 +115,12 @@ def normalize_money(value):
             if isinstance(value['value'], str):
                 parsed_value = parse_price_value(value['value'])
                 return {
-                    "amount": float(parsed_value),
+                    "value": float(parsed_value),
                     "currency": value.get('currency', 'USD')
                 }
             else:
                 return {
-                    "amount": float(value['value']),
+                    "value": float(value['value']),
                     "currency": value.get('currency', 'USD')
                 }
         elif 'amount' in value:
@@ -99,22 +128,22 @@ def normalize_money(value):
             if isinstance(value['amount'], str):
                 parsed_value = parse_price_value(value['amount'])
                 return {
-                    "amount": float(parsed_value),
+                    "value": float(parsed_value),
                     "currency": value.get('currency', 'USD')
                 }
             else:
                 return {
-                    "amount": float(value['amount']),
+                    "value": float(value['amount']),
                     "currency": value.get('currency', 'USD')
                 }
         else:
-            return {"amount": 0.0, "currency": "USD"}
+            return {"value": 0.0, "currency": "USD"}
     
     # Handle string format
     if isinstance(value, str):
         value = value.strip()
         if not value or value.upper() in ['N/A', 'NA', 'NULL', 'NONE', '']:
-            return {"amount": 0.0, "currency": "USD"}
+            return {"value": 0.0, "currency": "USD"}
         
         # Extract currency and numeric value
         currency = "USD"  # default
@@ -140,21 +169,21 @@ def normalize_money(value):
         try:
             parsed_value = parse_price_value(numeric_value)
             return {
-                "amount": float(parsed_value),
+                "value": float(parsed_value),
                 "currency": currency
             }
         except (ValueError, TypeError):
-            return {"amount": 0.0, "currency": "USD"}
+            return {"value": 0.0, "currency": "USD"}
     
     # Handle numeric values
     if isinstance(value, (int, float)):
         return {
-            "amount": float(value),
+            "value": float(value),
             "currency": "USD"
         }
     
     # Fallback
-    return {"amount": 0.0, "currency": "USD"}
+    return {"value": 0.0, "currency": "USD"}
 
 class JsonLoader(BaseLoader):
     """Loader for saving data to JSON files."""
@@ -515,7 +544,7 @@ class JsonLoader(BaseLoader):
             },
             "equipment": {
                 "total_value": {
-                    "value": float(equipment_metrics.get('total_value', 0)),
+                    "amount": self._calculate_equipment_total_from_items(equipment_metrics.get('items', [])),
                     "currency": "USD"
                 },
                 "items": self._transform_equipment_items(equipment_metrics.get('items', []))
@@ -616,7 +645,7 @@ class JsonLoader(BaseLoader):
             },
             "locations": self._create_location_data(sales_metrics),
             "highlights": self._create_highlights(business_metrics),
-            "summary_cards": self._create_summary_cards(business_metrics)
+            "summary_cards": self._create_summary_cards(business_metrics, start_date, end_date)
         }
         
         return business_sale_data
@@ -672,17 +701,25 @@ class JsonLoader(BaseLoader):
         
         return highlights
     
-    def _create_summary_cards(self, business_metrics: Dict[str, Any]) -> Dict[str, Any]:
+    def _create_summary_cards(self, business_metrics: Dict[str, Any], start_date=None, end_date=None) -> Dict[str, Any]:
         """Create summary cards data."""
         sales_metrics = business_metrics.get('sales', {})
         financial_metrics = business_metrics.get('financial', {})
+        
+        # Create dynamic period description
+        if start_date and end_date:
+            start_year = start_date.year if hasattr(start_date, 'year') else str(start_date)[:4]
+            end_year = end_date.year if hasattr(end_date, 'year') else str(end_date)[:4]
+            period_description = f"{start_year}-{end_year} Performance"
+        else:
+            period_description = "Historical Performance"
         
         return {
             "revenue_total": {
                 "value": float(sales_metrics.get('total_revenue', 0)),
                 "currency": "USD",
                 "label": "Total Revenue",
-                "description": "2021-2025 Performance"
+                "description": period_description
             },
             "annual_ebitda": {
                 "value": float(financial_metrics.get('profitability', {}).get('estimated_annual_ebitda', 0)),
@@ -844,8 +881,7 @@ class JsonLoader(BaseLoader):
                     "value": float(asking_price_value),
                     "currency": "USD"
                 },
-                "asking_price_numeric": float(asking_price_value),  # Backward compatibility alias
-                "established": "2010",  # Keep as string for backward compatibility
+                "established": 2010,  # Keep as numeric for type consistency
                 "established_year": 2010,  # Add numeric version for clarity
                 "locations": 2,
                 "state": "PA"  # Use consistent state abbreviation
@@ -864,9 +900,9 @@ class JsonLoader(BaseLoader):
                 "monthly_cash_flow": self._normalize_financial_value(
                     landing_page_metrics.get('monthly_cash_flow', None)
                 ),
-                "roi": self._normalize_percentage_value(investment_metrics.get('roi_percentage', None)),
-                "payback_period": self._normalize_percentage_value(investment_metrics.get('payback_period_years', None)),
-                "ebitda_margin": self._normalize_percentage_value(profitability.get('ebitda_margin', None))
+                "roi": round(float(investment_metrics.get('roi_percentage', 0)), 2),
+                "payback_period_years": round(float(investment_metrics.get('payback_period_years', 0)), 1),
+                "ebitda_margin": round(float(profitability.get('ebitda_margin', 0)), 2)
             },
             "property_details": {
                 "primary_location": landing_page_metrics.get('location_info', {}).get('primary_location', {}),
@@ -922,12 +958,14 @@ class JsonLoader(BaseLoader):
         return landing_page_data
     
     def _copy_files_to_website(self, final_dir: Path) -> None:
-        """Copy essential JSON files to website public/data directory for Next.js integration."""
+        """Copy essential JSON files to website admin data directory for Next.js integration."""
         try:
             
-            # Define website public/data directory (relative to project root)
+            # Define website admin data directory (relative to project root)
+            # Use ADMIN_DATA_DIR environment variable or default to .data
             project_root = Path(__file__).parent.parent.parent
-            website_data_dir = project_root / "website" / "public" / "data"
+            admin_data_dir = os.getenv('ADMIN_DATA_DIR', '.data')
+            website_data_dir = project_root / "website" / admin_data_dir
             website_data_dir.mkdir(parents=True, exist_ok=True)
             
             # Files to copy to website
@@ -941,23 +979,41 @@ class JsonLoader(BaseLoader):
             
             copied_files = []
             for filename in files_to_copy:
+                # SECURITY: Validate filename to prevent directory traversal
+                try:
+                    validate_file_path(filename)
+                except ValueError as e:
+                    logger.error(f"Security validation failed for {filename}: {e}")
+                    continue
+                
                 source_file = final_dir / filename
                 if source_file.exists():
                     dest_file = website_data_dir / filename
+                    
+                    # SECURITY: Double-check that the resolved destination path is within allowed directory
+                    try:
+                        resolved_dest = dest_file.resolve()
+                        resolved_website_dir = website_data_dir.resolve()
+                        if not str(resolved_dest).startswith(str(resolved_website_dir)):
+                            raise ValueError(f"Path traversal detected: {resolved_dest} is outside {resolved_website_dir}")
+                    except ValueError as e:
+                        logger.error(f"Security validation failed for destination {dest_file}: {e}")
+                        continue
+                    
                     shutil.copy2(source_file, dest_file)
                     copied_files.append(filename)
-                    logger.info(f"Copied {filename} to website public/data directory: {dest_file}")
+                    logger.info(f"Copied {filename} to website admin data directory: {dest_file}")
                 else:
                     logger.warning(f"Source file not found: {source_file}")
             
             if copied_files:
-                logger.info(f"Successfully copied {len(copied_files)} files to website public/data directory")
+                logger.info(f"Successfully copied {len(copied_files)} files to website admin data directory")
                 self.load_results['website_files_copied'] = copied_files
             else:
-                logger.warning("No files were copied to website public/data directory")
+                logger.warning("No files were copied to website admin data directory")
                 
         except (OSError, shutil.Error) as e:
-            logger.exception("Failed to copy files to website public/data directory")
+            logger.exception("Failed to copy files to website admin data directory")
             # Don't raise the exception - this is not critical for the main pipeline
     
     def _convert_dataframes_to_dict(self, data: Dict[str, Any]) -> Dict[str, Any]:
@@ -1369,3 +1425,17 @@ class JsonLoader(BaseLoader):
         except Exception as e:
             logger.error(f"Error loading patient dimension data: {str(e)}")
             return False
+    
+    def _calculate_equipment_total_from_items(self, items: List[Dict[str, Any]]) -> float:
+        """Calculate equipment total value from the sum of individual items to ensure data integrity."""
+        total = 0.0
+        for item in items:
+            # Handle different price field structures
+            if 'total_price' in item:
+                if isinstance(item['total_price'], dict):
+                    total += float(item['total_price'].get('amount', 0))
+                else:
+                    total += float(item['total_price'])
+            elif 'price' in item:
+                total += float(item['price'])
+        return total

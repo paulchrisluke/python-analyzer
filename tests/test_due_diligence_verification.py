@@ -105,9 +105,14 @@ MASTER_SCHEMA = {
                                         "type": "object",
                                         "properties": {
                                             "value": {"type": "number"},
+                                            "amount": {"type": "number"},
                                             "currency": {"type": "string"}
                                         },
-                                        "required": ["value", "currency"]
+                                        "required": ["currency"],
+                                        "anyOf": [
+                                            {"required": ["value"]},
+                                            {"required": ["amount"]}
+                                        ]
                                     }
                                 ]
                             }
@@ -122,9 +127,14 @@ MASTER_SCHEMA = {
                             "type": "object",
                             "properties": {
                                 "value": {"type": "number"},
+                                "amount": {"type": "number"},
                                 "currency": {"type": "string"}
                             },
-                            "required": ["value", "currency"]
+                            "required": ["currency"],
+                            "anyOf": [
+                                {"required": ["value"]},
+                                {"required": ["amount"]}
+                            ]
                         }
                     ]
                 },
@@ -275,10 +285,19 @@ class TestDueDiligenceManager:
         if "equipment" in internal_data and "items" in internal_data["equipment"]:
             for item in internal_data["equipment"]["items"]:
                 assert "value" in item, f"Missing 'value' field in equipment item: {item.get('name')}"
-                # Accept number, string, None, or money object with value/currency
+                # Accept number, string, None, or money object with value/currency or amount/currency
                 if isinstance(item["value"], dict):
-                    assert "value" in item["value"] and "currency" in item["value"], f"Money object must have 'value' and 'currency' keys, got {item['value']}"
-                    assert isinstance(item["value"]["value"], (int, float)), f"Money value must be numeric, got {type(item['value']['value'])}"
+                    # Check for both "value" and "amount" fields (actual data uses "amount")
+                    has_value = "value" in item["value"]
+                    has_amount = "amount" in item["value"]
+                    has_currency = "currency" in item["value"]
+                    
+                    assert (has_value or has_amount) and has_currency, f"Money object must have ('value' or 'amount') and 'currency' keys, got {item['value']}"
+                    
+                    if has_value:
+                        assert isinstance(item["value"]["value"], (int, float)), f"Money value must be numeric, got {type(item['value']['value'])}"
+                    if has_amount:
+                        assert isinstance(item["value"]["amount"], (int, float)), f"Money amount must be numeric, got {type(item['value']['amount'])}"
                 else:
                     assert isinstance(item["value"], (int, float, str, type(None))), f"Equipment value must be number, string, None, or money object, got {type(item['value'])}"
     

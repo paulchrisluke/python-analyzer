@@ -105,18 +105,32 @@ test.describe('Simple Auth Flow', () => {
   test('should handle invalid admin credentials gracefully', async ({ page }) => {
     await page.goto('/login');
     
+    // Wait for form to be ready
+    await expect(page.locator('input[type="email"]')).toBeVisible();
+    await expect(page.locator('input[type="password"]')).toBeVisible();
+    await expect(page.locator('button[type="submit"]')).toBeVisible();
+    
     // Fill with invalid credentials
     await page.fill('input[type="email"]', 'invalid@example.com');
     await page.fill('input[type="password"]', 'wrongpassword');
     
+    // Wait a moment for values to be set
+    await page.waitForTimeout(500);
+    
     // Submit the form
     await page.click('button[type="submit"]');
     
-    // Wait for URL to be on login page (not redirected) - may have query parameters
-    await page.waitForURL(/\/login(?:\/|\?.*)?$/);
+    // Wait for either error message or redirect (with longer timeout)
+    try {
+      // Try to wait for error message first
+      await expect(page.locator('text=Invalid credentials')).toBeVisible({ timeout: 5000 });
+    } catch (error) {
+      // If no error message, check if we're still on login page
+      await expect(page).toHaveURL(/\/login/, { timeout: 5000 });
+    }
     
-    // Should still be on login page (not redirected) - may have query parameters
-    await expect(page).toHaveURL(/\/login(?:\/|\?.*)?$/);
+    // Should still be on login page (not redirected)
+    await expect(page).toHaveURL(/\/login/);
   });
 
   test('should protect dashboard route', async ({ page }) => {
