@@ -56,7 +56,7 @@ export default async function HomePage() {
 
               {/* Financial Chart */}
               <div className="px-4 lg:px-6">
-                <FinancialChart data={etlData} />
+                <FinancialChart />
               </div>
 
               {/* Due Diligence */}

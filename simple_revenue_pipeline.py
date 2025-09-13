@@ -26,6 +26,13 @@ CONFIG = {
         "conservative": 0.95,  # 5% decline
         "base_case": 1.0,      # Current trend
         "optimistic": 1.05     # 5% growth
+    },
+    "projection_growth_rate": 0.02,  # 2% annual growth
+    "seasonal_variation": {
+        "q1": 0.85,  # Q1 significantly lower
+        "q2": 1.0,   # Q2 baseline
+        "q3": 1.15,  # Q3 significantly higher
+        "q4": 1.0    # Q4 baseline
     }
 }
 
@@ -290,7 +297,7 @@ class SimpleRevenuePipeline:
         }
     
     def _create_graph_data(self, projections: Dict[str, Any]) -> Dict[str, Any]:
-        """Create graph-ready data structure."""
+        """Create graph-ready data structure with continuous line from historical to projected."""
         graph_data = {
             "monthly_data": [],
             "yearly_totals": {"historical": {}, "projected": {}},
@@ -298,13 +305,14 @@ class SimpleRevenuePipeline:
         }
         
         # Process historical data
+        historical_data = []
         for file_data in self.audit_trail["pipeline_run"]["files_processed"]:
             filename = file_data["file"]
             year = filename.split("-")[0]
             month = filename.split("-")[1]
             date_str = f"{year}-{month.zfill(2)}-01"
             
-            graph_data["monthly_data"].append({
+            historical_data.append({
                 "date": date_str,
                 "year": year,
                 "month": month,
@@ -314,17 +322,58 @@ class SimpleRevenuePipeline:
                 "structure_type": file_data["structure_type"]
             })
         
-        # Add projected data
-        monthly_avg = projections["monthly_averages"]["2025"]["monthly_average"]
+        # Sort historical data by date
+        historical_data.sort(key=lambda x: x["date"])
         
-        # 2025 remaining months
-        for month_num in CONFIG["projection_months_2025"]:
+        # Get the last historical data point to ensure continuity
+        last_historical_revenue = None
+        last_historical_date = None
+        if historical_data:
+            last_historical_revenue = historical_data[-1]["revenue"]
+            last_historical_date = historical_data[-1]["date"]
+        
+        # Calculate projected revenue with growth and seasonal variation
+        def calculate_projected_revenue(year: int, month: int, is_first_projection: bool = False) -> float:
+            # For the first projection month, start exactly at the last historical revenue
+            if is_first_projection and last_historical_revenue is not None:
+                return round(last_historical_revenue, 2)
+            
+            # Use 2025 average for subsequent months
+            base_revenue = projections["monthly_averages"]["2025"]["monthly_average"]
+            
+            # Apply annual growth (2% per year)
+            years_from_2025 = year - 2025
+            growth_multiplier = (1 + CONFIG["projection_growth_rate"]) ** years_from_2025
+            
+            # Apply seasonal variation
+            if month in [1, 2, 3]:  # Q1
+                seasonal_multiplier = CONFIG["seasonal_variation"]["q1"]
+            elif month in [4, 5, 6]:  # Q2
+                seasonal_multiplier = CONFIG["seasonal_variation"]["q2"]
+            elif month in [7, 8, 9]:  # Q3
+                seasonal_multiplier = CONFIG["seasonal_variation"]["q3"]
+            else:  # Q4
+                seasonal_multiplier = CONFIG["seasonal_variation"]["q4"]
+            
+            # Add some monthly variation (random but consistent)
+            import hashlib
+            month_key = f"{year}-{month:02d}"
+            hash_val = int(hashlib.md5(month_key.encode()).hexdigest()[:8], 16)
+            variation = (hash_val % 2000 - 1000) / 10000  # ±10% variation
+            
+            projected_revenue = base_revenue * growth_multiplier * seasonal_multiplier * (1 + variation)
+            return round(projected_revenue, 2)
+        
+        # 2025 remaining months (Aug-Dec)
+        for i, month_num in enumerate(CONFIG["projection_months_2025"]):
             date_str = f"2025-{month_num:02d}-01"
+            is_first_projection = (i == 0)  # First month is the connection point
+            projected_revenue = calculate_projected_revenue(2025, month_num, is_first_projection)
             graph_data["monthly_data"].append({
                 "date": date_str,
                 "year": "2025",
                 "month": str(month_num),
-                "revenue": monthly_avg,
+                "revenue": projected_revenue,
                 "data_type": "projected",
                 "file": f"Projected 2025-{month_num:02d}",
                 "structure_type": "projected"
@@ -333,18 +382,31 @@ class SimpleRevenuePipeline:
         # 2026 full year
         for month_num in CONFIG["projection_year_2026"]:
             date_str = f"2026-{month_num:02d}-01"
+            projected_revenue = calculate_projected_revenue(2026, month_num)
             graph_data["monthly_data"].append({
                 "date": date_str,
                 "year": "2026",
                 "month": str(month_num),
-                "revenue": monthly_avg,
+                "revenue": projected_revenue,
                 "data_type": "projected",
                 "file": f"Projected 2026-{month_num:02d}",
                 "structure_type": "projected"
             })
         
-        # Sort by date
+        # Combine historical and projected data into single continuous array
+        graph_data["monthly_data"] = historical_data + graph_data["monthly_data"]
+        
+        # Sort by date to ensure proper order
         graph_data["monthly_data"].sort(key=lambda x: x["date"])
+        
+        # Add transition point marker for frontend
+        if historical_data:
+            last_historical_index = len(historical_data) - 1
+            graph_data["transition_point"] = {
+                "index": last_historical_index,
+                "date": historical_data[-1]["date"],
+                "revenue": historical_data[-1]["revenue"]
+            }
         
         # Calculate yearly totals
         self._calculate_yearly_totals(graph_data, projections)
@@ -430,7 +492,7 @@ class SimpleRevenuePipeline:
         if output_path is None:
             # Save only to where the website actually reads from
             output_paths = [
-                "website/src/data/revenue_audit_trail.json"  # Where website reads from
+                "website/public/data/revenue_audit_trail.json"  # Where website reads from
             ]
         else:
             output_paths = [output_path]

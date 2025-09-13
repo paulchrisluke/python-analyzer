@@ -1,9 +1,21 @@
 "use client"
 
 import * as React from "react"
-import { Area, AreaChart, CartesianGrid, XAxis, YAxis } from "recharts"
+import { Area, AreaChart, CartesianGrid, XAxis, YAxis, Line, LineChart, ComposedChart, ResponsiveContainer, ReferenceLine } from "recharts"
 
 import { useIsMobile } from "@/hooks/use-mobile"
+
+// Type definitions
+interface RevenueDataPoint {
+  date: string
+  year: string
+  month: string
+  revenue: number
+  data_type: "historical" | "projected"
+  file: string
+  structure_type: string
+}
+
 
 // Robust date parsing utility for YYYY-MM format
 function parseYearMonthString(dateString: string): Date | null {
@@ -36,6 +48,7 @@ function formatDateSafely(dateString: string, options: Intl.DateTimeFormatOption
   }
   return date.toLocaleDateString("en-US", options)
 }
+
 import {
   Card,
   CardContent,
@@ -61,40 +74,48 @@ import {
   ToggleGroupItem,
 } from "@/components/ui/toggle-group"
 
-// Sample financial data - in real app this would come from ETL data
-const financialData = [
-  { month: "2023-01", revenue: 65000, expenses: 45000, profit: 20000 },
-  { month: "2023-02", revenue: 72000, expenses: 48000, profit: 24000 },
-  { month: "2023-03", revenue: 68000, expenses: 46000, profit: 22000 },
-  { month: "2023-04", revenue: 75000, expenses: 50000, profit: 25000 },
-  { month: "2023-05", revenue: 82000, expenses: 52000, profit: 30000 },
-  { month: "2023-06", revenue: 78000, expenses: 49000, profit: 29000 },
-  { month: "2023-07", revenue: 85000, expenses: 54000, profit: 31000 },
-  { month: "2023-08", revenue: 88000, expenses: 55000, profit: 33000 },
-  { month: "2023-09", revenue: 92000, expenses: 58000, profit: 34000 },
-  { month: "2023-10", revenue: 87000, expenses: 53000, profit: 34000 },
-  { month: "2023-11", revenue: 95000, expenses: 59000, profit: 36000 },
-  { month: "2023-12", revenue: 98000, expenses: 60000, profit: 38000 },
-  { month: "2024-01", revenue: 102000, expenses: 62000, profit: 40000 },
-  { month: "2024-02", revenue: 105000, expenses: 64000, profit: 41000 },
-  { month: "2024-03", revenue: 108000, expenses: 66000, profit: 42000 },
-  { month: "2024-04", revenue: 112000, expenses: 68000, profit: 44000 },
-  { month: "2024-05", revenue: 115000, expenses: 70000, profit: 45000 },
-  { month: "2024-06", revenue: 118000, expenses: 72000, profit: 46000 },
-]
+// Types for revenue data
+interface RevenueDataPoint {
+  date: string
+  year: string
+  month: string
+  revenue: number
+  data_type: "historical" | "projected"
+  file: string
+  structure_type: string
+}
+
+interface RevenueAuditTrail {
+  pipeline_run: {
+    graph_data: {
+      monthly_data: RevenueDataPoint[]
+    }
+  }
+}
+
+// Load revenue data from the audit trail
+async function loadRevenueData(): Promise<RevenueDataPoint[]> {
+  try {
+    const response = await fetch('/data/revenue_audit_trail.json')
+    if (!response.ok) {
+      throw new Error('Failed to load revenue data')
+    }
+    const data: RevenueAuditTrail = await response.json()
+    return data.pipeline_run.graph_data.monthly_data
+  } catch (error) {
+    console.error('Error loading revenue data:', error)
+    return []
+  }
+}
 
 const chartConfig = {
   revenue: {
     label: "Revenue",
     color: "hsl(var(--chart-1))",
   },
-  expenses: {
-    label: "Expenses", 
+  projected_revenue: {
+    label: "Projected Revenue",
     color: "hsl(var(--chart-2))",
-  },
-  profit: {
-    label: "Profit",
-    color: "hsl(var(--chart-3))",
   },
 } satisfies ChartConfig
 
@@ -102,30 +123,121 @@ export function FinancialChart() {
   console.log("📊 FinancialChart rendering");
   
   const isMobile = useIsMobile()
-  const [timeRange, setTimeRange] = React.useState("12m")
+  const [timeRange, setTimeRange] = React.useState("all")
+  const [revenueData, setRevenueData] = React.useState<RevenueDataPoint[]>([])
+  const [loading, setLoading] = React.useState(true)
+
+  // Load revenue data on component mount
+  React.useEffect(() => {
+    loadRevenueData().then(data => {
+      setRevenueData(data)
+      setLoading(false)
+    })
+  }, [])
 
   React.useEffect(() => {
     if (isMobile) {
-      setTimeRange("6m")
+      setTimeRange("all")
     }
   }, [isMobile])
 
-  const filteredData = financialData.filter((item, index) => {
-    if (timeRange === "12m") return index >= 6 // Last 12 months
-    if (timeRange === "6m") return index >= 12 // Last 6 months
-    if (timeRange === "3m") return index >= 15 // Last 3 months
-    return true
-  })
+  // Transform revenue data for chart
+  const chartData = React.useMemo(() => {
+    if (!revenueData.length) return []
+
+    const transformed = revenueData.map((item, index) => ({
+      month: `${item.year}-${item.month.padStart(2, '0')}`,
+      revenue: item.data_type === "historical" ? item.revenue : null,
+      projected_revenue: item.data_type === "projected" ? item.revenue : null,
+      data_type: item.data_type,
+      date: item.date,
+      index: index
+    }))
+
+    // Debug: Log projected data to see if variation is present
+    const projectedData = transformed.filter(item => item.data_type === "projected")
+    if (projectedData.length > 0) {
+      console.log("Projected data for chart:", projectedData.slice(0, 5).map(item => ({
+        month: item.month,
+        revenue: item.revenue,
+        projected_revenue: item.projected_revenue
+      })))
+      console.log("First projected revenue value:", projectedData[0]?.projected_revenue)
+      console.log("Second projected revenue value:", projectedData[1]?.projected_revenue)
+    }
+
+    // Find the transition point and add a bridge point
+    const transitionIndex = transformed.findIndex(item => item.data_type === "projected")
+    if (transitionIndex > 0) {
+      const lastHistorical = transformed[transitionIndex - 1]
+      const firstProjected = transformed[transitionIndex]
+      
+      // Add a bridge point that has both values to connect the lines
+      const bridgePoint = {
+        ...lastHistorical,
+        revenue: lastHistorical.revenue,
+        projected_revenue: firstProjected.projected_revenue,
+        isBridge: true
+      }
+      
+      // Insert the bridge point
+      transformed.splice(transitionIndex, 0, bridgePoint)
+    }
+
+    return transformed
+  }, [revenueData])
+
+  const filteredData = React.useMemo(() => {
+    if (timeRange === "all") return chartData
+    
+    const now = new Date()
+    const cutoffDate = new Date()
+    
+    switch (timeRange) {
+      case "12m":
+        cutoffDate.setMonth(now.getMonth() - 12)
+        break
+      case "6m":
+        cutoffDate.setMonth(now.getMonth() - 6)
+        break
+      case "3m":
+        cutoffDate.setMonth(now.getMonth() - 3)
+        break
+      default:
+        return chartData
+    }
+    
+    return chartData.filter(item => {
+      const itemDate = new Date(item.date)
+      return itemDate >= cutoffDate
+    })
+  }, [chartData, timeRange])
+
+  if (loading) {
+    return (
+      <Card className="@container/card">
+        <CardHeader>
+          <CardTitle>Financial Performance</CardTitle>
+          <CardDescription>Loading revenue data...</CardDescription>
+        </CardHeader>
+        <CardContent className="px-2 pt-4 sm:px-6 sm:pt-6">
+          <div className="flex items-center justify-center h-[300px]">
+            <div className="text-muted-foreground">Loading...</div>
+          </div>
+        </CardContent>
+      </Card>
+    )
+  }
 
   return (
     <Card className="@container/card">
       <CardHeader className="relative">
-        <CardTitle>Financial Performance</CardTitle>
+        <CardTitle>Revenue Performance</CardTitle>
         <CardDescription>
           <span className="@[540px]/card:block hidden">
-            Revenue, expenses, and profit trends
+            Historical and projected revenue trends
           </span>
-          <span className="@[540px]/card:hidden">Financial trends</span>
+          <span className="@[540px]/card:hidden">Revenue trends</span>
         </CardDescription>
         <div className="absolute right-4 top-4">
           <ToggleGroup
@@ -135,6 +247,9 @@ export function FinancialChart() {
             variant="outline"
             className="@[767px]/card:flex hidden"
           >
+            <ToggleGroupItem value="all" className="h-8 px-2.5">
+              All Time
+            </ToggleGroupItem>
             <ToggleGroupItem value="12m" className="h-8 px-2.5">
               Last 12 months
             </ToggleGroupItem>
@@ -150,9 +265,12 @@ export function FinancialChart() {
               className="@[767px]/card:hidden flex w-40"
               aria-label="Select time range"
             >
-              <SelectValue placeholder="Last 12 months" />
+              <SelectValue placeholder="All Time" />
             </SelectTrigger>
             <SelectContent className="rounded-xl">
+              <SelectItem value="all" className="rounded-lg">
+                All Time
+              </SelectItem>
               <SelectItem value="12m" className="rounded-lg">
                 Last 12 months
               </SelectItem>
@@ -173,41 +291,13 @@ export function FinancialChart() {
         >
           <AreaChart data={filteredData}>
             <defs>
-              <linearGradient id="fillRevenue" x1="0" y1="0" x2="0" y2="1">
-                <stop
-                  offset="5%"
-                  stopColor="var(--color-revenue)"
-                  stopOpacity={0.8}
-                />
-                <stop
-                  offset="95%"
-                  stopColor="var(--color-revenue)"
-                  stopOpacity={0.1}
-                />
+              <linearGradient id="historicalGradient" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="5%" stopColor="var(--color-revenue)" stopOpacity={0.3}/>
+                <stop offset="95%" stopColor="var(--color-revenue)" stopOpacity={0}/>
               </linearGradient>
-              <linearGradient id="fillExpenses" x1="0" y1="0" x2="0" y2="1">
-                <stop
-                  offset="5%"
-                  stopColor="var(--color-expenses)"
-                  stopOpacity={0.8}
-                />
-                <stop
-                  offset="95%"
-                  stopColor="var(--color-expenses)"
-                  stopOpacity={0.1}
-                />
-              </linearGradient>
-              <linearGradient id="fillProfit" x1="0" y1="0" x2="0" y2="1">
-                <stop
-                  offset="5%"
-                  stopColor="var(--color-profit)"
-                  stopOpacity={0.8}
-                />
-                <stop
-                  offset="95%"
-                  stopColor="var(--color-profit)"
-                  stopOpacity={0.1}
-                />
+              <linearGradient id="projectedGradient" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="5%" stopColor="var(--color-projected_revenue)" stopOpacity={0.3}/>
+                <stop offset="95%" stopColor="var(--color-projected_revenue)" stopOpacity={0}/>
               </linearGradient>
             </defs>
             <CartesianGrid vertical={false} />
@@ -240,37 +330,51 @@ export function FinancialChart() {
                       year: "numeric",
                     })
                   }}
-                  formatter={(value, name) => [
-                    `$${Number(value).toLocaleString()}`,
-                    chartConfig[name as keyof typeof chartConfig]?.label || String(name),
-                  ]}
+                  formatter={(value, name, props: any) => {
+                    if (value === null || value === undefined) return [null, null]
+                    const label = name === "projected_revenue" ? "Projected Revenue" : "Historical Revenue"
+                    return [
+                      `$${Number(value).toLocaleString()}`,
+                      label,
+                    ]
+                  }}
                   indicator="dot"
                 />
               }
             />
+            {/* Historical Revenue Area */}
             <Area
               dataKey="revenue"
               type="natural"
-              fill="url(#fillRevenue)"
               stroke="var(--color-revenue)"
+              fill="url(#historicalGradient)"
               strokeWidth={2}
+              connectNulls={false}
             />
+            {/* Projected Revenue Area */}
             <Area
-              dataKey="expenses"
+              dataKey="projected_revenue"
               type="natural"
-              fill="url(#fillExpenses)"
-              stroke="var(--color-expenses)"
+              stroke="var(--color-projected_revenue)"
+              fill="url(#projectedGradient)"
               strokeWidth={2}
-            />
-            <Area
-              dataKey="profit"
-              type="natural"
-              fill="url(#fillProfit)"
-              stroke="var(--color-profit)"
-              strokeWidth={2}
+              strokeDasharray="5 5"
+              connectNulls={false}
             />
           </AreaChart>
         </ChartContainer>
+        
+        {/* Legend */}
+        <div className="flex items-center gap-6 mt-4 text-sm">
+          <div className="flex items-center gap-2">
+            <div className="w-3 h-3 rounded-full" style={{ backgroundColor: 'hsl(var(--chart-1))' }}></div>
+            <span className="text-muted-foreground">Historical Revenue</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="w-3 h-3 rounded-full border-2 border-dashed" style={{ borderColor: 'hsl(var(--chart-2))' }}></div>
+            <span className="text-muted-foreground">Projected Revenue</span>
+          </div>
+        </div>
       </CardContent>
     </Card>
   )
