@@ -840,6 +840,16 @@ class BusinessMetricsCalculator:
                     avg_monthly_revenue = round_currency(monthly_revenue.mean())
                     logger.info(f"Average monthly revenue from sales data: ${avg_monthly_revenue:,.2f}")
                     
+                    # Track file-level contribution for sales data
+                    total_sales_revenue = df['total_price'].sum()
+                    self.lineage_tracker.add_file_contribution(
+                        file_name="sales_transactions.csv",
+                        field_name="total_price",
+                        raw_value=total_sales_revenue,
+                        normalized_value=avg_monthly_revenue,
+                        description="Sales transaction aggregation by month"
+                    )
+                    
                     # Log the revenue calculation step
                     self.lineage_tracker.add_step("aggregate", "total_price", avg_monthly_revenue, 
                                                 "Calculate average monthly revenue from sales data")
@@ -847,6 +857,15 @@ class BusinessMetricsCalculator:
                     # Use the EBITDA margin from business rules (website shows 25.6%)
                     ebitda_margin = self.business_rules.get('financial_metrics', {}).get('ebitda_margin_target', 0.256)
                     calculated_monthly_ebitda = safe_currency_multiplication(avg_monthly_revenue, ebitda_margin)
+                    
+                    # Track file-level contribution for EBITDA calculation
+                    self.lineage_tracker.add_file_contribution(
+                        file_name="sales_transactions.csv",
+                        field_name="total_price",
+                        raw_value=avg_monthly_revenue,
+                        normalized_value=calculated_monthly_ebitda,
+                        description=f"EBITDA calculation from sales data using {ebitda_margin:.1%} margin"
+                    )
                     
                     # Log the EBITDA calculation step
                     self.lineage_tracker.add_multiply_step(
@@ -1085,6 +1104,12 @@ class BusinessMetricsCalculator:
             float: Monthly revenue average (not total revenue)
         """
         try:
+            # Start tracking P&L revenue calculation
+            self.lineage_tracker.start_calculation(
+                "pnl_monthly_revenue_average",
+                "Calculate monthly revenue average from P&L data with file-level contributions"
+            )
+            
             # P&L data is directly under normalized_data, not under 'financial'
             pnl_data = normalized_data.get('profit_loss', {})
             
@@ -1211,6 +1236,30 @@ class BusinessMetricsCalculator:
                     # Convert Decimal to float if needed
                     if isinstance(monthly_revenue, Decimal):
                         monthly_revenue = float(monthly_revenue)
+                    
+                    # Track file-level contribution for lineage
+                    field_name = "Unknown"
+                    raw_value = monthly_revenue
+                    if 'Pennsylvania' in df.columns and pd.notna(sales_row['Pennsylvania'].iloc[0]):
+                        field_name = "Pennsylvania"
+                        raw_value = self._safe_float_conversion(sales_row['Pennsylvania'].iloc[0])
+                    elif 'Cranberry' in df.columns and 'West View' in df.columns:
+                        field_name = "Cranberry + West View"
+                        cranberry_raw = self._safe_float_conversion(sales_row['Cranberry'].iloc[0])
+                        west_view_raw = self._safe_float_conversion(sales_row['West View'].iloc[0])
+                        raw_value = cranberry_raw + west_view_raw
+                    elif 'TOTAL' in df.columns:
+                        field_name = "TOTAL"
+                        raw_value = self._safe_float_conversion(sales_row['TOTAL'].iloc[0])
+                    
+                    self.lineage_tracker.add_file_contribution(
+                        file_name=pnl_key,
+                        field_name=field_name,
+                        raw_value=raw_value,
+                        normalized_value=monthly_revenue,
+                        description=f"Revenue from {pnl_key} - {field_name} column"
+                    )
+                    
                     total_revenue += monthly_revenue
                     month_count += 1
                     if month_key:
@@ -1249,10 +1298,15 @@ class BusinessMetricsCalculator:
             monthly_revenue_avg = safe_currency_division(total_revenue, month_count)
             logger.info(f"P&L monthly revenue average calculation complete: ${total_revenue:,.2f} total from {month_count} months (processed {processed_count}, skipped {skipped_count})")
             logger.info(f"Monthly revenue average: ${monthly_revenue_avg:,.2f}")
+            
+            # Finish the calculation tracking
+            self.lineage_tracker.finish_calculation(monthly_revenue_avg)
             return monthly_revenue_avg
             
         except Exception as e:
             logger.exception("Error estimating revenue from P&L data")
+            # Finish calculation with 0 value in case of error
+            self.lineage_tracker.finish_calculation(0.0)
             return 0.0
     
     def _calculate_performance_indicators(self) -> Dict[str, Any]:
