@@ -218,6 +218,37 @@ class CalculationLineageTracker:
             self.add_step(operation, field=",".join(fields), value=value, 
                          description=description, fields=fields)
     
+    def add_file_contribution(self, file_name: str, field_name: str, raw_value: Union[float, int, Decimal], 
+                             normalized_value: Union[float, int, Decimal], description: str = None) -> None:
+        """
+        Add a file-level contribution step to track individual file contributions.
+        
+        Args:
+            file_name: Name of the source file (e.g., "pnl_2023_2023-07-01_to_2023-07-31_ProfitAndLoss_CranberryHearing")
+            field_name: Name of the field/column (e.g., "Pennsylvania", "Cranberry", "total_price")
+            raw_value: Raw value extracted from the file
+            normalized_value: Normalized/processed value used in calculations
+            description: Optional description of the contribution
+        """
+        with self._lock:
+            if self.current_calculation is None:
+                raise CalculationError("No active calculation: call start_calculation() before add_file_contribution()")
+            
+            self.step_counter += 1
+            step = {
+                "step": self.step_counter,
+                "operation": "file_contribution",
+                "file_name": file_name,
+                "field_name": field_name,
+                "raw_value": _safe_convert_value(raw_value),
+                "normalized_value": _safe_convert_value(normalized_value),
+                "description": description,
+                "timestamp": datetime.now(timezone.utc).isoformat()
+            }
+            
+            self.current_calculation["steps"].append(step)
+            logger.debug(f"Added file contribution step {self.step_counter}: {file_name} -> {field_name} = {raw_value} -> {normalized_value}")
+    
     def finish_calculation(self, final_value: Union[float, int, Decimal]) -> Dict[str, Any]:
         """
         Finish the current calculation and return the lineage.
