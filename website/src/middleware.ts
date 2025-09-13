@@ -1,6 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { jwtVerify } from 'jose'
 
+// JWT Payload interface for type safety
+interface JWTPayload {
+  iss?: string
+  aud?: string
+  exp?: number
+  iat?: number
+  role?: string
+  [key: string]: unknown
+}
+
 // Protected routes that require authentication
 const protectedRoutes = ['/dashboard', '/docs', '/admin', '/buyer']
 
@@ -41,14 +51,14 @@ async function getUserRole(req: NextRequest): Promise<string | null> {
     if (!sessionCookie?.value) return null
     
     const token = sessionCookie.value
-    const { payload } = await jwtVerify(
+    const { payload } = await jwtVerify<JWTPayload>(
       token,
       new TextEncoder().encode(authSecret),
       { issuer: 'cranberry', audience: 'web' }
     )
     
     // Extract role from token payload
-    return (payload as any)?.role || null
+    return payload.role ?? null
   } catch (error) {
     console.error('Role extraction failed:', error)
     return null

@@ -7,14 +7,26 @@ export async function GET(request: NextRequest) {
     const token = request.cookies.get('cranberry-auth-session')?.value
 
     if (!token) {
-      return NextResponse.json({ user: null }, { status: 200 })
+      return NextResponse.json({ user: null }, { 
+        status: 200,
+        headers: {
+          'Cache-Control': 'no-store',
+          'Vary': 'Cookie'
+        }
+      })
     }
 
     // Verify the JWT token
     const authSecret = process.env.AUTH_SECRET
     if (!authSecret) {
       console.error('AUTH_SECRET not configured')
-      return NextResponse.json({ error: 'Authentication not configured' }, { status: 500 })
+      return NextResponse.json({ error: 'Authentication not configured' }, { 
+        status: 500,
+        headers: {
+          'Cache-Control': 'no-store',
+          'Vary': 'Cookie'
+        }
+      })
     }
 
     const secret = new TextEncoder().encode(authSecret)
@@ -25,26 +37,85 @@ export async function GET(request: NextRequest) {
         audience: 'web'
       })
 
-      // Extract user information from the JWT payload
+      // Validate JWT payload fields
+      const email = payload.email
+      const name = payload.name
+      const role = payload.role
+
+      // Validate email is a non-empty string
+      if (typeof email !== 'string' || email.trim() === '') {
+        console.error('Invalid email in JWT payload:', email)
+        return NextResponse.json({ user: null }, { 
+          status: 200,
+          headers: {
+            'Cache-Control': 'no-store',
+            'Vary': 'Cookie'
+          }
+        })
+      }
+
+      // Validate name is a non-empty string
+      if (typeof name !== 'string' || name.trim() === '') {
+        console.error('Invalid name in JWT payload:', name)
+        return NextResponse.json({ user: null }, { 
+          status: 200,
+          headers: {
+            'Cache-Control': 'no-store',
+            'Vary': 'Cookie'
+          }
+        })
+      }
+
+      // Validate role is either 'admin' or 'buyer'
+      if (role !== 'admin' && role !== 'buyer') {
+        console.error('Invalid role in JWT payload:', role)
+        return NextResponse.json({ user: null }, { 
+          status: 200,
+          headers: {
+            'Cache-Control': 'no-store',
+            'Vary': 'Cookie'
+          }
+        })
+      }
+
+      // Extract user information from the validated JWT payload
       const user = {
-        email: payload.email as string,
-        name: payload.name as string,
-        role: payload.role as 'admin' | 'buyer',
-        isAdmin: payload.role === 'admin',
-        isBuyer: payload.role === 'buyer',
+        email: email.trim(),
+        name: name.trim(),
+        role: role as 'admin' | 'buyer',
+        isAdmin: role === 'admin',
+        isBuyer: role === 'buyer',
         avatar: "/avatars/user.jpg"
       }
 
-      return NextResponse.json({ user }, { status: 200 })
+      return NextResponse.json({ user }, { 
+        status: 200,
+        headers: {
+          'Cache-Control': 'no-store',
+          'Vary': 'Cookie'
+        }
+      })
     } catch (jwtError) {
       console.error('JWT verification failed:', jwtError)
       // Invalid or expired token - clear the cookie
-      const response = NextResponse.json({ user: null }, { status: 200 })
+      const response = NextResponse.json({ user: null }, { 
+        status: 200,
+        headers: {
+          'Cache-Control': 'no-store',
+          'Vary': 'Cookie'
+        }
+      })
       response.cookies.delete('cranberry-auth-session')
       return response
     }
   } catch (error) {
     console.error('Session validation error:', error)
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+    return NextResponse.json({ error: 'Internal server error' }, { 
+      status: 500,
+      headers: {
+        'Cache-Control': 'no-store',
+        'Vary': 'Cookie'
+      }
+    })
   }
 }
