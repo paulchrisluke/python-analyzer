@@ -7,8 +7,9 @@ import {
   FileTextIcon,
   CheckCircleIcon
 } from "lucide-react";
-import { sanitize } from "@/lib/dompurify-wrapper";
+import { BusinessDescription } from "@/components/business-description";
 import { BusinessOverview } from "@/components/business-overview";
+import { useRevenueData } from "@/hooks/use-revenue-data";
 
 // Business data interfaces based on the actual ETL data structure
 interface Location {
@@ -105,7 +106,14 @@ interface BusinessData {
   business_operations: BusinessOperations;
   market_opportunity: MarketOpportunity;
   transaction_terms: TransactionTerms;
-  business_description?: string;
+  business_description?: {
+    paragraphs: Array<{
+      text: string
+      highlight?: string
+    }>
+    keyStrengths: string[]
+    marketOpportunity: string
+  };
   key_benefits?: string[];
 }
 
@@ -115,6 +123,25 @@ interface BusinessDetailsProps {
 
 export function BusinessDetails({ data }: BusinessDetailsProps) {
   console.log("🏢 BusinessDetails rendering");
+  
+  // Fetch real revenue data from the simple revenue pipeline
+  const { revenue, ebitda, loading, error } = useRevenueData();
+  
+  // Get real data from simple pipelines
+  const realRevenueData = revenue?.pipeline_run?.total_revenue;
+  const realEbitdaData = ebitda?.summary?.total_ebit;
+  
+  // Update the data with real revenue/EBITDA if available
+  const updatedData = {
+    ...data,
+    financial_highlights: {
+      ...data.financial_highlights,
+      annual_revenue: realRevenueData || data.financial_highlights?.annual_revenue || 0,
+      annual_ebitda: realEbitdaData || data.financial_highlights?.annual_ebitda || 0,
+      ebitda_margin: realRevenueData && realEbitdaData ? realEbitdaData / realRevenueData : data.financial_highlights?.ebitda_margin || 0,
+      payback_period: realEbitdaData && data.financial_highlights?.asking_price ? data.financial_highlights.asking_price / realEbitdaData : 0,
+    }
+  };
   
   // Helper function to parse currency strings (strips non-numeric characters)
   const parseCurrency = (value: string | number | null | undefined): number => {
@@ -140,7 +167,7 @@ export function BusinessDetails({ data }: BusinessDetailsProps) {
   return (
     <div className="space-y-6">
       {/* Business Overview */}
-      <BusinessOverview data={data} />
+      <BusinessOverview data={updatedData} />
 
 
       {/* Business Description */}
@@ -153,13 +180,7 @@ export function BusinessDetails({ data }: BusinessDetailsProps) {
         </CardHeader>
         <CardContent className="prose prose-sm max-w-none">
           {data.business_description ? (
-            // Sanitize HTML content to prevent XSS attacks - using safe wrapper
-            <div 
-              className="mb-4" 
-              dangerouslySetInnerHTML={{ 
-                __html: sanitize(data.business_description || '')
-              }} 
-            />
+            <BusinessDescription data={data.business_description} />
           ) : (
             <>
               <p className="mb-4">

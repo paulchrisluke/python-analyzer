@@ -21,7 +21,7 @@ const DEFAULT_SAFE_CONFIG = {
   FORBID_ATTR: ['onerror', 'onload', 'onclick', 'onmouseover', 'onfocus', 'onblur', 'onchange', 'onsubmit', 'onreset', 'onselect', 'onkeydown', 'onkeypress', 'onkeyup', 'onmousedown', 'onmousemove', 'onmouseout', 'onmouseup', 'onresize', 'onscroll', 'onunload']
 };
 
-// Server-side fallback sanitization (basic HTML tag removal)
+// Server-side fallback sanitization (preserves allowed HTML tags)
 function serverSideSanitize(input: string, options: any = {}): string {
   if (typeof input !== 'string') {
     return '';
@@ -30,11 +30,24 @@ function serverSideSanitize(input: string, options: any = {}): string {
   // Merge options with default safe config
   const config = { ...DEFAULT_SAFE_CONFIG, ...options };
   
-  // Basic server-side sanitization - remove all HTML tags and return plain text
-  // This is a fallback for SSR when DOMPurify is not available
+  // Basic server-side sanitization that preserves allowed HTML tags
+  // This matches the client-side behavior to prevent hydration mismatches
   let sanitized = input
     .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '') // Remove script tags
-    .replace(/<[^>]*>/g, '') // Remove all HTML tags
+    .replace(/<iframe\b[^<]*(?:(?!<\/iframe>)<[^<]*)*<\/iframe>/gi, '') // Remove iframe tags
+    .replace(/<object\b[^<]*(?:(?!<\/object>)<[^<]*)*<\/object>/gi, '') // Remove object tags
+    .replace(/<embed\b[^<]*>/gi, '') // Remove embed tags
+    .replace(/<link\b[^>]*>/gi, '') // Remove link tags
+    .replace(/<style\b[^<]*(?:(?!<\/style>)<[^<]*)*<\/style>/gi, '') // Remove style tags
+    .replace(/<meta\b[^>]*>/gi, '') // Remove meta tags
+    .replace(/<form\b[^<]*(?:(?!<\/form>)<[^<]*)*<\/form>/gi, '') // Remove form tags
+    .replace(/<input\b[^>]*>/gi, '') // Remove input tags
+    .replace(/<textarea\b[^<]*(?:(?!<\/textarea>)<[^<]*)*<\/textarea>/gi, '') // Remove textarea tags
+    .replace(/<select\b[^<]*(?:(?!<\/select>)<[^<]*)*<\/select>/gi, '') // Remove select tags
+    .replace(/<button\b[^<]*(?:(?!<\/button>)<[^<]*)*<\/button>/gi, '') // Remove button tags
+    // Remove dangerous attributes from allowed tags
+    .replace(/\s*on\w+\s*=\s*["'][^"']*["']/gi, '') // Remove event handlers
+    .replace(/\s*javascript\s*:/gi, '') // Remove javascript: protocols
     .replace(/&lt;/g, '<')
     .replace(/&gt;/g, '>')
     .replace(/&amp;/g, '&')

@@ -3,6 +3,7 @@
 import { useState } from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
+import { signIn, getSession } from "next-auth/react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import {
@@ -14,7 +15,6 @@ import {
 } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { useAuth } from "@/lib/simple-auth"
 
 export function LoginForm({
   className,
@@ -24,7 +24,6 @@ export function LoginForm({
   const [password, setPassword] = useState("")
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState("")
-  const { signIn } = useAuth()
   const router = useRouter()
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -33,15 +32,24 @@ export function LoginForm({
     setError("")
 
     try {
-      // Use the secure auth context for authentication
-      const result = await signIn(email.trim(), password)
-      
-      if (result.success) {
-        // Authentication successful - redirect to appropriate page
-        router.push("/dashboard/")
-      } else {
-        // Authentication failed
-        setError(result.error || "Sign in failed")
+      const result = await signIn('credentials', {
+        email: email.trim(),
+        password,
+        redirect: false
+      })
+
+      if (result?.error) {
+        setError("Invalid email or password")
+      } else if (result?.ok) {
+        // Get session to determine redirect
+        const session = await getSession()
+        if (session?.user?.role === 'admin') {
+          router.push("/admin")
+        } else if (session?.user?.role === 'buyer') {
+          router.push("/buyer")
+        } else {
+          router.push("/dashboard")
+        }
       }
     } catch (err) {
       console.error('Login error:', err)

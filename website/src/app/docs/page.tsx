@@ -1,4 +1,4 @@
-import { AuthGuard } from "@/components/auth-guard"
+import { AdminOrBuyer } from "@/components/nextauth-guard"
 import { DocumentsTable } from "@/components/documents-table"
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar"
 import { AppSidebar } from "@/components/app-sidebar"
@@ -8,7 +8,7 @@ import Link from "next/link"
 
 export default function DocsPage() {
   return (
-    <AuthGuard>
+    <AdminOrBuyer>
       <SidebarProvider>
         <AppSidebar />
         <SidebarInset>
@@ -71,6 +71,6 @@ export default function DocsPage() {
           </div>
         </SidebarInset>
       </SidebarProvider>
-    </AuthGuard>
+    </AdminOrBuyer>
   )
 }
