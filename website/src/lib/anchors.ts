@@ -8,7 +8,6 @@ export const ANCHORS = {
   BUSINESS_DETAILS: "business-details", 
   LOCATION_INFORMATION: "location-information",
   DUE_DILIGENCE: "due-diligence",
-  DUE_DILIGENCE_DOCUMENTS: "due-diligence-documents",
 } as const;
 
 /**

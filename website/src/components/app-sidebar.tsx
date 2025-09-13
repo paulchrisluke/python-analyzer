@@ -8,18 +8,15 @@ import {
   CalculatorIcon,
   ClipboardListIcon,
   DatabaseIcon,
-  FileCodeIcon,
   FileIcon,
   FileTextIcon,
   FolderIcon,
   HelpCircleIcon,
   LayoutDashboardIcon,
-  ListIcon,
   MapPinIcon,
   SettingsIcon,
   ShieldIcon,
   UserIcon,
-  UsersIcon,
 } from "lucide-react"
 import { useSession } from "@/lib/simple-auth"
 import { getAnchorUrl, ANCHORS } from "@/lib/anchors"
@@ -63,54 +60,6 @@ const getPublicNavData = () => ({
       icon: FolderIcon,
     },
   ],
-  navClouds: [
-    {
-      title: "Request Info",
-      icon: ArrowUpCircleIcon,
-      isActive: true,
-      url: "#",
-      items: [
-        {
-          title: "Schedule Meeting",
-          url: "#",
-        },
-        {
-          title: "Request Documents",
-          url: "#",
-        },
-      ],
-    },
-    {
-      title: "Investment",
-      icon: FileTextIcon,
-      url: "#",
-      items: [
-        {
-          title: "Financial Analysis",
-          url: "#",
-        },
-        {
-          title: "Market Research",
-          url: "#",
-        },
-      ],
-    },
-    {
-      title: "Legal",
-      icon: FileCodeIcon,
-      url: "#",
-      items: [
-        {
-          title: "Contracts",
-          url: "#",
-        },
-        {
-          title: "Compliance",
-          url: "#",
-        },
-      ],
-    },
-  ],
 })
 
 // Authenticated user navigation data
@@ -143,7 +92,7 @@ const getAuthenticatedNavData = (user: { name?: string; email?: string; image?: 
     },
     {
       title: "Due Diligence",
-      url: getAnchorUrl("DUE_DILIGENCE_DOCUMENTS"),
+      url: getAnchorUrl("DUE_DILIGENCE"),
       icon: FolderIcon,
     },
   ],
@@ -176,11 +125,6 @@ const getAuthenticatedNavData = (user: { name?: string; email?: string; image?: 
       name: "Financial Reports",
       url: "/docs",
       icon: DatabaseIcon,
-    },
-    {
-      name: "Due Diligence",
-      url: "/docs",
-      icon: ClipboardListIcon,
     },
     {
       name: "Equipment List",
@@ -218,11 +162,6 @@ const getAdminNavData = (user: { name?: string; email?: string; image?: string |
       url: "/admin/metrics",
       icon: BarChartIcon,
     },
-    {
-      title: "Pipeline Status",
-      url: "/admin/pipeline",
-      icon: CalculatorIcon,
-    },
   ],
   navSecondary: [
     {
@@ -247,6 +186,13 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   
   // Check if we're on an admin page (exact path segment match to prevent false positives like /administrator)
   const isAdminPage = /^\/admin(\/|$)/.test(pathname)
+  
+  console.log("🔍 Sidebar Debug:", {
+    pathname,
+    isAuthenticated,
+    isAdminPage,
+    userEmail: session?.user?.email
+  })
   
   // Get appropriate navigation data based on auth state and page type
   const data = isAuthenticated 
