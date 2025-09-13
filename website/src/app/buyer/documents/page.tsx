@@ -10,7 +10,7 @@ import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar"
 import { AppSidebar } from "@/components/app-sidebar"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { FileTextIcon, DownloadIcon, EyeIcon } from "lucide-react"
+import { FileText, Download, Eye } from "lucide-react"
 
 function BuyerDocumentsContent() {
   const { user, signOut } = useAuth()
@@ -57,7 +57,7 @@ function BuyerDocumentsContent() {
                     <div className="space-y-4">
                       <div className="flex items-center justify-between p-4 border rounded-lg">
                         <div className="flex items-center gap-3">
-                          <FileTextIcon className="h-5 w-5 text-muted-foreground" />
+                          <FileText className="h-5 w-5 text-muted-foreground" />
                           <div>
                             <div className="font-medium">P&L Statements (2021-2024)</div>
                             <div className="text-sm text-muted-foreground">Annual profit and loss statements</div>
@@ -65,18 +65,18 @@ function BuyerDocumentsContent() {
                         </div>
                         <div className="flex gap-2">
                           <Button variant="outline" size="sm">
-                            <EyeIcon className="h-4 w-4 mr-1" />
+                            <Eye className="h-4 w-4 mr-1" />
                             View
                           </Button>
                           <Button variant="outline" size="sm">
-                            <DownloadIcon className="h-4 w-4 mr-1" />
+                            <Download className="h-4 w-4 mr-1" />
                             Download
                           </Button>
                         </div>
                       </div>
                       <div className="flex items-center justify-between p-4 border rounded-lg">
                         <div className="flex items-center gap-3">
-                          <FileTextIcon className="h-5 w-5 text-muted-foreground" />
+                          <FileText className="h-5 w-5 text-muted-foreground" />
                           <div>
                             <div className="font-medium">Balance Sheets (2021-2024)</div>
                             <div className="text-sm text-muted-foreground">Annual balance sheet statements</div>
@@ -84,18 +84,18 @@ function BuyerDocumentsContent() {
                         </div>
                         <div className="flex gap-2">
                           <Button variant="outline" size="sm">
-                            <EyeIcon className="h-4 w-4 mr-1" />
+                            <Eye className="h-4 w-4 mr-1" />
                             View
                           </Button>
                           <Button variant="outline" size="sm">
-                            <DownloadIcon className="h-4 w-4 mr-1" />
+                            <Download className="h-4 w-4 mr-1" />
                             Download
                           </Button>
                         </div>
                       </div>
                       <div className="flex items-center justify-between p-4 border rounded-lg">
                         <div className="flex items-center gap-3">
-                          <FileTextIcon className="h-5 w-5 text-muted-foreground" />
+                          <FileText className="h-5 w-5 text-muted-foreground" />
                           <div>
                             <div className="font-medium">Cash Flow Statements</div>
                             <div className="text-sm text-muted-foreground">Monthly cash flow analysis</div>
@@ -103,11 +103,11 @@ function BuyerDocumentsContent() {
                         </div>
                         <div className="flex gap-2">
                           <Button variant="outline" size="sm">
-                            <EyeIcon className="h-4 w-4 mr-1" />
+                            <Eye className="h-4 w-4 mr-1" />
                             View
                           </Button>
                           <Button variant="outline" size="sm">
-                            <DownloadIcon className="h-4 w-4 mr-1" />
+                            <Download className="h-4 w-4 mr-1" />
                             Download
                           </Button>
                         </div>
@@ -130,7 +130,7 @@ function BuyerDocumentsContent() {
                     <div className="space-y-4">
                       <div className="flex items-center justify-between p-4 border rounded-lg">
                         <div className="flex items-center gap-3">
-                          <FileTextIcon className="h-5 w-5 text-muted-foreground" />
+                          <FileText className="h-5 w-5 text-muted-foreground" />
                           <div>
                             <div className="font-medium">Lease Agreements</div>
                             <div className="text-sm text-muted-foreground">Property lease contracts for both locations</div>
@@ -138,18 +138,18 @@ function BuyerDocumentsContent() {
                         </div>
                         <div className="flex gap-2">
                           <Button variant="outline" size="sm">
-                            <EyeIcon className="h-4 w-4 mr-1" />
+                            <Eye className="h-4 w-4 mr-1" />
                             View
                           </Button>
                           <Button variant="outline" size="sm">
-                            <DownloadIcon className="h-4 w-4 mr-1" />
+                            <Download className="h-4 w-4 mr-1" />
                             Download
                           </Button>
                         </div>
                       </div>
                       <div className="flex items-center justify-between p-4 border rounded-lg">
                         <div className="flex items-center gap-3">
-                          <FileTextIcon className="h-5 w-5 text-muted-foreground" />
+                          <FileText className="h-5 w-5 text-muted-foreground" />
                           <div>
                             <div className="font-medium">Insurance Contracts</div>
                             <div className="text-sm text-muted-foreground">UPMC and Aetna provider agreements</div>
@@ -157,18 +157,18 @@ function BuyerDocumentsContent() {
                         </div>
                         <div className="flex gap-2">
                           <Button variant="outline" size="sm">
-                            <EyeIcon className="h-4 w-4 mr-1" />
+                            <Eye className="h-4 w-4 mr-1" />
                             View
                           </Button>
                           <Button variant="outline" size="sm">
-                            <DownloadIcon className="h-4 w-4 mr-1" />
+                            <Download className="h-4 w-4 mr-1" />
                             Download
                           </Button>
                         </div>
                       </div>
                       <div className="flex items-center justify-between p-4 border rounded-lg">
                         <div className="flex items-center gap-3">
-                          <FileTextIcon className="h-5 w-5 text-muted-foreground" />
+                          <FileText className="h-5 w-5 text-muted-foreground" />
                           <div>
                             <div className="font-medium">Business Licenses</div>
                             <div className="text-sm text-muted-foreground">State and local business licenses</div>
@@ -176,11 +176,11 @@ function BuyerDocumentsContent() {
                         </div>
                         <div className="flex gap-2">
                           <Button variant="outline" size="sm">
-                            <EyeIcon className="h-4 w-4 mr-1" />
+                            <Eye className="h-4 w-4 mr-1" />
                             View
                           </Button>
                           <Button variant="outline" size="sm">
-                            <DownloadIcon className="h-4 w-4 mr-1" />
+                            <Download className="h-4 w-4 mr-1" />
                             Download
                           </Button>
                         </div>

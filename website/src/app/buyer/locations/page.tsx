@@ -43,7 +43,7 @@ const staticBusinessData = {
       annual_cam: 14400,
       total_monthly_cost: 9700,
       total_annual_cost: 116400,
-      cam_percentage: 12.4,
+      cam_percentage: 14.1,
     },
     total_locations: 2,
     property_type: "Medical Office",

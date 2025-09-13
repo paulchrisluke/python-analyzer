@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useCallback, useRef } from "react"
 
 interface RevenueData {
   revenue?: {
@@ -28,39 +28,75 @@ export function useRevenueData() {
     error: undefined
   })
 
-  const loadData = async () => {
+  const mountedRef = useRef(true)
+
+  const loadData = useCallback(async (signal: AbortSignal) => {
     setData(prev => ({ ...prev, loading: true, error: undefined }))
     
     try {
-      // Load revenue data from the same source as admin dashboard
-      const revenueResponse = await fetch('/data/revenue_audit_trail.json')
-      const revenueData = revenueResponse.ok ? await revenueResponse.json() : null
+      // Load both data sources in parallel
+      const [revenueResponse, ebitdaResponse] = await Promise.all([
+        fetch('/data/revenue_audit_trail.json', { 
+          signal, 
+          cache: 'no-store' 
+        }),
+        fetch('/data/ebitda_audit_trail.json', { 
+          signal, 
+          cache: 'no-store' 
+        })
+      ])
       
-      // Load EBIT data from the same source as admin dashboard
-      const ebitdaResponse = await fetch('/data/ebitda_audit_trail.json')
-      const ebitdaData = ebitdaResponse.ok ? await ebitdaResponse.json() : null
+      // Check if responses are ok
+      if (!revenueResponse.ok || !ebitdaResponse.ok) {
+        throw new Error('Failed to fetch data from server')
+      }
       
-      setData({
-        revenue: revenueData,
-        ebitda: ebitdaData,
-        loading: false,
-        error: undefined
-      })
-    } catch (error) {
-      setData(prev => ({
-        ...prev,
-        loading: false,
-        error: error instanceof Error ? error.message : 'Failed to load data'
-      }))
+      const [revenueData, ebitdaData] = await Promise.all([
+        revenueResponse.json(),
+        ebitdaResponse.json()
+      ])
+      
+      // Only update state if component is still mounted and not aborted
+      if (mountedRef.current && !signal.aborted) {
+        setData({
+          revenue: revenueData,
+          ebitda: ebitdaData,
+          loading: false,
+          error: undefined
+        })
+      }
+    } catch (error: unknown) {
+      // Only update state if component is still mounted and not aborted
+      if (mountedRef.current && !signal.aborted) {
+        setData(prev => ({
+          ...prev,
+          loading: false,
+          error: error instanceof Error ? error.message : 'Failed to load data'
+        }))
+      }
     }
-  }
+  }, [])
 
   useEffect(() => {
-    loadData()
-  }, [])
+    const controller = new AbortController()
+    const { signal } = controller
+    
+    loadData(signal)
+    
+    return () => {
+      mountedRef.current = false
+      controller.abort()
+    }
+  }, [loadData])
+
+  const refetch = useCallback(() => {
+    const controller = new AbortController()
+    loadData(controller.signal)
+    return () => controller.abort()
+  }, [loadData])
 
   return {
     ...data,
-    refetch: loadData
+    refetch
   }
 }

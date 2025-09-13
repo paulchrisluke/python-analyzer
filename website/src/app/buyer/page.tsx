@@ -28,7 +28,7 @@ const staticBusinessData = {
     business_name: "Cranberry Hearing & Balance Center",
     business_type: "Audiology Practice",
     asking_price: 650000,
-    established: "2019",
+    established: "2003",
     locations: 2,
     state: "PA",
   },
@@ -89,7 +89,7 @@ const staticBusinessData = {
     business_hours: "Monday-Friday 8AM-5PM",
   },
   business_overview: {
-    established_year: 2019,
+    established_year: 2003,
     total_employees: 8,
     services_offered: [
       "Hearing Evaluations",
@@ -110,7 +110,7 @@ const staticBusinessData = {
   business_description: {
     paragraphs: [
       {
-        text: "Cranberry Hearing and Balance Center is a well-established, multi-location audiology practice serving the Cranberry Township & Pittsburgh Metro Area. Founded in 2019, the practice has built a strong reputation for providing comprehensive hearing healthcare services to patients of all ages.",
+        text: "Cranberry Hearing and Balance Center is a well-established, multi-location audiology practice serving the Cranberry Township & Pittsburgh Metro Area. Founded in 2003, the practice has built a strong reputation for providing comprehensive hearing healthcare services to patients of all ages.",
         highlight: "Cranberry Hearing and Balance Center"
       },
       {

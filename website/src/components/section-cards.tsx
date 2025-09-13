@@ -25,8 +25,8 @@ function formatPercentage(value: number): string {
     return "0.0%";
   }
   
-  // Detect if the value is a ratio (0-1 range) and convert to percentage
-  const normalizedValue = value <= 1 && value >= 0 ? value * 100 : value;
+  // Detect if the value is a ratio (absolute value <= 1) and convert to percentage
+  const normalizedValue = Math.abs(value) <= 1 ? value * 100 : value;
   
   return `${normalizedValue.toFixed(1)}%`;
 }
@@ -89,7 +89,7 @@ export function SectionCards({ data }: SectionCardsProps) {
       </Card>
       <Card className="@container/card bg-gradient-to-t from-primary/5 to-card shadow-xs">
         <CardHeader>
-          <CardDescription>Cash Flow (EBIT)</CardDescription>
+          <CardDescription>Cash Flow (EBITDA)</CardDescription>
           <CardTitle className="text-2xl font-semibold tabular-nums @[250px]/card:text-3xl">
             {data ? formatCurrency(data.businessMetrics.annualEbitda) : "$664,245"}
           </CardTitle>

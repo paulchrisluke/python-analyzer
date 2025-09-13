@@ -120,17 +120,24 @@ function AdminPageContent() {
     }).format(num)
   }
 
-  const renderSectionCard = (title: string, value: string | number, description: string, icon: React.ReactNode, badge?: string) => (
+  const formatPlainNumber = (num: number) => {
+    return new Intl.NumberFormat('en-US', {
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0
+    }).format(num)
+  }
+
+  const renderSectionCard = (title: string, value: string | number, description: string, icon: React.ReactNode, badge?: string, isCurrency?: boolean) => (
     <Card className="@container/card bg-gradient-to-t from-primary/5 to-card shadow-xs">
       <CardHeader>
         <CardDescription>{title}</CardDescription>
         <CardTitle className="text-2xl font-semibold tabular-nums @[250px]/card:text-3xl">
-          {typeof value === 'number' ? formatNumber(value) : value}
+          {typeof value === 'number' ? (isCurrency ? formatNumber(value) : formatPlainNumber(value)) : value}
         </CardTitle>
         {badge && (
           <CardAction>
             <Badge variant="outline" className="text-xs">
-              <TrendingUp className="h-3 w-3 mr-1" />
+              <TrendingUp className="h-3 w-3 mr-1" aria-hidden="true" />
               {badge}
             </Badge>
           </CardAction>
@@ -138,7 +145,7 @@ function AdminPageContent() {
       </CardHeader>
       <CardFooter className="flex-col items-start gap-1.5 text-sm">
         <div className="line-clamp-1 flex gap-2 font-medium">
-          {description} {icon}
+          {description} <span aria-hidden="true">{icon}</span>
         </div>
         <div className="text-muted-foreground">
           Pipeline data
@@ -810,21 +817,25 @@ function AdminPageContent() {
                         "Total Revenue",
                         data.revenue.pipeline_run?.total_revenue || 0,
                         "Historical revenue",
-                        <DollarSign className="size-4" />,
-                        "Loaded"
+                        <DollarSign className="size-4" aria-hidden="true" />,
+                        "Loaded",
+                        true
                       )}
                       {renderSectionCard(
                         "Projected Revenue",
                         data.revenue.pipeline_run?.projections?.total_projected_revenue || 0,
                         "Future projections",
-                        <TrendingUp className="size-4" />,
-                        "Projected"
+                        <TrendingUp className="size-4" aria-hidden="true" />,
+                        "Projected",
+                        true
                       )}
                       {renderSectionCard(
                         "Files Processed",
                         data.revenue.pipeline_run?.files_processed?.length || 0,
                         "Data sources",
-                        <FileCheck className="size-4" />
+                        <FileCheck className="size-4" aria-hidden="true" />,
+                        undefined,
+                        false
                       )}
                     </>
                   )}
@@ -833,8 +844,9 @@ function AdminPageContent() {
                       "Total EBIT",
                       data.ebitda.summary?.total_ebit || 0,
                       "Earnings analysis",
-                      <Calculator className="size-4" />,
-                      "Calculated"
+                      <Calculator className="size-4" aria-hidden="true" />,
+                      "Calculated",
+                      true
                     )
                   )}
                 </div>
