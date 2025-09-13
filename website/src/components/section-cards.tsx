@@ -9,15 +9,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
-// Client-safe formatting functions
-function formatCurrency(amount: number): string {
-  return new Intl.NumberFormat('en-US', {
-    style: 'currency',
-    currency: 'USD',
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0,
-  }).format(amount);
-}
+import { formatCurrency } from "@/lib/format"
 
 function formatPercentage(value: number): string {
   // Guard against non-finite inputs

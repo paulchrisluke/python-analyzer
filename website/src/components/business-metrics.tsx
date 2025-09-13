@@ -1,4 +1,5 @@
-import { BusinessMetrics as BusinessMetricsType, formatCurrency, formatPercentage } from "@/lib/etl-data";
+import { BusinessMetrics as BusinessMetricsType, formatPercentage } from "@/lib/etl-data";
+import { formatCurrency } from "@/lib/format";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { TrendingUp, DollarSign, Target, Wrench } from "lucide-react";
 

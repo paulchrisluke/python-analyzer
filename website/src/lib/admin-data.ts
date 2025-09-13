@@ -166,27 +166,6 @@ export function generateDataQualityAlerts(
   return alerts
 }
 
-// Format currency values
-export function formatCurrency(amount: number | undefined | null): string {
-  if (amount === undefined || amount === null) {
-    return '$0'
-  }
-  
-  // Stricter numeric validation - check for non-finite numbers
-  if (typeof amount !== 'number' || !isFinite(amount)) {
-    return '$0'
-  }
-  
-  // Normalize -0 to 0
-  const normalizedAmount = amount === 0 ? 0 : amount
-  
-  return new Intl.NumberFormat('en-US', {
-    style: 'currency',
-    currency: 'USD',
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0,
-  }).format(normalizedAmount)
-}
 
 // Format percentage values
 export function formatPercentage(value: number | undefined | null): string {

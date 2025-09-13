@@ -10,6 +10,7 @@ import {
 import { BusinessDescription } from "@/components/business-description";
 import { BusinessOverview } from "@/components/business-overview";
 import { useRevenueData } from "@/hooks/use-revenue-data";
+import { formatCurrency } from "@/lib/format";
 
 // Business data interfaces based on the actual ETL data structure
 interface Location {
@@ -154,15 +155,6 @@ export function BusinessDetails({ data }: BusinessDetailsProps) {
     return isFinite(parsed) ? parsed : 0;
   };
 
-  // Helper function to format currency
-  const formatCurrency = (amount: number): string => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD',
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0,
-    }).format(amount);
-  };
 
   return (
     <div className="space-y-6">

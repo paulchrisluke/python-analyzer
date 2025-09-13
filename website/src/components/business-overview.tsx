@@ -11,6 +11,7 @@ import {
   CheckCircleIcon,
   InfoIcon
 } from "lucide-react";
+import { formatCurrency } from "@/lib/format";
 
 // Business data interfaces based on the actual ETL data structure
 interface Location {
@@ -83,15 +84,6 @@ interface BusinessOverviewProps {
 export function BusinessOverview({ data }: BusinessOverviewProps) {
   console.log("🏢 BusinessOverview rendering");
   
-  // Helper function to format currency
-  const formatCurrency = (amount: number): string => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD',
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0,
-    }).format(amount);
-  };
 
   // Helper function to parse currency strings (strips non-numeric characters)
   const parseCurrency = (value: string | number | null | undefined): number => {

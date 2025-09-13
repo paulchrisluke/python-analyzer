@@ -3,6 +3,7 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { MapPinIcon, ExternalLinkIcon, Building2Icon } from "lucide-react";
+import { formatCurrency } from "@/lib/format";
 
 interface LocationInformationProps {
   data: {
@@ -42,14 +43,6 @@ interface LocationInformationProps {
   };
 }
 
-const formatCurrency = (amount: number): string => {
-  return new Intl.NumberFormat('en-US', {
-    style: 'currency',
-    currency: 'USD',
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0,
-  }).format(amount);
-};
 
 export function LocationInformation({ data }: LocationInformationProps) {
   const primaryLocation = data.property_details?.primary_location;
