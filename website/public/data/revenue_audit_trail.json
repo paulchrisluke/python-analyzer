@@ -1,6 +1,6 @@
 {
   "pipeline_run": {
-    "timestamp": "2025-09-13T17:35:46.480279",
+    "timestamp": "2025-09-13T18:04:50.471481",
     "purpose": "Calculate total Pennsylvania revenue for business sale",
     "business_rules": {
       "include_locations": [
@@ -31,6 +31,13 @@
           "method": "Direct from Pennsylvania column",
           "value": 69061.28
         },
+        "line_item_used": "Total Income",
+        "sales_line_items": [
+          {
+            "name": "5017 \u00b7 Sales",
+            "value": 69061.28
+          }
+        ],
         "revenue": 69061.28,
         "has_data": true
       },
@@ -50,6 +57,25 @@
           "method": "Direct from Pennsylvania column",
           "value": 80007.58
         },
+        "line_item_used": "Total Income",
+        "sales_line_items": [
+          {
+            "name": "5017 \u00b7 Sales",
+            "value": 0.0
+          },
+          {
+            "name": "5018 \u00b7 Refund/Cancelled Sales",
+            "value": -610.0
+          },
+          {
+            "name": "5017 \u00b7 Sales - Other",
+            "value": 80617.58
+          },
+          {
+            "name": "Total 5017 \u00b7 Sales",
+            "value": 80007.58
+          }
+        ],
         "revenue": 80007.58,
         "has_data": true
       },
@@ -70,6 +96,25 @@
           "method": "Direct from Pennsylvania column",
           "value": 85577.24
         },
+        "line_item_used": "Total Income",
+        "sales_line_items": [
+          {
+            "name": "5017 \u00b7 Sales",
+            "value": 0.0
+          },
+          {
+            "name": "5018 \u00b7 Refund/Cancelled Sales",
+            "value": -3408.9
+          },
+          {
+            "name": "5017 \u00b7 Sales - Other",
+            "value": 88986.14
+          },
+          {
+            "name": "Total 5017 \u00b7 Sales",
+            "value": 85577.24
+          }
+        ],
         "revenue": 85577.24,
         "has_data": true
       },
@@ -89,6 +134,25 @@
           "method": "Direct from Pennsylvania column",
           "value": 62415.91
         },
+        "line_item_used": "Total Income",
+        "sales_line_items": [
+          {
+            "name": "5017 \u00b7 Sales",
+            "value": 0.0
+          },
+          {
+            "name": "5018 \u00b7 Refund/Cancelled Sales",
+            "value": 0.0
+          },
+          {
+            "name": "5017 \u00b7 Sales - Other",
+            "value": 62415.91
+          },
+          {
+            "name": "Total 5017 \u00b7 Sales",
+            "value": 62415.91
+          }
+        ],
         "revenue": 62415.91,
         "has_data": true
       },
@@ -109,6 +173,25 @@
           "method": "Direct from Pennsylvania column",
           "value": 61425.2
         },
+        "line_item_used": "Total Income",
+        "sales_line_items": [
+          {
+            "name": "5017 \u00b7 Sales",
+            "value": 0.0
+          },
+          {
+            "name": "5018 \u00b7 Refund/Cancelled Sales",
+            "value": 0.0
+          },
+          {
+            "name": "5017 \u00b7 Sales - Other",
+            "value": 61425.2
+          },
+          {
+            "name": "Total 5017 \u00b7 Sales",
+            "value": 61425.2
+          }
+        ],
         "revenue": 61425.2,
         "has_data": true
       },
@@ -129,6 +212,25 @@
           "method": "Direct from Pennsylvania column",
           "value": 84599.14
         },
+        "line_item_used": "Total Income",
+        "sales_line_items": [
+          {
+            "name": "5017 \u00b7 Sales",
+            "value": 0.0
+          },
+          {
+            "name": "5018 \u00b7 Refund/Cancelled Sales",
+            "value": -15.62
+          },
+          {
+            "name": "5017 \u00b7 Sales - Other",
+            "value": 84614.76
+          },
+          {
+            "name": "Total 5017 \u00b7 Sales",
+            "value": 84599.14
+          }
+        ],
         "revenue": 84599.14,
         "has_data": true
       },
@@ -149,6 +251,25 @@
           "method": "Direct from Pennsylvania column",
           "value": 82560.96
         },
+        "line_item_used": "Total Income",
+        "sales_line_items": [
+          {
+            "name": "5017 \u00b7 Sales",
+            "value": 0.0
+          },
+          {
+            "name": "5018 \u00b7 Refund/Cancelled Sales",
+            "value": -2370.15
+          },
+          {
+            "name": "5017 \u00b7 Sales - Other",
+            "value": 84931.11
+          },
+          {
+            "name": "Total 5017 \u00b7 Sales",
+            "value": 82560.96
+          }
+        ],
         "revenue": 82560.96,
         "has_data": true
       },
@@ -169,6 +290,25 @@
           "method": "Direct from Pennsylvania column",
           "value": 91623.09
         },
+        "line_item_used": "Total Income",
+        "sales_line_items": [
+          {
+            "name": "5017 \u00b7 Sales",
+            "value": 0.0
+          },
+          {
+            "name": "5018 \u00b7 Refund/Cancelled Sales",
+            "value": 0.0
+          },
+          {
+            "name": "5017 \u00b7 Sales - Other",
+            "value": 91623.09
+          },
+          {
+            "name": "Total 5017 \u00b7 Sales",
+            "value": 91623.09
+          }
+        ],
         "revenue": 91623.09,
         "has_data": true
       },
@@ -189,6 +329,25 @@
           "method": "Direct from Pennsylvania column",
           "value": 69363.57
         },
+        "line_item_used": "Total Income",
+        "sales_line_items": [
+          {
+            "name": "5017 \u00b7 Sales",
+            "value": 0.0
+          },
+          {
+            "name": "5018 \u00b7 Refund/Cancelled Sales",
+            "value": -4082.41
+          },
+          {
+            "name": "5017 \u00b7 Sales - Other",
+            "value": 73445.98
+          },
+          {
+            "name": "Total 5017 \u00b7 Sales",
+            "value": 69363.57
+          }
+        ],
         "revenue": 69363.57,
         "has_data": true
       },
@@ -209,6 +368,13 @@
           "method": "Direct from Pennsylvania column",
           "value": 93153.58
         },
+        "line_item_used": "Total Income",
+        "sales_line_items": [
+          {
+            "name": "5017 \u00b7 Sales",
+            "value": 93153.58
+          }
+        ],
         "revenue": 93153.58,
         "has_data": true
       },
@@ -229,6 +395,25 @@
           "method": "Direct from Pennsylvania column",
           "value": 52963.09
         },
+        "line_item_used": "Total Income",
+        "sales_line_items": [
+          {
+            "name": "5017 \u00b7 Sales",
+            "value": 0.0
+          },
+          {
+            "name": "5018 \u00b7 Refund/Cancelled Sales",
+            "value": -3333.36
+          },
+          {
+            "name": "5017 \u00b7 Sales - Other",
+            "value": 56296.45
+          },
+          {
+            "name": "Total 5017 \u00b7 Sales",
+            "value": 52963.09
+          }
+        ],
         "revenue": 52963.09,
         "has_data": true
       },
@@ -249,6 +434,25 @@
           "method": "Direct from Pennsylvania column",
           "value": 57939.86
         },
+        "line_item_used": "Total Income",
+        "sales_line_items": [
+          {
+            "name": "5017 \u00b7 Sales",
+            "value": 0.0
+          },
+          {
+            "name": "5018 \u00b7 Refund/Cancelled Sales",
+            "value": 0.0
+          },
+          {
+            "name": "5017 \u00b7 Sales - Other",
+            "value": 57939.86
+          },
+          {
+            "name": "Total 5017 \u00b7 Sales",
+            "value": 57939.86
+          }
+        ],
         "revenue": 57939.86,
         "has_data": true
       },
@@ -272,6 +476,13 @@
           "west_view_value": 17930.0,
           "total": 48526.979999999996
         },
+        "line_item_used": "Total Income",
+        "sales_line_items": [
+          {
+            "name": "5017 \u00b7 Sales",
+            "value": 48526.979999999996
+          }
+        ],
         "revenue": 48526.98,
         "has_data": true
       },
@@ -295,6 +506,13 @@
           "west_view_value": 19453.36,
           "total": 57172.8
         },
+        "line_item_used": "Total Income",
+        "sales_line_items": [
+          {
+            "name": "5017 \u00b7 Sales",
+            "value": 57172.8
+          }
+        ],
         "revenue": 57172.8,
         "has_data": true
       },
@@ -318,6 +536,13 @@
           "west_view_value": 36268.37,
           "total": 75283.06
         },
+        "line_item_used": "Total Income",
+        "sales_line_items": [
+          {
+            "name": "5017 \u00b7 Sales",
+            "value": 75283.06
+          }
+        ],
         "revenue": 75283.06,
         "has_data": true
       },
@@ -341,6 +566,25 @@
           "west_view_value": 44887.96,
           "total": 95889.4
         },
+        "line_item_used": "Total Income",
+        "sales_line_items": [
+          {
+            "name": "5017 \u00b7 Sales",
+            "value": 0.0
+          },
+          {
+            "name": "5018 \u00b7 Refund/Cancelled Sales",
+            "value": -52.0
+          },
+          {
+            "name": "5017 \u00b7 Sales - Other",
+            "value": 95941.4
+          },
+          {
+            "name": "Total 5017 \u00b7 Sales",
+            "value": 95889.4
+          }
+        ],
         "revenue": 95889.4,
         "has_data": true
       },
@@ -364,6 +608,25 @@
           "west_view_value": 42576.64,
           "total": 83613.54000000001
         },
+        "line_item_used": "Total Income",
+        "sales_line_items": [
+          {
+            "name": "5017 \u00b7 Sales",
+            "value": 0.0
+          },
+          {
+            "name": "5018 \u00b7 Refund/Cancelled Sales",
+            "value": 0.0
+          },
+          {
+            "name": "5017 \u00b7 Sales - Other",
+            "value": 83613.54000000001
+          },
+          {
+            "name": "Total 5017 \u00b7 Sales",
+            "value": 83613.54000000001
+          }
+        ],
         "revenue": 83613.54,
         "has_data": true
       },
@@ -387,6 +650,13 @@
           "west_view_value": 38018.39,
           "total": 73512.35
         },
+        "line_item_used": "Total Income",
+        "sales_line_items": [
+          {
+            "name": "5017 \u00b7 Sales",
+            "value": 73512.35
+          }
+        ],
         "revenue": 73512.35,
         "has_data": true
       },
@@ -410,6 +680,25 @@
           "west_view_value": 42473.2,
           "total": 76929.32
         },
+        "line_item_used": "Total Income",
+        "sales_line_items": [
+          {
+            "name": "5017 \u00b7 Sales",
+            "value": 0.0
+          },
+          {
+            "name": "5018 \u00b7 Refund/Cancelled Sales",
+            "value": -452.02
+          },
+          {
+            "name": "5017 \u00b7 Sales - Other",
+            "value": 77381.34
+          },
+          {
+            "name": "Total 5017 \u00b7 Sales",
+            "value": 76929.32
+          }
+        ],
         "revenue": 76929.32,
         "has_data": true
       },
@@ -433,6 +722,13 @@
           "west_view_value": 42714.96,
           "total": 87021.16
         },
+        "line_item_used": "Total Income",
+        "sales_line_items": [
+          {
+            "name": "5017 \u00b7 Sales",
+            "value": 87021.16
+          }
+        ],
         "revenue": 87021.16,
         "has_data": true
       },
@@ -456,6 +752,25 @@
           "west_view_value": 56745.93,
           "total": 93374.93
         },
+        "line_item_used": "Total Income",
+        "sales_line_items": [
+          {
+            "name": "5017 \u00b7 Sales",
+            "value": 0.0
+          },
+          {
+            "name": "5018 \u00b7 Refund/Cancelled Sales",
+            "value": -21.0
+          },
+          {
+            "name": "5017 \u00b7 Sales - Other",
+            "value": 93395.93
+          },
+          {
+            "name": "Total 5017 \u00b7 Sales",
+            "value": 93374.93
+          }
+        ],
         "revenue": 93374.93,
         "has_data": true
       },
@@ -479,6 +794,25 @@
           "west_view_value": 58585.43,
           "total": 98867.48999999999
         },
+        "line_item_used": "Total Income",
+        "sales_line_items": [
+          {
+            "name": "5017 \u00b7 Sales",
+            "value": 0.0
+          },
+          {
+            "name": "5018 \u00b7 Refund/Cancelled Sales",
+            "value": -70.02
+          },
+          {
+            "name": "5017 \u00b7 Sales - Other",
+            "value": 98937.51000000001
+          },
+          {
+            "name": "Total 5017 \u00b7 Sales",
+            "value": 98867.48999999999
+          }
+        ],
         "revenue": 98867.49,
         "has_data": true
       },
@@ -502,6 +836,25 @@
           "west_view_value": 55919.95,
           "total": 92385.87
         },
+        "line_item_used": "Total Income",
+        "sales_line_items": [
+          {
+            "name": "5017 \u00b7 Sales",
+            "value": 0.0
+          },
+          {
+            "name": "5018 \u00b7 Refund/Cancelled Sales",
+            "value": 0.0
+          },
+          {
+            "name": "5017 \u00b7 Sales - Other",
+            "value": 92385.87
+          },
+          {
+            "name": "Total 5017 \u00b7 Sales",
+            "value": 92385.87
+          }
+        ],
         "revenue": 92385.87,
         "has_data": true
       },
@@ -525,6 +878,25 @@
           "west_view_value": 53156.86,
           "total": 91798.66
         },
+        "line_item_used": "Total Income",
+        "sales_line_items": [
+          {
+            "name": "5017 \u00b7 Sales",
+            "value": 0.0
+          },
+          {
+            "name": "5018 \u00b7 Refund/Cancelled Sales",
+            "value": 0.0
+          },
+          {
+            "name": "5017 \u00b7 Sales - Other",
+            "value": 91798.66
+          },
+          {
+            "name": "Total 5017 \u00b7 Sales",
+            "value": 91798.66
+          }
+        ],
         "revenue": 91798.66,
         "has_data": true
       },
@@ -548,6 +920,25 @@
           "west_view_value": 75730.52,
           "total": 110475.27
         },
+        "line_item_used": "Total Income",
+        "sales_line_items": [
+          {
+            "name": "5017 \u00b7 Sales",
+            "value": 0.0
+          },
+          {
+            "name": "5018 \u00b7 Refund/Cancelled Sales",
+            "value": -4423.74
+          },
+          {
+            "name": "5017 \u00b7 Sales - Other",
+            "value": 114899.01
+          },
+          {
+            "name": "Total 5017 \u00b7 Sales",
+            "value": 110475.27
+          }
+        ],
         "revenue": 110475.27,
         "has_data": true
       },
@@ -571,6 +962,25 @@
           "west_view_value": 53277.47,
           "total": 66447.85
         },
+        "line_item_used": "Total Income",
+        "sales_line_items": [
+          {
+            "name": "5017 \u00b7 Sales",
+            "value": 0.0
+          },
+          {
+            "name": "5018 \u00b7 Refund/Cancelled Sales",
+            "value": -385.0
+          },
+          {
+            "name": "5017 \u00b7 Sales - Other",
+            "value": 66832.85
+          },
+          {
+            "name": "Total 5017 \u00b7 Sales",
+            "value": 66447.85
+          }
+        ],
         "revenue": 66447.85,
         "has_data": true
       },
@@ -594,6 +1004,25 @@
           "west_view_value": 47245.47,
           "total": 79183.1
         },
+        "line_item_used": "Total Income",
+        "sales_line_items": [
+          {
+            "name": "5017 \u00b7 Sales",
+            "value": 0.0
+          },
+          {
+            "name": "5018 \u00b7 Refund/Cancelled Sales",
+            "value": 0.0
+          },
+          {
+            "name": "5017 \u00b7 Sales - Other",
+            "value": 79183.1
+          },
+          {
+            "name": "Total 5017 \u00b7 Sales",
+            "value": 79183.1
+          }
+        ],
         "revenue": 79183.1,
         "has_data": true
       },
@@ -617,6 +1046,25 @@
           "west_view_value": 58681.16,
           "total": 96779.16
         },
+        "line_item_used": "Total Income",
+        "sales_line_items": [
+          {
+            "name": "5017 \u00b7 Sales",
+            "value": 0.0
+          },
+          {
+            "name": "5018 \u00b7 Refund/Cancelled Sales",
+            "value": -628.46
+          },
+          {
+            "name": "5017 \u00b7 Sales - Other",
+            "value": 97407.62
+          },
+          {
+            "name": "Total 5017 \u00b7 Sales",
+            "value": 96779.16
+          }
+        ],
         "revenue": 96779.16,
         "has_data": true
       },
@@ -640,6 +1088,13 @@
           "west_view_value": 46339.62,
           "total": 97894.06
         },
+        "line_item_used": "Total Income",
+        "sales_line_items": [
+          {
+            "name": "5017 \u00b7 Sales",
+            "value": 97894.06
+          }
+        ],
         "revenue": 97894.06,
         "has_data": true
       },
@@ -663,6 +1118,25 @@
           "west_view_value": 39452.85,
           "total": 82801.01000000001
         },
+        "line_item_used": "Total Income",
+        "sales_line_items": [
+          {
+            "name": "5017 \u00b7 Sales",
+            "value": 0.0
+          },
+          {
+            "name": "5018 \u00b7 Refund/Cancelled Sales",
+            "value": -4367.07
+          },
+          {
+            "name": "5017 \u00b7 Sales - Other",
+            "value": 87168.08
+          },
+          {
+            "name": "Total 5017 \u00b7 Sales",
+            "value": 82801.01000000001
+          }
+        ],
         "revenue": 82801.01,
         "has_data": true
       },
@@ -686,6 +1160,25 @@
           "west_view_value": 45715.41,
           "total": 71468.38
         },
+        "line_item_used": "Total Income",
+        "sales_line_items": [
+          {
+            "name": "5017 \u00b7 Sales",
+            "value": 0.0
+          },
+          {
+            "name": "5018 \u00b7 Refund/Cancelled Sales",
+            "value": 0.0
+          },
+          {
+            "name": "5017 \u00b7 Sales - Other",
+            "value": 71468.38
+          },
+          {
+            "name": "Total 5017 \u00b7 Sales",
+            "value": 71468.38
+          }
+        ],
         "revenue": 71468.38,
         "has_data": true
       }

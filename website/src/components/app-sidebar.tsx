@@ -217,7 +217,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         </SidebarMenu>
       </SidebarHeader>
       <SidebarContent>
-        <NavMain items={data.navMain} showRequestInfo={isAuthenticated} />
+        <NavMain items={data.navMain} showRequestInfo={isAuthenticated && !isAdminPage} />
         
         {/* Admin section - only for authenticated users on non-admin pages */}
         {isAuthenticated && !isAdminPage && (data as any).navAdmin && (data as any).navAdmin.length > 0 && (

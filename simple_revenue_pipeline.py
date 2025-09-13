@@ -362,12 +362,58 @@ class SimpleRevenuePipeline:
         if revenue_row.empty:
             raise ValueError(f"No '{CONFIG['revenue_row_name']}' row found")
         
+        # Capture the actual line item name used
+        actual_line_item = revenue_row.iloc[0, 0] if not revenue_row.empty else CONFIG["revenue_row_name"]
+        
+        # Also capture the underlying sales line items that make up the total with their values
+        sales_line_items = []
+        for idx, row in df.iterrows():
+            line_item = str(row.iloc[0]).strip()
+            if line_item and ("Sales" in line_item or "5017" in line_item) and line_item != "Total Income":
+                # Get the Pennsylvania value for this line item
+                pennsylvania_value = 0.0
+                if structure_type["type"] == "combined_pennsylvania":
+                    # For 2023 format, use Pennsylvania column
+                    pennsylvania_col = None
+                    for col in df.columns:
+                        if "Pennsylvania" in str(col):
+                            pennsylvania_col = col
+                            break
+                    if pennsylvania_col is not None:
+                        try:
+                            pennsylvania_value = float(row[pennsylvania_col]) if pd.notna(row[pennsylvania_col]) else 0.0
+                        except (ValueError, TypeError):
+                            pennsylvania_value = 0.0
+                elif structure_type["type"] == "separate_locations":
+                    # For 2024+ format, sum Cranberry and West View
+                    cranberry_value = 0.0
+                    west_view_value = 0.0
+                    for col in df.columns:
+                        if "Cranberry" in str(col):
+                            try:
+                                cranberry_value = float(row[col]) if pd.notna(row[col]) else 0.0
+                            except (ValueError, TypeError):
+                                cranberry_value = 0.0
+                        elif "West View" in str(col):
+                            try:
+                                west_view_value = float(row[col]) if pd.notna(row[col]) else 0.0
+                            except (ValueError, TypeError):
+                                west_view_value = 0.0
+                    pennsylvania_value = cranberry_value + west_view_value
+                
+                sales_line_items.append({
+                    "name": line_item,
+                    "value": pennsylvania_value
+                })
+        
         month_audit = {
             "file": csv_file.name,
             "structure_type": structure_type["type"],
             "columns_available": [col.strip() for col in df.columns if col.strip()],
             "revenue_fields_found": {},
             "calculation_details": {},
+            "line_item_used": actual_line_item,
+            "sales_line_items": sales_line_items,
             "revenue": 0.0,
             "has_data": True
         }

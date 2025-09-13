@@ -407,8 +407,24 @@ class SimpleEBITDAPipeline:
             }
         }
         
-        # Update audit trail
-        self.audit_trail["data_sources"] = [{"file": os.path.basename(f), "path": f} for f in all_files]
+        # Update audit trail with detailed field information
+        data_sources = []
+        for calculation in monthly_calculations:
+            # Flatten the fields_found from all locations into a single list
+            all_fields = []
+            for location_data in calculation.get("fields_analyzed", []):
+                all_fields.extend(location_data.get("fields_found", []))
+            
+            data_sources.append({
+                "file": calculation["filename"],
+                "path": calculation["file_path"],
+                "month": calculation["month"],
+                "fields_found": all_fields,
+                "ebit_calculation": calculation.get("ebit_calculation", {}),
+                "report_format": calculation.get("report_format", "unknown")
+            })
+        
+        self.audit_trail["data_sources"] = data_sources
         self.audit_trail["monthly_calculations"] = monthly_calculations
         self.audit_trail["summary"] = summary
         self.audit_trail["projections"] = projections
@@ -424,9 +440,9 @@ class SimpleEBITDAPipeline:
         if output_path is None:
             output_path = "ebitda_audit_trail.json"
         
-        # Save only to where the website actually reads from
+        # Save to where the website actually reads from
         locations = [
-            "website/src/data/ebitda_audit_trail.json"  # Where website reads from
+            "website/public/data/ebitda_audit_trail.json"  # Where website reads from
         ]
         
         for location in locations:
