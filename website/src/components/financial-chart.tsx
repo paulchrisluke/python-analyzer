@@ -293,15 +293,16 @@ export function FinancialChart() {
       const lastHistorical = transformed[transitionIndex - 1]
       const firstProjected = transformed[transitionIndex]
       
-      // Add a bridge point that has both values to connect the lines
+      // Create a bridge point that connects the historical and projected lines
+      // Use the same date as the first projected point but with historical revenue
       const bridgePoint = {
-        ...lastHistorical,
+        ...firstProjected,
         revenue: lastHistorical.revenue,
         projected_revenue: firstProjected.projected_revenue,
         isBridge: true
       }
       
-      // Insert the bridge point
+      // Insert the bridge point before the first projected point
       transformed.splice(transitionIndex, 0, bridgePoint)
     }
 

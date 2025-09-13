@@ -3,6 +3,31 @@ import { jwtVerify } from 'jose'
 
 export async function GET(request: NextRequest) {
   try {
+    // Development bypass: return configured role when bypass is enabled
+    if (process.env.NODE_ENV !== 'production' && process.env.DEV_AUTH_ROLE) {
+      const devRole = process.env.DEV_AUTH_ROLE.trim()
+      const validRoles = ['admin', 'buyer']
+      
+      if (validRoles.includes(devRole)) {
+        const user = {
+          email: 'admin@cranberryhearing.com',
+          name: 'Admin User',
+          role: devRole as 'admin' | 'buyer',
+          isAdmin: devRole === 'admin',
+          isBuyer: devRole === 'buyer',
+          avatar: "/avatars/user.jpg"
+        }
+        
+        return NextResponse.json({ user }, { 
+          status: 200,
+          headers: {
+            'Cache-Control': 'no-store',
+            'Vary': 'Cookie'
+          }
+        })
+      }
+    }
+
     // Get the JWT token from the HttpOnly cookie
     const token = request.cookies.get('cranberry-auth-session')?.value
 
