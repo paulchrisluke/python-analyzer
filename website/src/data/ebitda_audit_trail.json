@@ -1,0 +1,3413 @@
+{
+  "pipeline_info": {
+    "name": "Simple EBITDA Pipeline",
+    "version": "1.0",
+    "created_at": "2025-09-13T15:39:33.543768",
+    "calculation_method": "EBIT (Earnings Before Interest and Taxes)",
+    "note": "Depreciation/Amortization data not available in P&L files"
+  },
+  "configuration": {
+    "analysis_period": {
+      "start_date": "2023-01-01",
+      "end_date": "2025-06-30"
+    },
+    "locations": {
+      "include_states": [
+        "Pennsylvania"
+      ],
+      "exclude_states": [
+        "Virginia"
+      ]
+    },
+    "ebitda_calculation": {
+      "method": "EBIT (Earnings Before Interest and Taxes)",
+      "formula": "Net Income + Interest Expenses + Taxes",
+      "note": "Depreciation/Amortization data not available in P&L files"
+    },
+    "projections": {
+      "target_year": 2026,
+      "scenarios": {
+        "conservative": -0.05,
+        "base": 0.0,
+        "optimistic": 0.05
+      }
+    }
+  },
+  "data_sources": [
+    {
+      "file": "2023-07-01_to_2023-07-31_ProfitAndLoss_CranberryHearing.CSV",
+      "path": "docs/financials/Profit_and_Loss/2023_Profit_and_Loss/2023-07-01_to_2023-07-31_ProfitAndLoss_CranberryHearing.CSV"
+    },
+    {
+      "file": "2023-08-01_to_2023-08-31_ProfitAndLoss_CranberryHearing.CSV",
+      "path": "docs/financials/Profit_and_Loss/2023_Profit_and_Loss/2023-08-01_to_2023-08-31_ProfitAndLoss_CranberryHearing.CSV"
+    },
+    {
+      "file": "2023-01-01_to_2023-01-31_ProfitAndLoss_CranberryHearing.CSV",
+      "path": "docs/financials/Profit_and_Loss/2023_Profit_and_Loss/2023-01-01_to_2023-01-31_ProfitAndLoss_CranberryHearing.CSV"
+    },
+    {
+      "file": "2023-10-01_to_2023-10-31_ProfitAndLoss_CranberryHearing.CSV",
+      "path": "docs/financials/Profit_and_Loss/2023_Profit_and_Loss/2023-10-01_to_2023-10-31_ProfitAndLoss_CranberryHearing.CSV"
+    },
+    {
+      "file": "2023-09-01_to_2023-09-30_ProfitAndLoss_CranberryHearing.CSV",
+      "path": "docs/financials/Profit_and_Loss/2023_Profit_and_Loss/2023-09-01_to_2023-09-30_ProfitAndLoss_CranberryHearing.CSV"
+    },
+    {
+      "file": "2023-06-01_to_2023-06-30_ProfitAndLoss_CranberryHearing.CSV",
+      "path": "docs/financials/Profit_and_Loss/2023_Profit_and_Loss/2023-06-01_to_2023-06-30_ProfitAndLoss_CranberryHearing.CSV"
+    },
+    {
+      "file": "2023-11-01_to_2023-11-30_ProfitAndLoss_CranberryHearing.CSV",
+      "path": "docs/financials/Profit_and_Loss/2023_Profit_and_Loss/2023-11-01_to_2023-11-30_ProfitAndLoss_CranberryHearing.CSV"
+    },
+    {
+      "file": "2023-03-01_to_2023-03-31_ProfitAndLoss_CranberryHearing.CSV",
+      "path": "docs/financials/Profit_and_Loss/2023_Profit_and_Loss/2023-03-01_to_2023-03-31_ProfitAndLoss_CranberryHearing.CSV"
+    },
+    {
+      "file": "2023-05-01_to_2023-05-31_ProfitAndLoss_CranberryHearing.CSV",
+      "path": "docs/financials/Profit_and_Loss/2023_Profit_and_Loss/2023-05-01_to_2023-05-31_ProfitAndLoss_CranberryHearing.CSV"
+    },
+    {
+      "file": "2023-02-01_to_2023-02-28_ProfitAndLoss_CranberryHearing.CSV",
+      "path": "docs/financials/Profit_and_Loss/2023_Profit_and_Loss/2023-02-01_to_2023-02-28_ProfitAndLoss_CranberryHearing.CSV"
+    },
+    {
+      "file": "2023-12-01_to_2023-12-31_ProfitAndLoss_CranberryHearing.CSV",
+      "path": "docs/financials/Profit_and_Loss/2023_Profit_and_Loss/2023-12-01_to_2023-12-31_ProfitAndLoss_CranberryHearing.CSV"
+    },
+    {
+      "file": "2023-04-01_to_2023-04-30_ProfitAndLoss_CranberryHearing.CSV",
+      "path": "docs/financials/Profit_and_Loss/2023_Profit_and_Loss/2023-04-01_to_2023-04-30_ProfitAndLoss_CranberryHearing.CSV"
+    },
+    {
+      "file": "2024-01-01_to_2024-01-31_ProfitAndLoss_CranberryHearing.CSV",
+      "path": "docs/financials/Profit_and_Loss/2024_Profit_and_Loss/2024-01-01_to_2024-01-31_ProfitAndLoss_CranberryHearing.CSV"
+    },
+    {
+      "file": "2024-07-01_to_2024-07-31_ProfitAndLoss_CranberryHearing.CSV",
+      "path": "docs/financials/Profit_and_Loss/2024_Profit_and_Loss/2024-07-01_to_2024-07-31_ProfitAndLoss_CranberryHearing.CSV"
+    },
+    {
+      "file": "2024-08-01_to_2024-08-31_ProfitAndLoss_CranberryHearing.CSV",
+      "path": "docs/financials/Profit_and_Loss/2024_Profit_and_Loss/2024-08-01_to_2024-08-31_ProfitAndLoss_CranberryHearing.CSV"
+    },
+    {
+      "file": "2024-10-01_to_2024-10-31_ProfitAndLoss_CranberryHearing.CSV",
+      "path": "docs/financials/Profit_and_Loss/2024_Profit_and_Loss/2024-10-01_to_2024-10-31_ProfitAndLoss_CranberryHearing.CSV"
+    },
+    {
+      "file": "2024-05-01_to_2025-05-31_ProfitAndLoss_CranberryHearing.CSV",
+      "path": "docs/financials/Profit_and_Loss/2024_Profit_and_Loss/2024-05-01_to_2025-05-31_ProfitAndLoss_CranberryHearing.CSV"
+    },
+    {
+      "file": "2024-09-01_to_2024-09-30_ProfitAndLoss_CranberryHearing.CSV",
+      "path": "docs/financials/Profit_and_Loss/2024_Profit_and_Loss/2024-09-01_to_2024-09-30_ProfitAndLoss_CranberryHearing.CSV"
+    },
+    {
+      "file": "2024-06-01_to_2024-06-30_ProfitAndLoss_CranberryHearing.CSV",
+      "path": "docs/financials/Profit_and_Loss/2024_Profit_and_Loss/2024-06-01_to_2024-06-30_ProfitAndLoss_CranberryHearing.CSV"
+    },
+    {
+      "file": "2024-11-01_to_2024-11-30_ProfitAndLoss_CranberryHearing.CSV",
+      "path": "docs/financials/Profit_and_Loss/2024_Profit_and_Loss/2024-11-01_to_2024-11-30_ProfitAndLoss_CranberryHearing.CSV"
+    },
+    {
+      "file": "2024-03-01_to_2024-03-31_ProfitAndLoss_CranberryHearing.CSV",
+      "path": "docs/financials/Profit_and_Loss/2024_Profit_and_Loss/2024-03-01_to_2024-03-31_ProfitAndLoss_CranberryHearing.CSV"
+    },
+    {
+      "file": "2024-12-01_to_2024-12-31_ProfitAndLoss_CranberryHearing.CSV",
+      "path": "docs/financials/Profit_and_Loss/2024_Profit_and_Loss/2024-12-01_to_2024-12-31_ProfitAndLoss_CranberryHearing.CSV"
+    },
+    {
+      "file": "2024-02-01_to_2024-02-29_ProfitAndLoss_CranberryHearing.CSV",
+      "path": "docs/financials/Profit_and_Loss/2024_Profit_and_Loss/2024-02-01_to_2024-02-29_ProfitAndLoss_CranberryHearing.CSV"
+    },
+    {
+      "file": "2024-04-01_to_2024-04-30_ProfitAndLoss_CranberryHearing.CSV",
+      "path": "docs/financials/Profit_and_Loss/2024_Profit_and_Loss/2024-04-01_to_2024-04-30_ProfitAndLoss_CranberryHearing.CSV"
+    },
+    {
+      "file": "2025-04-01_to_2025-04-30_ProfitAndLoss_CranberryHearing.CSV",
+      "path": "docs/financials/Profit_and_Loss/2025_Profit_and_Loss/2025-04-01_to_2025-04-30_ProfitAndLoss_CranberryHearing.CSV"
+    },
+    {
+      "file": "2025-03-01_to_2025-03-31_ProfitAndLoss_CranberryHearing.CSV",
+      "path": "docs/financials/Profit_and_Loss/2025_Profit_and_Loss/2025-03-01_to_2025-03-31_ProfitAndLoss_CranberryHearing.CSV"
+    },
+    {
+      "file": "2025-05-01_to_2025-05-31_ProfitAndLoss_CranberryHearing.CSV",
+      "path": "docs/financials/Profit_and_Loss/2025_Profit_and_Loss/2025-05-01_to_2025-05-31_ProfitAndLoss_CranberryHearing.CSV"
+    },
+    {
+      "file": "2025-02-01_to_2025-02-28_ProfitAndLoss_CranberryHearing.CSV",
+      "path": "docs/financials/Profit_and_Loss/2025_Profit_and_Loss/2025-02-01_to_2025-02-28_ProfitAndLoss_CranberryHearing.CSV"
+    },
+    {
+      "file": "2025-06-01_to_2025-06-30_ProfitAndLoss_CranberryHearing.CSV",
+      "path": "docs/financials/Profit_and_Loss/2025_Profit_and_Loss/2025-06-01_to_2025-06-30_ProfitAndLoss_CranberryHearing.CSV"
+    },
+    {
+      "file": "2025-07-01_to_2025-07-31_ProfitAndLoss_CranberryHearing.CSV",
+      "path": "docs/financials/Profit_and_Loss/2025_Profit_and_Loss/2025-07-01_to_2025-07-31_ProfitAndLoss_CranberryHearing.CSV"
+    },
+    {
+      "file": "2025-01-01_to_2025-01-31_ProfitAndLoss_CranberryHearing.CSV",
+      "path": "docs/financials/Profit_and_Loss/2025_Profit_and_Loss/2025-01-01_to_2025-01-31_ProfitAndLoss_CranberryHearing.CSV"
+    }
+  ],
+  "monthly_calculations": [
+    {
+      "month": "2023-01",
+      "filename": "2023-01-01_to_2023-01-31_ProfitAndLoss_CranberryHearing.CSV",
+      "file_path": "docs/financials/Profit_and_Loss/2023_Profit_and_Loss/2023-01-01_to_2023-01-31_ProfitAndLoss_CranberryHearing.CSV",
+      "fields_analyzed": [
+        {
+          "location": "Pennsylvania",
+          "net_income": 17505.83,
+          "interest_expenses": 342.38,
+          "taxes": 2255.18,
+          "fields_found": [
+            {
+              "field": "Net Income",
+              "value": 17505.83,
+              "row": 69
+            },
+            {
+              "field": "Interest Expenses",
+              "value": 342.38,
+              "row": 32
+            },
+            {
+              "field": "Corporate income tax expense",
+              "value": 1450.0,
+              "row": 58
+            },
+            {
+              "field": "State taxes",
+              "value": 805.18,
+              "row": 20
+            }
+          ]
+        }
+      ],
+      "ebit_calculation": {
+        "net_income": 17505.83,
+        "interest_expenses": 342.38,
+        "taxes": 2255.18,
+        "ebit": 20103.390000000003,
+        "formula": "Net Income + Interest Expenses + Taxes",
+        "note": "This is EBIT, not full EBITDA (depreciation data not available)"
+      },
+      "data_quality": {
+        "has_net_income": true,
+        "has_interest": true,
+        "has_taxes": true,
+        "total_fields_found": 4,
+        "missing_depreciation": true,
+        "depreciation_note": "Depreciation/Amortization data not available in P&L files"
+      },
+      "notes": [
+        "Using 2023 format with Pennsylvania column"
+      ],
+      "report_format": "2023_format"
+    },
+    {
+      "month": "2023-02",
+      "filename": "2023-02-01_to_2023-02-28_ProfitAndLoss_CranberryHearing.CSV",
+      "file_path": "docs/financials/Profit_and_Loss/2023_Profit_and_Loss/2023-02-01_to_2023-02-28_ProfitAndLoss_CranberryHearing.CSV",
+      "fields_analyzed": [
+        {
+          "location": "Pennsylvania",
+          "net_income": 32804.34,
+          "interest_expenses": 303.4,
+          "taxes": 361.57,
+          "fields_found": [
+            {
+              "field": "Net Income",
+              "value": 32804.34,
+              "row": 66
+            },
+            {
+              "field": "Interest Expenses",
+              "value": 303.4,
+              "row": 38
+            },
+            {
+              "field": "State taxes",
+              "value": 361.57,
+              "row": 26
+            }
+          ]
+        }
+      ],
+      "ebit_calculation": {
+        "net_income": 32804.34,
+        "interest_expenses": 303.4,
+        "taxes": 361.57,
+        "ebit": 33469.31,
+        "formula": "Net Income + Interest Expenses + Taxes",
+        "note": "This is EBIT, not full EBITDA (depreciation data not available)"
+      },
+      "data_quality": {
+        "has_net_income": true,
+        "has_interest": true,
+        "has_taxes": true,
+        "total_fields_found": 3,
+        "missing_depreciation": true,
+        "depreciation_note": "Depreciation/Amortization data not available in P&L files"
+      },
+      "notes": [
+        "Using 2023 format with Pennsylvania column"
+      ],
+      "report_format": "2023_format"
+    },
+    {
+      "month": "2023-03",
+      "filename": "2023-03-01_to_2023-03-31_ProfitAndLoss_CranberryHearing.CSV",
+      "file_path": "docs/financials/Profit_and_Loss/2023_Profit_and_Loss/2023-03-01_to_2023-03-31_ProfitAndLoss_CranberryHearing.CSV",
+      "fields_analyzed": [
+        {
+          "location": "Pennsylvania",
+          "net_income": 20234.07,
+          "interest_expenses": 332.16,
+          "taxes": 1719.31,
+          "fields_found": [
+            {
+              "field": "Net Income",
+              "value": 20234.07,
+              "row": 73
+            },
+            {
+              "field": "Interest Expenses",
+              "value": 332.16,
+              "row": 42
+            },
+            {
+              "field": "Corporate income tax expense",
+              "value": 1450.0,
+              "row": 69
+            },
+            {
+              "field": "State taxes",
+              "value": 269.31,
+              "row": 28
+            }
+          ]
+        }
+      ],
+      "ebit_calculation": {
+        "net_income": 20234.07,
+        "interest_expenses": 332.16,
+        "taxes": 1719.31,
+        "ebit": 22285.54,
+        "formula": "Net Income + Interest Expenses + Taxes",
+        "note": "This is EBIT, not full EBITDA (depreciation data not available)"
+      },
+      "data_quality": {
+        "has_net_income": true,
+        "has_interest": true,
+        "has_taxes": true,
+        "total_fields_found": 4,
+        "missing_depreciation": true,
+        "depreciation_note": "Depreciation/Amortization data not available in P&L files"
+      },
+      "notes": [
+        "Using 2023 format with Pennsylvania column"
+      ],
+      "report_format": "2023_format"
+    },
+    {
+      "month": "2023-04",
+      "filename": "2023-04-01_to_2023-04-30_ProfitAndLoss_CranberryHearing.CSV",
+      "file_path": "docs/financials/Profit_and_Loss/2023_Profit_and_Loss/2023-04-01_to_2023-04-30_ProfitAndLoss_CranberryHearing.CSV",
+      "fields_analyzed": [
+        {
+          "location": "Pennsylvania",
+          "net_income": 8617.42,
+          "interest_expenses": 305.04,
+          "taxes": 170.35,
+          "fields_found": [
+            {
+              "field": "Net Income",
+              "value": 8617.42,
+              "row": 65
+            },
+            {
+              "field": "Interest Expenses",
+              "value": 305.04,
+              "row": 34
+            },
+            {
+              "field": "State taxes",
+              "value": 170.35,
+              "row": 23
+            }
+          ]
+        }
+      ],
+      "ebit_calculation": {
+        "net_income": 8617.42,
+        "interest_expenses": 305.04,
+        "taxes": 170.35,
+        "ebit": 9092.810000000001,
+        "formula": "Net Income + Interest Expenses + Taxes",
+        "note": "This is EBIT, not full EBITDA (depreciation data not available)"
+      },
+      "data_quality": {
+        "has_net_income": true,
+        "has_interest": true,
+        "has_taxes": true,
+        "total_fields_found": 3,
+        "missing_depreciation": true,
+        "depreciation_note": "Depreciation/Amortization data not available in P&L files"
+      },
+      "notes": [
+        "Using 2023 format with Pennsylvania column"
+      ],
+      "report_format": "2023_format"
+    },
+    {
+      "month": "2023-05",
+      "filename": "2023-05-01_to_2023-05-31_ProfitAndLoss_CranberryHearing.CSV",
+      "file_path": "docs/financials/Profit_and_Loss/2023_Profit_and_Loss/2023-05-01_to_2023-05-31_ProfitAndLoss_CranberryHearing.CSV",
+      "fields_analyzed": [
+        {
+          "location": "Pennsylvania",
+          "net_income": 10646.71,
+          "interest_expenses": 317.71,
+          "taxes": 90.38,
+          "fields_found": [
+            {
+              "field": "Net Income",
+              "value": 10646.71,
+              "row": 77
+            },
+            {
+              "field": "Interest Expenses",
+              "value": 317.71,
+              "row": 41
+            },
+            {
+              "field": "State taxes",
+              "value": 90.38,
+              "row": 27
+            }
+          ]
+        }
+      ],
+      "ebit_calculation": {
+        "net_income": 10646.71,
+        "interest_expenses": 317.71,
+        "taxes": 90.38,
+        "ebit": 11054.799999999997,
+        "formula": "Net Income + Interest Expenses + Taxes",
+        "note": "This is EBIT, not full EBITDA (depreciation data not available)"
+      },
+      "data_quality": {
+        "has_net_income": true,
+        "has_interest": true,
+        "has_taxes": true,
+        "total_fields_found": 3,
+        "missing_depreciation": true,
+        "depreciation_note": "Depreciation/Amortization data not available in P&L files"
+      },
+      "notes": [
+        "Using 2023 format with Pennsylvania column"
+      ],
+      "report_format": "2023_format"
+    },
+    {
+      "month": "2023-06",
+      "filename": "2023-06-01_to_2023-06-30_ProfitAndLoss_CranberryHearing.CSV",
+      "file_path": "docs/financials/Profit_and_Loss/2023_Profit_and_Loss/2023-06-01_to_2023-06-30_ProfitAndLoss_CranberryHearing.CSV",
+      "fields_analyzed": [
+        {
+          "location": "Pennsylvania",
+          "net_income": 24611.89,
+          "interest_expenses": 305.04,
+          "taxes": 55.44,
+          "fields_found": [
+            {
+              "field": "Net Income",
+              "value": 24611.89,
+              "row": 75
+            },
+            {
+              "field": "Interest Expenses",
+              "value": 305.04,
+              "row": 39
+            },
+            {
+              "field": "State taxes",
+              "value": 55.44,
+              "row": 27
+            }
+          ]
+        }
+      ],
+      "ebit_calculation": {
+        "net_income": 24611.89,
+        "interest_expenses": 305.04,
+        "taxes": 55.44,
+        "ebit": 24972.37,
+        "formula": "Net Income + Interest Expenses + Taxes",
+        "note": "This is EBIT, not full EBITDA (depreciation data not available)"
+      },
+      "data_quality": {
+        "has_net_income": true,
+        "has_interest": true,
+        "has_taxes": true,
+        "total_fields_found": 3,
+        "missing_depreciation": true,
+        "depreciation_note": "Depreciation/Amortization data not available in P&L files"
+      },
+      "notes": [
+        "Using 2023 format with Pennsylvania column"
+      ],
+      "report_format": "2023_format"
+    },
+    {
+      "month": "2023-07",
+      "filename": "2023-07-01_to_2023-07-31_ProfitAndLoss_CranberryHearing.CSV",
+      "file_path": "docs/financials/Profit_and_Loss/2023_Profit_and_Loss/2023-07-01_to_2023-07-31_ProfitAndLoss_CranberryHearing.CSV",
+      "fields_analyzed": [
+        {
+          "location": "Pennsylvania",
+          "net_income": 24413.25,
+          "interest_expenses": 299.88,
+          "taxes": 61.79,
+          "fields_found": [
+            {
+              "field": "Net Income",
+              "value": 24413.25,
+              "row": 70
+            },
+            {
+              "field": "Interest Expenses",
+              "value": 299.88,
+              "row": 38
+            },
+            {
+              "field": "State taxes",
+              "value": 61.79,
+              "row": 26
+            }
+          ]
+        }
+      ],
+      "ebit_calculation": {
+        "net_income": 24413.25,
+        "interest_expenses": 299.88,
+        "taxes": 61.79,
+        "ebit": 24774.920000000002,
+        "formula": "Net Income + Interest Expenses + Taxes",
+        "note": "This is EBIT, not full EBITDA (depreciation data not available)"
+      },
+      "data_quality": {
+        "has_net_income": true,
+        "has_interest": true,
+        "has_taxes": true,
+        "total_fields_found": 3,
+        "missing_depreciation": true,
+        "depreciation_note": "Depreciation/Amortization data not available in P&L files"
+      },
+      "notes": [
+        "Using 2023 format with Pennsylvania column"
+      ],
+      "report_format": "2023_format"
+    },
+    {
+      "month": "2023-08",
+      "filename": "2023-08-01_to_2023-08-31_ProfitAndLoss_CranberryHearing.CSV",
+      "file_path": "docs/financials/Profit_and_Loss/2023_Profit_and_Loss/2023-08-01_to_2023-08-31_ProfitAndLoss_CranberryHearing.CSV",
+      "fields_analyzed": [
+        {
+          "location": "Pennsylvania",
+          "net_income": 28320.58,
+          "interest_expenses": 299.88,
+          "taxes": 49.42,
+          "fields_found": [
+            {
+              "field": "Net Income",
+              "value": 28320.58,
+              "row": 78
+            },
+            {
+              "field": "Interest Expenses",
+              "value": 299.88,
+              "row": 38
+            },
+            {
+              "field": "State taxes",
+              "value": 49.42,
+              "row": 26
+            }
+          ]
+        }
+      ],
+      "ebit_calculation": {
+        "net_income": 28320.58,
+        "interest_expenses": 299.88,
+        "taxes": 49.42,
+        "ebit": 28669.88,
+        "formula": "Net Income + Interest Expenses + Taxes",
+        "note": "This is EBIT, not full EBITDA (depreciation data not available)"
+      },
+      "data_quality": {
+        "has_net_income": true,
+        "has_interest": true,
+        "has_taxes": true,
+        "total_fields_found": 3,
+        "missing_depreciation": true,
+        "depreciation_note": "Depreciation/Amortization data not available in P&L files"
+      },
+      "notes": [
+        "Using 2023 format with Pennsylvania column"
+      ],
+      "report_format": "2023_format"
+    },
+    {
+      "month": "2023-09",
+      "filename": "2023-09-01_to_2023-09-30_ProfitAndLoss_CranberryHearing.CSV",
+      "file_path": "docs/financials/Profit_and_Loss/2023_Profit_and_Loss/2023-09-01_to_2023-09-30_ProfitAndLoss_CranberryHearing.CSV",
+      "fields_analyzed": [
+        {
+          "location": "Pennsylvania",
+          "net_income": -1836.59,
+          "interest_expenses": 290.22,
+          "taxes": 2555.48,
+          "fields_found": [
+            {
+              "field": "Net Income",
+              "value": -1836.59,
+              "row": 77
+            },
+            {
+              "field": "Interest Expenses",
+              "value": 290.22,
+              "row": 38
+            },
+            {
+              "field": "Corporate income tax expense",
+              "value": 2512.5,
+              "row": 65
+            },
+            {
+              "field": "State taxes",
+              "value": 42.98,
+              "row": 24
+            }
+          ]
+        }
+      ],
+      "ebit_calculation": {
+        "net_income": -1836.59,
+        "interest_expenses": 290.22,
+        "taxes": 2555.48,
+        "ebit": 1009.1100000000001,
+        "formula": "Net Income + Interest Expenses + Taxes",
+        "note": "This is EBIT, not full EBITDA (depreciation data not available)"
+      },
+      "data_quality": {
+        "has_net_income": true,
+        "has_interest": true,
+        "has_taxes": true,
+        "total_fields_found": 4,
+        "missing_depreciation": true,
+        "depreciation_note": "Depreciation/Amortization data not available in P&L files"
+      },
+      "notes": [
+        "Using 2023 format with Pennsylvania column"
+      ],
+      "report_format": "2023_format"
+    },
+    {
+      "month": "2023-10",
+      "filename": "2023-10-01_to_2023-10-31_ProfitAndLoss_CranberryHearing.CSV",
+      "file_path": "docs/financials/Profit_and_Loss/2023_Profit_and_Loss/2023-10-01_to_2023-10-31_ProfitAndLoss_CranberryHearing.CSV",
+      "fields_analyzed": [
+        {
+          "location": "Pennsylvania",
+          "net_income": -8713.51,
+          "interest_expenses": 0,
+          "taxes": 41032.18,
+          "fields_found": [
+            {
+              "field": "Net Income",
+              "value": -8713.51,
+              "row": 70
+            },
+            {
+              "field": "Corporate income tax expense",
+              "value": 40936.0,
+              "row": 59
+            },
+            {
+              "field": "State taxes",
+              "value": 96.18,
+              "row": 25
+            }
+          ]
+        }
+      ],
+      "ebit_calculation": {
+        "net_income": -8713.51,
+        "interest_expenses": 0,
+        "taxes": 41032.18,
+        "ebit": 32318.67,
+        "formula": "Net Income + Interest Expenses + Taxes",
+        "note": "This is EBIT, not full EBITDA (depreciation data not available)"
+      },
+      "data_quality": {
+        "has_net_income": true,
+        "has_interest": false,
+        "has_taxes": true,
+        "total_fields_found": 3,
+        "missing_depreciation": true,
+        "depreciation_note": "Depreciation/Amortization data not available in P&L files"
+      },
+      "notes": [
+        "Using 2023 format with Pennsylvania column"
+      ],
+      "report_format": "2023_format"
+    },
+    {
+      "month": "2023-11",
+      "filename": "2023-11-01_to_2023-11-30_ProfitAndLoss_CranberryHearing.CSV",
+      "file_path": "docs/financials/Profit_and_Loss/2023_Profit_and_Loss/2023-11-01_to_2023-11-30_ProfitAndLoss_CranberryHearing.CSV",
+      "fields_analyzed": [
+        {
+          "location": "Pennsylvania",
+          "net_income": -2629.96,
+          "interest_expenses": 296.82,
+          "taxes": 1538.68,
+          "fields_found": [
+            {
+              "field": "Net Income",
+              "value": -2629.96,
+              "row": 73
+            },
+            {
+              "field": "Interest Expenses",
+              "value": 296.82,
+              "row": 35
+            },
+            {
+              "field": "Corporate income tax expense",
+              "value": 1450.0,
+              "row": 63
+            },
+            {
+              "field": "State taxes",
+              "value": 88.68,
+              "row": 23
+            }
+          ]
+        }
+      ],
+      "ebit_calculation": {
+        "net_income": -2629.96,
+        "interest_expenses": 296.82,
+        "taxes": 1538.68,
+        "ebit": -794.4599999999998,
+        "formula": "Net Income + Interest Expenses + Taxes",
+        "note": "This is EBIT, not full EBITDA (depreciation data not available)"
+      },
+      "data_quality": {
+        "has_net_income": true,
+        "has_interest": true,
+        "has_taxes": true,
+        "total_fields_found": 4,
+        "missing_depreciation": true,
+        "depreciation_note": "Depreciation/Amortization data not available in P&L files"
+      },
+      "notes": [
+        "Using 2023 format with Pennsylvania column"
+      ],
+      "report_format": "2023_format"
+    },
+    {
+      "month": "2023-12",
+      "filename": "2023-12-01_to_2023-12-31_ProfitAndLoss_CranberryHearing.CSV",
+      "file_path": "docs/financials/Profit_and_Loss/2023_Profit_and_Loss/2023-12-01_to_2023-12-31_ProfitAndLoss_CranberryHearing.CSV",
+      "fields_analyzed": [
+        {
+          "location": "Pennsylvania",
+          "net_income": -1649.85,
+          "interest_expenses": 544.61,
+          "taxes": 1522.9,
+          "fields_found": [
+            {
+              "field": "Net Income",
+              "value": -1649.85,
+              "row": 73
+            },
+            {
+              "field": "Interest Expenses",
+              "value": 544.61,
+              "row": 41
+            },
+            {
+              "field": "Corporate income tax expense",
+              "value": 1450.0,
+              "row": 65
+            },
+            {
+              "field": "State taxes",
+              "value": 72.9,
+              "row": 28
+            }
+          ]
+        }
+      ],
+      "ebit_calculation": {
+        "net_income": -1649.85,
+        "interest_expenses": 544.61,
+        "taxes": 1522.9,
+        "ebit": 417.6600000000003,
+        "formula": "Net Income + Interest Expenses + Taxes",
+        "note": "This is EBIT, not full EBITDA (depreciation data not available)"
+      },
+      "data_quality": {
+        "has_net_income": true,
+        "has_interest": true,
+        "has_taxes": true,
+        "total_fields_found": 4,
+        "missing_depreciation": true,
+        "depreciation_note": "Depreciation/Amortization data not available in P&L files"
+      },
+      "notes": [
+        "Using 2023 format with Pennsylvania column"
+      ],
+      "report_format": "2023_format"
+    },
+    {
+      "month": "2024-01",
+      "filename": "2024-01-01_to_2024-01-31_ProfitAndLoss_CranberryHearing.CSV",
+      "file_path": "docs/financials/Profit_and_Loss/2024_Profit_and_Loss/2024-01-01_to_2024-01-31_ProfitAndLoss_CranberryHearing.CSV",
+      "fields_analyzed": [
+        {
+          "location": "Cranberry",
+          "net_income": 4319.68,
+          "interest_expenses": 0,
+          "taxes": 725.0,
+          "fields_found": [
+            {
+              "field": "Net Income",
+              "value": 4319.68,
+              "row": 64
+            },
+            {
+              "field": "Corporate income tax expense",
+              "value": 725.0,
+              "row": 59
+            },
+            {
+              "field": "State taxes",
+              "value": 0.0,
+              "row": 20
+            }
+          ]
+        },
+        {
+          "location": "West View",
+          "net_income": -13598.41,
+          "interest_expenses": 0,
+          "taxes": 725.0,
+          "fields_found": [
+            {
+              "field": "Net Income",
+              "value": -13598.41,
+              "row": 64
+            },
+            {
+              "field": "Corporate income tax expense",
+              "value": 725.0,
+              "row": 59
+            },
+            {
+              "field": "State taxes",
+              "value": 0.0,
+              "row": 20
+            }
+          ]
+        }
+      ],
+      "ebit_calculation": {
+        "net_income": -9278.73,
+        "interest_expenses": 0,
+        "taxes": 1450.0,
+        "ebit": -7828.73,
+        "formula": "Net Income + Interest Expenses + Taxes",
+        "note": "This is EBIT, not full EBITDA (depreciation data not available)"
+      },
+      "data_quality": {
+        "has_net_income": true,
+        "has_interest": false,
+        "has_taxes": true,
+        "total_fields_found": 6,
+        "missing_depreciation": true,
+        "depreciation_note": "Depreciation/Amortization data not available in P&L files"
+      },
+      "notes": [
+        "Using 2024-2025 format with Cranberry and West View columns"
+      ],
+      "report_format": "2024_2025_format"
+    },
+    {
+      "month": "2024-02",
+      "filename": "2024-02-01_to_2024-02-29_ProfitAndLoss_CranberryHearing.CSV",
+      "file_path": "docs/financials/Profit_and_Loss/2024_Profit_and_Loss/2024-02-01_to_2024-02-29_ProfitAndLoss_CranberryHearing.CSV",
+      "fields_analyzed": [
+        {
+          "location": "Cranberry",
+          "net_income": 19120.88,
+          "interest_expenses": 88.51,
+          "taxes": 725.0,
+          "fields_found": [
+            {
+              "field": "Net Income",
+              "value": 19120.88,
+              "row": 66
+            },
+            {
+              "field": "Interest Expenses",
+              "value": 88.51,
+              "row": 34
+            },
+            {
+              "field": "Corporate income tax expense",
+              "value": 725.0,
+              "row": 62
+            },
+            {
+              "field": "State taxes",
+              "value": 0.0,
+              "row": 21
+            }
+          ]
+        },
+        {
+          "location": "West View",
+          "net_income": -1298.38,
+          "interest_expenses": 81.46,
+          "taxes": 725.0,
+          "fields_found": [
+            {
+              "field": "Net Income",
+              "value": -1298.38,
+              "row": 66
+            },
+            {
+              "field": "Interest Expenses",
+              "value": 81.46,
+              "row": 34
+            },
+            {
+              "field": "Corporate income tax expense",
+              "value": 725.0,
+              "row": 62
+            },
+            {
+              "field": "State taxes",
+              "value": 0.0,
+              "row": 21
+            }
+          ]
+        }
+      ],
+      "ebit_calculation": {
+        "net_income": 17822.5,
+        "interest_expenses": 169.97,
+        "taxes": 1450.0,
+        "ebit": 19442.47,
+        "formula": "Net Income + Interest Expenses + Taxes",
+        "note": "This is EBIT, not full EBITDA (depreciation data not available)"
+      },
+      "data_quality": {
+        "has_net_income": true,
+        "has_interest": true,
+        "has_taxes": true,
+        "total_fields_found": 8,
+        "missing_depreciation": true,
+        "depreciation_note": "Depreciation/Amortization data not available in P&L files"
+      },
+      "notes": [
+        "Using 2024-2025 format with Cranberry and West View columns"
+      ],
+      "report_format": "2024_2025_format"
+    },
+    {
+      "month": "2024-03",
+      "filename": "2024-03-01_to_2024-03-31_ProfitAndLoss_CranberryHearing.CSV",
+      "file_path": "docs/financials/Profit_and_Loss/2024_Profit_and_Loss/2024-03-01_to_2024-03-31_ProfitAndLoss_CranberryHearing.CSV",
+      "fields_analyzed": [
+        {
+          "location": "Cranberry",
+          "net_income": 10674.31,
+          "interest_expenses": 139.02,
+          "taxes": 725.0,
+          "fields_found": [
+            {
+              "field": "Net Income",
+              "value": 10674.31,
+              "row": 67
+            },
+            {
+              "field": "Interest Expenses",
+              "value": 139.02,
+              "row": 34
+            },
+            {
+              "field": "Corporate income tax expense",
+              "value": 725.0,
+              "row": 63
+            },
+            {
+              "field": "State taxes",
+              "value": 0.0,
+              "row": 20
+            }
+          ]
+        },
+        {
+          "location": "West View",
+          "net_income": 1112.56,
+          "interest_expenses": 138.92,
+          "taxes": 725.0,
+          "fields_found": [
+            {
+              "field": "Net Income",
+              "value": 1112.56,
+              "row": 67
+            },
+            {
+              "field": "Interest Expenses",
+              "value": 138.92,
+              "row": 34
+            },
+            {
+              "field": "Corporate income tax expense",
+              "value": 725.0,
+              "row": 63
+            },
+            {
+              "field": "State taxes",
+              "value": 0.0,
+              "row": 20
+            }
+          ]
+        }
+      ],
+      "ebit_calculation": {
+        "net_income": 11786.869999999999,
+        "interest_expenses": 277.94,
+        "taxes": 1450.0,
+        "ebit": 13514.81,
+        "formula": "Net Income + Interest Expenses + Taxes",
+        "note": "This is EBIT, not full EBITDA (depreciation data not available)"
+      },
+      "data_quality": {
+        "has_net_income": true,
+        "has_interest": true,
+        "has_taxes": true,
+        "total_fields_found": 8,
+        "missing_depreciation": true,
+        "depreciation_note": "Depreciation/Amortization data not available in P&L files"
+      },
+      "notes": [
+        "Using 2024-2025 format with Cranberry and West View columns"
+      ],
+      "report_format": "2024_2025_format"
+    },
+    {
+      "month": "2024-04",
+      "filename": "2024-04-01_to_2024-04-30_ProfitAndLoss_CranberryHearing.CSV",
+      "file_path": "docs/financials/Profit_and_Loss/2024_Profit_and_Loss/2024-04-01_to_2024-04-30_ProfitAndLoss_CranberryHearing.CSV",
+      "fields_analyzed": [
+        {
+          "location": "Cranberry",
+          "net_income": 21889.22,
+          "interest_expenses": 151.47,
+          "taxes": 725.0,
+          "fields_found": [
+            {
+              "field": "Net Income",
+              "value": 21889.22,
+              "row": 70
+            },
+            {
+              "field": "Interest Expenses",
+              "value": 151.47,
+              "row": 36
+            },
+            {
+              "field": "Corporate income tax expense",
+              "value": 725.0,
+              "row": 65
+            },
+            {
+              "field": "State taxes",
+              "value": 0.0,
+              "row": 23
+            }
+          ]
+        },
+        {
+          "location": "West View",
+          "net_income": 12237.62,
+          "interest_expenses": 151.47,
+          "taxes": 725.0,
+          "fields_found": [
+            {
+              "field": "Net Income",
+              "value": 12237.62,
+              "row": 70
+            },
+            {
+              "field": "Interest Expenses",
+              "value": 151.47,
+              "row": 36
+            },
+            {
+              "field": "Corporate income tax expense",
+              "value": 725.0,
+              "row": 65
+            },
+            {
+              "field": "State taxes",
+              "value": 0.0,
+              "row": 23
+            }
+          ]
+        }
+      ],
+      "ebit_calculation": {
+        "net_income": 34126.840000000004,
+        "interest_expenses": 302.94,
+        "taxes": 1450.0,
+        "ebit": 35879.780000000006,
+        "formula": "Net Income + Interest Expenses + Taxes",
+        "note": "This is EBIT, not full EBITDA (depreciation data not available)"
+      },
+      "data_quality": {
+        "has_net_income": true,
+        "has_interest": true,
+        "has_taxes": true,
+        "total_fields_found": 8,
+        "missing_depreciation": true,
+        "depreciation_note": "Depreciation/Amortization data not available in P&L files"
+      },
+      "notes": [
+        "Using 2024-2025 format with Cranberry and West View columns"
+      ],
+      "report_format": "2024_2025_format"
+    },
+    {
+      "month": "2024-05",
+      "filename": "2024-05-01_to_2025-05-31_ProfitAndLoss_CranberryHearing.CSV",
+      "file_path": "docs/financials/Profit_and_Loss/2024_Profit_and_Loss/2024-05-01_to_2025-05-31_ProfitAndLoss_CranberryHearing.CSV",
+      "fields_analyzed": [
+        {
+          "location": "Cranberry",
+          "net_income": 10008.14,
+          "interest_expenses": 25.78,
+          "taxes": 725.0,
+          "fields_found": [
+            {
+              "field": "Net Income",
+              "value": 10008.14,
+              "row": 71
+            },
+            {
+              "field": "Interest Expenses",
+              "value": 25.78,
+              "row": 38
+            },
+            {
+              "field": "Corporate income tax expense",
+              "value": 725.0,
+              "row": 67
+            },
+            {
+              "field": "State taxes",
+              "value": 0.0,
+              "row": 24
+            }
+          ]
+        },
+        {
+          "location": "West View",
+          "net_income": 10464.94,
+          "interest_expenses": 25.71,
+          "taxes": 725.0,
+          "fields_found": [
+            {
+              "field": "Net Income",
+              "value": 10464.94,
+              "row": 71
+            },
+            {
+              "field": "Interest Expenses",
+              "value": 25.71,
+              "row": 38
+            },
+            {
+              "field": "Corporate income tax expense",
+              "value": 725.0,
+              "row": 67
+            },
+            {
+              "field": "State taxes",
+              "value": 0.0,
+              "row": 24
+            }
+          ]
+        }
+      ],
+      "ebit_calculation": {
+        "net_income": 20473.08,
+        "interest_expenses": 51.49,
+        "taxes": 1450.0,
+        "ebit": 21974.570000000003,
+        "formula": "Net Income + Interest Expenses + Taxes",
+        "note": "This is EBIT, not full EBITDA (depreciation data not available)"
+      },
+      "data_quality": {
+        "has_net_income": true,
+        "has_interest": true,
+        "has_taxes": true,
+        "total_fields_found": 8,
+        "missing_depreciation": true,
+        "depreciation_note": "Depreciation/Amortization data not available in P&L files"
+      },
+      "notes": [
+        "Using 2024-2025 format with Cranberry and West View columns"
+      ],
+      "report_format": "2024_2025_format"
+    },
+    {
+      "month": "2024-06",
+      "filename": "2024-06-01_to_2024-06-30_ProfitAndLoss_CranberryHearing.CSV",
+      "file_path": "docs/financials/Profit_and_Loss/2024_Profit_and_Loss/2024-06-01_to_2024-06-30_ProfitAndLoss_CranberryHearing.CSV",
+      "fields_analyzed": [
+        {
+          "location": "Cranberry",
+          "net_income": 5197.45,
+          "interest_expenses": 117.1,
+          "taxes": 725.0,
+          "fields_found": [
+            {
+              "field": "Net Income",
+              "value": 5197.45,
+              "row": 66
+            },
+            {
+              "field": "Interest Expenses",
+              "value": 117.1,
+              "row": 32
+            },
+            {
+              "field": "Corporate income tax expense",
+              "value": 725.0,
+              "row": 62
+            },
+            {
+              "field": "State taxes",
+              "value": 0.0,
+              "row": 20
+            }
+          ]
+        },
+        {
+          "location": "West View",
+          "net_income": 9520.9,
+          "interest_expenses": 117.09,
+          "taxes": 725.0,
+          "fields_found": [
+            {
+              "field": "Net Income",
+              "value": 9520.9,
+              "row": 66
+            },
+            {
+              "field": "Interest Expenses",
+              "value": 117.09,
+              "row": 32
+            },
+            {
+              "field": "Corporate income tax expense",
+              "value": 725.0,
+              "row": 62
+            },
+            {
+              "field": "State taxes",
+              "value": 0.0,
+              "row": 20
+            }
+          ]
+        }
+      ],
+      "ebit_calculation": {
+        "net_income": 14718.349999999999,
+        "interest_expenses": 234.19,
+        "taxes": 1450.0,
+        "ebit": 16402.54,
+        "formula": "Net Income + Interest Expenses + Taxes",
+        "note": "This is EBIT, not full EBITDA (depreciation data not available)"
+      },
+      "data_quality": {
+        "has_net_income": true,
+        "has_interest": true,
+        "has_taxes": true,
+        "total_fields_found": 8,
+        "missing_depreciation": true,
+        "depreciation_note": "Depreciation/Amortization data not available in P&L files"
+      },
+      "notes": [
+        "Using 2024-2025 format with Cranberry and West View columns"
+      ],
+      "report_format": "2024_2025_format"
+    },
+    {
+      "month": "2024-07",
+      "filename": "2024-07-01_to_2024-07-31_ProfitAndLoss_CranberryHearing.CSV",
+      "file_path": "docs/financials/Profit_and_Loss/2024_Profit_and_Loss/2024-07-01_to_2024-07-31_ProfitAndLoss_CranberryHearing.CSV",
+      "fields_analyzed": [
+        {
+          "location": "Cranberry",
+          "net_income": 8885.55,
+          "interest_expenses": 138.77,
+          "taxes": 0.0,
+          "fields_found": [
+            {
+              "field": "Net Income",
+              "value": 8885.55,
+              "row": 67
+            },
+            {
+              "field": "Interest Expenses",
+              "value": 138.77,
+              "row": 35
+            },
+            {
+              "field": "State taxes",
+              "value": 0.0,
+              "row": 22
+            }
+          ]
+        },
+        {
+          "location": "West View",
+          "net_income": 8014.44,
+          "interest_expenses": 138.76,
+          "taxes": 0.0,
+          "fields_found": [
+            {
+              "field": "Net Income",
+              "value": 8014.44,
+              "row": 67
+            },
+            {
+              "field": "Interest Expenses",
+              "value": 138.76,
+              "row": 35
+            },
+            {
+              "field": "State taxes",
+              "value": 0.0,
+              "row": 22
+            }
+          ]
+        }
+      ],
+      "ebit_calculation": {
+        "net_income": 16899.989999999998,
+        "interest_expenses": 277.53,
+        "taxes": 0.0,
+        "ebit": 17177.519999999997,
+        "formula": "Net Income + Interest Expenses + Taxes",
+        "note": "This is EBIT, not full EBITDA (depreciation data not available)"
+      },
+      "data_quality": {
+        "has_net_income": true,
+        "has_interest": true,
+        "has_taxes": false,
+        "total_fields_found": 6,
+        "missing_depreciation": true,
+        "depreciation_note": "Depreciation/Amortization data not available in P&L files"
+      },
+      "notes": [
+        "Using 2024-2025 format with Cranberry and West View columns"
+      ],
+      "report_format": "2024_2025_format"
+    },
+    {
+      "month": "2024-08",
+      "filename": "2024-08-01_to_2024-08-31_ProfitAndLoss_CranberryHearing.CSV",
+      "file_path": "docs/financials/Profit_and_Loss/2024_Profit_and_Loss/2024-08-01_to_2024-08-31_ProfitAndLoss_CranberryHearing.CSV",
+      "fields_analyzed": [
+        {
+          "location": "Cranberry",
+          "net_income": 16569.18,
+          "interest_expenses": 2440.51,
+          "taxes": 1350.0,
+          "fields_found": [
+            {
+              "field": "Net Income",
+              "value": 16569.18,
+              "row": 63
+            },
+            {
+              "field": "Interest Expenses",
+              "value": 2440.51,
+              "row": 33
+            },
+            {
+              "field": "Corporate income tax expense",
+              "value": 1350.0,
+              "row": 59
+            },
+            {
+              "field": "State taxes",
+              "value": 0.0,
+              "row": 19
+            }
+          ]
+        },
+        {
+          "location": "West View",
+          "net_income": 7613.77,
+          "interest_expenses": 89.52,
+          "taxes": 1350.0,
+          "fields_found": [
+            {
+              "field": "Net Income",
+              "value": 7613.77,
+              "row": 63
+            },
+            {
+              "field": "Interest Expenses",
+              "value": 89.52,
+              "row": 33
+            },
+            {
+              "field": "Corporate income tax expense",
+              "value": 1350.0,
+              "row": 59
+            },
+            {
+              "field": "State taxes",
+              "value": 0.0,
+              "row": 19
+            }
+          ]
+        }
+      ],
+      "ebit_calculation": {
+        "net_income": 24182.95,
+        "interest_expenses": 2530.03,
+        "taxes": 2700.0,
+        "ebit": 29412.98,
+        "formula": "Net Income + Interest Expenses + Taxes",
+        "note": "This is EBIT, not full EBITDA (depreciation data not available)"
+      },
+      "data_quality": {
+        "has_net_income": true,
+        "has_interest": true,
+        "has_taxes": true,
+        "total_fields_found": 8,
+        "missing_depreciation": true,
+        "depreciation_note": "Depreciation/Amortization data not available in P&L files"
+      },
+      "notes": [
+        "Using 2024-2025 format with Cranberry and West View columns"
+      ],
+      "report_format": "2024_2025_format"
+    },
+    {
+      "month": "2024-09",
+      "filename": "2024-09-01_to_2024-09-30_ProfitAndLoss_CranberryHearing.CSV",
+      "file_path": "docs/financials/Profit_and_Loss/2024_Profit_and_Loss/2024-09-01_to_2024-09-30_ProfitAndLoss_CranberryHearing.CSV",
+      "fields_analyzed": [
+        {
+          "location": "Cranberry",
+          "net_income": 7691.34,
+          "interest_expenses": 54.82,
+          "taxes": 725.0,
+          "fields_found": [
+            {
+              "field": "Net Income",
+              "value": 7691.34,
+              "row": 70
+            },
+            {
+              "field": "Interest Expenses",
+              "value": 54.82,
+              "row": 37
+            },
+            {
+              "field": "Corporate income tax expense",
+              "value": 725.0,
+              "row": 65
+            },
+            {
+              "field": "State taxes",
+              "value": 0.0,
+              "row": 23
+            }
+          ]
+        },
+        {
+          "location": "West View",
+          "net_income": 16607.8,
+          "interest_expenses": 1502.36,
+          "taxes": 725.0,
+          "fields_found": [
+            {
+              "field": "Net Income",
+              "value": 16607.8,
+              "row": 70
+            },
+            {
+              "field": "Interest Expenses",
+              "value": 1502.36,
+              "row": 37
+            },
+            {
+              "field": "Corporate income tax expense",
+              "value": 725.0,
+              "row": 65
+            },
+            {
+              "field": "State taxes",
+              "value": 0.0,
+              "row": 23
+            }
+          ]
+        }
+      ],
+      "ebit_calculation": {
+        "net_income": 24299.14,
+        "interest_expenses": 1557.1799999999998,
+        "taxes": 1450.0,
+        "ebit": 27306.32,
+        "formula": "Net Income + Interest Expenses + Taxes",
+        "note": "This is EBIT, not full EBITDA (depreciation data not available)"
+      },
+      "data_quality": {
+        "has_net_income": true,
+        "has_interest": true,
+        "has_taxes": true,
+        "total_fields_found": 8,
+        "missing_depreciation": true,
+        "depreciation_note": "Depreciation/Amortization data not available in P&L files"
+      },
+      "notes": [
+        "Using 2024-2025 format with Cranberry and West View columns"
+      ],
+      "report_format": "2024_2025_format"
+    },
+    {
+      "month": "2024-10",
+      "filename": "2024-10-01_to_2024-10-31_ProfitAndLoss_CranberryHearing.CSV",
+      "file_path": "docs/financials/Profit_and_Loss/2024_Profit_and_Loss/2024-10-01_to_2024-10-31_ProfitAndLoss_CranberryHearing.CSV",
+      "fields_analyzed": [
+        {
+          "location": "Cranberry",
+          "net_income": 11992.92,
+          "interest_expenses": 149.2,
+          "taxes": 3725.0,
+          "fields_found": [
+            {
+              "field": "Net Income",
+              "value": 11992.92,
+              "row": 76
+            },
+            {
+              "field": "Interest Expenses",
+              "value": 149.2,
+              "row": 38
+            },
+            {
+              "field": "Corporate income tax expense",
+              "value": 3725.0,
+              "row": 65
+            },
+            {
+              "field": "State taxes",
+              "value": 0.0,
+              "row": 24
+            }
+          ]
+        },
+        {
+          "location": "West View",
+          "net_income": 19977.47,
+          "interest_expenses": 1333.19,
+          "taxes": 3725.0,
+          "fields_found": [
+            {
+              "field": "Net Income",
+              "value": 19977.47,
+              "row": 76
+            },
+            {
+              "field": "Interest Expenses",
+              "value": 1333.19,
+              "row": 38
+            },
+            {
+              "field": "Corporate income tax expense",
+              "value": 3725.0,
+              "row": 65
+            },
+            {
+              "field": "State taxes",
+              "value": 0.0,
+              "row": 24
+            }
+          ]
+        }
+      ],
+      "ebit_calculation": {
+        "net_income": 31970.39,
+        "interest_expenses": 1482.39,
+        "taxes": 7450.0,
+        "ebit": 40902.78,
+        "formula": "Net Income + Interest Expenses + Taxes",
+        "note": "This is EBIT, not full EBITDA (depreciation data not available)"
+      },
+      "data_quality": {
+        "has_net_income": true,
+        "has_interest": true,
+        "has_taxes": true,
+        "total_fields_found": 8,
+        "missing_depreciation": true,
+        "depreciation_note": "Depreciation/Amortization data not available in P&L files"
+      },
+      "notes": [
+        "Using 2024-2025 format with Cranberry and West View columns"
+      ],
+      "report_format": "2024_2025_format"
+    },
+    {
+      "month": "2024-11",
+      "filename": "2024-11-01_to_2024-11-30_ProfitAndLoss_CranberryHearing.CSV",
+      "file_path": "docs/financials/Profit_and_Loss/2024_Profit_and_Loss/2024-11-01_to_2024-11-30_ProfitAndLoss_CranberryHearing.CSV",
+      "fields_analyzed": [
+        {
+          "location": "Cranberry",
+          "net_income": 9841.93,
+          "interest_expenses": 99.62,
+          "taxes": 725.0,
+          "fields_found": [
+            {
+              "field": "Net Income",
+              "value": 9841.93,
+              "row": 70
+            },
+            {
+              "field": "Interest Expenses",
+              "value": 99.62,
+              "row": 36
+            },
+            {
+              "field": "Corporate income tax expense",
+              "value": 725.0,
+              "row": 65
+            },
+            {
+              "field": "State taxes",
+              "value": 0.0,
+              "row": 23
+            }
+          ]
+        },
+        {
+          "location": "West View",
+          "net_income": 15755.02,
+          "interest_expenses": 1283.62,
+          "taxes": 725.0,
+          "fields_found": [
+            {
+              "field": "Net Income",
+              "value": 15755.02,
+              "row": 70
+            },
+            {
+              "field": "Interest Expenses",
+              "value": 1283.62,
+              "row": 36
+            },
+            {
+              "field": "Corporate income tax expense",
+              "value": 725.0,
+              "row": 65
+            },
+            {
+              "field": "State taxes",
+              "value": 0.0,
+              "row": 23
+            }
+          ]
+        }
+      ],
+      "ebit_calculation": {
+        "net_income": 25596.95,
+        "interest_expenses": 1383.2399999999998,
+        "taxes": 1450.0,
+        "ebit": 28430.190000000002,
+        "formula": "Net Income + Interest Expenses + Taxes",
+        "note": "This is EBIT, not full EBITDA (depreciation data not available)"
+      },
+      "data_quality": {
+        "has_net_income": true,
+        "has_interest": true,
+        "has_taxes": true,
+        "total_fields_found": 8,
+        "missing_depreciation": true,
+        "depreciation_note": "Depreciation/Amortization data not available in P&L files"
+      },
+      "notes": [
+        "Using 2024-2025 format with Cranberry and West View columns"
+      ],
+      "report_format": "2024_2025_format"
+    },
+    {
+      "month": "2024-12",
+      "filename": "2024-12-01_to_2024-12-31_ProfitAndLoss_CranberryHearing.CSV",
+      "file_path": "docs/financials/Profit_and_Loss/2024_Profit_and_Loss/2024-12-01_to_2024-12-31_ProfitAndLoss_CranberryHearing.CSV",
+      "fields_analyzed": [
+        {
+          "location": "Cranberry",
+          "net_income": 10621.38,
+          "interest_expenses": 348.12,
+          "taxes": 1975.0,
+          "fields_found": [
+            {
+              "field": "Net Income",
+              "value": 10621.38,
+              "row": 67
+            },
+            {
+              "field": "Interest Expenses",
+              "value": 348.12,
+              "row": 35
+            },
+            {
+              "field": "Corporate income tax expense",
+              "value": 1975.0,
+              "row": 63
+            },
+            {
+              "field": "State taxes",
+              "value": 0.0,
+              "row": 22
+            }
+          ]
+        },
+        {
+          "location": "West View",
+          "net_income": -6446.1,
+          "interest_expenses": 2731.13,
+          "taxes": 1975.0,
+          "fields_found": [
+            {
+              "field": "Net Income",
+              "value": -6446.1,
+              "row": 67
+            },
+            {
+              "field": "Interest Expenses",
+              "value": 2731.13,
+              "row": 35
+            },
+            {
+              "field": "Corporate income tax expense",
+              "value": 1975.0,
+              "row": 63
+            },
+            {
+              "field": "State taxes",
+              "value": 0.0,
+              "row": 22
+            }
+          ]
+        }
+      ],
+      "ebit_calculation": {
+        "net_income": 4175.279999999999,
+        "interest_expenses": 3079.25,
+        "taxes": 3950.0,
+        "ebit": 11204.529999999999,
+        "formula": "Net Income + Interest Expenses + Taxes",
+        "note": "This is EBIT, not full EBITDA (depreciation data not available)"
+      },
+      "data_quality": {
+        "has_net_income": true,
+        "has_interest": true,
+        "has_taxes": true,
+        "total_fields_found": 8,
+        "missing_depreciation": true,
+        "depreciation_note": "Depreciation/Amortization data not available in P&L files"
+      },
+      "notes": [
+        "Using 2024-2025 format with Cranberry and West View columns"
+      ],
+      "report_format": "2024_2025_format"
+    },
+    {
+      "month": "2025-01",
+      "filename": "2025-01-01_to_2025-01-31_ProfitAndLoss_CranberryHearing.CSV",
+      "file_path": "docs/financials/Profit_and_Loss/2025_Profit_and_Loss/2025-01-01_to_2025-01-31_ProfitAndLoss_CranberryHearing.CSV",
+      "fields_analyzed": [
+        {
+          "location": "Cranberry",
+          "net_income": 9041.34,
+          "interest_expenses": 2667.22,
+          "taxes": 2333.33,
+          "fields_found": [
+            {
+              "field": "Net Income",
+              "value": 9041.34,
+              "row": 70
+            },
+            {
+              "field": "Interest Expenses",
+              "value": 2667.22,
+              "row": 35
+            },
+            {
+              "field": "Corporate income tax expense",
+              "value": 2333.33,
+              "row": 59
+            },
+            {
+              "field": "State taxes",
+              "value": 0.0,
+              "row": 23
+            }
+          ]
+        },
+        {
+          "location": "West View",
+          "net_income": 28772.73,
+          "interest_expenses": 104.92,
+          "taxes": 2333.33,
+          "fields_found": [
+            {
+              "field": "Net Income",
+              "value": 28772.73,
+              "row": 70
+            },
+            {
+              "field": "Interest Expenses",
+              "value": 104.92,
+              "row": 35
+            },
+            {
+              "field": "Corporate income tax expense",
+              "value": 2333.33,
+              "row": 59
+            },
+            {
+              "field": "State taxes",
+              "value": 0.0,
+              "row": 23
+            }
+          ]
+        }
+      ],
+      "ebit_calculation": {
+        "net_income": 37814.07,
+        "interest_expenses": 2772.14,
+        "taxes": 4666.66,
+        "ebit": 45252.869999999995,
+        "formula": "Net Income + Interest Expenses + Taxes",
+        "note": "This is EBIT, not full EBITDA (depreciation data not available)"
+      },
+      "data_quality": {
+        "has_net_income": true,
+        "has_interest": true,
+        "has_taxes": true,
+        "total_fields_found": 8,
+        "missing_depreciation": true,
+        "depreciation_note": "Depreciation/Amortization data not available in P&L files"
+      },
+      "notes": [
+        "Using 2024-2025 format with Cranberry and West View columns"
+      ],
+      "report_format": "2024_2025_format"
+    },
+    {
+      "month": "2025-02",
+      "filename": "2025-02-01_to_2025-02-28_ProfitAndLoss_CranberryHearing.CSV",
+      "file_path": "docs/financials/Profit_and_Loss/2025_Profit_and_Loss/2025-02-01_to_2025-02-28_ProfitAndLoss_CranberryHearing.CSV",
+      "fields_analyzed": [
+        {
+          "location": "Cranberry",
+          "net_income": -13264.13,
+          "interest_expenses": 191.39,
+          "taxes": 2000.0,
+          "fields_found": [
+            {
+              "field": "Net Income",
+              "value": -13264.13,
+              "row": 67
+            },
+            {
+              "field": "Interest Expenses",
+              "value": 191.39,
+              "row": 37
+            },
+            {
+              "field": "Corporate income tax expense",
+              "value": 2000.0,
+              "row": 63
+            },
+            {
+              "field": "State taxes",
+              "value": 0.0,
+              "row": 23
+            }
+          ]
+        },
+        {
+          "location": "West View",
+          "net_income": 11734.17,
+          "interest_expenses": 102.85,
+          "taxes": 2000.0,
+          "fields_found": [
+            {
+              "field": "Net Income",
+              "value": 11734.17,
+              "row": 67
+            },
+            {
+              "field": "Interest Expenses",
+              "value": 102.85,
+              "row": 37
+            },
+            {
+              "field": "Corporate income tax expense",
+              "value": 2000.0,
+              "row": 63
+            },
+            {
+              "field": "State taxes",
+              "value": 0.0,
+              "row": 23
+            }
+          ]
+        }
+      ],
+      "ebit_calculation": {
+        "net_income": -1529.9599999999991,
+        "interest_expenses": 294.24,
+        "taxes": 4000.0,
+        "ebit": 2764.2800000000007,
+        "formula": "Net Income + Interest Expenses + Taxes",
+        "note": "This is EBIT, not full EBITDA (depreciation data not available)"
+      },
+      "data_quality": {
+        "has_net_income": true,
+        "has_interest": true,
+        "has_taxes": true,
+        "total_fields_found": 8,
+        "missing_depreciation": true,
+        "depreciation_note": "Depreciation/Amortization data not available in P&L files"
+      },
+      "notes": [
+        "Using 2024-2025 format with Cranberry and West View columns"
+      ],
+      "report_format": "2024_2025_format"
+    },
+    {
+      "month": "2025-03",
+      "filename": "2025-03-01_to_2025-03-31_ProfitAndLoss_CranberryHearing.CSV",
+      "file_path": "docs/financials/Profit_and_Loss/2025_Profit_and_Loss/2025-03-01_to_2025-03-31_ProfitAndLoss_CranberryHearing.CSV",
+      "fields_analyzed": [
+        {
+          "location": "Cranberry",
+          "net_income": 6044.63,
+          "interest_expenses": 91.82,
+          "taxes": 1500.0,
+          "fields_found": [
+            {
+              "field": "Net Income",
+              "value": 6044.63,
+              "row": 75
+            },
+            {
+              "field": "Interest Expenses",
+              "value": 91.82,
+              "row": 36
+            },
+            {
+              "field": "Corporate income tax expense",
+              "value": 1500.0,
+              "row": 66
+            },
+            {
+              "field": "State taxes",
+              "value": 0.0,
+              "row": 23
+            }
+          ]
+        },
+        {
+          "location": "West View",
+          "net_income": 11844.2,
+          "interest_expenses": 91.81,
+          "taxes": 1500.0,
+          "fields_found": [
+            {
+              "field": "Net Income",
+              "value": 11844.2,
+              "row": 75
+            },
+            {
+              "field": "Interest Expenses",
+              "value": 91.81,
+              "row": 36
+            },
+            {
+              "field": "Corporate income tax expense",
+              "value": 1500.0,
+              "row": 66
+            },
+            {
+              "field": "State taxes",
+              "value": 0.0,
+              "row": 23
+            }
+          ]
+        }
+      ],
+      "ebit_calculation": {
+        "net_income": 17888.83,
+        "interest_expenses": 183.63,
+        "taxes": 3000.0,
+        "ebit": 21072.460000000003,
+        "formula": "Net Income + Interest Expenses + Taxes",
+        "note": "This is EBIT, not full EBITDA (depreciation data not available)"
+      },
+      "data_quality": {
+        "has_net_income": true,
+        "has_interest": true,
+        "has_taxes": true,
+        "total_fields_found": 8,
+        "missing_depreciation": true,
+        "depreciation_note": "Depreciation/Amortization data not available in P&L files"
+      },
+      "notes": [
+        "Using 2024-2025 format with Cranberry and West View columns"
+      ],
+      "report_format": "2024_2025_format"
+    },
+    {
+      "month": "2025-04",
+      "filename": "2025-04-01_to_2025-04-30_ProfitAndLoss_CranberryHearing.CSV",
+      "file_path": "docs/financials/Profit_and_Loss/2025_Profit_and_Loss/2025-04-01_to_2025-04-30_ProfitAndLoss_CranberryHearing.CSV",
+      "fields_analyzed": [
+        {
+          "location": "Cranberry",
+          "net_income": 7774.38,
+          "interest_expenses": 100.67,
+          "taxes": 2083.33,
+          "fields_found": [
+            {
+              "field": "Net Income",
+              "value": 7774.38,
+              "row": 76
+            },
+            {
+              "field": "Interest Expenses",
+              "value": 100.67,
+              "row": 36
+            },
+            {
+              "field": "Corporate income tax expense",
+              "value": 2083.33,
+              "row": 66
+            },
+            {
+              "field": "State taxes",
+              "value": 0.0,
+              "row": 24
+            }
+          ]
+        },
+        {
+          "location": "West View",
+          "net_income": 18600.8,
+          "interest_expenses": 100.66,
+          "taxes": 2083.34,
+          "fields_found": [
+            {
+              "field": "Net Income",
+              "value": 18600.8,
+              "row": 76
+            },
+            {
+              "field": "Interest Expenses",
+              "value": 100.66,
+              "row": 36
+            },
+            {
+              "field": "Corporate income tax expense",
+              "value": 2083.34,
+              "row": 66
+            },
+            {
+              "field": "State taxes",
+              "value": 0.0,
+              "row": 24
+            }
+          ]
+        }
+      ],
+      "ebit_calculation": {
+        "net_income": 26375.18,
+        "interest_expenses": 201.32999999999998,
+        "taxes": 4166.67,
+        "ebit": 30743.18,
+        "formula": "Net Income + Interest Expenses + Taxes",
+        "note": "This is EBIT, not full EBITDA (depreciation data not available)"
+      },
+      "data_quality": {
+        "has_net_income": true,
+        "has_interest": true,
+        "has_taxes": true,
+        "total_fields_found": 8,
+        "missing_depreciation": true,
+        "depreciation_note": "Depreciation/Amortization data not available in P&L files"
+      },
+      "notes": [
+        "Using 2024-2025 format with Cranberry and West View columns"
+      ],
+      "report_format": "2024_2025_format"
+    },
+    {
+      "month": "2025-05",
+      "filename": "2025-05-01_to_2025-05-31_ProfitAndLoss_CranberryHearing.CSV",
+      "file_path": "docs/financials/Profit_and_Loss/2025_Profit_and_Loss/2025-05-01_to_2025-05-31_ProfitAndLoss_CranberryHearing.CSV",
+      "fields_analyzed": [
+        {
+          "location": "Cranberry",
+          "net_income": 26029.19,
+          "interest_expenses": 95.12,
+          "taxes": 0.0,
+          "fields_found": [
+            {
+              "field": "Net Income",
+              "value": 26029.19,
+              "row": 65
+            },
+            {
+              "field": "Interest Expenses",
+              "value": 95.12,
+              "row": 34
+            },
+            {
+              "field": "State taxes",
+              "value": 0.0,
+              "row": 20
+            }
+          ]
+        },
+        {
+          "location": "West View",
+          "net_income": 9629.79,
+          "interest_expenses": 95.11,
+          "taxes": 0.0,
+          "fields_found": [
+            {
+              "field": "Net Income",
+              "value": 9629.79,
+              "row": 65
+            },
+            {
+              "field": "Interest Expenses",
+              "value": 95.11,
+              "row": 34
+            },
+            {
+              "field": "State taxes",
+              "value": 0.0,
+              "row": 20
+            }
+          ]
+        }
+      ],
+      "ebit_calculation": {
+        "net_income": 35658.979999999996,
+        "interest_expenses": 190.23000000000002,
+        "taxes": 0.0,
+        "ebit": 35849.21,
+        "formula": "Net Income + Interest Expenses + Taxes",
+        "note": "This is EBIT, not full EBITDA (depreciation data not available)"
+      },
+      "data_quality": {
+        "has_net_income": true,
+        "has_interest": true,
+        "has_taxes": false,
+        "total_fields_found": 6,
+        "missing_depreciation": true,
+        "depreciation_note": "Depreciation/Amortization data not available in P&L files"
+      },
+      "notes": [
+        "Using 2024-2025 format with Cranberry and West View columns"
+      ],
+      "report_format": "2024_2025_format"
+    },
+    {
+      "month": "2025-06",
+      "filename": "2025-06-01_to_2025-06-30_ProfitAndLoss_CranberryHearing.CSV",
+      "file_path": "docs/financials/Profit_and_Loss/2025_Profit_and_Loss/2025-06-01_to_2025-06-30_ProfitAndLoss_CranberryHearing.CSV",
+      "fields_analyzed": [
+        {
+          "location": "Cranberry",
+          "net_income": 5673.03,
+          "interest_expenses": 97.92,
+          "taxes": 7000.0,
+          "fields_found": [
+            {
+              "field": "Net Income",
+              "value": 5673.03,
+              "row": 68
+            },
+            {
+              "field": "Interest Expenses",
+              "value": 97.92,
+              "row": 38
+            },
+            {
+              "field": "Corporate income tax expense",
+              "value": 7000.0,
+              "row": 64
+            },
+            {
+              "field": "State taxes",
+              "value": 0.0,
+              "row": 25
+            }
+          ]
+        },
+        {
+          "location": "West View",
+          "net_income": -13733.95,
+          "interest_expenses": 97.92,
+          "taxes": 7000.0,
+          "fields_found": [
+            {
+              "field": "Net Income",
+              "value": -13733.95,
+              "row": 68
+            },
+            {
+              "field": "Interest Expenses",
+              "value": 97.92,
+              "row": 38
+            },
+            {
+              "field": "Corporate income tax expense",
+              "value": 7000.0,
+              "row": 64
+            },
+            {
+              "field": "State taxes",
+              "value": 0.0,
+              "row": 25
+            }
+          ]
+        }
+      ],
+      "ebit_calculation": {
+        "net_income": -8060.920000000001,
+        "interest_expenses": 195.84,
+        "taxes": 14000.0,
+        "ebit": 6134.919999999999,
+        "formula": "Net Income + Interest Expenses + Taxes",
+        "note": "This is EBIT, not full EBITDA (depreciation data not available)"
+      },
+      "data_quality": {
+        "has_net_income": true,
+        "has_interest": true,
+        "has_taxes": true,
+        "total_fields_found": 8,
+        "missing_depreciation": true,
+        "depreciation_note": "Depreciation/Amortization data not available in P&L files"
+      },
+      "notes": [
+        "Using 2024-2025 format with Cranberry and West View columns"
+      ],
+      "report_format": "2024_2025_format"
+    },
+    {
+      "month": "2025-07",
+      "filename": "2025-07-01_to_2025-07-31_ProfitAndLoss_CranberryHearing.CSV",
+      "file_path": "docs/financials/Profit_and_Loss/2025_Profit_and_Loss/2025-07-01_to_2025-07-31_ProfitAndLoss_CranberryHearing.CSV",
+      "fields_analyzed": [
+        {
+          "location": "Cranberry",
+          "net_income": 21572.13,
+          "interest_expenses": 0,
+          "taxes": 0,
+          "fields_found": [
+            {
+              "field": "Net Income",
+              "value": 21572.13,
+              "row": 40
+            }
+          ]
+        },
+        {
+          "location": "West View",
+          "net_income": 39662.35,
+          "interest_expenses": 0,
+          "taxes": 0,
+          "fields_found": [
+            {
+              "field": "Net Income",
+              "value": 39662.35,
+              "row": 40
+            }
+          ]
+        }
+      ],
+      "ebit_calculation": {
+        "net_income": 61234.479999999996,
+        "interest_expenses": 0,
+        "taxes": 0,
+        "ebit": 61234.479999999996,
+        "formula": "Net Income + Interest Expenses + Taxes",
+        "note": "This is EBIT, not full EBITDA (depreciation data not available)"
+      },
+      "data_quality": {
+        "has_net_income": true,
+        "has_interest": false,
+        "has_taxes": false,
+        "total_fields_found": 2,
+        "missing_depreciation": true,
+        "depreciation_note": "Depreciation/Amortization data not available in P&L files"
+      },
+      "notes": [
+        "Using 2024-2025 format with Cranberry and West View columns"
+      ],
+      "report_format": "2024_2025_format"
+    }
+  ],
+  "summary": {
+    "total_ebit": 664245.16,
+    "total_net_income": 538478.45,
+    "total_interest_expenses": 18820.7,
+    "total_taxes": 106946.01,
+    "months_analyzed": 31,
+    "calculation_method": "EBIT (Earnings Before Interest and Taxes)",
+    "missing_components": {
+      "depreciation": true,
+      "amortization": true,
+      "note": "Depreciation/Amortization data not available in P&L files"
+    },
+    "data_quality": {
+      "has_net_income": true,
+      "has_interest": true,
+      "has_taxes": true,
+      "missing_depreciation": true
+    }
+  },
+  "projections": {
+    "method": "Historical monthly average with growth scenarios",
+    "historical_average_monthly_ebit": 21427.26322580645,
+    "historical_months_analyzed": 31,
+    "scenarios": {
+      "conservative": {
+        "growth_rate": -0.05,
+        "monthly_ebit": 20355.90006451613,
+        "projected_months": [
+          {
+            "month": "2025-06",
+            "ebit": 20355.90006451613,
+            "data_type": "projected"
+          },
+          {
+            "month": "2025-07",
+            "ebit": 20355.90006451613,
+            "data_type": "projected"
+          },
+          {
+            "month": "2025-08",
+            "ebit": 20355.90006451613,
+            "data_type": "projected"
+          },
+          {
+            "month": "2025-09",
+            "ebit": 20355.90006451613,
+            "data_type": "projected"
+          },
+          {
+            "month": "2025-10",
+            "ebit": 20355.90006451613,
+            "data_type": "projected"
+          },
+          {
+            "month": "2025-11",
+            "ebit": 20355.90006451613,
+            "data_type": "projected"
+          },
+          {
+            "month": "2025-12",
+            "ebit": 20355.90006451613,
+            "data_type": "projected"
+          },
+          {
+            "month": "2026-01",
+            "ebit": 20355.90006451613,
+            "data_type": "projected"
+          },
+          {
+            "month": "2026-02",
+            "ebit": 20355.90006451613,
+            "data_type": "projected"
+          },
+          {
+            "month": "2026-03",
+            "ebit": 20355.90006451613,
+            "data_type": "projected"
+          },
+          {
+            "month": "2026-04",
+            "ebit": 20355.90006451613,
+            "data_type": "projected"
+          },
+          {
+            "month": "2026-05",
+            "ebit": 20355.90006451613,
+            "data_type": "projected"
+          },
+          {
+            "month": "2026-06",
+            "ebit": 20355.90006451613,
+            "data_type": "projected"
+          },
+          {
+            "month": "2026-07",
+            "ebit": 20355.90006451613,
+            "data_type": "projected"
+          },
+          {
+            "month": "2026-08",
+            "ebit": 20355.90006451613,
+            "data_type": "projected"
+          },
+          {
+            "month": "2026-09",
+            "ebit": 20355.90006451613,
+            "data_type": "projected"
+          },
+          {
+            "month": "2026-10",
+            "ebit": 20355.90006451613,
+            "data_type": "projected"
+          },
+          {
+            "month": "2026-11",
+            "ebit": 20355.90006451613,
+            "data_type": "projected"
+          },
+          {
+            "month": "2026-12",
+            "ebit": 20355.90006451613,
+            "data_type": "projected"
+          }
+        ],
+        "total_projected_ebit": 386762.1
+      },
+      "base": {
+        "growth_rate": 0.0,
+        "monthly_ebit": 21427.26322580645,
+        "projected_months": [
+          {
+            "month": "2025-06",
+            "ebit": 21427.26322580645,
+            "data_type": "projected"
+          },
+          {
+            "month": "2025-07",
+            "ebit": 21427.26322580645,
+            "data_type": "projected"
+          },
+          {
+            "month": "2025-08",
+            "ebit": 21427.26322580645,
+            "data_type": "projected"
+          },
+          {
+            "month": "2025-09",
+            "ebit": 21427.26322580645,
+            "data_type": "projected"
+          },
+          {
+            "month": "2025-10",
+            "ebit": 21427.26322580645,
+            "data_type": "projected"
+          },
+          {
+            "month": "2025-11",
+            "ebit": 21427.26322580645,
+            "data_type": "projected"
+          },
+          {
+            "month": "2025-12",
+            "ebit": 21427.26322580645,
+            "data_type": "projected"
+          },
+          {
+            "month": "2026-01",
+            "ebit": 21427.26322580645,
+            "data_type": "projected"
+          },
+          {
+            "month": "2026-02",
+            "ebit": 21427.26322580645,
+            "data_type": "projected"
+          },
+          {
+            "month": "2026-03",
+            "ebit": 21427.26322580645,
+            "data_type": "projected"
+          },
+          {
+            "month": "2026-04",
+            "ebit": 21427.26322580645,
+            "data_type": "projected"
+          },
+          {
+            "month": "2026-05",
+            "ebit": 21427.26322580645,
+            "data_type": "projected"
+          },
+          {
+            "month": "2026-06",
+            "ebit": 21427.26322580645,
+            "data_type": "projected"
+          },
+          {
+            "month": "2026-07",
+            "ebit": 21427.26322580645,
+            "data_type": "projected"
+          },
+          {
+            "month": "2026-08",
+            "ebit": 21427.26322580645,
+            "data_type": "projected"
+          },
+          {
+            "month": "2026-09",
+            "ebit": 21427.26322580645,
+            "data_type": "projected"
+          },
+          {
+            "month": "2026-10",
+            "ebit": 21427.26322580645,
+            "data_type": "projected"
+          },
+          {
+            "month": "2026-11",
+            "ebit": 21427.26322580645,
+            "data_type": "projected"
+          },
+          {
+            "month": "2026-12",
+            "ebit": 21427.26322580645,
+            "data_type": "projected"
+          }
+        ],
+        "total_projected_ebit": 407117.94
+      },
+      "optimistic": {
+        "growth_rate": 0.05,
+        "monthly_ebit": 22498.626387096774,
+        "projected_months": [
+          {
+            "month": "2025-06",
+            "ebit": 22498.626387096774,
+            "data_type": "projected"
+          },
+          {
+            "month": "2025-07",
+            "ebit": 22498.626387096774,
+            "data_type": "projected"
+          },
+          {
+            "month": "2025-08",
+            "ebit": 22498.626387096774,
+            "data_type": "projected"
+          },
+          {
+            "month": "2025-09",
+            "ebit": 22498.626387096774,
+            "data_type": "projected"
+          },
+          {
+            "month": "2025-10",
+            "ebit": 22498.626387096774,
+            "data_type": "projected"
+          },
+          {
+            "month": "2025-11",
+            "ebit": 22498.626387096774,
+            "data_type": "projected"
+          },
+          {
+            "month": "2025-12",
+            "ebit": 22498.626387096774,
+            "data_type": "projected"
+          },
+          {
+            "month": "2026-01",
+            "ebit": 22498.626387096774,
+            "data_type": "projected"
+          },
+          {
+            "month": "2026-02",
+            "ebit": 22498.626387096774,
+            "data_type": "projected"
+          },
+          {
+            "month": "2026-03",
+            "ebit": 22498.626387096774,
+            "data_type": "projected"
+          },
+          {
+            "month": "2026-04",
+            "ebit": 22498.626387096774,
+            "data_type": "projected"
+          },
+          {
+            "month": "2026-05",
+            "ebit": 22498.626387096774,
+            "data_type": "projected"
+          },
+          {
+            "month": "2026-06",
+            "ebit": 22498.626387096774,
+            "data_type": "projected"
+          },
+          {
+            "month": "2026-07",
+            "ebit": 22498.626387096774,
+            "data_type": "projected"
+          },
+          {
+            "month": "2026-08",
+            "ebit": 22498.626387096774,
+            "data_type": "projected"
+          },
+          {
+            "month": "2026-09",
+            "ebit": 22498.626387096774,
+            "data_type": "projected"
+          },
+          {
+            "month": "2026-10",
+            "ebit": 22498.626387096774,
+            "data_type": "projected"
+          },
+          {
+            "month": "2026-11",
+            "ebit": 22498.626387096774,
+            "data_type": "projected"
+          },
+          {
+            "month": "2026-12",
+            "ebit": 22498.626387096774,
+            "data_type": "projected"
+          }
+        ],
+        "total_projected_ebit": 427473.97
+      }
+    }
+  },
+  "graph_data": {
+    "monthly_data": [
+      {
+        "month": "2023-01",
+        "ebit": 20103.390000000003,
+        "data_type": "historical",
+        "net_income": 17505.83,
+        "interest": 342.38,
+        "taxes": 2255.18
+      },
+      {
+        "month": "2023-02",
+        "ebit": 33469.31,
+        "data_type": "historical",
+        "net_income": 32804.34,
+        "interest": 303.4,
+        "taxes": 361.57
+      },
+      {
+        "month": "2023-03",
+        "ebit": 22285.54,
+        "data_type": "historical",
+        "net_income": 20234.07,
+        "interest": 332.16,
+        "taxes": 1719.31
+      },
+      {
+        "month": "2023-04",
+        "ebit": 9092.810000000001,
+        "data_type": "historical",
+        "net_income": 8617.42,
+        "interest": 305.04,
+        "taxes": 170.35
+      },
+      {
+        "month": "2023-05",
+        "ebit": 11054.799999999997,
+        "data_type": "historical",
+        "net_income": 10646.71,
+        "interest": 317.71,
+        "taxes": 90.38
+      },
+      {
+        "month": "2023-06",
+        "ebit": 24972.37,
+        "data_type": "historical",
+        "net_income": 24611.89,
+        "interest": 305.04,
+        "taxes": 55.44
+      },
+      {
+        "month": "2023-07",
+        "ebit": 24774.920000000002,
+        "data_type": "historical",
+        "net_income": 24413.25,
+        "interest": 299.88,
+        "taxes": 61.79
+      },
+      {
+        "month": "2023-08",
+        "ebit": 28669.88,
+        "data_type": "historical",
+        "net_income": 28320.58,
+        "interest": 299.88,
+        "taxes": 49.42
+      },
+      {
+        "month": "2023-09",
+        "ebit": 1009.1100000000001,
+        "data_type": "historical",
+        "net_income": -1836.59,
+        "interest": 290.22,
+        "taxes": 2555.48
+      },
+      {
+        "month": "2023-10",
+        "ebit": 32318.67,
+        "data_type": "historical",
+        "net_income": -8713.51,
+        "interest": 0,
+        "taxes": 41032.18
+      },
+      {
+        "month": "2023-11",
+        "ebit": -794.4599999999998,
+        "data_type": "historical",
+        "net_income": -2629.96,
+        "interest": 296.82,
+        "taxes": 1538.68
+      },
+      {
+        "month": "2023-12",
+        "ebit": 417.6600000000003,
+        "data_type": "historical",
+        "net_income": -1649.85,
+        "interest": 544.61,
+        "taxes": 1522.9
+      },
+      {
+        "month": "2024-01",
+        "ebit": -7828.73,
+        "data_type": "historical",
+        "net_income": -9278.73,
+        "interest": 0,
+        "taxes": 1450.0
+      },
+      {
+        "month": "2024-02",
+        "ebit": 19442.47,
+        "data_type": "historical",
+        "net_income": 17822.5,
+        "interest": 169.97,
+        "taxes": 1450.0
+      },
+      {
+        "month": "2024-03",
+        "ebit": 13514.81,
+        "data_type": "historical",
+        "net_income": 11786.869999999999,
+        "interest": 277.94,
+        "taxes": 1450.0
+      },
+      {
+        "month": "2024-04",
+        "ebit": 35879.780000000006,
+        "data_type": "historical",
+        "net_income": 34126.840000000004,
+        "interest": 302.94,
+        "taxes": 1450.0
+      },
+      {
+        "month": "2024-05",
+        "ebit": 21974.570000000003,
+        "data_type": "historical",
+        "net_income": 20473.08,
+        "interest": 51.49,
+        "taxes": 1450.0
+      },
+      {
+        "month": "2024-06",
+        "ebit": 16402.54,
+        "data_type": "historical",
+        "net_income": 14718.349999999999,
+        "interest": 234.19,
+        "taxes": 1450.0
+      },
+      {
+        "month": "2024-07",
+        "ebit": 17177.519999999997,
+        "data_type": "historical",
+        "net_income": 16899.989999999998,
+        "interest": 277.53,
+        "taxes": 0.0
+      },
+      {
+        "month": "2024-08",
+        "ebit": 29412.98,
+        "data_type": "historical",
+        "net_income": 24182.95,
+        "interest": 2530.03,
+        "taxes": 2700.0
+      },
+      {
+        "month": "2024-09",
+        "ebit": 27306.32,
+        "data_type": "historical",
+        "net_income": 24299.14,
+        "interest": 1557.1799999999998,
+        "taxes": 1450.0
+      },
+      {
+        "month": "2024-10",
+        "ebit": 40902.78,
+        "data_type": "historical",
+        "net_income": 31970.39,
+        "interest": 1482.39,
+        "taxes": 7450.0
+      },
+      {
+        "month": "2024-11",
+        "ebit": 28430.190000000002,
+        "data_type": "historical",
+        "net_income": 25596.95,
+        "interest": 1383.2399999999998,
+        "taxes": 1450.0
+      },
+      {
+        "month": "2024-12",
+        "ebit": 11204.529999999999,
+        "data_type": "historical",
+        "net_income": 4175.279999999999,
+        "interest": 3079.25,
+        "taxes": 3950.0
+      },
+      {
+        "month": "2025-01",
+        "ebit": 45252.869999999995,
+        "data_type": "historical",
+        "net_income": 37814.07,
+        "interest": 2772.14,
+        "taxes": 4666.66
+      },
+      {
+        "month": "2025-02",
+        "ebit": 2764.2800000000007,
+        "data_type": "historical",
+        "net_income": -1529.9599999999991,
+        "interest": 294.24,
+        "taxes": 4000.0
+      },
+      {
+        "month": "2025-03",
+        "ebit": 21072.460000000003,
+        "data_type": "historical",
+        "net_income": 17888.83,
+        "interest": 183.63,
+        "taxes": 3000.0
+      },
+      {
+        "month": "2025-04",
+        "ebit": 30743.18,
+        "data_type": "historical",
+        "net_income": 26375.18,
+        "interest": 201.32999999999998,
+        "taxes": 4166.67
+      },
+      {
+        "month": "2025-05",
+        "ebit": 35849.21,
+        "data_type": "historical",
+        "net_income": 35658.979999999996,
+        "interest": 190.23000000000002,
+        "taxes": 0.0
+      },
+      {
+        "month": "2025-06",
+        "ebit": 6134.919999999999,
+        "data_type": "historical",
+        "net_income": -8060.920000000001,
+        "interest": 195.84,
+        "taxes": 14000.0
+      },
+      {
+        "month": "2025-06",
+        "ebit": 20355.90006451613,
+        "data_type": "projected",
+        "scenario": "conservative",
+        "net_income": null,
+        "interest": null,
+        "taxes": null
+      },
+      {
+        "month": "2025-06",
+        "ebit": 21427.26322580645,
+        "data_type": "projected",
+        "scenario": "base",
+        "net_income": null,
+        "interest": null,
+        "taxes": null
+      },
+      {
+        "month": "2025-06",
+        "ebit": 22498.626387096774,
+        "data_type": "projected",
+        "scenario": "optimistic",
+        "net_income": null,
+        "interest": null,
+        "taxes": null
+      },
+      {
+        "month": "2025-07",
+        "ebit": 61234.479999999996,
+        "data_type": "historical",
+        "net_income": 61234.479999999996,
+        "interest": 0,
+        "taxes": 0
+      },
+      {
+        "month": "2025-07",
+        "ebit": 20355.90006451613,
+        "data_type": "projected",
+        "scenario": "conservative",
+        "net_income": null,
+        "interest": null,
+        "taxes": null
+      },
+      {
+        "month": "2025-07",
+        "ebit": 21427.26322580645,
+        "data_type": "projected",
+        "scenario": "base",
+        "net_income": null,
+        "interest": null,
+        "taxes": null
+      },
+      {
+        "month": "2025-07",
+        "ebit": 22498.626387096774,
+        "data_type": "projected",
+        "scenario": "optimistic",
+        "net_income": null,
+        "interest": null,
+        "taxes": null
+      },
+      {
+        "month": "2025-08",
+        "ebit": 20355.90006451613,
+        "data_type": "projected",
+        "scenario": "conservative",
+        "net_income": null,
+        "interest": null,
+        "taxes": null
+      },
+      {
+        "month": "2025-08",
+        "ebit": 21427.26322580645,
+        "data_type": "projected",
+        "scenario": "base",
+        "net_income": null,
+        "interest": null,
+        "taxes": null
+      },
+      {
+        "month": "2025-08",
+        "ebit": 22498.626387096774,
+        "data_type": "projected",
+        "scenario": "optimistic",
+        "net_income": null,
+        "interest": null,
+        "taxes": null
+      },
+      {
+        "month": "2025-09",
+        "ebit": 20355.90006451613,
+        "data_type": "projected",
+        "scenario": "conservative",
+        "net_income": null,
+        "interest": null,
+        "taxes": null
+      },
+      {
+        "month": "2025-09",
+        "ebit": 21427.26322580645,
+        "data_type": "projected",
+        "scenario": "base",
+        "net_income": null,
+        "interest": null,
+        "taxes": null
+      },
+      {
+        "month": "2025-09",
+        "ebit": 22498.626387096774,
+        "data_type": "projected",
+        "scenario": "optimistic",
+        "net_income": null,
+        "interest": null,
+        "taxes": null
+      },
+      {
+        "month": "2025-10",
+        "ebit": 20355.90006451613,
+        "data_type": "projected",
+        "scenario": "conservative",
+        "net_income": null,
+        "interest": null,
+        "taxes": null
+      },
+      {
+        "month": "2025-10",
+        "ebit": 21427.26322580645,
+        "data_type": "projected",
+        "scenario": "base",
+        "net_income": null,
+        "interest": null,
+        "taxes": null
+      },
+      {
+        "month": "2025-10",
+        "ebit": 22498.626387096774,
+        "data_type": "projected",
+        "scenario": "optimistic",
+        "net_income": null,
+        "interest": null,
+        "taxes": null
+      },
+      {
+        "month": "2025-11",
+        "ebit": 20355.90006451613,
+        "data_type": "projected",
+        "scenario": "conservative",
+        "net_income": null,
+        "interest": null,
+        "taxes": null
+      },
+      {
+        "month": "2025-11",
+        "ebit": 21427.26322580645,
+        "data_type": "projected",
+        "scenario": "base",
+        "net_income": null,
+        "interest": null,
+        "taxes": null
+      },
+      {
+        "month": "2025-11",
+        "ebit": 22498.626387096774,
+        "data_type": "projected",
+        "scenario": "optimistic",
+        "net_income": null,
+        "interest": null,
+        "taxes": null
+      },
+      {
+        "month": "2025-12",
+        "ebit": 20355.90006451613,
+        "data_type": "projected",
+        "scenario": "conservative",
+        "net_income": null,
+        "interest": null,
+        "taxes": null
+      },
+      {
+        "month": "2025-12",
+        "ebit": 21427.26322580645,
+        "data_type": "projected",
+        "scenario": "base",
+        "net_income": null,
+        "interest": null,
+        "taxes": null
+      },
+      {
+        "month": "2025-12",
+        "ebit": 22498.626387096774,
+        "data_type": "projected",
+        "scenario": "optimistic",
+        "net_income": null,
+        "interest": null,
+        "taxes": null
+      },
+      {
+        "month": "2026-01",
+        "ebit": 20355.90006451613,
+        "data_type": "projected",
+        "scenario": "conservative",
+        "net_income": null,
+        "interest": null,
+        "taxes": null
+      },
+      {
+        "month": "2026-01",
+        "ebit": 21427.26322580645,
+        "data_type": "projected",
+        "scenario": "base",
+        "net_income": null,
+        "interest": null,
+        "taxes": null
+      },
+      {
+        "month": "2026-01",
+        "ebit": 22498.626387096774,
+        "data_type": "projected",
+        "scenario": "optimistic",
+        "net_income": null,
+        "interest": null,
+        "taxes": null
+      },
+      {
+        "month": "2026-02",
+        "ebit": 20355.90006451613,
+        "data_type": "projected",
+        "scenario": "conservative",
+        "net_income": null,
+        "interest": null,
+        "taxes": null
+      },
+      {
+        "month": "2026-02",
+        "ebit": 21427.26322580645,
+        "data_type": "projected",
+        "scenario": "base",
+        "net_income": null,
+        "interest": null,
+        "taxes": null
+      },
+      {
+        "month": "2026-02",
+        "ebit": 22498.626387096774,
+        "data_type": "projected",
+        "scenario": "optimistic",
+        "net_income": null,
+        "interest": null,
+        "taxes": null
+      },
+      {
+        "month": "2026-03",
+        "ebit": 20355.90006451613,
+        "data_type": "projected",
+        "scenario": "conservative",
+        "net_income": null,
+        "interest": null,
+        "taxes": null
+      },
+      {
+        "month": "2026-03",
+        "ebit": 21427.26322580645,
+        "data_type": "projected",
+        "scenario": "base",
+        "net_income": null,
+        "interest": null,
+        "taxes": null
+      },
+      {
+        "month": "2026-03",
+        "ebit": 22498.626387096774,
+        "data_type": "projected",
+        "scenario": "optimistic",
+        "net_income": null,
+        "interest": null,
+        "taxes": null
+      },
+      {
+        "month": "2026-04",
+        "ebit": 20355.90006451613,
+        "data_type": "projected",
+        "scenario": "conservative",
+        "net_income": null,
+        "interest": null,
+        "taxes": null
+      },
+      {
+        "month": "2026-04",
+        "ebit": 21427.26322580645,
+        "data_type": "projected",
+        "scenario": "base",
+        "net_income": null,
+        "interest": null,
+        "taxes": null
+      },
+      {
+        "month": "2026-04",
+        "ebit": 22498.626387096774,
+        "data_type": "projected",
+        "scenario": "optimistic",
+        "net_income": null,
+        "interest": null,
+        "taxes": null
+      },
+      {
+        "month": "2026-05",
+        "ebit": 20355.90006451613,
+        "data_type": "projected",
+        "scenario": "conservative",
+        "net_income": null,
+        "interest": null,
+        "taxes": null
+      },
+      {
+        "month": "2026-05",
+        "ebit": 21427.26322580645,
+        "data_type": "projected",
+        "scenario": "base",
+        "net_income": null,
+        "interest": null,
+        "taxes": null
+      },
+      {
+        "month": "2026-05",
+        "ebit": 22498.626387096774,
+        "data_type": "projected",
+        "scenario": "optimistic",
+        "net_income": null,
+        "interest": null,
+        "taxes": null
+      },
+      {
+        "month": "2026-06",
+        "ebit": 20355.90006451613,
+        "data_type": "projected",
+        "scenario": "conservative",
+        "net_income": null,
+        "interest": null,
+        "taxes": null
+      },
+      {
+        "month": "2026-06",
+        "ebit": 21427.26322580645,
+        "data_type": "projected",
+        "scenario": "base",
+        "net_income": null,
+        "interest": null,
+        "taxes": null
+      },
+      {
+        "month": "2026-06",
+        "ebit": 22498.626387096774,
+        "data_type": "projected",
+        "scenario": "optimistic",
+        "net_income": null,
+        "interest": null,
+        "taxes": null
+      },
+      {
+        "month": "2026-07",
+        "ebit": 20355.90006451613,
+        "data_type": "projected",
+        "scenario": "conservative",
+        "net_income": null,
+        "interest": null,
+        "taxes": null
+      },
+      {
+        "month": "2026-07",
+        "ebit": 21427.26322580645,
+        "data_type": "projected",
+        "scenario": "base",
+        "net_income": null,
+        "interest": null,
+        "taxes": null
+      },
+      {
+        "month": "2026-07",
+        "ebit": 22498.626387096774,
+        "data_type": "projected",
+        "scenario": "optimistic",
+        "net_income": null,
+        "interest": null,
+        "taxes": null
+      },
+      {
+        "month": "2026-08",
+        "ebit": 20355.90006451613,
+        "data_type": "projected",
+        "scenario": "conservative",
+        "net_income": null,
+        "interest": null,
+        "taxes": null
+      },
+      {
+        "month": "2026-08",
+        "ebit": 21427.26322580645,
+        "data_type": "projected",
+        "scenario": "base",
+        "net_income": null,
+        "interest": null,
+        "taxes": null
+      },
+      {
+        "month": "2026-08",
+        "ebit": 22498.626387096774,
+        "data_type": "projected",
+        "scenario": "optimistic",
+        "net_income": null,
+        "interest": null,
+        "taxes": null
+      },
+      {
+        "month": "2026-09",
+        "ebit": 20355.90006451613,
+        "data_type": "projected",
+        "scenario": "conservative",
+        "net_income": null,
+        "interest": null,
+        "taxes": null
+      },
+      {
+        "month": "2026-09",
+        "ebit": 21427.26322580645,
+        "data_type": "projected",
+        "scenario": "base",
+        "net_income": null,
+        "interest": null,
+        "taxes": null
+      },
+      {
+        "month": "2026-09",
+        "ebit": 22498.626387096774,
+        "data_type": "projected",
+        "scenario": "optimistic",
+        "net_income": null,
+        "interest": null,
+        "taxes": null
+      },
+      {
+        "month": "2026-10",
+        "ebit": 20355.90006451613,
+        "data_type": "projected",
+        "scenario": "conservative",
+        "net_income": null,
+        "interest": null,
+        "taxes": null
+      },
+      {
+        "month": "2026-10",
+        "ebit": 21427.26322580645,
+        "data_type": "projected",
+        "scenario": "base",
+        "net_income": null,
+        "interest": null,
+        "taxes": null
+      },
+      {
+        "month": "2026-10",
+        "ebit": 22498.626387096774,
+        "data_type": "projected",
+        "scenario": "optimistic",
+        "net_income": null,
+        "interest": null,
+        "taxes": null
+      },
+      {
+        "month": "2026-11",
+        "ebit": 20355.90006451613,
+        "data_type": "projected",
+        "scenario": "conservative",
+        "net_income": null,
+        "interest": null,
+        "taxes": null
+      },
+      {
+        "month": "2026-11",
+        "ebit": 21427.26322580645,
+        "data_type": "projected",
+        "scenario": "base",
+        "net_income": null,
+        "interest": null,
+        "taxes": null
+      },
+      {
+        "month": "2026-11",
+        "ebit": 22498.626387096774,
+        "data_type": "projected",
+        "scenario": "optimistic",
+        "net_income": null,
+        "interest": null,
+        "taxes": null
+      },
+      {
+        "month": "2026-12",
+        "ebit": 20355.90006451613,
+        "data_type": "projected",
+        "scenario": "conservative",
+        "net_income": null,
+        "interest": null,
+        "taxes": null
+      },
+      {
+        "month": "2026-12",
+        "ebit": 21427.26322580645,
+        "data_type": "projected",
+        "scenario": "base",
+        "net_income": null,
+        "interest": null,
+        "taxes": null
+      },
+      {
+        "month": "2026-12",
+        "ebit": 22498.626387096774,
+        "data_type": "projected",
+        "scenario": "optimistic",
+        "net_income": null,
+        "interest": null,
+        "taxes": null
+      }
+    ],
+    "summary": {
+      "total_historical_ebit": 664245.16,
+      "total_projected_ebit": {
+        "conservative": 386762.1,
+        "base": 407117.94,
+        "optimistic": 427473.97
+      },
+      "historical_months": 31,
+      "projected_months": 57
+    }
+  }
+}

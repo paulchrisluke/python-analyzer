@@ -10,6 +10,7 @@ from pathlib import Path
 from datetime import datetime
 from typing import Dict, List, Any, Tuple
 import logging
+from decimal import Decimal, ROUND_HALF_UP
 
 # Configuration
 CONFIG = {
@@ -31,6 +32,12 @@ CONFIG = {
 # Setup logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
+
+def normalize_float(value: float) -> float:
+    """Normalize float to 2 decimal places to avoid precision artifacts."""
+    if value is None:
+        return 0.0
+    return round(float(value), 2)
 
 class SimpleRevenuePipeline:
     """Simplified pipeline to calculate Pennsylvania revenue with audit trail."""
@@ -80,7 +87,7 @@ class SimpleRevenuePipeline:
         graph_data = self._create_graph_data(projections)
         
         # Finalize results
-        self.audit_trail["pipeline_run"]["total_revenue"] = round(total_revenue, 2)
+        self.audit_trail["pipeline_run"]["total_revenue"] = normalize_float(total_revenue)
         self.audit_trail["pipeline_run"]["projections"] = projections
         self.audit_trail["pipeline_run"]["graph_data"] = graph_data
         self.audit_trail["pipeline_run"]["validation"] = self._validate_data(years_processed)
@@ -234,9 +241,9 @@ class SimpleRevenuePipeline:
                 year_revenue = sum(f["revenue"] for f in year_files)
                 months_count = len(year_files)
                 monthly_averages[year] = {
-                    "total_revenue": round(year_revenue, 2),
+                    "total_revenue": normalize_float(year_revenue),
                     "months_available": months_count,
-                    "monthly_average": round(year_revenue / months_count, 2)
+                    "monthly_average": normalize_float(year_revenue / months_count)
                 }
         
         # Use most recent year's average for projections
@@ -355,9 +362,9 @@ class SimpleRevenuePipeline:
             if year_data:
                 total_revenue = sum(d["revenue"] for d in year_data)
                 graph_data["yearly_totals"]["historical"][year] = {
-                    "total_revenue": round(total_revenue, 2),
+                    "total_revenue": normalize_float(total_revenue),
                     "months": len(year_data),
-                    "monthly_average": round(total_revenue / len(year_data), 2)
+                    "monthly_average": normalize_float(total_revenue / len(year_data))
                 }
         
         # Projected yearly totals
@@ -421,12 +428,9 @@ class SimpleRevenuePipeline:
     def save_audit_trail(self, output_path: str = None):
         """Save the audit trail to JSON files in the same locations as ETL pipeline."""
         if output_path is None:
-            # Save to same locations as ETL pipeline
+            # Save only to where the website actually reads from
             output_paths = [
-                "revenue_audit_trail.json",  # Root directory
-                "website/.data/revenue_audit_trail.json",  # Backend data
-                "website/public/data/revenue_audit_trail.json",  # Frontend accessible
-                "data/final/revenue_audit_trail.json"  # Processed data
+                "website/src/data/revenue_audit_trail.json"  # Where website reads from
             ]
         else:
             output_paths = [output_path]

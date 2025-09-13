@@ -1,0 +1,1631 @@
+{
+  "pipeline_run": {
+    "timestamp": "2025-09-13T15:39:33.167430",
+    "purpose": "Calculate total Pennsylvania revenue for business sale",
+    "business_rules": {
+      "include_locations": [
+        "Pennsylvania",
+        "Cranberry",
+        "West View"
+      ],
+      "exclude_locations": [
+        "Virginia"
+      ],
+      "reasoning": "Only Pennsylvania locations are for sale (Cranberry + West View)"
+    },
+    "files_processed": [
+      {
+        "file": "2023-01-01_to_2023-01-31_ProfitAndLoss_CranberryHearing.CSV",
+        "structure_type": "combined_pennsylvania",
+        "columns_available": [
+          "Unnamed: 0",
+          "Pennsylvania",
+          "Virginia",
+          "Unclassified",
+          "TOTAL"
+        ],
+        "revenue_fields_found": {
+          "Pennsylvania": 69061.28
+        },
+        "calculation_details": {
+          "method": "Direct from Pennsylvania column",
+          "value": 69061.28
+        },
+        "revenue": 69061.28,
+        "has_data": true
+      },
+      {
+        "file": "2023-02-01_to_2023-02-28_ProfitAndLoss_CranberryHearing.CSV",
+        "structure_type": "combined_pennsylvania",
+        "columns_available": [
+          "Unnamed: 0",
+          "Pennsylvania",
+          "Virginia",
+          "TOTAL"
+        ],
+        "revenue_fields_found": {
+          "Pennsylvania": 80007.58
+        },
+        "calculation_details": {
+          "method": "Direct from Pennsylvania column",
+          "value": 80007.58
+        },
+        "revenue": 80007.58,
+        "has_data": true
+      },
+      {
+        "file": "2023-03-01_to_2023-03-31_ProfitAndLoss_CranberryHearing.CSV",
+        "structure_type": "combined_pennsylvania",
+        "columns_available": [
+          "Unnamed: 0",
+          "Pennsylvania",
+          "Virginia",
+          "Unclassified",
+          "TOTAL"
+        ],
+        "revenue_fields_found": {
+          "Pennsylvania": 85577.24
+        },
+        "calculation_details": {
+          "method": "Direct from Pennsylvania column",
+          "value": 85577.24
+        },
+        "revenue": 85577.24,
+        "has_data": true
+      },
+      {
+        "file": "2023-04-01_to_2023-04-30_ProfitAndLoss_CranberryHearing.CSV",
+        "structure_type": "combined_pennsylvania",
+        "columns_available": [
+          "Unnamed: 0",
+          "Pennsylvania",
+          "Virginia",
+          "TOTAL"
+        ],
+        "revenue_fields_found": {
+          "Pennsylvania": 62415.91
+        },
+        "calculation_details": {
+          "method": "Direct from Pennsylvania column",
+          "value": 62415.91
+        },
+        "revenue": 62415.91,
+        "has_data": true
+      },
+      {
+        "file": "2023-05-01_to_2023-05-31_ProfitAndLoss_CranberryHearing.CSV",
+        "structure_type": "combined_pennsylvania",
+        "columns_available": [
+          "Unnamed: 0",
+          "Pennsylvania",
+          "Virginia",
+          "Unclassified",
+          "TOTAL"
+        ],
+        "revenue_fields_found": {
+          "Pennsylvania": 61425.2
+        },
+        "calculation_details": {
+          "method": "Direct from Pennsylvania column",
+          "value": 61425.2
+        },
+        "revenue": 61425.2,
+        "has_data": true
+      },
+      {
+        "file": "2023-06-01_to_2023-06-30_ProfitAndLoss_CranberryHearing.CSV",
+        "structure_type": "combined_pennsylvania",
+        "columns_available": [
+          "Unnamed: 0",
+          "Pennsylvania",
+          "Virginia",
+          "Unclassified",
+          "TOTAL"
+        ],
+        "revenue_fields_found": {
+          "Pennsylvania": 84599.14
+        },
+        "calculation_details": {
+          "method": "Direct from Pennsylvania column",
+          "value": 84599.14
+        },
+        "revenue": 84599.14,
+        "has_data": true
+      },
+      {
+        "file": "2023-07-01_to_2023-07-31_ProfitAndLoss_CranberryHearing.CSV",
+        "structure_type": "combined_pennsylvania",
+        "columns_available": [
+          "Unnamed: 0",
+          "Pennsylvania",
+          "Virginia",
+          "Unclassified",
+          "TOTAL"
+        ],
+        "revenue_fields_found": {
+          "Pennsylvania": 82560.96
+        },
+        "calculation_details": {
+          "method": "Direct from Pennsylvania column",
+          "value": 82560.96
+        },
+        "revenue": 82560.96,
+        "has_data": true
+      },
+      {
+        "file": "2023-08-01_to_2023-08-31_ProfitAndLoss_CranberryHearing.CSV",
+        "structure_type": "combined_pennsylvania",
+        "columns_available": [
+          "Unnamed: 0",
+          "Pennsylvania",
+          "Virginia",
+          "Unclassified",
+          "TOTAL"
+        ],
+        "revenue_fields_found": {
+          "Pennsylvania": 91623.09
+        },
+        "calculation_details": {
+          "method": "Direct from Pennsylvania column",
+          "value": 91623.09
+        },
+        "revenue": 91623.09,
+        "has_data": true
+      },
+      {
+        "file": "2023-09-01_to_2023-09-30_ProfitAndLoss_CranberryHearing.CSV",
+        "structure_type": "combined_pennsylvania",
+        "columns_available": [
+          "Unnamed: 0",
+          "Pennsylvania",
+          "Virginia",
+          "Unclassified",
+          "TOTAL"
+        ],
+        "revenue_fields_found": {
+          "Pennsylvania": 69363.57
+        },
+        "calculation_details": {
+          "method": "Direct from Pennsylvania column",
+          "value": 69363.57
+        },
+        "revenue": 69363.57,
+        "has_data": true
+      },
+      {
+        "file": "2023-10-01_to_2023-10-31_ProfitAndLoss_CranberryHearing.CSV",
+        "structure_type": "combined_pennsylvania",
+        "columns_available": [
+          "Unnamed: 0",
+          "Pennsylvania",
+          "Virginia",
+          "Unclassified",
+          "TOTAL"
+        ],
+        "revenue_fields_found": {
+          "Pennsylvania": 93153.58
+        },
+        "calculation_details": {
+          "method": "Direct from Pennsylvania column",
+          "value": 93153.58
+        },
+        "revenue": 93153.58,
+        "has_data": true
+      },
+      {
+        "file": "2023-11-01_to_2023-11-30_ProfitAndLoss_CranberryHearing.CSV",
+        "structure_type": "combined_pennsylvania",
+        "columns_available": [
+          "Unnamed: 0",
+          "Pennsylvania",
+          "Virginia",
+          "Unclassified",
+          "TOTAL"
+        ],
+        "revenue_fields_found": {
+          "Pennsylvania": 52963.09
+        },
+        "calculation_details": {
+          "method": "Direct from Pennsylvania column",
+          "value": 52963.09
+        },
+        "revenue": 52963.09,
+        "has_data": true
+      },
+      {
+        "file": "2023-12-01_to_2023-12-31_ProfitAndLoss_CranberryHearing.CSV",
+        "structure_type": "combined_pennsylvania",
+        "columns_available": [
+          "Unnamed: 0",
+          "Pennsylvania",
+          "Virginia",
+          "Unclassified",
+          "TOTAL"
+        ],
+        "revenue_fields_found": {
+          "Pennsylvania": 57939.86
+        },
+        "calculation_details": {
+          "method": "Direct from Pennsylvania column",
+          "value": 57939.86
+        },
+        "revenue": 57939.86,
+        "has_data": true
+      },
+      {
+        "file": "2024-01-01_to_2024-01-31_ProfitAndLoss_CranberryHearing.CSV",
+        "structure_type": "separate_locations",
+        "columns_available": [
+          "Unnamed: 0",
+          "Cranberry",
+          "Virginia",
+          "West View",
+          "TOTAL"
+        ],
+        "revenue_fields_found": {
+          "Cranberry": 30596.98,
+          "West View": 17930.0
+        },
+        "calculation_details": {
+          "method": "Sum of Cranberry + West View columns",
+          "cranberry_value": 30596.98,
+          "west_view_value": 17930.0,
+          "total": 48526.979999999996
+        },
+        "revenue": 48526.98,
+        "has_data": true
+      },
+      {
+        "file": "2024-02-01_to_2024-02-29_ProfitAndLoss_CranberryHearing.CSV",
+        "structure_type": "separate_locations",
+        "columns_available": [
+          "Unnamed: 0",
+          "Cranberry",
+          "Virginia",
+          "West View",
+          "TOTAL"
+        ],
+        "revenue_fields_found": {
+          "Cranberry": 37719.44,
+          "West View": 19453.36
+        },
+        "calculation_details": {
+          "method": "Sum of Cranberry + West View columns",
+          "cranberry_value": 37719.44,
+          "west_view_value": 19453.36,
+          "total": 57172.8
+        },
+        "revenue": 57172.8,
+        "has_data": true
+      },
+      {
+        "file": "2024-03-01_to_2024-03-31_ProfitAndLoss_CranberryHearing.CSV",
+        "structure_type": "separate_locations",
+        "columns_available": [
+          "Unnamed: 0",
+          "Cranberry",
+          "Virginia",
+          "West View",
+          "TOTAL"
+        ],
+        "revenue_fields_found": {
+          "Cranberry": 39014.69,
+          "West View": 36268.37
+        },
+        "calculation_details": {
+          "method": "Sum of Cranberry + West View columns",
+          "cranberry_value": 39014.69,
+          "west_view_value": 36268.37,
+          "total": 75283.06
+        },
+        "revenue": 75283.06,
+        "has_data": true
+      },
+      {
+        "file": "2024-04-01_to_2024-04-30_ProfitAndLoss_CranberryHearing.CSV",
+        "structure_type": "separate_locations",
+        "columns_available": [
+          "Unnamed: 0",
+          "Cranberry",
+          "Virginia",
+          "West View",
+          "TOTAL"
+        ],
+        "revenue_fields_found": {
+          "Cranberry": 51001.44,
+          "West View": 44887.96
+        },
+        "calculation_details": {
+          "method": "Sum of Cranberry + West View columns",
+          "cranberry_value": 51001.44,
+          "west_view_value": 44887.96,
+          "total": 95889.4
+        },
+        "revenue": 95889.4,
+        "has_data": true
+      },
+      {
+        "file": "2024-05-01_to_2025-05-31_ProfitAndLoss_CranberryHearing.CSV",
+        "structure_type": "separate_locations",
+        "columns_available": [
+          "Unnamed: 0",
+          "Cranberry",
+          "Virginia",
+          "West View",
+          "TOTAL"
+        ],
+        "revenue_fields_found": {
+          "Cranberry": 41036.9,
+          "West View": 42576.64
+        },
+        "calculation_details": {
+          "method": "Sum of Cranberry + West View columns",
+          "cranberry_value": 41036.9,
+          "west_view_value": 42576.64,
+          "total": 83613.54000000001
+        },
+        "revenue": 83613.54,
+        "has_data": true
+      },
+      {
+        "file": "2024-06-01_to_2024-06-30_ProfitAndLoss_CranberryHearing.CSV",
+        "structure_type": "separate_locations",
+        "columns_available": [
+          "Unnamed: 0",
+          "Cranberry",
+          "Virginia",
+          "West View",
+          "TOTAL"
+        ],
+        "revenue_fields_found": {
+          "Cranberry": 35493.96,
+          "West View": 38018.39
+        },
+        "calculation_details": {
+          "method": "Sum of Cranberry + West View columns",
+          "cranberry_value": 35493.96,
+          "west_view_value": 38018.39,
+          "total": 73512.35
+        },
+        "revenue": 73512.35,
+        "has_data": true
+      },
+      {
+        "file": "2024-07-01_to_2024-07-31_ProfitAndLoss_CranberryHearing.CSV",
+        "structure_type": "separate_locations",
+        "columns_available": [
+          "Unnamed: 0",
+          "Cranberry",
+          "Virginia",
+          "West View",
+          "TOTAL"
+        ],
+        "revenue_fields_found": {
+          "Cranberry": 34456.12,
+          "West View": 42473.2
+        },
+        "calculation_details": {
+          "method": "Sum of Cranberry + West View columns",
+          "cranberry_value": 34456.12,
+          "west_view_value": 42473.2,
+          "total": 76929.32
+        },
+        "revenue": 76929.32,
+        "has_data": true
+      },
+      {
+        "file": "2024-08-01_to_2024-08-31_ProfitAndLoss_CranberryHearing.CSV",
+        "structure_type": "separate_locations",
+        "columns_available": [
+          "Unnamed: 0",
+          "Cranberry",
+          "Virginia",
+          "West View",
+          "TOTAL"
+        ],
+        "revenue_fields_found": {
+          "Cranberry": 44306.2,
+          "West View": 42714.96
+        },
+        "calculation_details": {
+          "method": "Sum of Cranberry + West View columns",
+          "cranberry_value": 44306.2,
+          "west_view_value": 42714.96,
+          "total": 87021.16
+        },
+        "revenue": 87021.16,
+        "has_data": true
+      },
+      {
+        "file": "2024-09-01_to_2024-09-30_ProfitAndLoss_CranberryHearing.CSV",
+        "structure_type": "separate_locations",
+        "columns_available": [
+          "Unnamed: 0",
+          "Cranberry",
+          "Virginia",
+          "West View",
+          "TOTAL"
+        ],
+        "revenue_fields_found": {
+          "Cranberry": 36629.0,
+          "West View": 56745.93
+        },
+        "calculation_details": {
+          "method": "Sum of Cranberry + West View columns",
+          "cranberry_value": 36629.0,
+          "west_view_value": 56745.93,
+          "total": 93374.93
+        },
+        "revenue": 93374.93,
+        "has_data": true
+      },
+      {
+        "file": "2024-10-01_to_2024-10-31_ProfitAndLoss_CranberryHearing.CSV",
+        "structure_type": "separate_locations",
+        "columns_available": [
+          "Unnamed: 0",
+          "Cranberry",
+          "Virginia",
+          "West View",
+          "TOTAL"
+        ],
+        "revenue_fields_found": {
+          "Cranberry": 40282.06,
+          "West View": 58585.43
+        },
+        "calculation_details": {
+          "method": "Sum of Cranberry + West View columns",
+          "cranberry_value": 40282.06,
+          "west_view_value": 58585.43,
+          "total": 98867.48999999999
+        },
+        "revenue": 98867.49,
+        "has_data": true
+      },
+      {
+        "file": "2024-11-01_to_2024-11-30_ProfitAndLoss_CranberryHearing.CSV",
+        "structure_type": "separate_locations",
+        "columns_available": [
+          "Unnamed: 0",
+          "Cranberry",
+          "Virginia",
+          "West View",
+          "TOTAL"
+        ],
+        "revenue_fields_found": {
+          "Cranberry": 36465.92,
+          "West View": 55919.95
+        },
+        "calculation_details": {
+          "method": "Sum of Cranberry + West View columns",
+          "cranberry_value": 36465.92,
+          "west_view_value": 55919.95,
+          "total": 92385.87
+        },
+        "revenue": 92385.87,
+        "has_data": true
+      },
+      {
+        "file": "2024-12-01_to_2024-12-31_ProfitAndLoss_CranberryHearing.CSV",
+        "structure_type": "separate_locations",
+        "columns_available": [
+          "Unnamed: 0",
+          "Cranberry",
+          "Virginia",
+          "West View",
+          "TOTAL"
+        ],
+        "revenue_fields_found": {
+          "Cranberry": 38641.8,
+          "West View": 53156.86
+        },
+        "calculation_details": {
+          "method": "Sum of Cranberry + West View columns",
+          "cranberry_value": 38641.8,
+          "west_view_value": 53156.86,
+          "total": 91798.66
+        },
+        "revenue": 91798.66,
+        "has_data": true
+      },
+      {
+        "file": "2025-01-01_to_2025-01-31_ProfitAndLoss_CranberryHearing.CSV",
+        "structure_type": "separate_locations",
+        "columns_available": [
+          "Unnamed: 0",
+          "Cranberry",
+          "Virginia",
+          "West View",
+          "TOTAL"
+        ],
+        "revenue_fields_found": {
+          "Cranberry": 34744.75,
+          "West View": 75730.52
+        },
+        "calculation_details": {
+          "method": "Sum of Cranberry + West View columns",
+          "cranberry_value": 34744.75,
+          "west_view_value": 75730.52,
+          "total": 110475.27
+        },
+        "revenue": 110475.27,
+        "has_data": true
+      },
+      {
+        "file": "2025-02-01_to_2025-02-28_ProfitAndLoss_CranberryHearing.CSV",
+        "structure_type": "separate_locations",
+        "columns_available": [
+          "Unnamed: 0",
+          "Cranberry",
+          "Virginia",
+          "West View",
+          "TOTAL"
+        ],
+        "revenue_fields_found": {
+          "Cranberry": 13170.38,
+          "West View": 53277.47
+        },
+        "calculation_details": {
+          "method": "Sum of Cranberry + West View columns",
+          "cranberry_value": 13170.38,
+          "west_view_value": 53277.47,
+          "total": 66447.85
+        },
+        "revenue": 66447.85,
+        "has_data": true
+      },
+      {
+        "file": "2025-03-01_to_2025-03-31_ProfitAndLoss_CranberryHearing.CSV",
+        "structure_type": "separate_locations",
+        "columns_available": [
+          "Unnamed: 0",
+          "Cranberry",
+          "Virginia",
+          "West View",
+          "TOTAL"
+        ],
+        "revenue_fields_found": {
+          "Cranberry": 31937.63,
+          "West View": 47245.47
+        },
+        "calculation_details": {
+          "method": "Sum of Cranberry + West View columns",
+          "cranberry_value": 31937.63,
+          "west_view_value": 47245.47,
+          "total": 79183.1
+        },
+        "revenue": 79183.1,
+        "has_data": true
+      },
+      {
+        "file": "2025-04-01_to_2025-04-30_ProfitAndLoss_CranberryHearing.CSV",
+        "structure_type": "separate_locations",
+        "columns_available": [
+          "Unnamed: 0",
+          "Cranberry",
+          "Virginia",
+          "West View",
+          "TOTAL"
+        ],
+        "revenue_fields_found": {
+          "Cranberry": 38098.0,
+          "West View": 58681.16
+        },
+        "calculation_details": {
+          "method": "Sum of Cranberry + West View columns",
+          "cranberry_value": 38098.0,
+          "west_view_value": 58681.16,
+          "total": 96779.16
+        },
+        "revenue": 96779.16,
+        "has_data": true
+      },
+      {
+        "file": "2025-05-01_to_2025-05-31_ProfitAndLoss_CranberryHearing.CSV",
+        "structure_type": "separate_locations",
+        "columns_available": [
+          "Unnamed: 0",
+          "Cranberry",
+          "Virginia",
+          "West View",
+          "TOTAL"
+        ],
+        "revenue_fields_found": {
+          "Cranberry": 51554.44,
+          "West View": 46339.62
+        },
+        "calculation_details": {
+          "method": "Sum of Cranberry + West View columns",
+          "cranberry_value": 51554.44,
+          "west_view_value": 46339.62,
+          "total": 97894.06
+        },
+        "revenue": 97894.06,
+        "has_data": true
+      },
+      {
+        "file": "2025-06-01_to_2025-06-30_ProfitAndLoss_CranberryHearing.CSV",
+        "structure_type": "separate_locations",
+        "columns_available": [
+          "Unnamed: 0",
+          "Cranberry",
+          "Virginia",
+          "West View",
+          "TOTAL"
+        ],
+        "revenue_fields_found": {
+          "Cranberry": 43348.16,
+          "West View": 39452.85
+        },
+        "calculation_details": {
+          "method": "Sum of Cranberry + West View columns",
+          "cranberry_value": 43348.16,
+          "west_view_value": 39452.85,
+          "total": 82801.01000000001
+        },
+        "revenue": 82801.01,
+        "has_data": true
+      },
+      {
+        "file": "2025-07-01_to_2025-07-31_ProfitAndLoss_CranberryHearing.CSV",
+        "structure_type": "separate_locations",
+        "columns_available": [
+          "Unnamed: 0",
+          "Cranberry",
+          "Virginia",
+          "West View",
+          "TOTAL"
+        ],
+        "revenue_fields_found": {
+          "Cranberry": 25752.97,
+          "West View": 45715.41
+        },
+        "calculation_details": {
+          "method": "Sum of Cranberry + West View columns",
+          "cranberry_value": 25752.97,
+          "west_view_value": 45715.41,
+          "total": 71468.38
+        },
+        "revenue": 71468.38,
+        "has_data": true
+      }
+    ],
+    "structure_changes": {
+      "2023": {
+        "type": "combined_pennsylvania",
+        "description": "Combined Pennsylvania column (2023 format)",
+        "columns_used": [
+          "Pennsylvania"
+        ]
+      },
+      "2024": {
+        "type": "separate_locations",
+        "description": "Separate Cranberry and West View columns (2024-2025 format)",
+        "columns_used": [
+          "Cranberry",
+          "West View"
+        ]
+      },
+      "2025": {
+        "type": "separate_locations",
+        "description": "Separate Cranberry and West View columns (2024-2025 format)",
+        "columns_used": [
+          "Cranberry",
+          "West View"
+        ]
+      }
+    },
+    "validation": {
+      "years_processed": [
+        "2023",
+        "2024",
+        "2025"
+      ],
+      "data_quality_checks": {
+        "low_revenue_months": 0,
+        "total_months_processed": 31,
+        "data_completeness": "31 months processed"
+      },
+      "missing_months": [
+        {
+          "year": "2025",
+          "missing_count": 5,
+          "files_found": 7
+        }
+      ],
+      "recommendations": [
+        "2025: Missing 5 months of data"
+      ]
+    },
+    "total_revenue": 2470114.89,
+    "projections": {
+      "methodology": "Monthly average based on available data",
+      "projection_period": "2025-08 through 2026-12",
+      "monthly_averages": {
+        "2023": {
+          "total_revenue": 890690.5,
+          "months_available": 12,
+          "monthly_average": 74224.21
+        },
+        "2024": {
+          "total_revenue": 974375.56,
+          "months_available": 12,
+          "monthly_average": 81197.96
+        },
+        "2025": {
+          "total_revenue": 605048.83,
+          "months_available": 7,
+          "monthly_average": 86435.55
+        }
+      },
+      "projected_revenue": {
+        "2025_remaining": {
+          "months": 5,
+          "monthly_average": 86435.55,
+          "total_projected": 432177.75
+        },
+        "2026_full_year": {
+          "months": 12,
+          "monthly_average": 86435.55,
+          "total_projected": 1037226.6
+        }
+      },
+      "total_projected_revenue": 1469404.35,
+      "scenarios": {
+        "conservative": {
+          "multiplier": 0.95,
+          "monthly_average": 82113.77,
+          "total_projected": 1395934.13,
+          "description": "5% decline from current trend"
+        },
+        "base_case": {
+          "multiplier": 1.0,
+          "monthly_average": 86435.55,
+          "total_projected": 1469404.35,
+          "description": "Continue current trend from current trend"
+        },
+        "optimistic": {
+          "multiplier": 1.05,
+          "monthly_average": 90757.33,
+          "total_projected": 1542874.57,
+          "description": "5% growth from current trend"
+        }
+      },
+      "assumptions": [
+        "Using 2025 monthly average of $86,435.55 for projections"
+      ]
+    },
+    "graph_data": {
+      "monthly_data": [
+        {
+          "date": "2023-01-01",
+          "year": "2023",
+          "month": "01",
+          "revenue": 69061.28,
+          "data_type": "historical",
+          "file": "2023-01-01_to_2023-01-31_ProfitAndLoss_CranberryHearing.CSV",
+          "structure_type": "combined_pennsylvania"
+        },
+        {
+          "date": "2023-02-01",
+          "year": "2023",
+          "month": "02",
+          "revenue": 80007.58,
+          "data_type": "historical",
+          "file": "2023-02-01_to_2023-02-28_ProfitAndLoss_CranberryHearing.CSV",
+          "structure_type": "combined_pennsylvania"
+        },
+        {
+          "date": "2023-03-01",
+          "year": "2023",
+          "month": "03",
+          "revenue": 85577.24,
+          "data_type": "historical",
+          "file": "2023-03-01_to_2023-03-31_ProfitAndLoss_CranberryHearing.CSV",
+          "structure_type": "combined_pennsylvania"
+        },
+        {
+          "date": "2023-04-01",
+          "year": "2023",
+          "month": "04",
+          "revenue": 62415.91,
+          "data_type": "historical",
+          "file": "2023-04-01_to_2023-04-30_ProfitAndLoss_CranberryHearing.CSV",
+          "structure_type": "combined_pennsylvania"
+        },
+        {
+          "date": "2023-05-01",
+          "year": "2023",
+          "month": "05",
+          "revenue": 61425.2,
+          "data_type": "historical",
+          "file": "2023-05-01_to_2023-05-31_ProfitAndLoss_CranberryHearing.CSV",
+          "structure_type": "combined_pennsylvania"
+        },
+        {
+          "date": "2023-06-01",
+          "year": "2023",
+          "month": "06",
+          "revenue": 84599.14,
+          "data_type": "historical",
+          "file": "2023-06-01_to_2023-06-30_ProfitAndLoss_CranberryHearing.CSV",
+          "structure_type": "combined_pennsylvania"
+        },
+        {
+          "date": "2023-07-01",
+          "year": "2023",
+          "month": "07",
+          "revenue": 82560.96,
+          "data_type": "historical",
+          "file": "2023-07-01_to_2023-07-31_ProfitAndLoss_CranberryHearing.CSV",
+          "structure_type": "combined_pennsylvania"
+        },
+        {
+          "date": "2023-08-01",
+          "year": "2023",
+          "month": "08",
+          "revenue": 91623.09,
+          "data_type": "historical",
+          "file": "2023-08-01_to_2023-08-31_ProfitAndLoss_CranberryHearing.CSV",
+          "structure_type": "combined_pennsylvania"
+        },
+        {
+          "date": "2023-09-01",
+          "year": "2023",
+          "month": "09",
+          "revenue": 69363.57,
+          "data_type": "historical",
+          "file": "2023-09-01_to_2023-09-30_ProfitAndLoss_CranberryHearing.CSV",
+          "structure_type": "combined_pennsylvania"
+        },
+        {
+          "date": "2023-10-01",
+          "year": "2023",
+          "month": "10",
+          "revenue": 93153.58,
+          "data_type": "historical",
+          "file": "2023-10-01_to_2023-10-31_ProfitAndLoss_CranberryHearing.CSV",
+          "structure_type": "combined_pennsylvania"
+        },
+        {
+          "date": "2023-11-01",
+          "year": "2023",
+          "month": "11",
+          "revenue": 52963.09,
+          "data_type": "historical",
+          "file": "2023-11-01_to_2023-11-30_ProfitAndLoss_CranberryHearing.CSV",
+          "structure_type": "combined_pennsylvania"
+        },
+        {
+          "date": "2023-12-01",
+          "year": "2023",
+          "month": "12",
+          "revenue": 57939.86,
+          "data_type": "historical",
+          "file": "2023-12-01_to_2023-12-31_ProfitAndLoss_CranberryHearing.CSV",
+          "structure_type": "combined_pennsylvania"
+        },
+        {
+          "date": "2024-01-01",
+          "year": "2024",
+          "month": "01",
+          "revenue": 48526.98,
+          "data_type": "historical",
+          "file": "2024-01-01_to_2024-01-31_ProfitAndLoss_CranberryHearing.CSV",
+          "structure_type": "separate_locations"
+        },
+        {
+          "date": "2024-02-01",
+          "year": "2024",
+          "month": "02",
+          "revenue": 57172.8,
+          "data_type": "historical",
+          "file": "2024-02-01_to_2024-02-29_ProfitAndLoss_CranberryHearing.CSV",
+          "structure_type": "separate_locations"
+        },
+        {
+          "date": "2024-03-01",
+          "year": "2024",
+          "month": "03",
+          "revenue": 75283.06,
+          "data_type": "historical",
+          "file": "2024-03-01_to_2024-03-31_ProfitAndLoss_CranberryHearing.CSV",
+          "structure_type": "separate_locations"
+        },
+        {
+          "date": "2024-04-01",
+          "year": "2024",
+          "month": "04",
+          "revenue": 95889.4,
+          "data_type": "historical",
+          "file": "2024-04-01_to_2024-04-30_ProfitAndLoss_CranberryHearing.CSV",
+          "structure_type": "separate_locations"
+        },
+        {
+          "date": "2024-05-01",
+          "year": "2024",
+          "month": "05",
+          "revenue": 83613.54,
+          "data_type": "historical",
+          "file": "2024-05-01_to_2025-05-31_ProfitAndLoss_CranberryHearing.CSV",
+          "structure_type": "separate_locations"
+        },
+        {
+          "date": "2024-06-01",
+          "year": "2024",
+          "month": "06",
+          "revenue": 73512.35,
+          "data_type": "historical",
+          "file": "2024-06-01_to_2024-06-30_ProfitAndLoss_CranberryHearing.CSV",
+          "structure_type": "separate_locations"
+        },
+        {
+          "date": "2024-07-01",
+          "year": "2024",
+          "month": "07",
+          "revenue": 76929.32,
+          "data_type": "historical",
+          "file": "2024-07-01_to_2024-07-31_ProfitAndLoss_CranberryHearing.CSV",
+          "structure_type": "separate_locations"
+        },
+        {
+          "date": "2024-08-01",
+          "year": "2024",
+          "month": "08",
+          "revenue": 87021.16,
+          "data_type": "historical",
+          "file": "2024-08-01_to_2024-08-31_ProfitAndLoss_CranberryHearing.CSV",
+          "structure_type": "separate_locations"
+        },
+        {
+          "date": "2024-09-01",
+          "year": "2024",
+          "month": "09",
+          "revenue": 93374.93,
+          "data_type": "historical",
+          "file": "2024-09-01_to_2024-09-30_ProfitAndLoss_CranberryHearing.CSV",
+          "structure_type": "separate_locations"
+        },
+        {
+          "date": "2024-10-01",
+          "year": "2024",
+          "month": "10",
+          "revenue": 98867.49,
+          "data_type": "historical",
+          "file": "2024-10-01_to_2024-10-31_ProfitAndLoss_CranberryHearing.CSV",
+          "structure_type": "separate_locations"
+        },
+        {
+          "date": "2024-11-01",
+          "year": "2024",
+          "month": "11",
+          "revenue": 92385.87,
+          "data_type": "historical",
+          "file": "2024-11-01_to_2024-11-30_ProfitAndLoss_CranberryHearing.CSV",
+          "structure_type": "separate_locations"
+        },
+        {
+          "date": "2024-12-01",
+          "year": "2024",
+          "month": "12",
+          "revenue": 91798.66,
+          "data_type": "historical",
+          "file": "2024-12-01_to_2024-12-31_ProfitAndLoss_CranberryHearing.CSV",
+          "structure_type": "separate_locations"
+        },
+        {
+          "date": "2025-01-01",
+          "year": "2025",
+          "month": "01",
+          "revenue": 110475.27,
+          "data_type": "historical",
+          "file": "2025-01-01_to_2025-01-31_ProfitAndLoss_CranberryHearing.CSV",
+          "structure_type": "separate_locations"
+        },
+        {
+          "date": "2025-02-01",
+          "year": "2025",
+          "month": "02",
+          "revenue": 66447.85,
+          "data_type": "historical",
+          "file": "2025-02-01_to_2025-02-28_ProfitAndLoss_CranberryHearing.CSV",
+          "structure_type": "separate_locations"
+        },
+        {
+          "date": "2025-03-01",
+          "year": "2025",
+          "month": "03",
+          "revenue": 79183.1,
+          "data_type": "historical",
+          "file": "2025-03-01_to_2025-03-31_ProfitAndLoss_CranberryHearing.CSV",
+          "structure_type": "separate_locations"
+        },
+        {
+          "date": "2025-04-01",
+          "year": "2025",
+          "month": "04",
+          "revenue": 96779.16,
+          "data_type": "historical",
+          "file": "2025-04-01_to_2025-04-30_ProfitAndLoss_CranberryHearing.CSV",
+          "structure_type": "separate_locations"
+        },
+        {
+          "date": "2025-05-01",
+          "year": "2025",
+          "month": "05",
+          "revenue": 97894.06,
+          "data_type": "historical",
+          "file": "2025-05-01_to_2025-05-31_ProfitAndLoss_CranberryHearing.CSV",
+          "structure_type": "separate_locations"
+        },
+        {
+          "date": "2025-06-01",
+          "year": "2025",
+          "month": "06",
+          "revenue": 82801.01,
+          "data_type": "historical",
+          "file": "2025-06-01_to_2025-06-30_ProfitAndLoss_CranberryHearing.CSV",
+          "structure_type": "separate_locations"
+        },
+        {
+          "date": "2025-07-01",
+          "year": "2025",
+          "month": "07",
+          "revenue": 71468.38,
+          "data_type": "historical",
+          "file": "2025-07-01_to_2025-07-31_ProfitAndLoss_CranberryHearing.CSV",
+          "structure_type": "separate_locations"
+        },
+        {
+          "date": "2025-08-01",
+          "year": "2025",
+          "month": "8",
+          "revenue": 86435.55,
+          "data_type": "projected",
+          "file": "Projected 2025-08",
+          "structure_type": "projected"
+        },
+        {
+          "date": "2025-09-01",
+          "year": "2025",
+          "month": "9",
+          "revenue": 86435.55,
+          "data_type": "projected",
+          "file": "Projected 2025-09",
+          "structure_type": "projected"
+        },
+        {
+          "date": "2025-10-01",
+          "year": "2025",
+          "month": "10",
+          "revenue": 86435.55,
+          "data_type": "projected",
+          "file": "Projected 2025-10",
+          "structure_type": "projected"
+        },
+        {
+          "date": "2025-11-01",
+          "year": "2025",
+          "month": "11",
+          "revenue": 86435.55,
+          "data_type": "projected",
+          "file": "Projected 2025-11",
+          "structure_type": "projected"
+        },
+        {
+          "date": "2025-12-01",
+          "year": "2025",
+          "month": "12",
+          "revenue": 86435.55,
+          "data_type": "projected",
+          "file": "Projected 2025-12",
+          "structure_type": "projected"
+        },
+        {
+          "date": "2026-01-01",
+          "year": "2026",
+          "month": "1",
+          "revenue": 86435.55,
+          "data_type": "projected",
+          "file": "Projected 2026-01",
+          "structure_type": "projected"
+        },
+        {
+          "date": "2026-02-01",
+          "year": "2026",
+          "month": "2",
+          "revenue": 86435.55,
+          "data_type": "projected",
+          "file": "Projected 2026-02",
+          "structure_type": "projected"
+        },
+        {
+          "date": "2026-03-01",
+          "year": "2026",
+          "month": "3",
+          "revenue": 86435.55,
+          "data_type": "projected",
+          "file": "Projected 2026-03",
+          "structure_type": "projected"
+        },
+        {
+          "date": "2026-04-01",
+          "year": "2026",
+          "month": "4",
+          "revenue": 86435.55,
+          "data_type": "projected",
+          "file": "Projected 2026-04",
+          "structure_type": "projected"
+        },
+        {
+          "date": "2026-05-01",
+          "year": "2026",
+          "month": "5",
+          "revenue": 86435.55,
+          "data_type": "projected",
+          "file": "Projected 2026-05",
+          "structure_type": "projected"
+        },
+        {
+          "date": "2026-06-01",
+          "year": "2026",
+          "month": "6",
+          "revenue": 86435.55,
+          "data_type": "projected",
+          "file": "Projected 2026-06",
+          "structure_type": "projected"
+        },
+        {
+          "date": "2026-07-01",
+          "year": "2026",
+          "month": "7",
+          "revenue": 86435.55,
+          "data_type": "projected",
+          "file": "Projected 2026-07",
+          "structure_type": "projected"
+        },
+        {
+          "date": "2026-08-01",
+          "year": "2026",
+          "month": "8",
+          "revenue": 86435.55,
+          "data_type": "projected",
+          "file": "Projected 2026-08",
+          "structure_type": "projected"
+        },
+        {
+          "date": "2026-09-01",
+          "year": "2026",
+          "month": "9",
+          "revenue": 86435.55,
+          "data_type": "projected",
+          "file": "Projected 2026-09",
+          "structure_type": "projected"
+        },
+        {
+          "date": "2026-10-01",
+          "year": "2026",
+          "month": "10",
+          "revenue": 86435.55,
+          "data_type": "projected",
+          "file": "Projected 2026-10",
+          "structure_type": "projected"
+        },
+        {
+          "date": "2026-11-01",
+          "year": "2026",
+          "month": "11",
+          "revenue": 86435.55,
+          "data_type": "projected",
+          "file": "Projected 2026-11",
+          "structure_type": "projected"
+        },
+        {
+          "date": "2026-12-01",
+          "year": "2026",
+          "month": "12",
+          "revenue": 86435.55,
+          "data_type": "projected",
+          "file": "Projected 2026-12",
+          "structure_type": "projected"
+        }
+      ],
+      "yearly_totals": {
+        "historical": {
+          "2023": {
+            "total_revenue": 890690.5,
+            "months": 12,
+            "monthly_average": 74224.21
+          },
+          "2024": {
+            "total_revenue": 974375.56,
+            "months": 12,
+            "monthly_average": 81197.96
+          },
+          "2025": {
+            "total_revenue": 605048.83,
+            "months": 7,
+            "monthly_average": 86435.55
+          }
+        },
+        "projected": {
+          "2025_remaining": {
+            "months": 5,
+            "monthly_average": 86435.55,
+            "total_projected": 432177.75
+          },
+          "2026_full_year": {
+            "months": 12,
+            "monthly_average": 86435.55,
+            "total_projected": 1037226.6
+          }
+        }
+      },
+      "scenarios": {
+        "conservative": [
+          {
+            "date": "2025-08-01",
+            "year": "2025",
+            "month": "8",
+            "revenue": 82113.77,
+            "scenario": "conservative"
+          },
+          {
+            "date": "2025-09-01",
+            "year": "2025",
+            "month": "9",
+            "revenue": 82113.77,
+            "scenario": "conservative"
+          },
+          {
+            "date": "2025-10-01",
+            "year": "2025",
+            "month": "10",
+            "revenue": 82113.77,
+            "scenario": "conservative"
+          },
+          {
+            "date": "2025-11-01",
+            "year": "2025",
+            "month": "11",
+            "revenue": 82113.77,
+            "scenario": "conservative"
+          },
+          {
+            "date": "2025-12-01",
+            "year": "2025",
+            "month": "12",
+            "revenue": 82113.77,
+            "scenario": "conservative"
+          },
+          {
+            "date": "2026-01-01",
+            "year": "2026",
+            "month": "1",
+            "revenue": 82113.77,
+            "scenario": "conservative"
+          },
+          {
+            "date": "2026-02-01",
+            "year": "2026",
+            "month": "2",
+            "revenue": 82113.77,
+            "scenario": "conservative"
+          },
+          {
+            "date": "2026-03-01",
+            "year": "2026",
+            "month": "3",
+            "revenue": 82113.77,
+            "scenario": "conservative"
+          },
+          {
+            "date": "2026-04-01",
+            "year": "2026",
+            "month": "4",
+            "revenue": 82113.77,
+            "scenario": "conservative"
+          },
+          {
+            "date": "2026-05-01",
+            "year": "2026",
+            "month": "5",
+            "revenue": 82113.77,
+            "scenario": "conservative"
+          },
+          {
+            "date": "2026-06-01",
+            "year": "2026",
+            "month": "6",
+            "revenue": 82113.77,
+            "scenario": "conservative"
+          },
+          {
+            "date": "2026-07-01",
+            "year": "2026",
+            "month": "7",
+            "revenue": 82113.77,
+            "scenario": "conservative"
+          },
+          {
+            "date": "2026-08-01",
+            "year": "2026",
+            "month": "8",
+            "revenue": 82113.77,
+            "scenario": "conservative"
+          },
+          {
+            "date": "2026-09-01",
+            "year": "2026",
+            "month": "9",
+            "revenue": 82113.77,
+            "scenario": "conservative"
+          },
+          {
+            "date": "2026-10-01",
+            "year": "2026",
+            "month": "10",
+            "revenue": 82113.77,
+            "scenario": "conservative"
+          },
+          {
+            "date": "2026-11-01",
+            "year": "2026",
+            "month": "11",
+            "revenue": 82113.77,
+            "scenario": "conservative"
+          },
+          {
+            "date": "2026-12-01",
+            "year": "2026",
+            "month": "12",
+            "revenue": 82113.77,
+            "scenario": "conservative"
+          }
+        ],
+        "base_case": [
+          {
+            "date": "2025-08-01",
+            "year": "2025",
+            "month": "8",
+            "revenue": 86435.55,
+            "scenario": "base_case"
+          },
+          {
+            "date": "2025-09-01",
+            "year": "2025",
+            "month": "9",
+            "revenue": 86435.55,
+            "scenario": "base_case"
+          },
+          {
+            "date": "2025-10-01",
+            "year": "2025",
+            "month": "10",
+            "revenue": 86435.55,
+            "scenario": "base_case"
+          },
+          {
+            "date": "2025-11-01",
+            "year": "2025",
+            "month": "11",
+            "revenue": 86435.55,
+            "scenario": "base_case"
+          },
+          {
+            "date": "2025-12-01",
+            "year": "2025",
+            "month": "12",
+            "revenue": 86435.55,
+            "scenario": "base_case"
+          },
+          {
+            "date": "2026-01-01",
+            "year": "2026",
+            "month": "1",
+            "revenue": 86435.55,
+            "scenario": "base_case"
+          },
+          {
+            "date": "2026-02-01",
+            "year": "2026",
+            "month": "2",
+            "revenue": 86435.55,
+            "scenario": "base_case"
+          },
+          {
+            "date": "2026-03-01",
+            "year": "2026",
+            "month": "3",
+            "revenue": 86435.55,
+            "scenario": "base_case"
+          },
+          {
+            "date": "2026-04-01",
+            "year": "2026",
+            "month": "4",
+            "revenue": 86435.55,
+            "scenario": "base_case"
+          },
+          {
+            "date": "2026-05-01",
+            "year": "2026",
+            "month": "5",
+            "revenue": 86435.55,
+            "scenario": "base_case"
+          },
+          {
+            "date": "2026-06-01",
+            "year": "2026",
+            "month": "6",
+            "revenue": 86435.55,
+            "scenario": "base_case"
+          },
+          {
+            "date": "2026-07-01",
+            "year": "2026",
+            "month": "7",
+            "revenue": 86435.55,
+            "scenario": "base_case"
+          },
+          {
+            "date": "2026-08-01",
+            "year": "2026",
+            "month": "8",
+            "revenue": 86435.55,
+            "scenario": "base_case"
+          },
+          {
+            "date": "2026-09-01",
+            "year": "2026",
+            "month": "9",
+            "revenue": 86435.55,
+            "scenario": "base_case"
+          },
+          {
+            "date": "2026-10-01",
+            "year": "2026",
+            "month": "10",
+            "revenue": 86435.55,
+            "scenario": "base_case"
+          },
+          {
+            "date": "2026-11-01",
+            "year": "2026",
+            "month": "11",
+            "revenue": 86435.55,
+            "scenario": "base_case"
+          },
+          {
+            "date": "2026-12-01",
+            "year": "2026",
+            "month": "12",
+            "revenue": 86435.55,
+            "scenario": "base_case"
+          }
+        ],
+        "optimistic": [
+          {
+            "date": "2025-08-01",
+            "year": "2025",
+            "month": "8",
+            "revenue": 90757.33,
+            "scenario": "optimistic"
+          },
+          {
+            "date": "2025-09-01",
+            "year": "2025",
+            "month": "9",
+            "revenue": 90757.33,
+            "scenario": "optimistic"
+          },
+          {
+            "date": "2025-10-01",
+            "year": "2025",
+            "month": "10",
+            "revenue": 90757.33,
+            "scenario": "optimistic"
+          },
+          {
+            "date": "2025-11-01",
+            "year": "2025",
+            "month": "11",
+            "revenue": 90757.33,
+            "scenario": "optimistic"
+          },
+          {
+            "date": "2025-12-01",
+            "year": "2025",
+            "month": "12",
+            "revenue": 90757.33,
+            "scenario": "optimistic"
+          },
+          {
+            "date": "2026-01-01",
+            "year": "2026",
+            "month": "1",
+            "revenue": 90757.33,
+            "scenario": "optimistic"
+          },
+          {
+            "date": "2026-02-01",
+            "year": "2026",
+            "month": "2",
+            "revenue": 90757.33,
+            "scenario": "optimistic"
+          },
+          {
+            "date": "2026-03-01",
+            "year": "2026",
+            "month": "3",
+            "revenue": 90757.33,
+            "scenario": "optimistic"
+          },
+          {
+            "date": "2026-04-01",
+            "year": "2026",
+            "month": "4",
+            "revenue": 90757.33,
+            "scenario": "optimistic"
+          },
+          {
+            "date": "2026-05-01",
+            "year": "2026",
+            "month": "5",
+            "revenue": 90757.33,
+            "scenario": "optimistic"
+          },
+          {
+            "date": "2026-06-01",
+            "year": "2026",
+            "month": "6",
+            "revenue": 90757.33,
+            "scenario": "optimistic"
+          },
+          {
+            "date": "2026-07-01",
+            "year": "2026",
+            "month": "7",
+            "revenue": 90757.33,
+            "scenario": "optimistic"
+          },
+          {
+            "date": "2026-08-01",
+            "year": "2026",
+            "month": "8",
+            "revenue": 90757.33,
+            "scenario": "optimistic"
+          },
+          {
+            "date": "2026-09-01",
+            "year": "2026",
+            "month": "9",
+            "revenue": 90757.33,
+            "scenario": "optimistic"
+          },
+          {
+            "date": "2026-10-01",
+            "year": "2026",
+            "month": "10",
+            "revenue": 90757.33,
+            "scenario": "optimistic"
+          },
+          {
+            "date": "2026-11-01",
+            "year": "2026",
+            "month": "11",
+            "revenue": 90757.33,
+            "scenario": "optimistic"
+          },
+          {
+            "date": "2026-12-01",
+            "year": "2026",
+            "month": "12",
+            "revenue": 90757.33,
+            "scenario": "optimistic"
+          }
+        ]
+      }
+    }
+  }
+}
