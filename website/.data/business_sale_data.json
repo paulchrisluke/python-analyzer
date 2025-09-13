@@ -1,12 +1,12 @@
 {
   "metadata": {
     "business_name": "Cranberry Hearing and Balance Center",
-    "generated_at": "2025-09-13T03:32:18.561Z",
-    "etl_run_timestamp": "2025-09-13T03:32:18.561Z",
-    "data_period": "2023-01-01 to 2025-06-30",
+    "generated_at": "2025-09-13T08:49:08.092Z",
+    "etl_run_timestamp": "2025-09-13T08:49:08.092Z",
+    "data_period": "2023-03-13 to 2025-09-13",
     "months_analyzed": 30,
     "data_source": "ETL Pipeline - Real Business Data",
-    "analysis_period": "2023-01-01 to 2025-06-30"
+    "analysis_period": "2023-03-13 to 2025-09-13"
   },
   "traceability": {
     "field_mappings": {
@@ -110,286 +110,7 @@
       "financial_calculation": "Financial metric calculation",
       "direct": "Direct field mapping"
     },
-    "calculation_lineage": {
-      "calculation_lineage": [
-        {
-          "metric_name": "monthly_ebitda",
-          "description": "Calculate monthly EBITDA from financial data",
-          "steps": [
-            {
-              "step": 1,
-              "operation": "aggregate",
-              "field": "total_price",
-              "value": 4379.5,
-              "description": "Calculate average monthly revenue from sales data",
-              "timestamp": "2025-09-13T03:32:17.417129+00:00"
-            },
-            {
-              "step": 2,
-              "operation": "multiply",
-              "field": "avg_monthly_revenue",
-              "value": 1121.15,
-              "description": "Apply EBITDA margin of 25.6%",
-              "timestamp": "2025-09-13T03:32:17.417436+00:00",
-              "factor": 0.256
-            }
-          ],
-          "start_time": "2025-09-13T03:32:17.415584+00:00",
-          "final_value": 1121.15,
-          "end_time": "2025-09-13T03:32:17.417545+00:00"
-        },
-        {
-          "metric_name": "annual_revenue_projection",
-          "description": "Calculate annual revenue projection from monthly average",
-          "steps": [
-            {
-              "step": 1,
-              "operation": "input",
-              "field": "total_revenue",
-              "value": 2331332.7,
-              "description": "Total revenue from analysis period",
-              "timestamp": "2025-09-13T03:32:17.428628+00:00"
-            },
-            {
-              "step": 2,
-              "operation": "input",
-              "field": "monthly_revenue_average",
-              "value": 77711.09,
-              "description": "Average monthly revenue",
-              "timestamp": "2025-09-13T03:32:17.428635+00:00"
-            },
-            {
-              "step": 3,
-              "operation": "input",
-              "field": "months_in_period",
-              "value": 30,
-              "description": "Number of months in analysis period",
-              "timestamp": "2025-09-13T03:32:17.428639+00:00"
-            },
-            {
-              "step": 4,
-              "operation": "annualize",
-              "field": "monthly_revenue_average",
-              "value": 932533.08,
-              "description": "Annualize monthly revenue average (monthly_avg * 12)",
-              "timestamp": "2025-09-13T03:32:17.428646+00:00",
-              "factor": 12
-            }
-          ],
-          "start_time": "2025-09-13T03:32:17.428619+00:00",
-          "final_value": 932533.08,
-          "end_time": "2025-09-13T03:32:17.428653+00:00"
-        },
-        {
-          "metric_name": "ebitda_margin",
-          "description": "Calculate EBITDA margin from financial data",
-          "steps": [
-            {
-              "step": 1,
-              "operation": "divide",
-              "field": "total_revenue",
-              "value": 77711.09000000001,
-              "description": "Calculate monthly revenue average from total revenue",
-              "timestamp": "2025-09-13T03:32:17.428753+00:00",
-              "divisor": 30
-            },
-            {
-              "step": 2,
-              "operation": "input",
-              "field": "real_ebitda",
-              "value": 1121.15,
-              "description": "Real EBITDA from financial data",
-              "timestamp": "2025-09-13T03:32:17.428760+00:00"
-            },
-            {
-              "step": 3,
-              "operation": "divide",
-              "field": "real_ebitda",
-              "value": 0.01442715576373977,
-              "description": "Calculate EBITDA margin (real_ebitda / monthly_revenue_avg)",
-              "timestamp": "2025-09-13T03:32:17.428766+00:00",
-              "divisor": 77711.09000000001
-            }
-          ],
-          "start_time": "2025-09-13T03:32:17.428748+00:00",
-          "final_value": 1.44,
-          "end_time": "2025-09-13T03:32:17.428792+00:00"
-        },
-        {
-          "metric_name": "estimated_annual_ebitda",
-          "description": "Calculate estimated annual EBITDA",
-          "steps": [
-            {
-              "step": 1,
-              "operation": "annualize",
-              "field": "estimated_ebitda",
-              "value": 13453.8,
-              "description": "Annualize monthly EBITDA (monthly_ebitda * 12)",
-              "timestamp": "2025-09-13T03:32:17.428832+00:00",
-              "factor": 12
-            }
-          ],
-          "start_time": "2025-09-13T03:32:17.428827+00:00",
-          "final_value": 13453.8,
-          "end_time": "2025-09-13T03:32:17.428836+00:00"
-        },
-        {
-          "metric_name": "roi_percentage",
-          "description": "Calculate ROI percentage from annual EBITDA and asking price",
-          "steps": [
-            {
-              "step": 1,
-              "operation": "input",
-              "field": "asking_price",
-              "value": 650000.0,
-              "description": "Asking price from business rules",
-              "timestamp": "2025-09-13T03:32:17.428914+00:00"
-            },
-            {
-              "step": 2,
-              "operation": "input",
-              "field": "estimated_annual_ebitda",
-              "value": 13453.8,
-              "description": "Annual EBITDA from profitability metrics",
-              "timestamp": "2025-09-13T03:32:17.428917+00:00"
-            },
-            {
-              "step": 3,
-              "operation": "divide",
-              "field": "estimated_annual_ebitda",
-              "value": 0.020698153846153845,
-              "description": "Calculate ROI ratio (annual_ebitda / asking_price)",
-              "timestamp": "2025-09-13T03:32:17.428922+00:00",
-              "divisor": 650000.0
-            },
-            {
-              "step": 4,
-              "operation": "multiply",
-              "field": "roi_ratio",
-              "value": 2.0698153846153846,
-              "description": "Convert ROI ratio to percentage (roi_ratio * 100)",
-              "timestamp": "2025-09-13T03:32:17.428926+00:00",
-              "factor": 100
-            }
-          ],
-          "start_time": "2025-09-13T03:32:17.428881+00:00",
-          "final_value": 2.07,
-          "end_time": "2025-09-13T03:32:17.428930+00:00"
-        },
-        {
-          "metric_name": "payback_period_years",
-          "description": "Calculate payback period in years",
-          "steps": [
-            {
-              "step": 1,
-              "operation": "divide",
-              "field": "asking_price",
-              "value": 48.31348763918001,
-              "description": "Calculate payback period (asking_price / annual_ebitda)",
-              "timestamp": "2025-09-13T03:32:17.429037+00:00",
-              "divisor": 13453.8
-            }
-          ],
-          "start_time": "2025-09-13T03:32:17.429012+00:00",
-          "final_value": 48.3,
-          "end_time": "2025-09-13T03:32:17.429049+00:00"
-        },
-        {
-          "metric_name": "equipment_value",
-          "description": "Calculate total equipment value from CSV files",
-          "steps": [
-            {
-              "step": 1,
-              "operation": "input",
-              "field": "equipment_items_count",
-              "value": 28,
-              "description": "Number of equipment items from CSV files",
-              "timestamp": "2025-09-13T03:32:17.436312+00:00"
-            },
-            {
-              "step": 2,
-              "operation": "input",
-              "field": "equipment_source",
-              "value": "CSV files",
-              "description": "Equipment data source",
-              "timestamp": "2025-09-13T03:32:17.436322+00:00"
-            },
-            {
-              "step": 3,
-              "operation": "item",
-              "field": "equipment_item_1",
-              "value": 8555.0,
-              "description": "Equipment item: CL-12B LP Single Wall Room O.D. 6'2\"x4'4\"x7'2\" I.D.\n5'6\"x3'8\"x6'6\"",
-              "timestamp": "2025-09-13T03:32:17.436329+00:00"
-            },
-            {
-              "step": 4,
-              "operation": "item",
-              "field": "equipment_item_2",
-              "value": 400.0,
-              "description": "Equipment item: 20'' X 60\" Window In Door",
-              "timestamp": "2025-09-13T03:32:17.436333+00:00"
-            },
-            {
-              "step": 5,
-              "operation": "item",
-              "field": "equipment_item_3",
-              "value": 4000.0,
-              "description": "Equipment item: CL12B LP standard Installation with Cello connections\nand FF calibration if needed",
-              "timestamp": "2025-09-13T03:32:17.436337+00:00"
-            },
-            {
-              "step": 6,
-              "operation": "item",
-              "field": "equipment_item_4",
-              "value": 1900.0,
-              "description": "Equipment item: Sound room freight",
-              "timestamp": "2025-09-13T03:32:17.436340+00:00"
-            },
-            {
-              "step": 7,
-              "operation": "item",
-              "field": "equipment_item_5",
-              "value": 3420.0,
-              "description": "Equipment item: Cello Computer Controled Diagnostic Audiometer",
-              "timestamp": "2025-09-13T03:32:17.436343+00:00"
-            },
-            {
-              "step": 8,
-              "operation": "summary",
-              "field": "remaining_items",
-              "value": 23,
-              "description": "Additional 23 equipment items",
-              "timestamp": "2025-09-13T03:32:17.436356+00:00"
-            },
-            {
-              "step": 9,
-              "operation": "sum",
-              "field": "equipment_items_total",
-              "value": 61487.5,
-              "description": "Sum of all equipment item values",
-              "timestamp": "2025-09-13T03:32:17.436360+00:00"
-            }
-          ],
-          "start_time": "2025-09-13T03:32:17.433607+00:00",
-          "final_value": 61727.5,
-          "end_time": "2025-09-13T03:32:17.436418+00:00"
-        }
-      ],
-      "lineage_summary": {
-        "total_calculations": 7,
-        "metrics_calculated": [
-          "monthly_ebitda",
-          "annual_revenue_projection",
-          "ebitda_margin",
-          "estimated_annual_ebitda",
-          "roi_percentage",
-          "payback_period_years",
-          "equipment_value"
-        ],
-        "total_steps": 24
-      }
-    },
+    "calculation_lineage": {},
     "document_registry": {
       "documents": [
         {
@@ -405,7 +126,7 @@
           "status": true,
           "expected": true,
           "notes": null,
-          "registered_at": "2025-09-13T03:32:17.127650+00:00"
+          "registered_at": "2025-09-13T08:49:08.063935+00:00"
         },
         {
           "name": "2024-07-01_to_2024-07-31_ProfitAndLoss_CranberryHearing.CSV",
@@ -420,7 +141,7 @@
           "status": true,
           "expected": true,
           "notes": null,
-          "registered_at": "2025-09-13T03:32:17.127742+00:00"
+          "registered_at": "2025-09-13T08:49:08.064070+00:00"
         },
         {
           "name": "2024-08-01_to_2024-08-31_ProfitAndLoss_CranberryHearing.CSV",
@@ -435,7 +156,7 @@
           "status": true,
           "expected": true,
           "notes": null,
-          "registered_at": "2025-09-13T03:32:17.127828+00:00"
+          "registered_at": "2025-09-13T08:49:08.064160+00:00"
         },
         {
           "name": "2024-10-01_to_2024-10-31_ProfitAndLoss_CranberryHearing.CSV",
@@ -450,7 +171,22 @@
           "status": true,
           "expected": true,
           "notes": null,
-          "registered_at": "2025-09-13T03:32:17.127915+00:00"
+          "registered_at": "2025-09-13T08:49:08.064244+00:00"
+        },
+        {
+          "name": "2024-05-01_to_2025-05-31_ProfitAndLoss_CranberryHearing.CSV",
+          "category": "financials",
+          "file_type": ".csv",
+          "file_path": "/Users/paulchrisluke/Cranberry Hearing and Balance Center/docs/financials/Profit_and_Loss/2024_Profit_and_Loss/2024-05-01_to_2025-05-31_ProfitAndLoss_CranberryHearing.CSV",
+          "file_size": "3.7 KB",
+          "file_size_bytes": 3824,
+          "last_modified": "2025-09-13T07:47:09.166899+00:00",
+          "created_date": "2025-09-13T07:56:19.027209+00:00",
+          "file_hash": "2080582f6d472333f202dbcb51a04590e2df3cbac869582c6bfde175debad3b5",
+          "status": true,
+          "expected": true,
+          "notes": null,
+          "registered_at": "2025-09-13T08:49:08.064329+00:00"
         },
         {
           "name": "2024-09-01_to_2024-09-30_ProfitAndLoss_CranberryHearing.CSV",
@@ -465,7 +201,7 @@
           "status": true,
           "expected": true,
           "notes": null,
-          "registered_at": "2025-09-13T03:32:17.127999+00:00"
+          "registered_at": "2025-09-13T08:49:08.064411+00:00"
         },
         {
           "name": "2024-06-01_to_2024-06-30_ProfitAndLoss_CranberryHearing.CSV",
@@ -480,7 +216,7 @@
           "status": true,
           "expected": true,
           "notes": null,
-          "registered_at": "2025-09-13T03:32:17.128084+00:00"
+          "registered_at": "2025-09-13T08:49:08.064493+00:00"
         },
         {
           "name": "2024-11-01_to_2024-11-30_ProfitAndLoss_CranberryHearing.CSV",
@@ -495,22 +231,7 @@
           "status": true,
           "expected": true,
           "notes": null,
-          "registered_at": "2025-09-13T03:32:17.128168+00:00"
-        },
-        {
-          "name": "2025-05-01_to_2025-05-31_ProfitAndLoss_CranberryHearing.CSV",
-          "category": "financials",
-          "file_type": ".csv",
-          "file_path": "/Users/paulchrisluke/Cranberry Hearing and Balance Center/docs/financials/Profit_and_Loss/2024_Profit_and_Loss/2025-05-01_to_2025-05-31_ProfitAndLoss_CranberryHearing.CSV",
-          "file_size": "3.7 KB",
-          "file_size_bytes": 3824,
-          "last_modified": "2025-09-07T03:09:17.017211+00:00",
-          "created_date": "2025-09-07T03:09:17.017329+00:00",
-          "file_hash": "2080582f6d472333f202dbcb51a04590e2df3cbac869582c6bfde175debad3b5",
-          "status": true,
-          "expected": true,
-          "notes": null,
-          "registered_at": "2025-09-13T03:32:17.128250+00:00"
+          "registered_at": "2025-09-13T08:49:08.064575+00:00"
         },
         {
           "name": "2024-03-01_to_2024-03-31_ProfitAndLoss_CranberryHearing.CSV",
@@ -525,7 +246,7 @@
           "status": true,
           "expected": true,
           "notes": null,
-          "registered_at": "2025-09-13T03:32:17.128336+00:00"
+          "registered_at": "2025-09-13T08:49:08.064657+00:00"
         },
         {
           "name": "2024-12-01_to_2024-12-31_ProfitAndLoss_CranberryHearing.CSV",
@@ -540,7 +261,7 @@
           "status": true,
           "expected": true,
           "notes": null,
-          "registered_at": "2025-09-13T03:32:17.128419+00:00"
+          "registered_at": "2025-09-13T08:49:08.064738+00:00"
         },
         {
           "name": "2024-02-01_to_2024-02-29_ProfitAndLoss_CranberryHearing.CSV",
@@ -555,7 +276,7 @@
           "status": true,
           "expected": true,
           "notes": null,
-          "registered_at": "2025-09-13T03:32:17.128504+00:00"
+          "registered_at": "2025-09-13T08:49:08.064820+00:00"
         },
         {
           "name": "2024-04-01_to_2024-04-30_ProfitAndLoss_CranberryHearing.CSV",
@@ -570,7 +291,7 @@
           "status": true,
           "expected": true,
           "notes": null,
-          "registered_at": "2025-09-13T03:32:17.128586+00:00"
+          "registered_at": "2025-09-13T08:49:08.064901+00:00"
         },
         {
           "name": "2023-07-01_to_2023-07-31_ProfitAndLoss_CranberryHearing.CSV",
@@ -585,7 +306,7 @@
           "status": true,
           "expected": true,
           "notes": null,
-          "registered_at": "2025-09-13T03:32:17.128671+00:00"
+          "registered_at": "2025-09-13T08:49:08.064983+00:00"
         },
         {
           "name": "2023-08-01_to_2023-08-31_ProfitAndLoss_CranberryHearing.CSV",
@@ -600,7 +321,7 @@
           "status": true,
           "expected": true,
           "notes": null,
-          "registered_at": "2025-09-13T03:32:17.128767+00:00"
+          "registered_at": "2025-09-13T08:49:08.065064+00:00"
         },
         {
           "name": "2023-01-01_to_2023-01-31_ProfitAndLoss_CranberryHearing.CSV",
@@ -615,7 +336,7 @@
           "status": true,
           "expected": true,
           "notes": null,
-          "registered_at": "2025-09-13T03:32:17.128852+00:00"
+          "registered_at": "2025-09-13T08:49:08.065145+00:00"
         },
         {
           "name": "2023-10-01_to_2023-10-31_ProfitAndLoss_CranberryHearing.CSV",
@@ -630,7 +351,7 @@
           "status": true,
           "expected": true,
           "notes": null,
-          "registered_at": "2025-09-13T03:32:17.128933+00:00"
+          "registered_at": "2025-09-13T08:49:08.065227+00:00"
         },
         {
           "name": "2023-09-01_to_2023-09-30_ProfitAndLoss_CranberryHearing.CSV",
@@ -645,7 +366,7 @@
           "status": true,
           "expected": true,
           "notes": null,
-          "registered_at": "2025-09-13T03:32:17.129014+00:00"
+          "registered_at": "2025-09-13T08:49:08.065310+00:00"
         },
         {
           "name": "2023-06-01_to_2023-06-30_ProfitAndLoss_CranberryHearing.CSV",
@@ -660,7 +381,7 @@
           "status": true,
           "expected": true,
           "notes": null,
-          "registered_at": "2025-09-13T03:32:17.129151+00:00"
+          "registered_at": "2025-09-13T08:49:08.065391+00:00"
         },
         {
           "name": "2023-11-01_to_2023-11-30_ProfitAndLoss_CranberryHearing.CSV",
@@ -675,7 +396,7 @@
           "status": true,
           "expected": true,
           "notes": null,
-          "registered_at": "2025-09-13T03:32:17.129248+00:00"
+          "registered_at": "2025-09-13T08:49:08.065474+00:00"
         },
         {
           "name": "2023-03-01_to_2023-03-31_ProfitAndLoss_CranberryHearing.CSV",
@@ -690,7 +411,7 @@
           "status": true,
           "expected": true,
           "notes": null,
-          "registered_at": "2025-09-13T03:32:17.129337+00:00"
+          "registered_at": "2025-09-13T08:49:08.065555+00:00"
         },
         {
           "name": "2023-05-01_to_2023-05-31_ProfitAndLoss_CranberryHearing.CSV",
@@ -705,7 +426,7 @@
           "status": true,
           "expected": true,
           "notes": null,
-          "registered_at": "2025-09-13T03:32:17.129424+00:00"
+          "registered_at": "2025-09-13T08:49:08.065636+00:00"
         },
         {
           "name": "2023-02-01_to_2023-02-28_ProfitAndLoss_CranberryHearing.CSV",
@@ -720,7 +441,7 @@
           "status": true,
           "expected": true,
           "notes": null,
-          "registered_at": "2025-09-13T03:32:17.129508+00:00"
+          "registered_at": "2025-09-13T08:49:08.065717+00:00"
         },
         {
           "name": "2023-12-01_to_2023-12-31_ProfitAndLoss_CranberryHearing.CSV",
@@ -735,7 +456,7 @@
           "status": true,
           "expected": true,
           "notes": null,
-          "registered_at": "2025-09-13T03:32:17.129592+00:00"
+          "registered_at": "2025-09-13T08:49:08.065797+00:00"
         },
         {
           "name": "2023-04-01_to_2023-04-30_ProfitAndLoss_CranberryHearing.CSV",
@@ -750,7 +471,7 @@
           "status": true,
           "expected": true,
           "notes": null,
-          "registered_at": "2025-09-13T03:32:17.129677+00:00"
+          "registered_at": "2025-09-13T08:49:08.065877+00:00"
         },
         {
           "name": "2025-04-01_to_2025-04-30_ProfitAndLoss_CranberryHearing.CSV",
@@ -765,7 +486,7 @@
           "status": true,
           "expected": true,
           "notes": null,
-          "registered_at": "2025-09-13T03:32:17.129766+00:00"
+          "registered_at": "2025-09-13T08:49:08.065963+00:00"
         },
         {
           "name": "2025-03-01_to_2025-03-31_ProfitAndLoss_CranberryHearing.CSV",
@@ -780,7 +501,7 @@
           "status": true,
           "expected": true,
           "notes": null,
-          "registered_at": "2025-09-13T03:32:17.129849+00:00"
+          "registered_at": "2025-09-13T08:49:08.066045+00:00"
         },
         {
           "name": "2025-05-01_to_2025-05-31_ProfitAndLoss_CranberryHearing.CSV",
@@ -795,7 +516,7 @@
           "status": true,
           "expected": true,
           "notes": null,
-          "registered_at": "2025-09-13T03:32:17.129929+00:00"
+          "registered_at": "2025-09-13T08:49:08.066131+00:00"
         },
         {
           "name": "2025-02-01_to_2025-02-28_ProfitAndLoss_CranberryHearing.CSV",
@@ -810,7 +531,7 @@
           "status": true,
           "expected": true,
           "notes": null,
-          "registered_at": "2025-09-13T03:32:17.130010+00:00"
+          "registered_at": "2025-09-13T08:49:08.066213+00:00"
         },
         {
           "name": "2025-06-01_to_2025-06-30_ProfitAndLoss_CranberryHearing.CSV",
@@ -825,7 +546,7 @@
           "status": true,
           "expected": true,
           "notes": null,
-          "registered_at": "2025-09-13T03:32:17.130090+00:00"
+          "registered_at": "2025-09-13T08:49:08.066294+00:00"
         },
         {
           "name": "2025-07-01_to_2025-07-31_ProfitAndLoss_CranberryHearing.CSV",
@@ -840,7 +561,7 @@
           "status": true,
           "expected": true,
           "notes": null,
-          "registered_at": "2025-09-13T03:32:17.130168+00:00"
+          "registered_at": "2025-09-13T08:49:08.066375+00:00"
         },
         {
           "name": "2025-01-01_to_2025-01-31_ProfitAndLoss_CranberryHearing.CSV",
@@ -855,7 +576,7 @@
           "status": true,
           "expected": true,
           "notes": null,
-          "registered_at": "2025-09-13T03:32:17.130247+00:00"
+          "registered_at": "2025-09-13T08:49:08.066456+00:00"
         },
         {
           "name": "2023-12-30_to_2024-01-31_Chase_BusinessChecking_CranberryHearing.pdf",
@@ -870,7 +591,7 @@
           "status": true,
           "expected": true,
           "notes": null,
-          "registered_at": "2025-09-13T03:32:17.130398+00:00"
+          "registered_at": "2025-09-13T08:49:08.066605+00:00"
         },
         {
           "name": "2023-04-01_to_2023-04-28_Chase_BusinessChecking_CranberryHearing.pdf",
@@ -885,7 +606,7 @@
           "status": true,
           "expected": true,
           "notes": null,
-          "registered_at": "2025-09-13T03:32:17.130549+00:00"
+          "registered_at": "2025-09-13T08:49:08.066756+00:00"
         },
         {
           "name": "2021-10-01_to_2021-10-29_Chase_BusinessChecking_CranberryHearing.pdf",
@@ -900,7 +621,7 @@
           "status": true,
           "expected": true,
           "notes": null,
-          "registered_at": "2025-09-13T03:32:17.130695+00:00"
+          "registered_at": "2025-09-13T08:49:08.066902+00:00"
         },
         {
           "name": "2023-07-01_to_2023-07-31_Chase_BusinessChecking_CranberryHearing.pdf",
@@ -915,7 +636,7 @@
           "status": true,
           "expected": true,
           "notes": null,
-          "registered_at": "2025-09-13T03:32:17.130848+00:00"
+          "registered_at": "2025-09-13T08:49:08.067056+00:00"
         },
         {
           "name": "2024-03-30_to_2024-04-30_Chase_BusinessChecking_CranberryHearing.pdf",
@@ -930,7 +651,7 @@
           "status": true,
           "expected": true,
           "notes": null,
-          "registered_at": "2025-09-13T03:32:17.130998+00:00"
+          "registered_at": "2025-09-13T08:49:08.067204+00:00"
         },
         {
           "name": "2024-11-30_to_2024-12-31_Chase_BusinessChecking_CranberryHearing.pdf",
@@ -945,7 +666,7 @@
           "status": true,
           "expected": true,
           "notes": null,
-          "registered_at": "2025-09-13T03:32:17.131202+00:00"
+          "registered_at": "2025-09-13T08:49:08.067406+00:00"
         },
         {
           "name": "2021-07-01_to_2021-07-30_Chase_BusinessChecking_CranberryHearing.pdf",
@@ -960,7 +681,7 @@
           "status": true,
           "expected": true,
           "notes": null,
-          "registered_at": "2025-09-13T03:32:17.131356+00:00"
+          "registered_at": "2025-09-13T08:49:08.067562+00:00"
         },
         {
           "name": "2023-09-01_to_2023-09-29_Chase_BusinessChecking_CranberryHearing.pdf",
@@ -975,7 +696,7 @@
           "status": true,
           "expected": true,
           "notes": null,
-          "registered_at": "2025-09-13T03:32:17.131509+00:00"
+          "registered_at": "2025-09-13T08:49:08.067711+00:00"
         },
         {
           "name": "2021-09-01_to_2021-09-30_Chase_BusinessChecking_CranberryHearing.pdf",
@@ -990,7 +711,7 @@
           "status": true,
           "expected": true,
           "notes": null,
-          "registered_at": "2025-09-13T03:32:17.131663+00:00"
+          "registered_at": "2025-09-13T08:49:08.067860+00:00"
         },
         {
           "name": "2024-06-29_to_2024-07-31_Chase_BusinessChecking_CranberryHearing.pdf",
@@ -1005,7 +726,7 @@
           "status": true,
           "expected": true,
           "notes": null,
-          "registered_at": "2025-09-13T03:32:17.131861+00:00"
+          "registered_at": "2025-09-13T08:49:08.068057+00:00"
         },
         {
           "name": "2021-02-27_to_2021-03-31_Chase_BusinessChecking_CranberryHearing.pdf",
@@ -1020,7 +741,7 @@
           "status": true,
           "expected": true,
           "notes": null,
-          "registered_at": "2025-09-13T03:32:17.132009+00:00"
+          "registered_at": "2025-09-13T08:49:08.068204+00:00"
         },
         {
           "name": "2021-01-30_to_2021-02-26_Chase_BusinessChecking_CranberryHearing.pdf",
@@ -1035,7 +756,7 @@
           "status": true,
           "expected": true,
           "notes": null,
-          "registered_at": "2025-09-13T03:32:17.132164+00:00"
+          "registered_at": "2025-09-13T08:49:08.068362+00:00"
         },
         {
           "name": "2022-12-31_to_2023-01-31_Chase_BusinessChecking_CranberryHearing.pdf",
@@ -1050,7 +771,7 @@
           "status": true,
           "expected": true,
           "notes": null,
-          "registered_at": "2025-09-13T03:32:17.132315+00:00"
+          "registered_at": "2025-09-13T08:49:08.068519+00:00"
         },
         {
           "name": "2023-11-01_to_2023-11-30_Chase_BusinessChecking_CranberryHearing.pdf",
@@ -1065,7 +786,7 @@
           "status": true,
           "expected": true,
           "notes": null,
-          "registered_at": "2025-09-13T03:32:17.132463+00:00"
+          "registered_at": "2025-09-13T08:49:08.068666+00:00"
         },
         {
           "name": "2021-10-30_to_2021-11-30_Chase_BusinessChecking_CranberryHearing.pdf",
@@ -1080,7 +801,7 @@
           "status": true,
           "expected": true,
           "notes": null,
-          "registered_at": "2025-09-13T03:32:17.132632+00:00"
+          "registered_at": "2025-09-13T08:49:08.068832+00:00"
         },
         {
           "name": "2024-08-31_to_2024-09-30_Chase_BusinessChecking_CranberryHearing.pdf",
@@ -1095,7 +816,7 @@
           "status": true,
           "expected": true,
           "notes": null,
-          "registered_at": "2025-09-13T03:32:17.132837+00:00"
+          "registered_at": "2025-09-13T08:49:08.069035+00:00"
         },
         {
           "name": "2023-02-01_to_2023-02-28_Chase_BusinessChecking_CranberryHearing.pdf",
@@ -1110,7 +831,7 @@
           "status": true,
           "expected": true,
           "notes": null,
-          "registered_at": "2025-09-13T03:32:17.133001+00:00"
+          "registered_at": "2025-09-13T08:49:08.069195+00:00"
         },
         {
           "name": "2023-12-01_to_2023-12-29_Chase_BusinessChecking_CranberryHearing.pdf",
@@ -1125,7 +846,7 @@
           "status": true,
           "expected": true,
           "notes": null,
-          "registered_at": "2025-09-13T03:32:17.133150+00:00"
+          "registered_at": "2025-09-13T08:49:08.069344+00:00"
         },
         {
           "name": "2024-08-01_to_2024-08-30_Chase_BusinessChecking_CranberryHearing.pdf",
@@ -1140,7 +861,7 @@
           "status": true,
           "expected": true,
           "notes": null,
-          "registered_at": "2025-09-13T03:32:17.133381+00:00"
+          "registered_at": "2025-09-13T08:49:08.069571+00:00"
         },
         {
           "name": "2021-05-29_to_2021-06-30_Chase_BusinessChecking_CranberryHearing.pdf",
@@ -1155,7 +876,7 @@
           "status": true,
           "expected": true,
           "notes": null,
-          "registered_at": "2025-09-13T03:32:17.133535+00:00"
+          "registered_at": "2025-09-13T08:49:08.069724+00:00"
         },
         {
           "name": "2025-01-01_to_2025-01-31_Chase_BusinessChecking_CranberryHearing.pdf",
@@ -1170,7 +891,7 @@
           "status": true,
           "expected": true,
           "notes": null,
-          "registered_at": "2025-09-13T03:32:17.133740+00:00"
+          "registered_at": "2025-09-13T08:49:08.069931+00:00"
         },
         {
           "name": "2025-02-01_to_2025-02-28_Chase_BusinessChecking_CranberryHearing.pdf",
@@ -1185,7 +906,7 @@
           "status": true,
           "expected": true,
           "notes": null,
-          "registered_at": "2025-09-13T03:32:17.133936+00:00"
+          "registered_at": "2025-09-13T08:49:08.070196+00:00"
         },
         {
           "name": "2023-04-29_to_2023-05-31_Chase_BusinessChecking_CranberryHearing.pdf",
@@ -1200,7 +921,7 @@
           "status": true,
           "expected": true,
           "notes": null,
-          "registered_at": "2025-09-13T03:32:17.134087+00:00"
+          "registered_at": "2025-09-13T08:49:08.070500+00:00"
         },
         {
           "name": "2025-05-01_to_2025-05-30_Chase_BusinessChecking_CranberryHearing.pdf",
@@ -1215,7 +936,7 @@
           "status": true,
           "expected": true,
           "notes": null,
-          "registered_at": "2025-09-13T03:32:17.134289+00:00"
+          "registered_at": "2025-09-13T08:49:08.070731+00:00"
         },
         {
           "name": "2023-03-01_to_2023-03-31_Chase_BusinessChecking_CranberryHearing.pdf",
@@ -1230,7 +951,7 @@
           "status": true,
           "expected": true,
           "notes": null,
-          "registered_at": "2025-09-13T03:32:17.134440+00:00"
+          "registered_at": "2025-09-13T08:49:08.070911+00:00"
         },
         {
           "name": "2021-04-01_to_2021-04-30_Chase_BusinessChecking_CranberryHearing.pdf",
@@ -1245,7 +966,7 @@
           "status": true,
           "expected": true,
           "notes": null,
-          "registered_at": "2025-09-13T03:32:17.134594+00:00"
+          "registered_at": "2025-09-13T08:49:08.071081+00:00"
         },
         {
           "name": "2024-06-01_to_2024-06-28_Chase_BusinessChecking_CranberryHearing.pdf",
@@ -1260,7 +981,7 @@
           "status": true,
           "expected": true,
           "notes": null,
-          "registered_at": "2025-09-13T03:32:17.134756+00:00"
+          "registered_at": "2025-09-13T08:49:08.071257+00:00"
         },
         {
           "name": "2024-02-01_to_2024-02-29_Chase_BusinessChecking_CranberryHearing.pdf",
@@ -1275,7 +996,7 @@
           "status": true,
           "expected": true,
           "notes": null,
-          "registered_at": "2025-09-13T03:32:17.134904+00:00"
+          "registered_at": "2025-09-13T08:49:08.071415+00:00"
         },
         {
           "name": "2024-11-01_to_2024-11-29_Chase_BusinessChecking_CranberryHearing.pdf",
@@ -1290,7 +1011,7 @@
           "status": true,
           "expected": true,
           "notes": null,
-          "registered_at": "2025-09-13T03:32:17.135095+00:00"
+          "registered_at": "2025-09-13T08:49:08.071610+00:00"
         },
         {
           "name": "2021-05-01_to_2021-05-28_Chase_BusinessChecking_CranberryHearing.pdf",
@@ -1305,7 +1026,7 @@
           "status": true,
           "expected": true,
           "notes": null,
-          "registered_at": "2025-09-13T03:32:17.135241+00:00"
+          "registered_at": "2025-09-13T08:49:08.071763+00:00"
         },
         {
           "name": "2023-06-01_to_2023-06-30_Chase_BusinessChecking_CranberryHearing.pdf",
@@ -1320,7 +1041,7 @@
           "status": true,
           "expected": true,
           "notes": null,
-          "registered_at": "2025-09-13T03:32:17.135399+00:00"
+          "registered_at": "2025-09-13T08:49:08.071920+00:00"
         },
         {
           "name": "2021-12-01_to_2021-12-31_Chase_BusinessChecking_CranberryHearing.pdf",
@@ -1335,7 +1056,7 @@
           "status": true,
           "expected": true,
           "notes": null,
-          "registered_at": "2025-09-13T03:32:17.135547+00:00"
+          "registered_at": "2025-09-13T08:49:08.072078+00:00"
         },
         {
           "name": "2021-07-31_to_2021-08-31_Chase_BusinessChecking_CranberryHearing.pdf",
@@ -1350,7 +1071,7 @@
           "status": true,
           "expected": true,
           "notes": null,
-          "registered_at": "2025-09-13T03:32:17.135692+00:00"
+          "registered_at": "2025-09-13T08:49:08.072227+00:00"
         },
         {
           "name": "2024-10-01_to_2024-10-31_Chase_BusinessChecking_CranberryHearing.pdf",
@@ -1365,7 +1086,7 @@
           "status": true,
           "expected": true,
           "notes": null,
-          "registered_at": "2025-09-13T03:32:17.135895+00:00"
+          "registered_at": "2025-09-13T08:49:08.072443+00:00"
         },
         {
           "name": "2024-03-01_to_2024-03-29_Chase_BusinessChecking_CranberryHearing.pdf",
@@ -1380,7 +1101,7 @@
           "status": true,
           "expected": true,
           "notes": null,
-          "registered_at": "2025-09-13T03:32:17.136051+00:00"
+          "registered_at": "2025-09-13T08:49:08.072603+00:00"
         },
         {
           "name": "2023-09-30_to_2023-10-31_Chase_BusinessChecking_CranberryHearing.pdf",
@@ -1395,7 +1116,7 @@
           "status": true,
           "expected": true,
           "notes": null,
-          "registered_at": "2025-09-13T03:32:17.136199+00:00"
+          "registered_at": "2025-09-13T08:49:08.072755+00:00"
         },
         {
           "name": "2025-04-01_to_2025-04-30_Chase_BusinessChecking_CranberryHearing.pdf",
@@ -1410,7 +1131,7 @@
           "status": true,
           "expected": true,
           "notes": null,
-          "registered_at": "2025-09-13T03:32:17.136404+00:00"
+          "registered_at": "2025-09-13T08:49:08.072974+00:00"
         },
         {
           "name": "2022-08-01_to_2022-08-31_BalanceSheet_CranberryHearing.CSV",
@@ -1425,7 +1146,7 @@
           "status": true,
           "expected": true,
           "notes": null,
-          "registered_at": "2025-09-13T03:32:17.136489+00:00"
+          "registered_at": "2025-09-13T08:49:08.073076+00:00"
         },
         {
           "name": "2022-10-01_to_2022-10-31_BalanceSheet_CranberryHearing.CSV",
@@ -1440,7 +1161,7 @@
           "status": true,
           "expected": true,
           "notes": null,
-          "registered_at": "2025-09-13T03:32:17.136606+00:00"
+          "registered_at": "2025-09-13T08:49:08.073168+00:00"
         },
         {
           "name": "2022-05-01_to_2022-05-31_BalanceSheet_CranberryHearing.CSV",
@@ -1455,7 +1176,7 @@
           "status": true,
           "expected": true,
           "notes": null,
-          "registered_at": "2025-09-13T03:32:17.136704+00:00"
+          "registered_at": "2025-09-13T08:49:08.073259+00:00"
         },
         {
           "name": "2022-12-01_to_2022-12-31_BalanceSheet_CranberryHearing.CSV",
@@ -1470,7 +1191,7 @@
           "status": true,
           "expected": true,
           "notes": null,
-          "registered_at": "2025-09-13T03:32:17.136778+00:00"
+          "registered_at": "2025-09-13T08:49:08.073382+00:00"
         },
         {
           "name": "2022-07-01_to_2022-07-31_BalanceSheet_CranberryHearing.CSV",
@@ -1485,7 +1206,7 @@
           "status": true,
           "expected": true,
           "notes": null,
-          "registered_at": "2025-09-13T03:32:17.136866+00:00"
+          "registered_at": "2025-09-13T08:49:08.073516+00:00"
         },
         {
           "name": "2022-01-01_to_2022-12-31_BalanceSheet_CranberryHearing.CSV",
@@ -1500,7 +1221,7 @@
           "status": true,
           "expected": true,
           "notes": null,
-          "registered_at": "2025-09-13T03:32:17.136941+00:00"
+          "registered_at": "2025-09-13T08:49:08.073627+00:00"
         },
         {
           "name": "2022-06-01_to_2022-06-30_BalanceSheet_CranberryHearing.CSV",
@@ -1515,7 +1236,7 @@
           "status": true,
           "expected": true,
           "notes": null,
-          "registered_at": "2025-09-13T03:32:17.137014+00:00"
+          "registered_at": "2025-09-13T08:49:08.073728+00:00"
         },
         {
           "name": "2022-01-01_to_2022-01-31_BalanceSheet_CranberryHearing.CSV",
@@ -1530,7 +1251,7 @@
           "status": true,
           "expected": true,
           "notes": null,
-          "registered_at": "2025-09-13T03:32:17.137090+00:00"
+          "registered_at": "2025-09-13T08:49:08.073818+00:00"
         },
         {
           "name": "2022-04-01_to_2022-04-30_BalanceSheet_CranberryHearing.CSV",
@@ -1545,7 +1266,7 @@
           "status": true,
           "expected": true,
           "notes": null,
-          "registered_at": "2025-09-13T03:32:17.137165+00:00"
+          "registered_at": "2025-09-13T08:49:08.073909+00:00"
         },
         {
           "name": "2022-02-01_to_2022-02-28_BalanceSheet_CranberryHearing.CSV",
@@ -1560,7 +1281,7 @@
           "status": true,
           "expected": true,
           "notes": null,
-          "registered_at": "2025-09-13T03:32:17.137244+00:00"
+          "registered_at": "2025-09-13T08:49:08.074005+00:00"
         },
         {
           "name": "2022-03-01_to_2022-03-31_BalanceSheet_CranberryHearing.CSV",
@@ -1575,7 +1296,7 @@
           "status": true,
           "expected": true,
           "notes": null,
-          "registered_at": "2025-09-13T03:32:17.137322+00:00"
+          "registered_at": "2025-09-13T08:49:08.074108+00:00"
         },
         {
           "name": "2022-09-01_to_2022-09-30_BalanceSheet_CranberryHearing.CSV",
@@ -1590,7 +1311,7 @@
           "status": true,
           "expected": true,
           "notes": null,
-          "registered_at": "2025-09-13T03:32:17.137400+00:00"
+          "registered_at": "2025-09-13T08:49:08.074194+00:00"
         },
         {
           "name": "2022-11-01_to_2022-11-30_BalanceSheet_CranberryHearing.CSV",
@@ -1605,7 +1326,7 @@
           "status": true,
           "expected": true,
           "notes": null,
-          "registered_at": "2025-09-13T03:32:17.137567+00:00"
+          "registered_at": "2025-09-13T08:49:08.074309+00:00"
         },
         {
           "name": "2023-01-01_to_2023-12-31_GeneralLedger_CranberryHearing.CSV",
@@ -1620,7 +1341,7 @@
           "status": true,
           "expected": true,
           "notes": null,
-          "registered_at": "2025-09-13T03:32:17.137737+00:00"
+          "registered_at": "2025-09-13T08:49:08.074515+00:00"
         },
         {
           "name": "2024-01-01_to_2024-12-31_GeneralLedger_CranberryHearing.CSV",
@@ -1635,7 +1356,7 @@
           "status": true,
           "expected": true,
           "notes": null,
-          "registered_at": "2025-09-13T03:32:17.138304+00:00"
+          "registered_at": "2025-09-13T08:49:08.075052+00:00"
         },
         {
           "name": "2025-01-01_to_2025-12-31_GeneralLedger_CranberryHearing.CSV",
@@ -1650,7 +1371,7 @@
           "status": true,
           "expected": true,
           "notes": null,
-          "registered_at": "2025-09-13T03:32:17.138650+00:00"
+          "registered_at": "2025-09-13T08:49:08.075375+00:00"
         },
         {
           "name": "2022-01-01_to_2022-12-31_GeneralLedger_CranberryHearing.CSV",
@@ -1665,7 +1386,7 @@
           "status": true,
           "expected": true,
           "notes": null,
-          "registered_at": "2025-09-13T03:32:17.139231+00:00"
+          "registered_at": "2025-09-13T08:49:08.075919+00:00"
         },
         {
           "name": "2021-01-01_to_2021-12-31_GeneralLedger_CranberryHearing.CSV",
@@ -1680,7 +1401,7 @@
           "status": true,
           "expected": true,
           "notes": null,
-          "registered_at": "2025-09-13T03:32:17.141910+00:00"
+          "registered_at": "2025-09-13T08:49:08.078456+00:00"
         },
         {
           "name": "2024-01-01_to_2024-12-31_W2Information_CranberryHearing.pdf",
@@ -1695,7 +1416,7 @@
           "status": true,
           "expected": true,
           "notes": null,
-          "registered_at": "2025-09-13T03:32:17.142216+00:00"
+          "registered_at": "2025-09-13T08:49:08.078724+00:00"
         },
         {
           "name": "2024-01-01_to_2024-12-31_VAIncomeTaxSummary_CranberryHearing.pdf",
@@ -1710,7 +1431,7 @@
           "status": true,
           "expected": true,
           "notes": null,
-          "registered_at": "2025-09-13T03:32:17.142344+00:00"
+          "registered_at": "2025-09-13T08:49:08.078848+00:00"
         },
         {
           "name": "2024-12-01_to_2024-12-31_Chase2015_Activity_CranberryHearing.pdf",
@@ -1725,7 +1446,7 @@
           "status": true,
           "expected": true,
           "notes": null,
-          "registered_at": "2025-09-13T03:32:17.142503+00:00"
+          "registered_at": "2025-09-13T08:49:08.079002+00:00"
         },
         {
           "name": "2024-12-01_to_2024-12-31_Chase5330_Activity_CranberryHearing.pdf",
@@ -1740,7 +1461,7 @@
           "status": true,
           "expected": true,
           "notes": null,
-          "registered_at": "2025-09-13T03:32:17.142674+00:00"
+          "registered_at": "2025-09-13T08:49:08.079178+00:00"
         },
         {
           "name": "2024-10-01_to_2024-12-31_Form941_Q4_CranberryHearing.pdf",
@@ -1755,7 +1476,7 @@
           "status": true,
           "expected": true,
           "notes": null,
-          "registered_at": "2025-09-13T03:32:17.142772+00:00"
+          "registered_at": "2025-09-13T08:49:08.079279+00:00"
         },
         {
           "name": "2024-01-01_to_2024-12-31_W3_TaxYear_CranberryHearing.pdf",
@@ -1770,7 +1491,7 @@
           "status": true,
           "expected": true,
           "notes": null,
-          "registered_at": "2025-09-13T03:32:17.142857+00:00"
+          "registered_at": "2025-09-13T08:49:08.079364+00:00"
         },
         {
           "name": "2024-12-01_to_2024-12-31_CapitalOne_Activity_CranberryHearing.pdf",
@@ -1785,7 +1506,7 @@
           "status": true,
           "expected": true,
           "notes": null,
-          "registered_at": "2025-09-13T03:32:17.143349+00:00"
+          "registered_at": "2025-09-13T08:49:08.079849+00:00"
         },
         {
           "name": "2024-04-01_to_2024-06-30_Form941_Q2_CranberryHearing.pdf",
@@ -1800,7 +1521,7 @@
           "status": true,
           "expected": true,
           "notes": null,
-          "registered_at": "2025-09-13T03:32:17.143454+00:00"
+          "registered_at": "2025-09-13T08:49:08.079951+00:00"
         },
         {
           "name": "2024-01-01_to_2024-12-31_W2R_PAAnnualReconciliation_CranberryHearing.pdf",
@@ -1815,7 +1536,7 @@
           "status": true,
           "expected": true,
           "notes": null,
-          "registered_at": "2025-09-13T03:32:17.143545+00:00"
+          "registered_at": "2025-09-13T08:49:08.080044+00:00"
         },
         {
           "name": "2024-01-01_to_2024-12-31_PAAnnualReconciliation_CranberryHearing.pdf",
@@ -1830,7 +1551,7 @@
           "status": true,
           "expected": true,
           "notes": null,
-          "registered_at": "2025-09-13T03:32:17.143633+00:00"
+          "registered_at": "2025-09-13T08:49:08.080205+00:00"
         },
         {
           "name": "2024-07-01_to_2024-09-30_Form941_Q3_CranberryHearing.pdf",
@@ -1845,7 +1566,7 @@
           "status": true,
           "expected": true,
           "notes": null,
-          "registered_at": "2025-09-13T03:32:17.143731+00:00"
+          "registered_at": "2025-09-13T08:49:08.080377+00:00"
         },
         {
           "name": "2024-12-31_PNCStatement_CranberryHearing.pdf",
@@ -1860,7 +1581,7 @@
           "status": true,
           "expected": true,
           "notes": null,
-          "registered_at": "2025-09-13T03:32:17.143940+00:00"
+          "registered_at": "2025-09-13T08:49:08.080604+00:00"
         },
         {
           "name": "2024-01-01_to_2024-03-31_Form941_Q1_CranberryHearing.pdf",
@@ -1875,7 +1596,7 @@
           "status": true,
           "expected": true,
           "notes": null,
-          "registered_at": "2025-09-13T03:32:17.144040+00:00"
+          "registered_at": "2025-09-13T08:49:08.080712+00:00"
         },
         {
           "name": "2024-01-01_to_2024-12-31_ColoradoStateW2_CranberryHearing.pdf",
@@ -1890,7 +1611,7 @@
           "status": true,
           "expected": true,
           "notes": null,
-          "registered_at": "2025-09-13T03:32:17.144126+00:00"
+          "registered_at": "2025-09-13T08:49:08.080799+00:00"
         },
         {
           "name": "2021-01-01_to_2021-12-31_StarkeyCOGS_CranberryHearing.csv",
@@ -1905,7 +1626,7 @@
           "status": true,
           "expected": true,
           "notes": null,
-          "registered_at": "2025-09-13T03:32:17.144269+00:00"
+          "registered_at": "2025-09-13T08:49:08.080942+00:00"
         },
         {
           "name": "2023-01-01_to_2023-12-31_StarkeyCOGS_CranberryHearing.csv",
@@ -1920,7 +1641,7 @@
           "status": true,
           "expected": true,
           "notes": null,
-          "registered_at": "2025-09-13T03:32:17.144393+00:00"
+          "registered_at": "2025-09-13T08:49:08.081066+00:00"
         },
         {
           "name": "2024-01-01_to_2024-12-31_StarkeyCOGS_CranberryHearing.csv",
@@ -1935,7 +1656,7 @@
           "status": true,
           "expected": true,
           "notes": null,
-          "registered_at": "2025-09-13T03:32:17.144519+00:00"
+          "registered_at": "2025-09-13T08:49:08.081188+00:00"
         },
         {
           "name": "2025-01-01_to_2025-08-31_StarkeyCOGS_CranberryHearing.csv",
@@ -1950,7 +1671,7 @@
           "status": true,
           "expected": true,
           "notes": null,
-          "registered_at": "2025-09-13T03:32:17.144634+00:00"
+          "registered_at": "2025-09-13T08:49:08.081301+00:00"
         },
         {
           "name": "2022-01-01_to_2022-12-31_StarkeyCOGS_CranberryHearing.csv",
@@ -1965,7 +1686,7 @@
           "status": true,
           "expected": true,
           "notes": null,
-          "registered_at": "2025-09-13T03:32:17.144758+00:00"
+          "registered_at": "2025-09-13T08:49:08.081422+00:00"
         },
         {
           "name": "2006-08-31_UPMC_AncillaryProviderAgreement.pdf",
@@ -1980,7 +1701,7 @@
           "status": true,
           "expected": true,
           "notes": null,
-          "registered_at": "2025-09-13T03:32:17.146202+00:00"
+          "registered_at": "2025-09-13T08:49:08.082867+00:00"
         },
         {
           "name": "2015-09-28_Aetna.pdf",
@@ -1995,7 +1716,7 @@
           "status": true,
           "expected": true,
           "notes": null,
-          "registered_at": "2025-09-13T03:32:17.149937+00:00"
+          "registered_at": "2025-09-13T08:49:08.086573+00:00"
         },
         {
           "name": "2022-01-01_to_2030-12-31_BDNPL_CommercialLease_CranberryHearing.pdf",
@@ -2010,7 +1731,7 @@
           "status": true,
           "expected": true,
           "notes": null,
-          "registered_at": "2025-09-13T03:32:17.150197+00:00"
+          "registered_at": "2025-09-13T08:49:08.086852+00:00"
         },
         {
           "name": "2022-01-01_to_2030-12-31_BDNPL_CommercialLease_CranberryHearing.csv",
@@ -2025,7 +1746,7 @@
           "status": true,
           "expected": true,
           "notes": null,
-          "registered_at": "2025-09-13T03:32:17.150283+00:00"
+          "registered_at": "2025-09-13T08:49:08.086940+00:00"
         },
         {
           "name": "2019-11-08_Starkey_EquipmentQuotation_CelloAudiometer_TrumpetREM_CranberryHearing.pdf",
@@ -2040,7 +1761,7 @@
           "status": true,
           "expected": true,
           "notes": null,
-          "registered_at": "2025-09-13T03:32:17.150798+00:00"
+          "registered_at": "2025-09-13T08:49:08.087386+00:00"
         },
         {
           "name": "2019-11-06_Starkey_EquipmentQuotation_CelloAudiometer_CosmeticHearingSolutions.pdf",
@@ -2055,7 +1776,7 @@
           "status": true,
           "expected": true,
           "notes": null,
-          "registered_at": "2025-09-13T03:32:17.151080+00:00"
+          "registered_at": "2025-09-13T08:49:08.087657+00:00"
         },
         {
           "name": "2019-11-06_Celloaudiometer_Cosmetichearingsolutions.csv",
@@ -2070,7 +1791,7 @@
           "status": true,
           "expected": true,
           "notes": null,
-          "registered_at": "2025-09-13T03:32:17.151159+00:00"
+          "registered_at": "2025-09-13T08:49:08.087735+00:00"
         },
         {
           "name": "2019-11-11_Starkey_EquipmentQuotation_TrumpetREM_AudiometerCombo_CranberryHearing.pdf",
@@ -2085,7 +1806,7 @@
           "status": true,
           "expected": true,
           "notes": null,
-          "registered_at": "2025-09-13T03:32:17.151428+00:00"
+          "registered_at": "2025-09-13T08:49:08.088008+00:00"
         },
         {
           "name": "2019-11-08_Celloaudiometer_Trumpetrem_Cranberryhearing.csv",
@@ -2100,7 +1821,7 @@
           "status": true,
           "expected": true,
           "notes": null,
-          "registered_at": "2025-09-13T03:32:17.151505+00:00"
+          "registered_at": "2025-09-13T08:49:08.088091+00:00"
         },
         {
           "name": "2019-11-11_Trumpetrem_Audiometercombo_Cranberryhearing.csv",
@@ -2115,7 +1836,7 @@
           "status": true,
           "expected": true,
           "notes": null,
-          "registered_at": "2025-09-13T03:32:17.151579+00:00"
+          "registered_at": "2025-09-13T08:49:08.088168+00:00"
         },
         {
           "name": "2021-05-20_to_2024-12-05_HearingAidSalesCancellations_CranberryHearing.xlsx.csv",
@@ -2130,7 +1851,7 @@
           "status": true,
           "expected": true,
           "notes": null,
-          "registered_at": "2025-09-13T03:32:17.151861+00:00"
+          "registered_at": "2025-09-13T08:49:08.088419+00:00"
         },
         {
           "name": "2021-05-20_to_2024-12-05_HearingAidSalesReplacements_CranberryHearing.csv",
@@ -2145,7 +1866,7 @@
           "status": true,
           "expected": true,
           "notes": null,
-          "registered_at": "2025-09-13T03:32:17.152027+00:00"
+          "registered_at": "2025-09-13T08:49:08.088593+00:00"
         },
         {
           "name": "2021-05-20_to_2024-12-05_HearingAidSales_CranberryHearing.csv",
@@ -2160,7 +1881,7 @@
           "status": true,
           "expected": true,
           "notes": null,
-          "registered_at": "2025-09-13T03:32:17.154714+00:00"
+          "registered_at": "2025-09-13T08:49:08.091314+00:00"
         },
         {
           "name": "2021-01-01_to_2024-12-31_HearingAidSalesLedger_CranberryHearing.xlsx",
@@ -2175,7 +1896,7 @@
           "status": true,
           "expected": true,
           "notes": null,
-          "registered_at": "2025-09-13T03:32:17.154908+00:00"
+          "registered_at": "2025-09-13T08:49:08.091515+00:00"
         },
         {
           "name": "2021-05-20_to_2024-12-05_HearingAidSalesReturns_CranberryHearing.csv",
@@ -2190,7 +1911,7 @@
           "status": true,
           "expected": true,
           "notes": null,
-          "registered_at": "2025-09-13T03:32:17.155007+00:00"
+          "registered_at": "2025-09-13T08:49:08.091621+00:00"
         },
         {
           "name": "2021-05-20_to_2024-12-05_HearingAidSales_Exchanges_CranberryHearing.csv",
@@ -2205,7 +1926,7 @@
           "status": true,
           "expected": true,
           "notes": null,
-          "registered_at": "2025-09-13T03:32:17.155119+00:00"
+          "registered_at": "2025-09-13T08:49:08.091809+00:00"
         }
       ],
       "coverage_analysis": {
@@ -2261,8 +1982,8 @@
     "traceability_enabled": true
   },
   "sales": {
-    "total_transactions": 6,
-    "total_revenue": 12790.0
+    "total_transactions": 0,
+    "total_revenue": 0.0
   },
   "financials": {
     "documents": [
@@ -2310,12 +2031,12 @@
       }
     ],
     "metrics": {
-      "annual_revenue_projection": 932533.08,
-      "estimated_annual_ebitda": 13453.8,
-      "roi_percentage": 2.07,
-      "ebitda_margin": 1.44,
-      "payback_period_years": 48.3,
-      "equipment_value": 61727.5,
+      "annual_revenue_projection": 0.0,
+      "estimated_annual_ebitda": 0.0,
+      "roi_percentage": 0.0,
+      "ebitda_margin": 0.0,
+      "payback_period_years": 0.0,
+      "equipment_value": 0.0,
       "asking_price": 650000.0,
       "visibility": [
         "public",
@@ -2327,879 +2048,10 @@
   },
   "equipment": {
     "total_value": {
-      "amount": 61487.5,
+      "amount": 0.0,
       "currency": "USD"
     },
-    "items": [
-      {
-        "name": "CL-12B LP Single Wall Room O.D. 6'2\"x4'4\"x7'2\" I.D.\n5'6\"x3'8\"x6'6\"",
-        "part_number": "68068-004",
-        "quantity": 1,
-        "unit_price": {
-          "value": 8555.0,
-          "currency": "USD"
-        },
-        "total_price": {
-          "value": 8555.0,
-          "currency": "USD"
-        },
-        "category": "Test Booth",
-        "source_file": "2019-11-06_Celloaudiometer_Cosmetichearingsolutions.csv",
-        "value": {
-          "value": 8555.0,
-          "currency": "USD"
-        },
-        "file_path": "docs/equipment/2019-11-06_Celloaudiometer_Cosmetichearingsolutions.csv",
-        "status": true,
-        "notes": "Equipment item from 2019-11-06_Celloaudiometer_Cosmetichearingsolutions.csv",
-        "due_date": null,
-        "file_type": "CSV",
-        "file_size": "Unknown",
-        "visibility": [
-          "public",
-          "nda",
-          "buyer",
-          "internal"
-        ]
-      },
-      {
-        "name": "20'' X 60\" Window In Door",
-        "part_number": "68066-500",
-        "quantity": 1,
-        "unit_price": {
-          "value": 400.0,
-          "currency": "USD"
-        },
-        "total_price": {
-          "value": 400.0,
-          "currency": "USD"
-        },
-        "category": "Other",
-        "source_file": "2019-11-06_Celloaudiometer_Cosmetichearingsolutions.csv",
-        "value": {
-          "value": 400.0,
-          "currency": "USD"
-        },
-        "file_path": "docs/equipment/2019-11-06_Celloaudiometer_Cosmetichearingsolutions.csv",
-        "status": true,
-        "notes": "Equipment item from 2019-11-06_Celloaudiometer_Cosmetichearingsolutions.csv",
-        "due_date": null,
-        "file_type": "CSV",
-        "file_size": "Unknown",
-        "visibility": [
-          "public",
-          "nda",
-          "buyer",
-          "internal"
-        ]
-      },
-      {
-        "name": "CL12B LP standard Installation with Cello connections\nand FF calibration if needed",
-        "part_number": "MISCEQU",
-        "quantity": 1,
-        "unit_price": {
-          "value": 4000.0,
-          "currency": "USD"
-        },
-        "total_price": {
-          "value": 4000.0,
-          "currency": "USD"
-        },
-        "category": "Audiometer",
-        "source_file": "2019-11-06_Celloaudiometer_Cosmetichearingsolutions.csv",
-        "value": {
-          "value": 4000.0,
-          "currency": "USD"
-        },
-        "file_path": "docs/equipment/2019-11-06_Celloaudiometer_Cosmetichearingsolutions.csv",
-        "status": true,
-        "notes": "Equipment item from 2019-11-06_Celloaudiometer_Cosmetichearingsolutions.csv",
-        "due_date": null,
-        "file_type": "CSV",
-        "file_size": "Unknown",
-        "visibility": [
-          "public",
-          "nda",
-          "buyer",
-          "internal"
-        ]
-      },
-      {
-        "name": "Sound room freight",
-        "part_number": "MISCEQU",
-        "quantity": 1,
-        "unit_price": {
-          "value": 1900.0,
-          "currency": "USD"
-        },
-        "total_price": {
-          "value": 1900.0,
-          "currency": "USD"
-        },
-        "category": "Test Booth",
-        "source_file": "2019-11-06_Celloaudiometer_Cosmetichearingsolutions.csv",
-        "value": {
-          "value": 1900.0,
-          "currency": "USD"
-        },
-        "file_path": "docs/equipment/2019-11-06_Celloaudiometer_Cosmetichearingsolutions.csv",
-        "status": true,
-        "notes": "Equipment item from 2019-11-06_Celloaudiometer_Cosmetichearingsolutions.csv",
-        "due_date": null,
-        "file_type": "CSV",
-        "file_size": "Unknown",
-        "visibility": [
-          "public",
-          "nda",
-          "buyer",
-          "internal"
-        ]
-      },
-      {
-        "name": "Cello Computer Controled Diagnostic Audiometer",
-        "part_number": "31243-051",
-        "quantity": 1,
-        "unit_price": {
-          "value": 3420.0,
-          "currency": "USD"
-        },
-        "total_price": {
-          "value": 3420.0,
-          "currency": "USD"
-        },
-        "category": "Audiometer",
-        "source_file": "2019-11-06_Celloaudiometer_Cosmetichearingsolutions.csv",
-        "value": {
-          "value": 3420.0,
-          "currency": "USD"
-        },
-        "file_path": "docs/equipment/2019-11-06_Celloaudiometer_Cosmetichearingsolutions.csv",
-        "status": true,
-        "notes": "Equipment item from 2019-11-06_Celloaudiometer_Cosmetichearingsolutions.csv",
-        "due_date": null,
-        "file_type": "CSV",
-        "file_size": "Unknown",
-        "visibility": [
-          "public",
-          "nda",
-          "buyer",
-          "internal"
-        ]
-      },
-      {
-        "name": "ER 3C Insert Earphone",
-        "part_number": "68001-080",
-        "quantity": 1,
-        "unit_price": {
-          "value": 450.0,
-          "currency": "USD"
-        },
-        "total_price": {
-          "value": 450.0,
-          "currency": "USD"
-        },
-        "category": "Accessory",
-        "source_file": "2019-11-06_Celloaudiometer_Cosmetichearingsolutions.csv",
-        "value": {
-          "value": 450.0,
-          "currency": "USD"
-        },
-        "file_path": "docs/equipment/2019-11-06_Celloaudiometer_Cosmetichearingsolutions.csv",
-        "status": true,
-        "notes": "Equipment item from 2019-11-06_Celloaudiometer_Cosmetichearingsolutions.csv",
-        "due_date": null,
-        "file_type": "CSV",
-        "file_size": "Unknown",
-        "visibility": [
-          "public",
-          "nda",
-          "buyer",
-          "internal"
-        ]
-      },
-      {
-        "name": "Cable Gray 3 Ft",
-        "part_number": "19101-031",
-        "quantity": 3,
-        "unit_price": {
-          "value": 12.5,
-          "currency": "USD"
-        },
-        "total_price": {
-          "value": 37.5,
-          "currency": "USD"
-        },
-        "category": "Accessory",
-        "source_file": "2019-11-06_Celloaudiometer_Cosmetichearingsolutions.csv",
-        "value": {
-          "value": 37.5,
-          "currency": "USD"
-        },
-        "file_path": "docs/equipment/2019-11-06_Celloaudiometer_Cosmetichearingsolutions.csv",
-        "status": true,
-        "notes": "Equipment item from 2019-11-06_Celloaudiometer_Cosmetichearingsolutions.csv",
-        "due_date": null,
-        "file_type": "CSV",
-        "file_size": "Unknown",
-        "visibility": [
-          "public",
-          "nda",
-          "buyer",
-          "internal"
-        ]
-      },
-      {
-        "name": "Cable Red 3 Ft",
-        "part_number": "19101-032",
-        "quantity": 2,
-        "unit_price": {
-          "value": 12.5,
-          "currency": "USD"
-        },
-        "total_price": {
-          "value": 25.0,
-          "currency": "USD"
-        },
-        "category": "Accessory",
-        "source_file": "2019-11-06_Celloaudiometer_Cosmetichearingsolutions.csv",
-        "value": {
-          "value": 25.0,
-          "currency": "USD"
-        },
-        "file_path": "docs/equipment/2019-11-06_Celloaudiometer_Cosmetichearingsolutions.csv",
-        "status": true,
-        "notes": "Equipment item from 2019-11-06_Celloaudiometer_Cosmetichearingsolutions.csv",
-        "due_date": null,
-        "file_type": "CSV",
-        "file_size": "Unknown",
-        "visibility": [
-          "public",
-          "nda",
-          "buyer",
-          "internal"
-        ]
-      },
-      {
-        "name": "Cable Blue 3 Ft",
-        "part_number": "19101-033",
-        "quantity": 2,
-        "unit_price": {
-          "value": 12.5,
-          "currency": "USD"
-        },
-        "total_price": {
-          "value": 25.0,
-          "currency": "USD"
-        },
-        "category": "Accessory",
-        "source_file": "2019-11-06_Celloaudiometer_Cosmetichearingsolutions.csv",
-        "value": {
-          "value": 25.0,
-          "currency": "USD"
-        },
-        "file_path": "docs/equipment/2019-11-06_Celloaudiometer_Cosmetichearingsolutions.csv",
-        "status": true,
-        "notes": "Equipment item from 2019-11-06_Celloaudiometer_Cosmetichearingsolutions.csv",
-        "due_date": null,
-        "file_type": "CSV",
-        "file_size": "Unknown",
-        "visibility": [
-          "public",
-          "nda",
-          "buyer",
-          "internal"
-        ]
-      },
-      {
-        "name": "CL-12B LP Single Wall Room O.D. 6'2\"x4'4\"x7'2\" I.D.\n5'6\"x3'8\"x6'6\"",
-        "part_number": "68068-004",
-        "quantity": 1,
-        "unit_price": {
-          "value": 8555.0,
-          "currency": "USD"
-        },
-        "total_price": {
-          "value": 8555.0,
-          "currency": "USD"
-        },
-        "category": "Test Booth",
-        "source_file": "2019-11-08_Celloaudiometer_Trumpetrem_Cranberryhearing.csv",
-        "value": {
-          "value": 8555.0,
-          "currency": "USD"
-        },
-        "file_path": "docs/equipment/2019-11-08_Celloaudiometer_Trumpetrem_Cranberryhearing.csv",
-        "status": true,
-        "notes": "Equipment item from 2019-11-08_Celloaudiometer_Trumpetrem_Cranberryhearing.csv",
-        "due_date": null,
-        "file_type": "CSV",
-        "file_size": "Unknown",
-        "visibility": [
-          "public",
-          "nda",
-          "buyer",
-          "internal"
-        ]
-      },
-      {
-        "name": "20'' X 60\" Window In Door",
-        "part_number": "68066-500",
-        "quantity": 1,
-        "unit_price": {
-          "value": 400.0,
-          "currency": "USD"
-        },
-        "total_price": {
-          "value": 400.0,
-          "currency": "USD"
-        },
-        "category": "Other",
-        "source_file": "2019-11-08_Celloaudiometer_Trumpetrem_Cranberryhearing.csv",
-        "value": {
-          "value": 400.0,
-          "currency": "USD"
-        },
-        "file_path": "docs/equipment/2019-11-08_Celloaudiometer_Trumpetrem_Cranberryhearing.csv",
-        "status": true,
-        "notes": "Equipment item from 2019-11-08_Celloaudiometer_Trumpetrem_Cranberryhearing.csv",
-        "due_date": null,
-        "file_type": "CSV",
-        "file_size": "Unknown",
-        "visibility": [
-          "public",
-          "nda",
-          "buyer",
-          "internal"
-        ]
-      },
-      {
-        "name": "CL12BLP Sound booth and audiometer install",
-        "part_number": "MISCEQU",
-        "quantity": 1,
-        "unit_price": {
-          "value": 4000.0,
-          "currency": "USD"
-        },
-        "total_price": {
-          "value": 4000.0,
-          "currency": "USD"
-        },
-        "category": "Audiometer",
-        "source_file": "2019-11-08_Celloaudiometer_Trumpetrem_Cranberryhearing.csv",
-        "value": {
-          "value": 4000.0,
-          "currency": "USD"
-        },
-        "file_path": "docs/equipment/2019-11-08_Celloaudiometer_Trumpetrem_Cranberryhearing.csv",
-        "status": true,
-        "notes": "Equipment item from 2019-11-08_Celloaudiometer_Trumpetrem_Cranberryhearing.csv",
-        "due_date": null,
-        "file_type": "CSV",
-        "file_size": "Unknown",
-        "visibility": [
-          "public",
-          "nda",
-          "buyer",
-          "internal"
-        ]
-      },
-      {
-        "name": "Sound Booth Freight",
-        "part_number": "MISCEQU",
-        "quantity": 1,
-        "unit_price": {
-          "value": 1000.0,
-          "currency": "USD"
-        },
-        "total_price": {
-          "value": 1000.0,
-          "currency": "USD"
-        },
-        "category": "Test Booth",
-        "source_file": "2019-11-08_Celloaudiometer_Trumpetrem_Cranberryhearing.csv",
-        "value": {
-          "value": 1000.0,
-          "currency": "USD"
-        },
-        "file_path": "docs/equipment/2019-11-08_Celloaudiometer_Trumpetrem_Cranberryhearing.csv",
-        "status": true,
-        "notes": "Equipment item from 2019-11-08_Celloaudiometer_Trumpetrem_Cranberryhearing.csv",
-        "due_date": null,
-        "file_type": "CSV",
-        "file_size": "Unknown",
-        "visibility": [
-          "public",
-          "nda",
-          "buyer",
-          "internal"
-        ]
-      },
-      {
-        "name": "Cello Computer Controled Diagnostic Audiometer\nIncludes QSIN License",
-        "part_number": "31243-051",
-        "quantity": 1,
-        "unit_price": {
-          "value": 3420.0,
-          "currency": "USD"
-        },
-        "total_price": {
-          "value": 3420.0,
-          "currency": "USD"
-        },
-        "category": "Audiometer",
-        "source_file": "2019-11-08_Celloaudiometer_Trumpetrem_Cranberryhearing.csv",
-        "value": {
-          "value": 3420.0,
-          "currency": "USD"
-        },
-        "file_path": "docs/equipment/2019-11-08_Celloaudiometer_Trumpetrem_Cranberryhearing.csv",
-        "status": true,
-        "notes": "Equipment item from 2019-11-08_Celloaudiometer_Trumpetrem_Cranberryhearing.csv",
-        "due_date": null,
-        "file_type": "CSV",
-        "file_size": "Unknown",
-        "visibility": [
-          "public",
-          "nda",
-          "buyer",
-          "internal"
-        ]
-      },
-      {
-        "name": "ER 3C Insert Earphone",
-        "part_number": "68001-080",
-        "quantity": 1,
-        "unit_price": {
-          "value": 450.0,
-          "currency": "USD"
-        },
-        "total_price": {
-          "value": 450.0,
-          "currency": "USD"
-        },
-        "category": "Accessory",
-        "source_file": "2019-11-08_Celloaudiometer_Trumpetrem_Cranberryhearing.csv",
-        "value": {
-          "value": 450.0,
-          "currency": "USD"
-        },
-        "file_path": "docs/equipment/2019-11-08_Celloaudiometer_Trumpetrem_Cranberryhearing.csv",
-        "status": true,
-        "notes": "Equipment item from 2019-11-08_Celloaudiometer_Trumpetrem_Cranberryhearing.csv",
-        "due_date": null,
-        "file_type": "CSV",
-        "file_size": "Unknown",
-        "visibility": [
-          "public",
-          "nda",
-          "buyer",
-          "internal"
-        ]
-      },
-      {
-        "name": "Cable Gray 3 Ft",
-        "part_number": "19101-031",
-        "quantity": 3,
-        "unit_price": {
-          "value": 12.5,
-          "currency": "USD"
-        },
-        "total_price": {
-          "value": 37.5,
-          "currency": "USD"
-        },
-        "category": "Accessory",
-        "source_file": "2019-11-08_Celloaudiometer_Trumpetrem_Cranberryhearing.csv",
-        "value": {
-          "value": 37.5,
-          "currency": "USD"
-        },
-        "file_path": "docs/equipment/2019-11-08_Celloaudiometer_Trumpetrem_Cranberryhearing.csv",
-        "status": true,
-        "notes": "Equipment item from 2019-11-08_Celloaudiometer_Trumpetrem_Cranberryhearing.csv",
-        "due_date": null,
-        "file_type": "CSV",
-        "file_size": "Unknown",
-        "visibility": [
-          "public",
-          "nda",
-          "buyer",
-          "internal"
-        ]
-      },
-      {
-        "name": "Cable Red 3 Ft",
-        "part_number": "19101-032",
-        "quantity": 2,
-        "unit_price": {
-          "value": 12.5,
-          "currency": "USD"
-        },
-        "total_price": {
-          "value": 25.0,
-          "currency": "USD"
-        },
-        "category": "Accessory",
-        "source_file": "2019-11-08_Celloaudiometer_Trumpetrem_Cranberryhearing.csv",
-        "value": {
-          "value": 25.0,
-          "currency": "USD"
-        },
-        "file_path": "docs/equipment/2019-11-08_Celloaudiometer_Trumpetrem_Cranberryhearing.csv",
-        "status": true,
-        "notes": "Equipment item from 2019-11-08_Celloaudiometer_Trumpetrem_Cranberryhearing.csv",
-        "due_date": null,
-        "file_type": "CSV",
-        "file_size": "Unknown",
-        "visibility": [
-          "public",
-          "nda",
-          "buyer",
-          "internal"
-        ]
-      },
-      {
-        "name": "Cable Blue 3 Ft",
-        "part_number": "19101-033",
-        "quantity": 2,
-        "unit_price": {
-          "value": 12.5,
-          "currency": "USD"
-        },
-        "total_price": {
-          "value": 25.0,
-          "currency": "USD"
-        },
-        "category": "Accessory",
-        "source_file": "2019-11-08_Celloaudiometer_Trumpetrem_Cranberryhearing.csv",
-        "value": {
-          "value": 25.0,
-          "currency": "USD"
-        },
-        "file_path": "docs/equipment/2019-11-08_Celloaudiometer_Trumpetrem_Cranberryhearing.csv",
-        "status": true,
-        "notes": "Equipment item from 2019-11-08_Celloaudiometer_Trumpetrem_Cranberryhearing.csv",
-        "due_date": null,
-        "file_type": "CSV",
-        "file_size": "Unknown",
-        "visibility": [
-          "public",
-          "nda",
-          "buyer",
-          "internal"
-        ]
-      },
-      {
-        "name": "Trumpet REM - Real-Ear Measurement system",
-        "part_number": "31243-067",
-        "quantity": 1,
-        "unit_price": {
-          "value": 4090.0,
-          "currency": "USD"
-        },
-        "total_price": {
-          "value": 4090.0,
-          "currency": "USD"
-        },
-        "category": "REM System",
-        "source_file": "2019-11-08_Celloaudiometer_Trumpetrem_Cranberryhearing.csv",
-        "value": {
-          "value": 4090.0,
-          "currency": "USD"
-        },
-        "file_path": "docs/equipment/2019-11-08_Celloaudiometer_Trumpetrem_Cranberryhearing.csv",
-        "status": true,
-        "notes": "Equipment item from 2019-11-08_Celloaudiometer_Trumpetrem_Cranberryhearing.csv",
-        "due_date": null,
-        "file_type": "CSV",
-        "file_size": "Unknown",
-        "visibility": [
-          "public",
-          "nda",
-          "buyer",
-          "internal"
-        ]
-      },
-      {
-        "name": "CL-12B LP Single Wall Room O.D. 6'2\"x4'4\"x7'2\" I.D.\n5'6\"x3'8\"x6'6\"",
-        "part_number": "68068-004",
-        "quantity": 1,
-        "unit_price": {
-          "value": 8555.0,
-          "currency": "USD"
-        },
-        "total_price": {
-          "value": 8555.0,
-          "currency": "USD"
-        },
-        "category": "Test Booth",
-        "source_file": "2019-11-11_Trumpetrem_Audiometercombo_Cranberryhearing.csv",
-        "value": {
-          "value": 8555.0,
-          "currency": "USD"
-        },
-        "file_path": "docs/equipment/2019-11-11_Trumpetrem_Audiometercombo_Cranberryhearing.csv",
-        "status": true,
-        "notes": "Equipment item from 2019-11-11_Trumpetrem_Audiometercombo_Cranberryhearing.csv",
-        "due_date": null,
-        "file_type": "CSV",
-        "file_size": "Unknown",
-        "visibility": [
-          "public",
-          "nda",
-          "buyer",
-          "internal"
-        ]
-      },
-      {
-        "name": "20'' X 60\" Window In Door",
-        "part_number": "68066-500",
-        "quantity": 1,
-        "unit_price": {
-          "value": 400.0,
-          "currency": "USD"
-        },
-        "total_price": {
-          "value": 400.0,
-          "currency": "USD"
-        },
-        "category": "Other",
-        "source_file": "2019-11-11_Trumpetrem_Audiometercombo_Cranberryhearing.csv",
-        "value": {
-          "value": 400.0,
-          "currency": "USD"
-        },
-        "file_path": "docs/equipment/2019-11-11_Trumpetrem_Audiometercombo_Cranberryhearing.csv",
-        "status": true,
-        "notes": "Equipment item from 2019-11-11_Trumpetrem_Audiometercombo_Cranberryhearing.csv",
-        "due_date": null,
-        "file_type": "CSV",
-        "file_size": "Unknown",
-        "visibility": [
-          "public",
-          "nda",
-          "buyer",
-          "internal"
-        ]
-      },
-      {
-        "name": "CL12BLP Sound booth and audiometer install",
-        "part_number": "MISCEQU",
-        "quantity": 1,
-        "unit_price": {
-          "value": 4000.0,
-          "currency": "USD"
-        },
-        "total_price": {
-          "value": 4000.0,
-          "currency": "USD"
-        },
-        "category": "Audiometer",
-        "source_file": "2019-11-11_Trumpetrem_Audiometercombo_Cranberryhearing.csv",
-        "value": {
-          "value": 4000.0,
-          "currency": "USD"
-        },
-        "file_path": "docs/equipment/2019-11-11_Trumpetrem_Audiometercombo_Cranberryhearing.csv",
-        "status": true,
-        "notes": "Equipment item from 2019-11-11_Trumpetrem_Audiometercombo_Cranberryhearing.csv",
-        "due_date": null,
-        "file_type": "CSV",
-        "file_size": "Unknown",
-        "visibility": [
-          "public",
-          "nda",
-          "buyer",
-          "internal"
-        ]
-      },
-      {
-        "name": "Sound Booth Freight",
-        "part_number": "MISCEQU",
-        "quantity": 1,
-        "unit_price": {
-          "value": 1000.0,
-          "currency": "USD"
-        },
-        "total_price": {
-          "value": 1000.0,
-          "currency": "USD"
-        },
-        "category": "Test Booth",
-        "source_file": "2019-11-11_Trumpetrem_Audiometercombo_Cranberryhearing.csv",
-        "value": {
-          "value": 1000.0,
-          "currency": "USD"
-        },
-        "file_path": "docs/equipment/2019-11-11_Trumpetrem_Audiometercombo_Cranberryhearing.csv",
-        "status": true,
-        "notes": "Equipment item from 2019-11-11_Trumpetrem_Audiometercombo_Cranberryhearing.csv",
-        "due_date": null,
-        "file_type": "CSV",
-        "file_size": "Unknown",
-        "visibility": [
-          "public",
-          "nda",
-          "buyer",
-          "internal"
-        ]
-      },
-      {
-        "name": "Trumpet REM & Aud - Real-Ear Measurement system &\nDiagnostic Audiom",
-        "part_number": "31243-071",
-        "quantity": 1,
-        "unit_price": {
-          "value": 6180.0,
-          "currency": "USD"
-        },
-        "total_price": {
-          "value": 6180.0,
-          "currency": "USD"
-        },
-        "category": "REM System",
-        "source_file": "2019-11-11_Trumpetrem_Audiometercombo_Cranberryhearing.csv",
-        "value": {
-          "value": 6180.0,
-          "currency": "USD"
-        },
-        "file_path": "docs/equipment/2019-11-11_Trumpetrem_Audiometercombo_Cranberryhearing.csv",
-        "status": true,
-        "notes": "Equipment item from 2019-11-11_Trumpetrem_Audiometercombo_Cranberryhearing.csv",
-        "due_date": null,
-        "file_type": "CSV",
-        "file_size": "Unknown",
-        "visibility": [
-          "public",
-          "nda",
-          "buyer",
-          "internal"
-        ]
-      },
-      {
-        "name": "ER 3C Insert Earphone",
-        "part_number": "68001-080",
-        "quantity": 1,
-        "unit_price": {
-          "value": 450.0,
-          "currency": "USD"
-        },
-        "total_price": {
-          "value": 450.0,
-          "currency": "USD"
-        },
-        "category": "Accessory",
-        "source_file": "2019-11-11_Trumpetrem_Audiometercombo_Cranberryhearing.csv",
-        "value": {
-          "value": 450.0,
-          "currency": "USD"
-        },
-        "file_path": "docs/equipment/2019-11-11_Trumpetrem_Audiometercombo_Cranberryhearing.csv",
-        "status": true,
-        "notes": "Equipment item from 2019-11-11_Trumpetrem_Audiometercombo_Cranberryhearing.csv",
-        "due_date": null,
-        "file_type": "CSV",
-        "file_size": "Unknown",
-        "visibility": [
-          "public",
-          "nda",
-          "buyer",
-          "internal"
-        ]
-      },
-      {
-        "name": "Cable Gray 3 Ft",
-        "part_number": "19101-031",
-        "quantity": 3,
-        "unit_price": {
-          "value": 12.5,
-          "currency": "USD"
-        },
-        "total_price": {
-          "value": 37.5,
-          "currency": "USD"
-        },
-        "category": "Accessory",
-        "source_file": "2019-11-11_Trumpetrem_Audiometercombo_Cranberryhearing.csv",
-        "value": {
-          "value": 37.5,
-          "currency": "USD"
-        },
-        "file_path": "docs/equipment/2019-11-11_Trumpetrem_Audiometercombo_Cranberryhearing.csv",
-        "status": true,
-        "notes": "Equipment item from 2019-11-11_Trumpetrem_Audiometercombo_Cranberryhearing.csv",
-        "due_date": null,
-        "file_type": "CSV",
-        "file_size": "Unknown",
-        "visibility": [
-          "public",
-          "nda",
-          "buyer",
-          "internal"
-        ]
-      },
-      {
-        "name": "Cable Red 3 Ft",
-        "part_number": "19101-032",
-        "quantity": 2,
-        "unit_price": {
-          "value": 12.5,
-          "currency": "USD"
-        },
-        "total_price": {
-          "value": 25.0,
-          "currency": "USD"
-        },
-        "category": "Accessory",
-        "source_file": "2019-11-11_Trumpetrem_Audiometercombo_Cranberryhearing.csv",
-        "value": {
-          "value": 25.0,
-          "currency": "USD"
-        },
-        "file_path": "docs/equipment/2019-11-11_Trumpetrem_Audiometercombo_Cranberryhearing.csv",
-        "status": true,
-        "notes": "Equipment item from 2019-11-11_Trumpetrem_Audiometercombo_Cranberryhearing.csv",
-        "due_date": null,
-        "file_type": "CSV",
-        "file_size": "Unknown",
-        "visibility": [
-          "public",
-          "nda",
-          "buyer",
-          "internal"
-        ]
-      },
-      {
-        "name": "Cable Blue 3 Ft",
-        "part_number": "19101-033",
-        "quantity": 2,
-        "unit_price": {
-          "value": 12.5,
-          "currency": "USD"
-        },
-        "total_price": {
-          "value": 25.0,
-          "currency": "USD"
-        },
-        "category": "Accessory",
-        "source_file": "2019-11-11_Trumpetrem_Audiometercombo_Cranberryhearing.csv",
-        "value": {
-          "value": 25.0,
-          "currency": "USD"
-        },
-        "file_path": "docs/equipment/2019-11-11_Trumpetrem_Audiometercombo_Cranberryhearing.csv",
-        "status": true,
-        "notes": "Equipment item from 2019-11-11_Trumpetrem_Audiometercombo_Cranberryhearing.csv",
-        "due_date": null,
-        "file_type": "CSV",
-        "file_size": "Unknown",
-        "visibility": [
-          "public",
-          "nda",
-          "buyer",
-          "internal"
-        ]
-      }
-    ]
+    "items": []
   },
   "legal": {
     "documents": [
@@ -3322,50 +2174,40 @@
       "currency": "USD"
     },
     "market_value": {
-      "value": 493174.14,
+      "value": 0.0,
       "currency": "USD"
     },
-    "discount_percentage": -31.8,
+    "discount_percentage": 0.0,
     "discount_amount": {
-      "value": -156825.86,
+      "value": 0.0,
       "currency": "USD"
     }
   },
-  "locations": [
-    {
-      "name": "Pennsylvania",
-      "type": "Secondary location",
-      "estimated_revenue": 12790.0,
-      "performance": "Consistent revenue"
-    }
-  ],
+  "locations": [],
   "highlights": [
-    "Proven Revenue: $12,790 total revenue",
-    "Strong Margins: 1.4% EBITDA margin",
     "Healthcare Industry: Recession-resistant business",
-    "Turnkey Operation: Complete infrastructure included",
-    "High ROI: 2.1% annual return potential"
+    "Turnkey Operation: Complete infrastructure included"
   ],
   "summary_cards": {
     "revenue_total": {
-      "value": 12790.0,
+      "value": 0.0,
       "currency": "USD",
       "label": "Total Revenue",
       "description": "2023-2025 Performance"
     },
     "annual_ebitda": {
-      "value": 13453.8,
+      "value": 0.0,
       "currency": "USD",
       "label": "Annual EBITDA",
       "description": "Projected Annual"
     },
     "roi": {
-      "value": 2.07,
+      "value": 0.0,
       "label": "ROI",
       "description": "Annual Return"
     },
     "equipment_value": {
-      "value": 61727.5,
+      "value": 0.0,
       "currency": "USD",
       "label": "Equipment Value",
       "description": "Included in Sale"

@@ -3,10 +3,10 @@ name: Deploy Cranberry Website (Simple)
 on:
   push:
     branches: [ main, master ]
-    paths: [ 'website/**', 'simple_revenue_pipeline.py', 'docs/**' ]
+    paths: [ 'website/**', 'simple_revenue_pipeline.py', 'simple_ebitda_pipeline.py', 'docs/**' ]
   pull_request:
     branches: [ main, master ]
-    paths: [ 'website/**', 'simple_revenue_pipeline.py', 'docs/**' ]
+    paths: [ 'website/**', 'simple_revenue_pipeline.py', 'simple_ebitda_pipeline.py', 'docs/**' ]
 
 jobs:
   deploy:

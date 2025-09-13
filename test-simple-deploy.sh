@@ -45,7 +45,11 @@ cd website
 # Install Node.js dependencies
 if [ ! -d "node_modules" ]; then
     echo "📦 Installing Node.js dependencies..."
-    npm install
+    if ! npm install; then
+        exit_code=$?
+        echo "❌ npm install failed with exit code: $exit_code"
+        exit $exit_code
+    fi
 fi
 
 # Build the website
