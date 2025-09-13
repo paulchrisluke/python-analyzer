@@ -12,6 +12,7 @@ import {
   FileTextIcon,
   FolderIcon,
   HelpCircleIcon,
+  HomeIcon,
   LayoutDashboardIcon,
   MapPinIcon,
   SettingsIcon,
@@ -36,168 +37,120 @@ import {
   SidebarMenuItem,
 } from "@/components/ui/sidebar"
 
-// Public (unauthenticated) navigation data
-const getPublicNavData = () => ({
-  navMain: [
-    {
-      title: "Investment Highlights",
-      url: getAnchorUrl("INVESTMENT_HIGHLIGHTS"),
-      icon: BarChartIcon,
-    },
-    {
-      title: "Business Details",
-      url: getAnchorUrl("BUSINESS_DETAILS"),
-      icon: Building2Icon,
-    },
-    {
-      title: "Location Information",
-      url: getAnchorUrl("LOCATION_INFORMATION"),
-      icon: MapPinIcon,
-    },
-    {
-      title: "Due Diligence",
-      url: getAnchorUrl("DUE_DILIGENCE"),
-      icon: FolderIcon,
-    },
-  ],
-})
+// Base navigation items
+const salesPageItem = {
+  title: "Sales Page",
+  url: "/",
+  icon: HomeIcon,
+}
 
-// Authenticated user navigation data
-const getAuthenticatedNavData = (user: { name?: string; email?: string; image?: string | null }) => ({
-  user: {
-    name: user?.name || "User",
-    email: user?.email || "user@example.com",
-    avatar: user?.image || "/avatars/user.jpg",
+const adminNavItems = [
+  {
+    title: "Admin Dashboard",
+    url: "/admin",
+    icon: ShieldIcon,
   },
-  navMain: [
-    {
-      title: "Dashboard",
-      url: "/dashboard",
-      icon: LayoutDashboardIcon,
-    },
-    {
-      title: "Investment Highlights",
-      url: getAnchorUrl("INVESTMENT_HIGHLIGHTS"),
-      icon: BarChartIcon,
-    },
-    {
-      title: "Business Details",
-      url: getAnchorUrl("BUSINESS_DETAILS"),
-      icon: Building2Icon,
-    },
-    {
-      title: "Location Information",
-      url: getAnchorUrl("LOCATION_INFORMATION"),
-      icon: MapPinIcon,
-    },
-    {
-      title: "Due Diligence",
-      url: getAnchorUrl("DUE_DILIGENCE"),
-      icon: FolderIcon,
-    },
-  ],
-  navAdmin: [
-    {
-      title: "Admin Dashboard",
-      url: "/admin",
-      icon: ShieldIcon,
-    },
-    {
-      title: "Data Sources",
-      url: "/admin/documents",
-      icon: DatabaseIcon,
-    },
-  ],
-  navSecondary: [
-    {
-      title: "Settings",
-      url: "#",
-      icon: SettingsIcon,
-    },
-    {
-      title: "Get Help",
-      url: "#",
-      icon: HelpCircleIcon,
-    },
-  ],
-  documents: [
-    {
-      name: "Financial Reports",
-      url: "/docs",
-      icon: DatabaseIcon,
-    },
-    {
-      name: "Equipment List",
-      url: "/docs",
-      icon: FileIcon,
-    },
-    {
-      name: "Legal Documents",
-      url: "/docs",
-      icon: FileTextIcon,
-    },
-  ],
-})
+  {
+    title: "Data Sources",
+    url: "/admin/documents",
+    icon: DatabaseIcon,
+  },
+  {
+    title: "Business Metrics",
+    url: "/admin/metrics",
+    icon: BarChartIcon,
+  },
+]
 
-// Admin-specific navigation data (cleaner, focused on admin tasks)
-const getAdminNavData = (user: { name?: string; email?: string; image?: string | null }) => ({
-  user: {
-    name: user?.name || "Admin",
-    email: user?.email || "admin@example.com",
-    avatar: user?.image || "/avatars/admin.jpg",
+// Buyer-specific navigation items
+const buyerNavItems = [
+  {
+    title: "Dashboard",
+    url: "/buyer",
+    icon: LayoutDashboardIcon,
   },
-  navMain: [
-    {
-      title: "Admin Dashboard",
-      url: "/admin",
-      icon: ShieldIcon,
-    },
-    {
-      title: "Data Sources",
-      url: "/admin/documents",
-      icon: DatabaseIcon,
-    },
-    {
-      title: "Business Metrics",
-      url: "/admin/metrics",
-      icon: BarChartIcon,
-    },
-  ],
-  navSecondary: [
-    {
-      title: "Settings",
-      url: "/admin/settings",
-      icon: SettingsIcon,
-    },
-    {
-      title: "Get Help",
-      url: "#",
-      icon: HelpCircleIcon,
-    },
-  ],
-})
+  {
+    title: "Financial Analysis",
+    url: "/buyer/financials",
+    icon: BarChartIcon,
+  },
+  {
+    title: "Location Details",
+    url: "/buyer/locations",
+    icon: MapPinIcon,
+  },
+  {
+    title: "Documents",
+    url: "/buyer/documents",
+    icon: FileTextIcon,
+  },
+]
+
+// Get navigation data based on user role
+const getNavData = (user: { name?: string; email?: string; image?: string | null; role?: string } | null) => {
+  const isAuthenticated = !!user
+  const isAdmin = user?.role === 'admin'
+  const isBuyer = user?.role === 'buyer'
+  
+  let navMain = [salesPageItem]
+  let sections = []
+  
+  // Add role-specific navigation with section headers
+  if (isAdmin) {
+    // Admins can see buyer pages for oversight (shown first)
+    sections.push({
+      title: "Buyer Pages",
+      items: buyerNavItems
+    })
+    // Admin section comes last
+    sections.push({
+      title: "Admin",
+      items: adminNavItems
+    })
+  } else if (isBuyer) {
+    sections.push({
+      title: "Buyer",
+      items: buyerNavItems
+    })
+  }
+  
+  return {
+    user: isAuthenticated ? {
+      name: user?.name || "User",
+      email: user?.email || "user@example.com",
+      avatar: user?.image || "/avatars/user.jpg",
+    } : null,
+    navMain,
+    sections,
+    navSecondary: isAuthenticated ? [
+      {
+        title: "Settings",
+        url: isAdmin ? "/admin/settings" : "/settings",
+        icon: SettingsIcon,
+      },
+      {
+        title: "Get Help",
+        url: "#",
+        icon: HelpCircleIcon,
+      },
+    ] : [],
+  }
+}
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   console.log("📱 AppSidebar rendering");
   
   const { data: session } = useSession()
-  const pathname = usePathname()
   const isAuthenticated = !!session?.user
   
-  // Check if we're on an admin page (exact path segment match to prevent false positives like /administrator)
-  const isAdminPage = /^\/admin(\/|$)/.test(pathname)
-  
   console.log("🔍 Sidebar Debug:", {
-    pathname,
     isAuthenticated,
-    isAdminPage,
+    userRole: session?.user?.role,
     userEmail: session?.user?.email
   })
   
-  // Get appropriate navigation data based on auth state and page type
-  const data = isAuthenticated 
-    ? (isAdminPage ? getAdminNavData(session.user) : getAuthenticatedNavData(session.user))
-    : getPublicNavData()
+  // Get navigation data based on user role
+  const data = getNavData(session?.user || null)
 
   return (
     <Sidebar collapsible="offcanvas" {...props}>
@@ -217,31 +170,26 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         </SidebarMenu>
       </SidebarHeader>
       <SidebarContent>
-        <NavMain items={data.navMain} showRequestInfo={isAuthenticated && !isAdminPage} />
+        <NavMain items={data.navMain} showRequestInfo={isAuthenticated} />
         
-        {/* Admin section - only for authenticated users on non-admin pages */}
-        {isAuthenticated && !isAdminPage && (data as any).navAdmin && (data as any).navAdmin.length > 0 && (
-          <div className="px-2 py-2">
+        {/* Role-specific sections with headers */}
+        {data.sections && data.sections.map((section, index) => (
+          <div key={index} className="px-2 py-2">
             <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2 px-2">
-              Admin Tools
+              {section.title}
             </div>
-            <NavMain items={(data as any).navAdmin} showRequestInfo={false} />
+            <NavMain items={section.items} showRequestInfo={false} />
           </div>
-        )}
-        
-        {/* Documents section - only for authenticated users on non-admin pages */}
-        {isAuthenticated && !isAdminPage && (data as any).documents && (data as any).documents.length > 0 && (
-          <NavDocuments items={(data as any).documents} />
-        )}
+        ))}
         
         {/* Secondary navigation - for authenticated users */}
-        {isAuthenticated && (data as any).navSecondary && (data as any).navSecondary.length > 0 && (
-          <NavSecondary items={(data as any).navSecondary} className="mt-auto" />
+        {isAuthenticated && data.navSecondary && data.navSecondary.length > 0 && (
+          <NavSecondary items={data.navSecondary} className="mt-auto" />
         )}
       </SidebarContent>
       <SidebarFooter>
         {isAuthenticated ? (
-          <NavUser user={(data as any).user} />
+          <NavUser user={data.user} />
         ) : (
           <SidebarMenu>
             <SidebarMenuItem>

@@ -69,31 +69,9 @@ export function SectionCards({ data }: SectionCardsProps) {
       </Card>
       <Card className="@container/card bg-gradient-to-t from-primary/5 to-card shadow-xs">
         <CardHeader>
-          <CardDescription>Cash Flow (EBITDA)</CardDescription>
+          <CardDescription>Annual Revenue</CardDescription>
           <CardTitle className="text-2xl font-semibold tabular-nums @[250px]/card:text-3xl">
-            {data ? formatCurrency(data.businessMetrics.annualEbitda) : "$260,403"}
-          </CardTitle>
-          <CardAction>
-            <Badge variant="outline" className="text-xs">
-              <IconTrendingUp className="h-3 w-3 mr-1" />
-              Strong
-            </Badge>
-          </CardAction>
-        </CardHeader>
-        <CardFooter className="flex-col items-start gap-1.5 text-sm">
-          <div className="line-clamp-1 flex gap-2 font-medium">
-            Consistent cash flow <IconShield className="size-4" />
-          </div>
-          <div className="text-muted-foreground">
-            Insurance-based revenue
-          </div>
-        </CardFooter>
-      </Card>
-      <Card className="@container/card bg-gradient-to-t from-primary/5 to-card shadow-xs">
-        <CardHeader>
-          <CardDescription>Gross Revenue</CardDescription>
-          <CardTitle className="text-2xl font-semibold tabular-nums @[250px]/card:text-3xl">
-            {data ? formatCurrency(data.businessMetrics.annualRevenue) : "$932,533"}
+            {data ? formatCurrency(data.businessMetrics.annualRevenue) : "$2,470,115"}
           </CardTitle>
           <CardAction>
             <Badge variant="outline" className="text-xs">
@@ -104,29 +82,51 @@ export function SectionCards({ data }: SectionCardsProps) {
         </CardHeader>
         <CardFooter className="flex-col items-start gap-1.5 text-sm">
           <div className="line-clamp-1 flex gap-2 font-medium">
-            Annual revenue <IconBuilding className="size-4" />
+            Total revenue <IconBuilding className="size-4" />
           </div>
           <div className="text-muted-foreground">30-month track record</div>
         </CardFooter>
       </Card>
       <Card className="@container/card bg-gradient-to-t from-primary/5 to-card shadow-xs">
         <CardHeader>
-          <CardDescription>EBITDA</CardDescription>
+          <CardDescription>Cash Flow (EBIT)</CardDescription>
           <CardTitle className="text-2xl font-semibold tabular-nums @[250px]/card:text-3xl">
-            {data ? formatCurrency(data.businessMetrics.annualEbitda) : "$260,403"}
+            {data ? formatCurrency(data.businessMetrics.annualEbitda) : "$664,245"}
           </CardTitle>
           <CardAction>
             <Badge variant="outline" className="text-xs">
               <IconTrendingUp className="h-3 w-3 mr-1" />
-              {data ? formatPercentage(data.businessMetrics.ebitdaMargin) : "27.9%"}
+              {data ? formatPercentage(data.businessMetrics.ebitdaMargin) : "26.9%"}
             </Badge>
           </CardAction>
         </CardHeader>
         <CardFooter className="flex-col items-start gap-1.5 text-sm">
           <div className="line-clamp-1 flex gap-2 font-medium">
-            Strong profitability <IconTarget className="size-4" />
+            Consistent cash flow <IconShield className="size-4" />
           </div>
-          <div className="text-muted-foreground">Industry-leading margins</div>
+          <div className="text-muted-foreground">
+            Before interest, taxes, depreciation
+          </div>
+        </CardFooter>
+      </Card>
+      <Card className="@container/card bg-gradient-to-t from-primary/5 to-card shadow-xs">
+        <CardHeader>
+          <CardDescription>Equipment Value</CardDescription>
+          <CardTitle className="text-2xl font-semibold tabular-nums @[250px]/card:text-3xl">
+            $61,728
+          </CardTitle>
+          <CardAction>
+            <Badge variant="outline" className="text-xs">
+              <IconTrendingUp className="h-3 w-3 mr-1" />
+              Included
+            </Badge>
+          </CardAction>
+        </CardHeader>
+        <CardFooter className="flex-col items-start gap-1.5 text-sm">
+          <div className="line-clamp-1 flex gap-2 font-medium">
+            Professional equipment <IconPackage className="size-4" />
+          </div>
+          <div className="text-muted-foreground">State-of-the-art audiometers & tools</div>
         </CardFooter>
       </Card>
     </div>

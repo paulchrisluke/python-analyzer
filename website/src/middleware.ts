@@ -116,12 +116,12 @@ export async function middleware(request: NextRequest) {
       return NextResponse.redirect(unauthorizedUrl)
     }
 
-    // Check buyer-only routes
+    // Check buyer-only routes (admins can also access buyer routes for oversight)
     const isBuyerOnlyRoute = buyerOnlyRoutes.some(route => 
       matchesRoute(pathname, route)
     )
     
-    if (isBuyerOnlyRoute && userRole !== 'buyer') {
+    if (isBuyerOnlyRoute && userRole !== 'buyer' && userRole !== 'admin') {
       // Redirect to unauthorized page or admin dashboard
       const unauthorizedUrl = new URL('/unauthorized', request.url)
       return NextResponse.redirect(unauthorizedUrl)
