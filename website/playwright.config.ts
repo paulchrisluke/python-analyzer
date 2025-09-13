@@ -33,8 +33,8 @@ export default defineConfig({
     command: 'npm run dev',
     port: 3000,
     reuseExistingServer: !process.env.CI,
-    env: {
-      ...process.env,
-    },
+    env: Object.fromEntries(
+      Object.entries(process.env).filter(([_, value]) => value !== undefined)
+    ) as Record<string, string>,
   },
 });

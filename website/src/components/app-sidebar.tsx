@@ -188,7 +188,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         )}
       </SidebarContent>
       <SidebarFooter>
-        {isAuthenticated ? (
+        {isAuthenticated && data.user ? (
           <NavUser user={data.user} />
         ) : (
           <SidebarMenu>

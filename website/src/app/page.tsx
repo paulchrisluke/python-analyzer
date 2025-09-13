@@ -80,6 +80,35 @@ const staticBusinessData = {
       "Tinnitus Management",
       "Custom Ear Protection"
     ],
+    insurance_coverage: {
+      total_insurers: 2,
+      insurers: [
+        {
+          name: "State Farm Insurance",
+          years_active: 5,
+          contract_date: "2019-01-01",
+          status: "Active",
+          coverage_type: "General Liability"
+        },
+        {
+          name: "Medical Professional Insurance",
+          years_active: 3,
+          contract_date: "2021-01-01", 
+          status: "Active",
+          coverage_type: "Professional Liability"
+        }
+      ],
+      total_years_coverage: 8,
+      average_years_per_insurer: 4,
+      coverage_stability_score: 0.85
+    },
+    payment_methods: [
+      "Cash",
+      "Check", 
+      "Credit Card",
+      "Insurance",
+      "Financing Available"
+    ],
     equipment_value: "61728",
     business_hours: "Monday-Friday 8AM-5PM",
   },

@@ -22,8 +22,8 @@ interface RevenueData {
 
 export function useRevenueData() {
   const [data, setData] = useState<RevenueData>({
-    revenue: null,
-    ebitda: null,
+    revenue: undefined,
+    ebitda: undefined,
     loading: true,
     error: undefined
   })
