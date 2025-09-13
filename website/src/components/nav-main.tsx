@@ -13,6 +13,7 @@ import {
 
 export function NavMain({
   items,
+  showRequestInfo = false,
 }: {
   items: {
     title: string
@@ -20,29 +21,32 @@ export function NavMain({
     icon?: LucideIcon
     id?: string
   }[]
+  showRequestInfo?: boolean
 }) {
   return (
     <SidebarGroup>
       <SidebarGroupContent className="flex flex-col gap-2">
-        <SidebarMenu>
-          <SidebarMenuItem className="flex items-center gap-2">
-            <SidebarMenuButton
-              tooltip="Request Info"
-              className="min-w-8 bg-primary text-primary-foreground duration-200 ease-linear hover:bg-primary/90 hover:text-primary-foreground active:bg-primary/90 active:text-primary-foreground"
-            >
-              <PlusCircleIcon />
-              <span>Request Info</span>
-            </SidebarMenuButton>
-            <Button
-              size="icon"
-              className="h-9 w-9 shrink-0 group-data-[collapsible=icon]:opacity-0"
-              variant="outline"
-            >
-              <MailIcon />
-              <span className="sr-only">Inbox</span>
-            </Button>
-          </SidebarMenuItem>
-        </SidebarMenu>
+        {showRequestInfo && (
+          <SidebarMenu>
+            <SidebarMenuItem className="flex items-center gap-2">
+              <SidebarMenuButton
+                tooltip="Request Info"
+                className="min-w-8 bg-primary text-primary-foreground duration-200 ease-linear hover:bg-primary/90 hover:text-primary-foreground active:bg-primary/90 active:text-primary-foreground"
+              >
+                <PlusCircleIcon />
+                <span>Request Info</span>
+              </SidebarMenuButton>
+              <Button
+                size="icon"
+                className="h-9 w-9 shrink-0 group-data-[collapsible=icon]:opacity-0"
+                variant="outline"
+              >
+                <MailIcon />
+                <span className="sr-only">Inbox</span>
+              </Button>
+            </SidebarMenuItem>
+          </SidebarMenu>
+        )}
         <SidebarMenu>
           {items.map((item) => (
             <SidebarMenuItem key={item.url || item.id}>

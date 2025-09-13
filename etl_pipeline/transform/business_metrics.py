@@ -474,13 +474,10 @@ class BusinessMetricsCalculator:
             monthly_revenue_avg = 0.0
             logger.warning("No revenue data available from P&L or sales data")
         
-        # Calculate revenue metrics (consolidated logic)
-        financial_metrics['revenue_metrics'] = {
-            'total_revenue': total_revenue,
-            'annual_revenue_projection': safe_currency_multiplication(monthly_revenue_avg, 12) if monthly_revenue_avg > 0 else 0.0,
-            'monthly_revenue_average': monthly_revenue_avg,
-            'analysis_period_months': months_in_period
-        }
+        # Calculate revenue metrics with lineage tracking
+        financial_metrics['revenue_metrics'] = self._calculate_revenue_metrics_with_lineage(
+            total_revenue, monthly_revenue_avg, months_in_period
+        )
         
         # Add analysis period dates for json_loader
         if analysis_period:
@@ -489,42 +486,199 @@ class BusinessMetricsCalculator:
         
         logger.info(f"Final revenue metrics: {financial_metrics['revenue_metrics']}")
         
-        # EBITDA calculation - use real data if available, otherwise use margin
-        if real_ebitda is not None:
-            # Real EBITDA is monthly, so calculate monthly revenue average for consistent units
-            monthly_revenue_avg = total_revenue / months_in_period if months_in_period > 0 else 0
-            ebitda_margin = real_ebitda / monthly_revenue_avg if monthly_revenue_avg > 0 else 0
-            estimated_ebitda = real_ebitda  # Keep as monthly for consistency
-            logger.info(f"Using real EBITDA from financial data: ${estimated_ebitda:,.2f} monthly")
-            logger.info(f"Monthly revenue average: ${monthly_revenue_avg:,.2f}, EBITDA margin: {ebitda_margin:.1%}")
+        # Calculate EBITDA metrics with lineage tracking
+        profitability_metrics = self._calculate_ebitda_metrics_with_lineage(
+            real_ebitda, total_revenue, months_in_period
+        )
+        financial_metrics['profitability'] = profitability_metrics
+        
+        # Calculate ROI and payback metrics with lineage tracking
+        investment_metrics = self._calculate_investment_metrics_with_lineage(profitability_metrics)
+        financial_metrics['investment_metrics'] = investment_metrics
+        
+        return financial_metrics
+    
+    def _calculate_revenue_metrics_with_lineage(self, total_revenue: float, monthly_revenue_avg: float, months_in_period: int) -> Dict[str, Any]:
+        """Calculate revenue metrics with detailed lineage tracking."""
+        # Start tracking annual revenue projection calculation
+        self.lineage_tracker.start_calculation(
+            "annual_revenue_projection",
+            "Calculate annual revenue projection from monthly average"
+        )
+        
+        # Log input values
+        self.lineage_tracker.add_step("input", "total_revenue", total_revenue, "Total revenue from analysis period")
+        self.lineage_tracker.add_step("input", "monthly_revenue_average", monthly_revenue_avg, "Average monthly revenue")
+        self.lineage_tracker.add_step("input", "months_in_period", months_in_period, "Number of months in analysis period")
+        
+        # Calculate annual revenue projection
+        if monthly_revenue_avg > 0:
+            annual_revenue_projection = safe_currency_multiplication(monthly_revenue_avg, 12)
+            self.lineage_tracker.add_annualize_step(
+                "monthly_revenue_average",
+                annual_revenue_projection,
+                factor=12,
+                description="Annualize monthly revenue average (monthly_avg * 12)"
+            )
         else:
+            annual_revenue_projection = 0.0
+            self.lineage_tracker.add_step("fallback", "annual_revenue_projection", 0.0, "No revenue data available, using 0")
+        
+        # Finish calculation
+        self.lineage_tracker.finish_calculation(annual_revenue_projection)
+        
+        logger.info(f"Annual revenue projection calculated with lineage: ${annual_revenue_projection:,.2f}")
+        
+        return {
+            'total_revenue': total_revenue,
+            'annual_revenue_projection': annual_revenue_projection,
+            'monthly_revenue_average': monthly_revenue_avg,
+            'analysis_period_months': months_in_period
+        }
+    
+    def _calculate_ebitda_metrics_with_lineage(self, real_ebitda: Optional[float], total_revenue: float, months_in_period: int) -> Dict[str, Any]:
+        """Calculate EBITDA metrics with detailed lineage tracking."""
+        # Start tracking EBITDA margin calculation
+        self.lineage_tracker.start_calculation(
+            "ebitda_margin",
+            "Calculate EBITDA margin from financial data"
+        )
+        
+        # Calculate monthly revenue average for consistent units
+        monthly_revenue_avg = total_revenue / months_in_period if months_in_period > 0 else 0
+        self.lineage_tracker.add_divide_step(
+            "total_revenue",
+            monthly_revenue_avg,
+            divisor=months_in_period,
+            description="Calculate monthly revenue average from total revenue"
+        )
+        
+        if real_ebitda is not None:
+            # Use real EBITDA from financial data
+            estimated_ebitda = real_ebitda
+            ebitda_margin = real_ebitda / monthly_revenue_avg if monthly_revenue_avg > 0 else 0
+            
+            self.lineage_tracker.add_step("input", "real_ebitda", real_ebitda, "Real EBITDA from financial data")
+            self.lineage_tracker.add_divide_step(
+                "real_ebitda",
+                ebitda_margin,
+                divisor=monthly_revenue_avg,
+                description="Calculate EBITDA margin (real_ebitda / monthly_revenue_avg)"
+            )
+            
+            logger.info(f"Using real EBITDA from financial data: ${estimated_ebitda:,.2f} monthly")
+        else:
+            # Use estimated EBITDA with margin from business rules
             ebitda_margin = self.business_rules.get('financial_metrics', {}).get('ebitda_margin_target', 0.25)
-            monthly_revenue_avg = total_revenue / months_in_period if months_in_period > 0 else 0
             estimated_ebitda = safe_currency_multiplication(monthly_revenue_avg, ebitda_margin)
+            
+            self.lineage_tracker.add_step("input", "ebitda_margin_target", ebitda_margin, "EBITDA margin from business rules")
+            self.lineage_tracker.add_multiply_step(
+                "monthly_revenue_avg",
+                estimated_ebitda,
+                factor=ebitda_margin,
+                description="Calculate estimated EBITDA (monthly_revenue_avg * ebitda_margin)"
+            )
+            
             logger.info(f"Using estimated EBITDA with {ebitda_margin:.1%} margin: ${estimated_ebitda:,.2f} monthly")
+        
+        # Finish EBITDA margin calculation
+        self.lineage_tracker.finish_calculation(round(ebitda_margin * 100, 2))
+        
+        # Start tracking annual EBITDA calculation
+        self.lineage_tracker.start_calculation(
+            "estimated_annual_ebitda",
+            "Calculate estimated annual EBITDA"
+        )
         
         # Calculate annual EBITDA projection
         annual_ebitda = safe_currency_multiplication(estimated_ebitda, 12)
+        self.lineage_tracker.add_annualize_step(
+            "estimated_ebitda",
+            annual_ebitda,
+            factor=12,
+            description="Annualize monthly EBITDA (monthly_ebitda * 12)"
+        )
         
-        financial_metrics['profitability'] = {
+        # Finish annual EBITDA calculation
+        self.lineage_tracker.finish_calculation(annual_ebitda)
+        
+        logger.info(f"EBITDA metrics calculated with lineage: margin={ebitda_margin:.1%}, annual=${annual_ebitda:,.2f}")
+        
+        return {
             'estimated_ebitda': estimated_ebitda,
             'ebitda_margin': round(ebitda_margin * 100, 2),  # Round to 2 decimal places
             'estimated_annual_ebitda': annual_ebitda
         }
+    
+    def _calculate_investment_metrics_with_lineage(self, profitability_metrics: Dict[str, Any]) -> Dict[str, Any]:
+        """Calculate ROI and payback period metrics with detailed lineage tracking."""
+        # Start tracking ROI calculation
+        self.lineage_tracker.start_calculation(
+            "roi_percentage",
+            "Calculate ROI percentage from annual EBITDA and asking price"
+        )
         
-        # ROI calculation - use consistent asking price
+        # Get asking price
         asking_price = self._parse_asking_price()
-        roi = (annual_ebitda / asking_price) * 100 if asking_price > 0 else 0
-        payback_years = asking_price / annual_ebitda if annual_ebitda > 0 else 0
+        self.lineage_tracker.add_step("input", "asking_price", asking_price, "Asking price from business rules")
         
-        financial_metrics['investment_metrics'] = {
+        # Get annual EBITDA
+        annual_ebitda = profitability_metrics.get('estimated_annual_ebitda', 0)
+        self.lineage_tracker.add_step("input", "estimated_annual_ebitda", annual_ebitda, "Annual EBITDA from profitability metrics")
+        
+        # Calculate ROI percentage
+        if asking_price > 0:
+            roi = (annual_ebitda / asking_price) * 100
+            self.lineage_tracker.add_divide_step(
+                "estimated_annual_ebitda",
+                roi,
+                divisor=asking_price,
+                description="Calculate ROI ratio (annual_ebitda / asking_price)"
+            )
+            self.lineage_tracker.add_multiply_step(
+                "roi_ratio",
+                roi,
+                factor=100,
+                description="Convert ROI ratio to percentage (roi_ratio * 100)"
+            )
+        else:
+            roi = 0
+            self.lineage_tracker.add_step("fallback", "roi_percentage", 0, "Asking price is 0, ROI set to 0")
+        
+        # Finish ROI calculation
+        self.lineage_tracker.finish_calculation(round(roi, 2))
+        
+        # Start tracking payback period calculation
+        self.lineage_tracker.start_calculation(
+            "payback_period_years",
+            "Calculate payback period in years"
+        )
+        
+        # Calculate payback period
+        if annual_ebitda > 0:
+            payback_years = asking_price / annual_ebitda
+            self.lineage_tracker.add_divide_step(
+                "asking_price",
+                payback_years,
+                divisor=annual_ebitda,
+                description="Calculate payback period (asking_price / annual_ebitda)"
+            )
+        else:
+            payback_years = 0
+            self.lineage_tracker.add_step("fallback", "payback_period_years", 0, "Annual EBITDA is 0, payback period set to 0")
+        
+        # Finish payback period calculation
+        self.lineage_tracker.finish_calculation(round(payback_years, 1))
+        
+        logger.info(f"Investment metrics calculated with lineage: ROI={roi:.2f}%, Payback={payback_years:.1f} years")
+        
+        return {
             'asking_price': asking_price,  # Single source of truth
             'estimated_annual_ebitda': annual_ebitda,
             'roi_percentage': round(roi, 2),  # Round to 2 decimal places
             'payback_period_years': round(payback_years, 1)  # Round to 1 decimal place, clearly in years
         }
-        
-        return financial_metrics
     
     def _calculate_operational_metrics(self, normalized_data: Dict[str, Any]) -> Dict[str, Any]:
         """Calculate operational metrics."""
@@ -1152,61 +1306,6 @@ class BusinessMetricsCalculator:
         """Clear calculation lineage history."""
         self.lineage_tracker.clear_calculations()
     
-    def _calculate_annual_projection(self, sales_metrics: Dict[str, Any]) -> float:
-        """Calculate annual revenue projection based on configurable date range."""
-        # Start tracking this calculation
-        self.lineage_tracker.start_calculation(
-            "annual_revenue_projection",
-            "Calculate annual revenue projection from sales data"
-        )
-        
-        # Get the monthly average from the analysis period
-        monthly_average = sales_metrics.get('average_transaction_value', 0)
-        total_revenue = sales_metrics.get('total_revenue', 0)
-        total_transactions = sales_metrics.get('total_transactions', 0)
-        
-        # Log input values
-        self.lineage_tracker.add_step("input", "total_revenue", total_revenue, "Total revenue from sales data")
-        self.lineage_tracker.add_step("input", "total_transactions", total_transactions, "Total number of transactions")
-        
-        # Calculate monthly revenue average (not transaction average)
-        analysis_period = self.business_rules.get('analysis_period', {})
-        if analysis_period:
-            start_date = pd.to_datetime(analysis_period.get('start_date', '2021-01-01'))
-            end_date = pd.to_datetime(analysis_period.get('end_date', '2025-12-31'))
-            months_in_period = ((end_date.year - start_date.year) * 12 + 
-                              (end_date.month - start_date.month) + 1)
-        else:
-            months_in_period = 12  # Default fallback changed from 30 to 12
-        
-        self.lineage_tracker.add_step("input", "months_in_period", months_in_period, "Number of months in analysis period")
-        
-        # Calculate monthly revenue average from total revenue and months
-        monthly_revenue_average = safe_currency_division(total_revenue, months_in_period)
-        
-        self.lineage_tracker.add_divide_step(
-            "total_revenue", 
-            monthly_revenue_average, 
-            divisor=months_in_period,
-            description="Calculate monthly revenue average"
-        )
-        
-        # Annual projection = monthly average * 12
-        annual_projection = safe_currency_multiplication(monthly_revenue_average, 12)
-        
-        self.lineage_tracker.add_annualize_step(
-            "monthly_revenue_average",
-            annual_projection,
-            factor=12,
-            description="Annualize monthly revenue average"
-        )
-        
-        # Finish calculation and log result
-        self.lineage_tracker.finish_calculation(annual_projection)
-        
-        logger.info(f"Annual projection calculation: ${monthly_revenue_average:,.2f} monthly avg * 12 = ${annual_projection:,.2f}")
-        
-        return annual_projection
     
     def _calculate_patient_retention(self, df: pd.DataFrame) -> float:
         """Calculate patient retention rate."""
@@ -1272,7 +1371,13 @@ class BusinessMetricsCalculator:
             return 1.0  # Default to no adjustment
     
     def _calculate_equipment_metrics(self) -> Dict[str, Any]:
-        """Calculate equipment metrics dynamically from CSV files."""
+        """Calculate equipment metrics dynamically from CSV files with lineage tracking."""
+        # Start tracking equipment value calculation
+        self.lineage_tracker.start_calculation(
+            "equipment_value",
+            "Calculate total equipment value from CSV files"
+        )
+        
         try:
             # Import here to avoid circular imports
             from ..utils.equipment_calculator import get_equipment_metrics
@@ -1280,16 +1385,52 @@ class BusinessMetricsCalculator:
             # Calculate equipment value from CSV files
             equipment_metrics = get_equipment_metrics()
             
-            logger.info(f"Equipment value calculated from CSV files: ${equipment_metrics['total_value']:,.2f}")
-            logger.info(f"Equipment items: {len(equipment_metrics['items'])}")
+            # Track equipment items and total value
+            items = equipment_metrics.get('items', [])
+            total_value = equipment_metrics.get('total_value', 0)
+            
+            self.lineage_tracker.add_step("input", "equipment_items_count", len(items), "Number of equipment items from CSV files")
+            self.lineage_tracker.add_step("input", "equipment_source", "CSV files", "Equipment data source")
+            
+            # Calculate total value from individual items
+            calculated_total = 0.0
+            for i, item in enumerate(items):
+                if isinstance(item, dict):
+                    item_value = item.get('total_price', 0)
+                    if isinstance(item_value, dict):
+                        item_value = item_value.get('amount', 0)
+                    calculated_total += float(item_value)
+                    
+                    # Log first few items for traceability
+                    if i < 5:  # Log first 5 items
+                        self.lineage_tracker.add_step("item", f"equipment_item_{i+1}", item_value, f"Equipment item: {item.get('name', 'Unknown')}")
+            
+            # Log remaining items count
+            if len(items) > 5:
+                self.lineage_tracker.add_step("summary", "remaining_items", len(items) - 5, f"Additional {len(items) - 5} equipment items")
+            
+            # Track total calculation
+            self.lineage_tracker.add_sum_step(
+                "equipment_items_total",
+                calculated_total,
+                "Sum of all equipment item values"
+            )
+            
+            logger.info(f"Equipment value calculated from CSV files: ${total_value:,.2f}")
+            logger.info(f"Equipment items: {len(items)}")
             
         except Exception as e:
             logger.error(f"Error calculating equipment metrics from CSV files: {e}")
             
             # Fallback to business rules if CSV calculation fails
             equipment_config = self.business_rules.get('equipment', {})
+            fallback_value = equipment_config.get('total_value', 0)
+            
+            self.lineage_tracker.add_step("fallback", "equipment_source", "Business rules", "CSV calculation failed, using business rules fallback")
+            self.lineage_tracker.add_step("input", "fallback_equipment_value", fallback_value, "Equipment value from business rules")
+            
             equipment_metrics = {
-                'total_value': equipment_config.get('total_value', 0),
+                'total_value': fallback_value,
                 'description': equipment_config.get('description', 'No equipment data available'),
                 'source': 'Fallback from business rules',
                 'items': [],
@@ -1297,6 +1438,12 @@ class BusinessMetricsCalculator:
             }
             
             logger.warning("Using fallback equipment value from business rules")
+        
+        # Finish equipment value calculation
+        final_value = equipment_metrics.get('total_value', 0)
+        self.lineage_tracker.finish_calculation(final_value)
+        
+        logger.info(f"Equipment metrics calculated with lineage: ${final_value:,.2f}")
         
         return equipment_metrics
     

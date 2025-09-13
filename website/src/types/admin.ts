@@ -17,6 +17,33 @@ export interface BusinessSaleData {
     data_source: string;
     analysis_period: string;
   };
+  traceability?: {
+    field_mappings: {
+      field_mappings: {
+        sales_mappings: Record<string, string>;
+        financial_mappings: Record<string, string>;
+        equipment_mappings: Record<string, string>;
+      };
+    };
+    document_registry?: {
+      documents: Array<{
+        name: string;
+        category: string;
+        file_type: string;
+        file_path: string;
+        file_size: string;
+        file_size_bytes: number;
+        last_modified: string;
+        created_date: string;
+        file_hash: string;
+        status: boolean;
+        expected: boolean;
+        notes: string | null;
+        registered_at: string;
+      }>;
+    };
+    documents: DocumentItem[];
+  };
   sales: {
     total_transactions: number;
     total_revenue: Money;
@@ -64,6 +91,51 @@ export interface BusinessSaleData {
 }
 
 export interface DueDiligenceCoverage {
+  metadata?: {
+    analysis_timestamp: string;
+    analyzer_version: string;
+    total_documents_analyzed: number;
+  };
+  base_coverage?: {
+    sales: {
+      status: string;
+      completeness_score: number;
+      missing_periods: string[];
+      data_quality_issues: string[];
+      coverage_details: Record<string, any>;
+      fallback_strategies: string[];
+    };
+    financial: {
+      status: string;
+      completeness_score: number;
+      missing_documents: string[];
+      data_quality_issues: string[];
+      coverage_details: {
+        found_documents: string[];
+        missing_documents: string[];
+        total_expected: number;
+        found_count: number;
+      };
+      fallback_strategies: string[];
+      coverage_percentage: number;
+    };
+    equipment: {
+      status: string;
+      completeness_score: number;
+      missing_documents: string[];
+      data_quality_issues: string[];
+      coverage_details: {
+        equipment_count: number;
+        total_value: number;
+        categories_found: string[];
+        categories_missing: string[];
+        // Backward compatibility
+        found_categories?: string[];
+        missing_categories?: string[];
+      };
+      fallback_strategies: string[];
+    };
+  };
   etl_run_timestamp: string;
   sales: {
     status: string;
