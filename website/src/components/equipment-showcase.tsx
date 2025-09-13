@@ -1,4 +1,5 @@
-import { EquipmentCategory, formatCurrency } from "@/lib/etl-data";
+import { EquipmentCategory } from "@/lib/etl-data";
+import { formatCurrency } from "@/lib/format";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Wrench, MapPin } from "lucide-react";
 

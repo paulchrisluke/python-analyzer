@@ -5,6 +5,7 @@
 import 'server-only'
 import landingPageData from '../data/landing_page_data.json';
 import equipmentAnalysis from '../data/equipment_analysis.json';
+import { formatCurrency } from './format';
 
 export interface BusinessMetrics {
   annualRevenue: number;
@@ -107,15 +108,6 @@ export async function loadETLData() {
   }
 }
 
-// Format currency values
-export function formatCurrency(amount: number): string {
-  return new Intl.NumberFormat('en-US', {
-    style: 'currency',
-    currency: 'USD',
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0,
-  }).format(amount);
-}
 
 // Format percentage values
 export function formatPercentage(value: number): string {
