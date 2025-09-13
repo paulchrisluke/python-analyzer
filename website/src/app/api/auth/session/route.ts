@@ -45,37 +45,50 @@ export async function GET(request: NextRequest) {
       // Validate email is a non-empty string
       if (typeof email !== 'string' || email.trim() === '') {
         console.error('Invalid email in JWT payload:', email)
-        return NextResponse.json({ user: null }, { 
+        const response = NextResponse.json({ user: null }, { 
           status: 200,
           headers: {
             'Cache-Control': 'no-store',
             'Vary': 'Cookie'
           }
         })
+        response.cookies.delete('cranberry-auth-session')
+        return response
       }
 
       // Validate name is a non-empty string
       if (typeof name !== 'string' || name.trim() === '') {
         console.error('Invalid name in JWT payload:', name)
-        return NextResponse.json({ user: null }, { 
+        const response = NextResponse.json({ user: null }, { 
           status: 200,
           headers: {
             'Cache-Control': 'no-store',
             'Vary': 'Cookie'
           }
         })
+        response.cookies.delete('cranberry-auth-session')
+        return response
       }
 
       // Validate role is either 'admin' or 'buyer'
       if (role !== 'admin' && role !== 'buyer') {
         console.error('Invalid role in JWT payload:', role)
-        return NextResponse.json({ user: null }, { 
+        const response = NextResponse.json({ user: null }, { 
           status: 200,
           headers: {
             'Cache-Control': 'no-store',
             'Vary': 'Cookie'
           }
         })
+        // Clear the HttpOnly cookie by setting it to expire immediately
+        response.cookies.set('cranberry-auth-session', '', {
+          httpOnly: true,
+          secure: process.env.NODE_ENV === 'production',
+          sameSite: 'lax',
+          maxAge: 0, // Expire immediately
+          path: '/'
+        })
+        return response
       }
 
       // Extract user information from the validated JWT payload

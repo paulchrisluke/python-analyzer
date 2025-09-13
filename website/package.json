@@ -15,8 +15,8 @@
     "test:ui": "playwright test --ui",
     "test:headed": "playwright test --headed",
     "test:ci": "playwright test --reporter=github",
-    "test:auth": "playwright test tests/auth.spec.ts",
-    "test:auth:full": "playwright test tests/auth.spec.ts tests/auth-authenticated.spec.ts"
+    "test:auth": "playwright test tests/simple-auth.spec.ts",
+    "test:auth:full": "playwright test tests/simple-auth.spec.ts"
   },
   "keywords": [
     "nextjs",
@@ -51,7 +51,6 @@
     "@radix-ui/react-tooltip": "^1.2.8",
     "@tabler/icons-react": "^3.34.1",
     "@tanstack/react-table": "^8.21.3",
-    "@types/bcrypt": "^6.0.0",
     "@types/dompurify": "^3.0.5",
     "bcrypt": "^6.0.0",
     "class-variance-authority": "^0.7.1",
@@ -72,6 +71,7 @@
   },
   "devDependencies": {
     "@playwright/test": "^1.55.0",
+    "@types/bcrypt": "^6.0.0",
     "@types/node": "^20.0.0",
     "@types/react": "19.1.12",
     "autoprefixer": "^10.0.1",

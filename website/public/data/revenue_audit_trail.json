@@ -1,6 +1,6 @@
 {
   "pipeline_run": {
-    "timestamp": "2025-09-13T18:04:50.471481",
+    "timestamp": "2025-09-13T20:05:56.011570",
     "purpose": "Calculate total Pennsylvania revenue for business sale",
     "business_rules": {
       "include_locations": [

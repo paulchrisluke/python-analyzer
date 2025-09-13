@@ -139,19 +139,15 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     }
   }
 
-  const signOut = async () => {
-    try {
-      // Clear the HttpOnly cookie by calling a logout endpoint
-      await fetch('/api/auth/logout', {
-        method: 'POST',
-        credentials: 'include',
-      })
-    } catch (error) {
-      console.error('Error during logout:', error)
-    } finally {
-      // Clear local state regardless of server response
-      setUser(null)
-    }
+  const signOut = () => {
+    // Clear the HttpOnly cookie by calling a logout endpoint
+    fetch('/api/auth/logout', {
+      method: 'POST',
+      credentials: 'include',
+    }).catch(error => console.error('Error during logout:', error))
+    
+    // Clear local state immediately
+    setUser(null)
   }
 
   return (

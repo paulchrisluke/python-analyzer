@@ -38,8 +38,13 @@ async function getUserRole(req: NextRequest): Promise<string | null> {
     // Single DEV_AUTH_ROLE variable: if set in development, use it; if not set, use normal auth
     if (process.env.NODE_ENV !== 'production' && process.env.DEV_AUTH_ROLE) {
       const devRole = process.env.DEV_AUTH_ROLE.trim()
-      // Validate role against known roles, fallback to 'admin' if invalid
-      return VALID_ROLES.includes(devRole as any) ? devRole : 'admin'
+      // Validate role against known roles - fail fast on invalid values
+      if (VALID_ROLES.includes(devRole as any)) {
+        return devRole
+      } else {
+        console.error(`Invalid DEV_AUTH_ROLE: "${devRole}". Valid roles are: ${VALID_ROLES.join(', ')}`)
+        return null // Return null instead of defaulting to admin to prevent privilege escalation
+      }
     }
 
     const authSecret = process.env.AUTH_SECRET?.trim()
