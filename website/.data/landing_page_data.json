@@ -18,18 +18,18 @@
       "status": "available"
     },
     "annual_ebitda": {
-      "value": 13453.8,
+      "value": 260403.12,
       "currency": "USD",
       "status": "available"
     },
     "monthly_cash_flow": {
-      "value": 1121.15,
+      "value": 21700.26,
       "currency": "USD",
       "status": "available"
     },
-    "roi": 2.07,
-    "payback_period_years": 48.3,
-    "ebitda_margin": 1.44
+    "roi": 40.06,
+    "payback_period_years": 2.5,
+    "ebitda_margin": 27.92
   },
   "property_details": {
     "primary_location": {
@@ -134,8 +134,8 @@
     "Strong EBITDA margins"
   ],
   "metadata": {
-    "generated_at": "2025-09-13T04:38:36.732Z",
-    "etl_run_timestamp": "2025-09-13T04:38:36.732Z",
+    "generated_at": "2025-09-13T04:47:16.937Z",
+    "etl_run_timestamp": "2025-09-13T04:47:16.937Z",
     "data_source": "ETL Pipeline Analysis",
     "version": "1.0"
   }

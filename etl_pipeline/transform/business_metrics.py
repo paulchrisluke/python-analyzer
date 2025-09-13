@@ -826,68 +826,8 @@ class BusinessMetricsCalculator:
                 self.lineage_tracker.finish_calculation(0)
                 return None
             
-            # Since P&L data is company-wide but we only want sale locations,
-            # we'll calculate EBITDA based on actual sales revenue with a reasonable margin
-            sales_data = normalized_data.get('sales', {})
-            if 'main_sales' in sales_data:
-                df = sales_data['main_sales'].copy()
-                
-                # Calculate monthly revenue from sales data (already filtered to sale locations)
-                df['sale_date'] = pd.to_datetime(df['sale_date'])
-                monthly_revenue = df.groupby(df['sale_date'].dt.to_period('M'))['total_price'].sum()
-                
-                if len(monthly_revenue) > 0:
-                    avg_monthly_revenue = round_currency(monthly_revenue.mean())
-                    logger.info(f"Average monthly revenue from sales data: ${avg_monthly_revenue:,.2f}")
-                    
-                    # Track file-level contribution for sales data
-                    total_sales_revenue = df['total_price'].sum()
-                    self.lineage_tracker.add_file_contribution(
-                        file_name="sales_transactions.csv",
-                        field_name="total_price",
-                        raw_value=total_sales_revenue,
-                        normalized_value=avg_monthly_revenue,
-                        description="Sales transaction aggregation by month"
-                    )
-                    
-                    # Log the revenue calculation step
-                    self.lineage_tracker.add_step("aggregate", "total_price", avg_monthly_revenue, 
-                                                "Calculate average monthly revenue from sales data")
-                    
-                    # Use the EBITDA margin from business rules (website shows 25.6%)
-                    ebitda_margin = self.business_rules.get('financial_metrics', {}).get('ebitda_margin_target', 0.256)
-                    calculated_monthly_ebitda = safe_currency_multiplication(avg_monthly_revenue, ebitda_margin)
-                    
-                    # Track file-level contribution for EBITDA calculation
-                    self.lineage_tracker.add_file_contribution(
-                        file_name="sales_transactions.csv",
-                        field_name="total_price",
-                        raw_value=avg_monthly_revenue,
-                        normalized_value=calculated_monthly_ebitda,
-                        description=f"EBITDA calculation from sales data using {ebitda_margin:.1%} margin"
-                    )
-                    
-                    # Log the EBITDA calculation step
-                    self.lineage_tracker.add_multiply_step(
-                        "avg_monthly_revenue", 
-                        calculated_monthly_ebitda, 
-                        factor=ebitda_margin,
-                        description=f"Apply EBITDA margin of {ebitda_margin:.1%}"
-                    )
-                    
-                    logger.info(f"Calculated monthly EBITDA using {ebitda_margin:.1%} margin: ${calculated_monthly_ebitda:,.2f}")
-                    
-                    # Finish calculation
-                    self.lineage_tracker.finish_calculation(calculated_monthly_ebitda)
-                    return calculated_monthly_ebitda
-                else:
-                    logger.warning("No sales data available for EBITDA calculation")
-                    # Finish calculation before returning None to maintain consistent state
-                    self.lineage_tracker.finish_calculation(None)
-                    return None
-            
-            # Fallback to P&L calculation if sales data not available
-            logger.info("Falling back to P&L calculation...")
+            # Prioritize P&L data for EBITDA calculation since it has actual expense breakdown
+            logger.info("Using P&L data for EBITDA calculation with field-level tracking...")
             monthly_ebitdas = []
             all_expense_categories = defaultdict(float)
             
@@ -944,6 +884,11 @@ class BusinessMetricsCalculator:
                 monthly_operational_expenses = 0  # For EBITDA calculation
                 monthly_total_expenses = 0  # For complete analysis
                 
+                # Track individual field contributions for lineage
+                revenue_contributions = []
+                included_expense_contributions = []
+                excluded_expense_contributions = []
+                
                 # Find actual revenue categories (Sales and Investment Income only - exclude calculated values)
                 # Filter to only include Pennsylvania revenue (sale locations only)
                 if 'Unnamed: 0' not in df.columns:
@@ -959,6 +904,11 @@ class BusinessMetricsCalculator:
                         # Only use Pennsylvania column (sale locations only)
                         revenue_amount = self._safe_float_conversion(row['Pennsylvania'])
                         monthly_revenue += revenue_amount
+                        revenue_contributions.append({
+                            'field_name': 'Pennsylvania',
+                            'raw_value': revenue_amount,
+                            'description': f"Revenue from {row['Unnamed: 0']} - Pennsylvania column"
+                        })
                         logger.info(f"  Revenue (PA sale locations only): {row['Unnamed: 0']} = ${revenue_amount:,.2f}")
                     elif 'Cranberry' in df.columns and 'West View' in df.columns:
                         # 2024/2025 data structure: Cranberry, Virginia, West View
@@ -968,12 +918,22 @@ class BusinessMetricsCalculator:
                         revenue_amount = cranberry_revenue + west_view_revenue
                         if revenue_amount != 0:
                             monthly_revenue += revenue_amount
+                            revenue_contributions.append({
+                                'field_name': 'Cranberry + West View',
+                                'raw_value': revenue_amount,
+                                'description': f"Revenue from {row['Unnamed: 0']} - Cranberry + West View columns"
+                            })
                             logger.info(f"  Revenue (sale locations only): {row['Unnamed: 0']} = ${revenue_amount:,.2f} (Cranberry: ${cranberry_revenue:,.2f}, West View: ${west_view_revenue:,.2f})")
                     elif pd.notna(row.get('TOTAL')) and row.get('TOTAL') != 0:
                         # Fallback to TOTAL if neither structure is available
                         # WARNING: This includes all locations, not just sale locations
                         revenue_amount = self._safe_float_conversion(row['TOTAL'])
                         monthly_revenue += revenue_amount
+                        revenue_contributions.append({
+                            'field_name': 'TOTAL',
+                            'raw_value': revenue_amount,
+                            'description': f"Revenue from {row['Unnamed: 0']} - TOTAL column (includes all locations)"
+                        })
                         logger.warning(f"  Revenue (TOTAL fallback - includes all locations): {row['Unnamed: 0']} = ${revenue_amount:,.2f}")
                 
                 # Find ALL expenses for comprehensive analysis
@@ -992,8 +952,21 @@ class BusinessMetricsCalculator:
                         monthly_total_expenses += expense_amount
                         
                         # For EBITDA: exclude Interest, Income Tax, Corporate Tax, Depreciation, Amortization (but allow Payroll Tax)
-                        if not any(exclude in expense_name for exclude in ['Interest', 'Income Tax', 'Corporate Tax', 'Depreciation', 'Amortization', 'Total', 'Summary']):
+                        is_excluded = any(exclude in expense_name for exclude in ['Interest', 'Income Tax', 'Corporate Tax', 'Depreciation', 'Amortization', 'Total', 'Summary'])
+                        
+                        if is_excluded:
+                            excluded_expense_contributions.append({
+                                'field_name': expense_name,
+                                'raw_value': expense_amount,
+                                'description': f"Excluded from EBITDA: {expense_name} - Pennsylvania column"
+                            })
+                        else:
                             monthly_operational_expenses += expense_amount
+                            included_expense_contributions.append({
+                                'field_name': expense_name,
+                                'raw_value': expense_amount,
+                                'description': f"Included in EBITDA: {expense_name} - Pennsylvania column"
+                            })
                     elif 'Cranberry' in df.columns and 'West View' in df.columns:
                         # 2024/2025 data structure: Cranberry, Virginia, West View
                         # Only include Cranberry + West View (sale locations), exclude Virginia
@@ -1008,8 +981,21 @@ class BusinessMetricsCalculator:
                             monthly_total_expenses += expense_amount
                             
                             # For EBITDA: exclude Interest, Tax, Depreciation, Amortization
-                            if not any(exclude in expense_name for exclude in ['Interest', 'Tax', 'Depreciation', 'Amortization', 'Total', 'Summary']):
+                            is_excluded = any(exclude in expense_name for exclude in ['Interest', 'Tax', 'Depreciation', 'Amortization', 'Total', 'Summary'])
+                            
+                            if is_excluded:
+                                excluded_expense_contributions.append({
+                                    'field_name': expense_name,
+                                    'raw_value': expense_amount,
+                                    'description': f"Excluded from EBITDA: {expense_name} - Cranberry + West View columns"
+                                })
+                            else:
                                 monthly_operational_expenses += expense_amount
+                                included_expense_contributions.append({
+                                    'field_name': expense_name,
+                                    'raw_value': expense_amount,
+                                    'description': f"Included in EBITDA: {expense_name} - Cranberry + West View columns"
+                                })
                     elif pd.notna(row.get('TOTAL')) and row.get('TOTAL') != 0:
                         # Fallback to TOTAL if neither structure is available
                         # WARNING: This includes all locations, not just sale locations
@@ -1021,8 +1007,21 @@ class BusinessMetricsCalculator:
                         monthly_total_expenses += expense_amount
                         
                         # For EBITDA: exclude Interest, Income Tax, Corporate Tax, Depreciation, Amortization (but allow Payroll Tax)
-                        if not any(exclude in expense_name for exclude in ['Interest', 'Income Tax', 'Corporate Tax', 'Depreciation', 'Amortization', 'Total', 'Summary']):
+                        is_excluded = any(exclude in expense_name for exclude in ['Interest', 'Income Tax', 'Corporate Tax', 'Depreciation', 'Amortization', 'Total', 'Summary'])
+                        
+                        if is_excluded:
+                            excluded_expense_contributions.append({
+                                'field_name': expense_name,
+                                'raw_value': expense_amount,
+                                'description': f"Excluded from EBITDA: {expense_name} - TOTAL column (includes all locations)"
+                            })
+                        else:
                             monthly_operational_expenses += expense_amount
+                            included_expense_contributions.append({
+                                'field_name': expense_name,
+                                'raw_value': expense_amount,
+                                'description': f"Included in EBITDA: {expense_name} - TOTAL column (includes all locations)"
+                            })
                 
                 # Calculate monthly EBITDA (operational expenses only)
                 if monthly_revenue > 0:
@@ -1031,6 +1030,46 @@ class BusinessMetricsCalculator:
                     if month_key:
                         found_months.append(month_key)
                         monthly_ebitdas_dict[month_key] = monthly_ebitda
+                    
+                    # Track all field contributions in lineage
+                    # Revenue contributions
+                    for contribution in revenue_contributions:
+                        self.lineage_tracker.add_file_contribution(
+                            file_name=pnl_key,
+                            field_name=contribution['field_name'],
+                            raw_value=contribution['raw_value'],
+                            normalized_value=contribution['raw_value'],
+                            description=contribution['description']
+                        )
+                    
+                    # Included expense contributions
+                    for contribution in included_expense_contributions:
+                        self.lineage_tracker.add_file_contribution(
+                            file_name=pnl_key,
+                            field_name=contribution['field_name'],
+                            raw_value=contribution['raw_value'],
+                            normalized_value=-contribution['raw_value'],  # Negative for expenses
+                            description=contribution['description']
+                        )
+                    
+                    # Excluded expense contributions (for transparency)
+                    for contribution in excluded_expense_contributions:
+                        self.lineage_tracker.add_file_contribution(
+                            file_name=pnl_key,
+                            field_name=contribution['field_name'],
+                            raw_value=contribution['raw_value'],
+                            normalized_value=0,  # Zero impact on EBITDA
+                            description=contribution['description']
+                        )
+                    
+                    # Add the final EBITDA calculation step
+                    self.lineage_tracker.add_step(
+                        "calculate",
+                        "monthly_ebitda",
+                        monthly_ebitda,
+                        f"EBITDA calculation: Revenue ${monthly_revenue:,.2f} - Operational Expenses ${monthly_operational_expenses:,.2f} = ${monthly_ebitda:,.2f}"
+                    )
+                    
                     logger.info(f"Monthly EBITDA for {pnl_key}: ${monthly_ebitda:,.2f} (Revenue: ${monthly_revenue:,.2f}, Op Expenses: ${monthly_operational_expenses:,.2f}, Total Expenses: ${monthly_total_expenses:,.2f})")
             
             # Identify missing months for EBITDA calculation
@@ -1066,10 +1105,75 @@ class BusinessMetricsCalculator:
                 for expense_name, total_amount in sorted_expenses[:10]:
                     logger.info(f"  {expense_name}: ${total_amount:,.2f}")
                 
+                # Finish calculation
+                self.lineage_tracker.finish_calculation(avg_monthly_ebitda)
                 return avg_monthly_ebitda
             else:
-                logger.warning("No valid P&L data found for EBITDA calculation")
-                return None
+                logger.warning("No valid P&L data found for EBITDA calculation, falling back to sales data...")
+                
+                # Fallback to sales data if P&L calculation failed
+                sales_data = normalized_data.get('sales', {})
+                if 'main_sales' in sales_data:
+                    df = sales_data['main_sales'].copy()
+                    
+                    # Calculate monthly revenue from sales data (already filtered to sale locations)
+                    df['sale_date'] = pd.to_datetime(df['sale_date'])
+                    monthly_revenue = df.groupby(df['sale_date'].dt.to_period('M'))['total_price'].sum()
+                    
+                    if len(monthly_revenue) > 0:
+                        avg_monthly_revenue = round_currency(monthly_revenue.mean())
+                        logger.info(f"Average monthly revenue from sales data: ${avg_monthly_revenue:,.2f}")
+                        
+                        # Track file-level contribution for sales data
+                        total_sales_revenue = df['total_price'].sum()
+                        self.lineage_tracker.add_file_contribution(
+                            file_name="sales_transactions.csv",
+                            field_name="total_price",
+                            raw_value=total_sales_revenue,
+                            normalized_value=avg_monthly_revenue,
+                            description="Sales transaction aggregation by month"
+                        )
+                        
+                        # Log the revenue calculation step
+                        self.lineage_tracker.add_step("aggregate", "total_price", avg_monthly_revenue, 
+                                                    "Calculate average monthly revenue from sales data")
+                        
+                        # Use the EBITDA margin from business rules (website shows 25.6%)
+                        ebitda_margin = self.business_rules.get('financial_metrics', {}).get('ebitda_margin_target', 0.256)
+                        calculated_monthly_ebitda = safe_currency_multiplication(avg_monthly_revenue, ebitda_margin)
+                        
+                        # Track file-level contribution for EBITDA calculation
+                        self.lineage_tracker.add_file_contribution(
+                            file_name="sales_transactions.csv",
+                            field_name="total_price",
+                            raw_value=avg_monthly_revenue,
+                            normalized_value=calculated_monthly_ebitda,
+                            description=f"EBITDA calculation from sales data using {ebitda_margin:.1%} margin"
+                        )
+                        
+                        # Log the EBITDA calculation step
+                        self.lineage_tracker.add_multiply_step(
+                            "avg_monthly_revenue", 
+                            calculated_monthly_ebitda, 
+                            factor=ebitda_margin,
+                            description=f"Apply EBITDA margin of {ebitda_margin:.1%}"
+                        )
+                        
+                        logger.info(f"Calculated monthly EBITDA using {ebitda_margin:.1%} margin: ${calculated_monthly_ebitda:,.2f}")
+                        
+                        # Finish calculation
+                        self.lineage_tracker.finish_calculation(calculated_monthly_ebitda)
+                        return calculated_monthly_ebitda
+                    else:
+                        logger.warning("No sales data available for EBITDA calculation")
+                        # Finish calculation before returning None to maintain consistent state
+                        self.lineage_tracker.finish_calculation(None)
+                        return None
+                else:
+                    logger.warning("No sales data available for EBITDA calculation")
+                    # Finish calculation before returning None to maintain consistent state
+                    self.lineage_tracker.finish_calculation(None)
+                    return None
                 
         except Exception as e:
             logger.exception("Error calculating real EBITDA from financial data")

@@ -19,12 +19,12 @@
     "end_date": "2025-06-30",
     "profitability": {
       "estimated_ebitda": {
-        "value": 1121.15,
+        "value": 21700.260000000006,
         "currency": "USD"
       },
-      "ebitda_margin": 1.44,
+      "ebitda_margin": 27.92,
       "estimated_annual_ebitda": {
-        "value": 13453.8,
+        "value": 260403.12,
         "currency": "USD"
       }
     },
@@ -34,14 +34,14 @@
         "currency": "USD"
       },
       "estimated_annual_ebitda": {
-        "value": 13453.8,
+        "value": 260403.12,
         "currency": "USD"
       },
-      "roi_percentage": 2.07,
-      "payback_period_years": 48.3
+      "roi_percentage": 40.06,
+      "payback_period_years": 2.5
     }
   },
-  "generated_at": "2025-09-13T04:38:36.731Z",
-  "etl_run_timestamp": "2025-09-13T04:38:36.731Z",
+  "generated_at": "2025-09-13T04:47:16.936Z",
+  "etl_run_timestamp": "2025-09-13T04:47:16.936Z",
   "data_source": "ETL Pipeline Analysis"
 }
