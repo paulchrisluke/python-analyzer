@@ -37,27 +37,35 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Email cannot be empty' }, { status: 400 })
     }
 
-    // Get admin credentials from environment with proper parsing
+    // Get credentials from environment with proper parsing
     const adminEmails = process.env.ADMIN_EMAILS?.split(/[,\n]/).map(s => s.trim()).filter(Boolean) || []
     const adminPasswords = process.env.ADMIN_PASSWORD_HASHES?.split(/[,\n]/).map(s => s.trim()).filter(Boolean) || []
+    const buyerEmails = process.env.BUYER_EMAILS?.split(/[,\n]/).map(s => s.trim()).filter(Boolean) || []
+    const buyerPasswords = process.env.BUYER_PASSWORD_HASHES?.split(/[,\n]/).map(s => s.trim()).filter(Boolean) || []
     const isDevelopment = process.env.NODE_ENV === 'development'
 
-    // Security: Require explicit admin emails configuration
-    if (adminEmails.length === 0) {
-      console.error('ADMIN_EMAILS not configured or contains no valid entries')
+    // Security: Require explicit credentials configuration
+    if (adminEmails.length === 0 && buyerEmails.length === 0) {
+      console.error('No admin or buyer emails configured')
       return NextResponse.json({ error: 'Authentication not configured' }, { status: 500 })
     }
 
     // Security: Require explicit password hashes unless in development
-    if (adminPasswords.length === 0 && !isDevelopment) {
-      console.error('ADMIN_PASSWORD_HASHES not configured or contains no valid entries and not in development mode')
+    if (adminPasswords.length === 0 && buyerPasswords.length === 0 && !isDevelopment) {
+      console.error('No password hashes configured and not in development mode')
       return NextResponse.json({ error: 'Authentication not configured' }, { status: 500 })
     }
 
     // Security: Ensure email and password arrays align when not in development
-    if (!isDevelopment && adminEmails.length !== adminPasswords.length) {
-      console.error(`ADMIN_EMAILS (${adminEmails.length} entries) and ADMIN_PASSWORD_HASHES (${adminPasswords.length} entries) length mismatch`)
-      return NextResponse.json({ error: 'Authentication configuration mismatch' }, { status: 500 })
+    if (!isDevelopment) {
+      if (adminEmails.length > 0 && adminEmails.length !== adminPasswords.length) {
+        console.error(`ADMIN_EMAILS (${adminEmails.length} entries) and ADMIN_PASSWORD_HASHES (${adminPasswords.length} entries) length mismatch`)
+        return NextResponse.json({ error: 'Authentication configuration mismatch' }, { status: 500 })
+      }
+      if (buyerEmails.length > 0 && buyerEmails.length !== buyerPasswords.length) {
+        console.error(`BUYER_EMAILS (${buyerEmails.length} entries) and BUYER_PASSWORD_HASHES (${buyerPasswords.length} entries) length mismatch`)
+        return NextResponse.json({ error: 'Authentication configuration mismatch' }, { status: 500 })
+      }
     }
 
     // Security: Require explicit JWT secret configuration
@@ -76,31 +84,63 @@ export async function POST(request: NextRequest) {
       }, { status: 500 })
     }
 
-    // Find admin email index
+    // Check if user is admin
     const adminIndex = adminEmails.findIndex(adminEmail => 
       adminEmail.trim().toLowerCase() === normalizedEmail
     )
 
-    if (adminIndex === -1) {
-      return NextResponse.json({ error: 'Invalid credentials' }, { status: 401 })
-    }
+    let userRole = null
+    let isValidCredentials = false
 
-    // Development bypass: allow any password when in development and no hashes configured
-    if (isDevelopment && adminPasswords.length === 0) {
-      console.warn('Development mode: Allowing authentication without password verification')
-    } else {
-      // Production mode: require explicit password verification
-      const correctPassword = adminPasswords[adminIndex]?.trim()
-      if (!correctPassword || correctPassword !== password) {
-        return NextResponse.json({ error: 'Invalid credentials' }, { status: 401 })
+    if (adminIndex !== -1) {
+      // Development bypass: allow any password when in development and no hashes configured
+      if (isDevelopment && adminPasswords.length === 0) {
+        console.warn('Development mode: Allowing admin authentication without password verification')
+        userRole = 'admin'
+        isValidCredentials = true
+      } else {
+        // Production mode: require explicit password verification
+        const correctPassword = adminPasswords[adminIndex]?.trim()
+        if (correctPassword && correctPassword === password) {
+          userRole = 'admin'
+          isValidCredentials = true
+        }
       }
     }
 
-    // Create JWT token
+    // If not admin, check if user is buyer
+    if (!isValidCredentials) {
+      const buyerIndex = buyerEmails.findIndex(buyerEmail => 
+        buyerEmail.trim().toLowerCase() === normalizedEmail
+      )
+
+      if (buyerIndex !== -1) {
+        // Development bypass: allow any password when in development and no hashes configured
+        if (isDevelopment && buyerPasswords.length === 0) {
+          console.warn('Development mode: Allowing buyer authentication without password verification')
+          userRole = 'buyer'
+          isValidCredentials = true
+        } else {
+          // Production mode: require explicit password verification
+          const correctPassword = buyerPasswords[buyerIndex]?.trim()
+          if (correctPassword && correctPassword === password) {
+            userRole = 'buyer'
+            isValidCredentials = true
+          }
+        }
+      }
+    }
+
+    if (!isValidCredentials) {
+      return NextResponse.json({ error: 'Invalid credentials' }, { status: 401 })
+    }
+
+    // Create JWT token with role information
     const secret = new TextEncoder().encode(authSecret)
     const token = await new SignJWT({ 
       email: normalizedEmail,
-      name: normalizedEmail.split('@')[0]
+      name: normalizedEmail.split('@')[0],
+      role: userRole
     })
       .setProtectedHeader({ alg: 'HS256' })
       .setIssuedAt()

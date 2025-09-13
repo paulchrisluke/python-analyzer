@@ -2,7 +2,13 @@ import { NextRequest, NextResponse } from 'next/server'
 import { jwtVerify } from 'jose'
 
 // Protected routes that require authentication
-const protectedRoutes = ['/dashboard', '/docs', '/admin']
+const protectedRoutes = ['/dashboard', '/docs', '/admin', '/buyer']
+
+// Admin-only routes
+const adminOnlyRoutes = ['/admin']
+
+// Buyer-only routes  
+const buyerOnlyRoutes = ['/buyer']
 
 // Public routes that don't require authentication
 const publicRoutes = ['/', '/login', '/signup']
@@ -12,75 +18,95 @@ function matchesRoute(pathname: string, route: string): boolean {
   return pathname === route || pathname.startsWith(route + '/')
 }
 
-// Simple authentication check using session cookie
-async function isAuthenticated(req: NextRequest): Promise<boolean> {
+// Get user role from JWT token
+async function getUserRole(req: NextRequest): Promise<string | null> {
   try {
-    // Development bypass: only when explicitly enabled and not in production
+    // Development bypass: return admin role when bypass is enabled
     if (process.env.NODE_ENV !== 'production' && 
         process.env.DEV_AUTH_BYPASS === 'true' && 
         !process.env.PLAYWRIGHT_TEST) {
-      console.warn('⚠️  DEV_AUTH_BYPASS is active - authentication is disabled for development')
-      return true
+      return 'admin'
     }
 
-    // Security: Fail closed if AUTH_SECRET is not configured
     const authSecret = process.env.AUTH_SECRET?.trim()
-    const MIN_SECRET_LENGTH = 32
-    
-    if (!authSecret) {
-      console.error('AUTH_SECRET is not configured - authentication disabled for security')
-      return false
-    }
-    
-    if (authSecret.length < MIN_SECRET_LENGTH) {
-      console.error(`AUTH_SECRET is too short (${authSecret.length} chars, minimum ${MIN_SECRET_LENGTH}) - authentication disabled for security`)
-      return false
+    if (!authSecret || authSecret.length < 32) {
+      return null
     }
 
-    // Check for signed session token and verify on the server
     const sessionCookie = req.cookies.get('cranberry-auth-session')
-    if (!sessionCookie?.value) return false
+    if (!sessionCookie?.value) return null
+    
     const token = sessionCookie.value
-    await jwtVerify(
+    const { payload } = await jwtVerify(
       token,
       new TextEncoder().encode(authSecret),
       { issuer: 'cranberry', audience: 'web' }
     )
-    return true
+    
+    // Extract role from token payload
+    return (payload as any)?.role || null
   } catch (error) {
-    console.error('Authentication check failed:', error)
-    return false
+    console.error('Role extraction failed:', error)
+    return null
   }
+}
+
+// Simple authentication check using session cookie
+async function isAuthenticated(req: NextRequest): Promise<boolean> {
+  const role = await getUserRole(req)
+  return role !== null
 }
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
-
-  // Check if the route is protected using exact-or-prefix-with-slash matching
-  const isProtectedRoute = protectedRoutes.some(route => 
-    matchesRoute(pathname, route)
-  )
 
   // Check if the route is public
   const isPublicRoute = publicRoutes.some(route => 
     pathname === route
   )
 
-  // For protected routes, check authentication server-side
+  // For public routes, allow access
+  if (isPublicRoute) {
+    return NextResponse.next()
+  }
+
+  // Check if the route is protected using exact-or-prefix-with-slash matching
+  const isProtectedRoute = protectedRoutes.some(route => 
+    matchesRoute(pathname, route)
+  )
+
+  // For protected routes, check authentication and authorization
   if (isProtectedRoute) {
-    const authenticated = await isAuthenticated(request)
+    const userRole = await getUserRole(request)
     
-    if (!authenticated) {
+    if (!userRole) {
       // Redirect to login page, preserving the original pathname
       const loginUrl = new URL('/login', request.url)
       loginUrl.searchParams.set('redirect', pathname)
       return NextResponse.redirect(loginUrl)
     }
-  }
 
-  // For public routes, allow access
-  if (isPublicRoute) {
-    return NextResponse.next()
+    // Check admin-only routes
+    const isAdminOnlyRoute = adminOnlyRoutes.some(route => 
+      matchesRoute(pathname, route)
+    )
+    
+    if (isAdminOnlyRoute && userRole !== 'admin') {
+      // Redirect to unauthorized page or buyer dashboard
+      const unauthorizedUrl = new URL('/unauthorized', request.url)
+      return NextResponse.redirect(unauthorizedUrl)
+    }
+
+    // Check buyer-only routes
+    const isBuyerOnlyRoute = buyerOnlyRoutes.some(route => 
+      matchesRoute(pathname, route)
+    )
+    
+    if (isBuyerOnlyRoute && userRole !== 'buyer') {
+      // Redirect to unauthorized page or admin dashboard
+      const unauthorizedUrl = new URL('/unauthorized', request.url)
+      return NextResponse.redirect(unauthorizedUrl)
+    }
   }
 
   // For any other routes, allow access (they can handle their own auth logic)

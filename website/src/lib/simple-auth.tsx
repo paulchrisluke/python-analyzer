@@ -6,8 +6,9 @@ import React, { useState, useEffect, createContext, useContext } from "react"
 export interface User {
   email: string
   name: string
-  role: 'admin' | 'user'
+  role: 'admin' | 'buyer' | 'user'
   isAdmin: boolean
+  isBuyer: boolean
   avatar?: string
 }
 
@@ -54,42 +55,76 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   const signIn = async (email: string, password: string): Promise<{ success: boolean; error?: string }> => {
     try {
-      // Get admin credentials from environment (in a real app, this would be server-side)
+      // Get credentials from environment
       const adminEmails = process.env.NEXT_PUBLIC_ADMIN_EMAILS?.split(',') || []
       const adminPasswords = process.env.NEXT_PUBLIC_ADMIN_PASSWORDS?.split(',') || []
+      const buyerEmails = process.env.NEXT_PUBLIC_BUYER_EMAILS?.split(',') || []
+      const buyerPasswords = process.env.NEXT_PUBLIC_BUYER_PASSWORDS?.split(',') || []
 
-      // Find matching admin
+      // Check if user is admin
       const adminIndex = adminEmails.findIndex(adminEmail => 
         adminEmail.trim().toLowerCase() === email.toLowerCase()
       )
 
-      if (adminIndex === -1) {
-        return { success: false, error: 'Invalid email or password' }
+      if (adminIndex !== -1) {
+        const correctPassword = adminPasswords[adminIndex]?.trim()
+        if (!correctPassword || correctPassword !== password) {
+          return { success: false, error: 'Invalid email or password' }
+        }
+
+        const userData: User = {
+          email: email.toLowerCase(),
+          name: email.split('@')[0],
+          role: 'admin',
+          isAdmin: true,
+          isBuyer: false,
+          avatar: "/avatars/user.jpg"
+        }
+
+        // Store session
+        const sessionData = {
+          user: userData,
+          timestamp: Date.now()
+        }
+        localStorage.setItem('cranberry-auth-session', JSON.stringify(sessionData))
+        setUser(userData)
+
+        return { success: true }
       }
 
-      const correctPassword = adminPasswords[adminIndex]?.trim()
-      if (!correctPassword || correctPassword !== password) {
-        return { success: false, error: 'Invalid email or password' }
+      // Check if user is buyer
+      const buyerIndex = buyerEmails.findIndex(buyerEmail => 
+        buyerEmail.trim().toLowerCase() === email.toLowerCase()
+      )
+
+      if (buyerIndex !== -1) {
+        const correctPassword = buyerPasswords[buyerIndex]?.trim()
+        if (!correctPassword || correctPassword !== password) {
+          return { success: false, error: 'Invalid email or password' }
+        }
+
+        const userData: User = {
+          email: email.toLowerCase(),
+          name: email.split('@')[0],
+          role: 'buyer',
+          isAdmin: false,
+          isBuyer: true,
+          avatar: "/avatars/user.jpg"
+        }
+
+        // Store session
+        const sessionData = {
+          user: userData,
+          timestamp: Date.now()
+        }
+        localStorage.setItem('cranberry-auth-session', JSON.stringify(sessionData))
+        setUser(userData)
+
+        return { success: true }
       }
 
-      // Create user object with admin role (since only admins can sign in)
-      const userData: User = {
-        email: email.toLowerCase(),
-        name: email.split('@')[0], // Simple name from email
-        role: 'admin',
-        isAdmin: true,
-        avatar: "/avatars/user.jpg" // Default avatar
-      }
-
-      // Store session
-      const sessionData = {
-        user: userData,
-        timestamp: Date.now()
-      }
-      localStorage.setItem('cranberry-auth-session', JSON.stringify(sessionData))
-      setUser(userData)
-
-      return { success: true }
+      // If neither admin nor buyer, return error
+      return { success: false, error: 'Invalid email or password' }
     } catch (error) {
       console.error('Sign in error:', error)
       return { success: false, error: 'An unexpected error occurred' }
