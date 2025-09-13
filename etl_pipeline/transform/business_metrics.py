@@ -629,13 +629,16 @@ class BusinessMetricsCalculator:
         
         # Calculate ROI percentage
         if asking_price > 0:
-            roi = (annual_ebitda / asking_price) * 100
+            # First calculate ROI ratio
+            roi_ratio = annual_ebitda / asking_price
             self.lineage_tracker.add_divide_step(
                 "estimated_annual_ebitda",
-                roi,
+                roi_ratio,
                 divisor=asking_price,
                 description="Calculate ROI ratio (annual_ebitda / asking_price)"
             )
+            # Then convert to percentage
+            roi = roi_ratio * 100
             self.lineage_tracker.add_multiply_step(
                 "roi_ratio",
                 roi,

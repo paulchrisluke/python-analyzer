@@ -245,8 +245,8 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const pathname = usePathname()
   const isAuthenticated = !!session?.user
   
-  // Check if we're on an admin page
-  const isAdminPage = pathname.startsWith('/admin')
+  // Check if we're on an admin page (exact path segment match to prevent false positives like /administrator)
+  const isAdminPage = /^\/admin(\/|$)/.test(pathname)
   
   // Get appropriate navigation data based on auth state and page type
   const data = isAuthenticated 

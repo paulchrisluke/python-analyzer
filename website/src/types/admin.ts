@@ -19,11 +19,9 @@ export interface BusinessSaleData {
   };
   traceability?: {
     field_mappings: {
-      field_mappings: {
-        sales_mappings: Record<string, string>;
-        financial_mappings: Record<string, string>;
-        equipment_mappings: Record<string, string>;
-      };
+      sales_mappings: Record<string, string>;
+      financial_mappings: Record<string, string>;
+      equipment_mappings: Record<string, string>;
     };
     document_registry?: {
       documents: Array<{
@@ -41,6 +39,30 @@ export interface BusinessSaleData {
         notes: string | null;
         registered_at: string;
       }>;
+    };
+    calculation_lineage?: {
+      calculation_lineage: Array<{
+        metric_name: string;
+        description: string;
+        steps: Array<{
+          step: number;
+          operation: string;
+          field: string;
+          value: number;
+          description: string;
+          timestamp: string;
+          factor?: number;
+          divisor?: number;
+        }>;
+        start_time: string;
+        end_time: string;
+        final_value: number;
+      }>;
+      lineage_summary: {
+        total_calculations: number;
+        total_steps: number;
+        metrics_calculated: string[];
+      };
     };
     documents: DocumentItem[];
   };

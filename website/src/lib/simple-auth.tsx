@@ -2,10 +2,13 @@
 
 import React, { useState, useEffect, createContext, useContext } from "react"
 
-// Simple user type
+// User type with role information
 export interface User {
   email: string
   name: string
+  role: 'admin' | 'user'
+  isAdmin: boolean
+  avatar?: string
 }
 
 // Auth context type
@@ -69,10 +72,13 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         return { success: false, error: 'Invalid email or password' }
       }
 
-      // Create user object
+      // Create user object with admin role (since only admins can sign in)
       const userData: User = {
         email: email.toLowerCase(),
-        name: email.split('@')[0] // Simple name from email
+        name: email.split('@')[0], // Simple name from email
+        role: 'admin',
+        isAdmin: true,
+        avatar: "/avatars/user.jpg" // Default avatar
       }
 
       // Store session

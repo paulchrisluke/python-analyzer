@@ -489,7 +489,7 @@ class JsonLoader(BaseLoader):
             
             # Add comprehensive traceability metadata
             sanitized_coverage['traceability'] = {
-                "field_mappings": self.field_mapping_registry.export_traceability_for_json(),
+                **self.field_mapping_registry.export_traceability_for_json(),
                 "document_registry": self.document_registry.export_registry_for_json(),
                 "etl_pipeline_version": "1.0.0",
                 "traceability_enabled": True
@@ -548,7 +548,7 @@ class JsonLoader(BaseLoader):
             },
             # Add comprehensive traceability metadata
             "traceability": {
-                "field_mappings": self.field_mapping_registry.export_traceability_for_json(),
+                **self.field_mapping_registry.export_traceability_for_json(),
                 "calculation_lineage": business_metrics.get('calculation_lineage', {}),
                 "document_registry": self.document_registry.export_registry_for_json(),
                 "etl_pipeline_version": "1.0.0",
