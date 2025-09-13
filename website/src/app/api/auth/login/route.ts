@@ -113,7 +113,7 @@ export async function POST(request: NextRequest) {
     // Set cookie
     const response = NextResponse.json({ success: true })
     response.cookies.set('cranberry-auth-session', token, {
-      httpOnly: true,
+      httpOnly: true, // Restored for security
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',
       maxAge: 7 * 24 * 60 * 60 // 7 days

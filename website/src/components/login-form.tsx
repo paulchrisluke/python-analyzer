@@ -35,7 +35,7 @@ export function LoginForm({
     try {
       
       // Use server-side authentication
-      const response = await fetch('/api/auth/login', {
+      const response = await fetch('/api/auth/login/', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -56,8 +56,23 @@ export function LoginForm({
         }
       } else {
         // Server already set the session cookie, treat successful response as authenticated
+        // Also update localStorage for client-side auth system
+        const userData = {
+          email: email.toLowerCase(),
+          name: email.split('@')[0],
+          role: 'admin',
+          isAdmin: true,
+          avatar: "/avatars/user.jpg"
+        }
+        
+        const sessionData = {
+          user: userData,
+          timestamp: Date.now()
+        }
+        localStorage.setItem('cranberry-auth-session', JSON.stringify(sessionData))
+        
         // Redirect to dashboard after successful login
-        window.location.href = "/dashboard"
+        window.location.href = "/dashboard/"
       }
     } catch (err) {
       if ((err as any)?.name === 'AbortError' || err instanceof DOMException || (err as any)?.code === 'ERR_ABORTED') {
