@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { SignJWT } from 'jose'
+import bcrypt from 'bcrypt'
 
 export async function POST(request: NextRequest) {
   try {
@@ -39,9 +40,9 @@ export async function POST(request: NextRequest) {
 
     // Get credentials from environment with proper parsing
     const adminEmails = process.env.ADMIN_EMAILS?.split(/[,\n]/).map(s => s.trim()).filter(Boolean) || []
-    const adminPasswords = process.env.ADMIN_PASSWORD_HASHES?.split(/[,\n]/).map(s => s.trim()).filter(Boolean) || []
+    const adminPasswordHashes = process.env.ADMIN_PASSWORD_HASHES?.split(/[,\n]/).map(s => s.trim()).filter(Boolean) || []
     const buyerEmails = process.env.BUYER_EMAILS?.split(/[,\n]/).map(s => s.trim()).filter(Boolean) || []
-    const buyerPasswords = process.env.BUYER_PASSWORD_HASHES?.split(/[,\n]/).map(s => s.trim()).filter(Boolean) || []
+    const buyerPasswordHashes = process.env.BUYER_PASSWORD_HASHES?.split(/[,\n]/).map(s => s.trim()).filter(Boolean) || []
     const isDevelopment = process.env.NODE_ENV === 'development'
 
     // Security: Require explicit credentials configuration
@@ -51,19 +52,19 @@ export async function POST(request: NextRequest) {
     }
 
     // Security: Require explicit password hashes unless in development
-    if (adminPasswords.length === 0 && buyerPasswords.length === 0 && !isDevelopment) {
+    if (adminPasswordHashes.length === 0 && buyerPasswordHashes.length === 0 && !isDevelopment) {
       console.error('No password hashes configured and not in development mode')
       return NextResponse.json({ error: 'Authentication not configured' }, { status: 500 })
     }
 
     // Security: Ensure email and password arrays align when not in development
     if (!isDevelopment) {
-      if (adminEmails.length > 0 && adminEmails.length !== adminPasswords.length) {
-        console.error(`ADMIN_EMAILS (${adminEmails.length} entries) and ADMIN_PASSWORD_HASHES (${adminPasswords.length} entries) length mismatch`)
+      if (adminEmails.length > 0 && adminEmails.length !== adminPasswordHashes.length) {
+        console.error(`ADMIN_EMAILS (${adminEmails.length} entries) and ADMIN_PASSWORD_HASHES (${adminPasswordHashes.length} entries) length mismatch`)
         return NextResponse.json({ error: 'Authentication configuration mismatch' }, { status: 500 })
       }
-      if (buyerEmails.length > 0 && buyerEmails.length !== buyerPasswords.length) {
-        console.error(`BUYER_EMAILS (${buyerEmails.length} entries) and BUYER_PASSWORD_HASHES (${buyerPasswords.length} entries) length mismatch`)
+      if (buyerEmails.length > 0 && buyerEmails.length !== buyerPasswordHashes.length) {
+        console.error(`BUYER_EMAILS (${buyerEmails.length} entries) and BUYER_PASSWORD_HASHES (${buyerPasswordHashes.length} entries) length mismatch`)
         return NextResponse.json({ error: 'Authentication configuration mismatch' }, { status: 500 })
       }
     }
@@ -94,16 +95,24 @@ export async function POST(request: NextRequest) {
 
     if (adminIndex !== -1) {
       // Development bypass: allow any password when in development and no hashes configured
-      if (isDevelopment && adminPasswords.length === 0) {
+      if (isDevelopment && adminPasswordHashes.length === 0) {
         console.warn('Development mode: Allowing admin authentication without password verification')
         userRole = 'admin'
         isValidCredentials = true
       } else {
-        // Production mode: require explicit password verification
-        const correctPassword = adminPasswords[adminIndex]?.trim()
-        if (correctPassword && correctPassword === password) {
-          userRole = 'admin'
-          isValidCredentials = true
+        // Production mode: require explicit password verification using bcrypt
+        const storedHash = adminPasswordHashes[adminIndex]?.trim()
+        if (storedHash) {
+          try {
+            const isPasswordValid = await bcrypt.compare(password, storedHash)
+            if (isPasswordValid) {
+              userRole = 'admin'
+              isValidCredentials = true
+            }
+          } catch (error) {
+            console.error('Error verifying admin password:', error)
+            return NextResponse.json({ error: 'Authentication error' }, { status: 500 })
+          }
         }
       }
     }
@@ -116,16 +125,24 @@ export async function POST(request: NextRequest) {
 
       if (buyerIndex !== -1) {
         // Development bypass: allow any password when in development and no hashes configured
-        if (isDevelopment && buyerPasswords.length === 0) {
+        if (isDevelopment && buyerPasswordHashes.length === 0) {
           console.warn('Development mode: Allowing buyer authentication without password verification')
           userRole = 'buyer'
           isValidCredentials = true
         } else {
-          // Production mode: require explicit password verification
-          const correctPassword = buyerPasswords[buyerIndex]?.trim()
-          if (correctPassword && correctPassword === password) {
-            userRole = 'buyer'
-            isValidCredentials = true
+          // Production mode: require explicit password verification using bcrypt
+          const storedHash = buyerPasswordHashes[buyerIndex]?.trim()
+          if (storedHash) {
+            try {
+              const isPasswordValid = await bcrypt.compare(password, storedHash)
+              if (isPasswordValid) {
+                userRole = 'buyer'
+                isValidCredentials = true
+              }
+            } catch (error) {
+              console.error('Error verifying buyer password:', error)
+              return NextResponse.json({ error: 'Authentication error' }, { status: 500 })
+            }
           }
         }
       }

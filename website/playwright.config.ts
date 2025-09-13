@@ -35,7 +35,6 @@ export default defineConfig({
     reuseExistingServer: !process.env.CI,
     env: {
       ...process.env,
-      PLAYWRIGHT_TEST: 'true',
     },
   },
 });

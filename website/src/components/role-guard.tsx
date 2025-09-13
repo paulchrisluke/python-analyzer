@@ -22,18 +22,8 @@ export function RoleGuard({
 
   useEffect(() => {
     if (!isLoading && user && !allowedRoles.includes(user.role)) {
-      if (redirectTo) {
-        router.push(redirectTo)
-      } else {
-        // Default redirect based on user role
-        if (user.role === 'admin') {
-          router.push('/admin')
-        } else if (user.role === 'buyer') {
-          router.push('/buyer')
-        } else {
-          router.push('/unauthorized')
-        }
-      }
+      const target = redirectTo ?? (user.role === 'admin' ? '/admin' : user.role === 'buyer' ? '/buyer' : '/unauthorized')
+      router.replace(target)
     }
   }, [user, isLoading, allowedRoles, redirectTo, router])
 

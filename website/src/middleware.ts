@@ -18,14 +18,18 @@ function matchesRoute(pathname: string, route: string): boolean {
   return pathname === route || pathname.startsWith(route + '/')
 }
 
+// Valid roles in the system
+const VALID_ROLES = ['admin', 'buyer'] as const
+
 // Get user role from JWT token
 async function getUserRole(req: NextRequest): Promise<string | null> {
   try {
-    // Development bypass: return admin role when bypass is enabled
-    if (process.env.NODE_ENV !== 'production' && 
-        process.env.DEV_AUTH_BYPASS === 'true' && 
-        !process.env.PLAYWRIGHT_TEST) {
-      return 'admin'
+    // Development bypass: return configured role when bypass is enabled
+    // Single DEV_AUTH_ROLE variable: if set in development, use it; if not set, use normal auth
+    if (process.env.NODE_ENV !== 'production' && process.env.DEV_AUTH_ROLE) {
+      const devRole = process.env.DEV_AUTH_ROLE.trim()
+      // Validate role against known roles, fallback to 'admin' if invalid
+      return VALID_ROLES.includes(devRole as any) ? devRole : 'admin'
     }
 
     const authSecret = process.env.AUTH_SECRET?.trim()

@@ -2,6 +2,7 @@
 
 import { useState } from "react"
 import Link from "next/link"
+import { useRouter } from "next/navigation"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import {
@@ -13,6 +14,7 @@ import {
 } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { useAuth } from "@/lib/simple-auth"
 
 export function LoginForm({
   className,
@@ -22,67 +24,29 @@ export function LoginForm({
   const [password, setPassword] = useState("")
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState("")
+  const { signIn } = useAuth()
+  const router = useRouter()
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsLoading(true)
     setError("")
 
-    // Create AbortController for timeout handling
-    const controller = new AbortController()
-    const timeoutId = setTimeout(() => controller.abort(), 10000) // 10 second timeout
-
     try {
+      // Use the secure auth context for authentication
+      const result = await signIn(email.trim(), password)
       
-      // Use server-side authentication
-      const response = await fetch('/api/auth/login/', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json',
-        },
-        body: JSON.stringify({ email: email.trim(), password }),
-        signal: controller.signal,
-      })
-
-      if (!response.ok) {
-        // Guard JSON parsing with try/catch
-        try {
-          const errorData = await response.json()
-          setError(errorData.error || "Sign in failed")
-        } catch (jsonError) {
-          // Fall back to generic error message if JSON parsing fails
-          setError("Sign in failed. Please try again.")
-        }
+      if (result.success) {
+        // Authentication successful - redirect to appropriate page
+        router.push("/dashboard/")
       } else {
-        // Server already set the session cookie, treat successful response as authenticated
-        // Also update localStorage for client-side auth system
-        const userData = {
-          email: email.toLowerCase(),
-          name: email.split('@')[0],
-          role: 'admin',
-          isAdmin: true,
-          avatar: "/avatars/user.jpg"
-        }
-        
-        const sessionData = {
-          user: userData,
-          timestamp: Date.now()
-        }
-        localStorage.setItem('cranberry-auth-session', JSON.stringify(sessionData))
-        
-        // Redirect to dashboard after successful login
-        window.location.href = "/dashboard/"
+        // Authentication failed
+        setError(result.error || "Sign in failed")
       }
     } catch (err) {
-      if ((err as any)?.name === 'AbortError' || err instanceof DOMException || (err as any)?.code === 'ERR_ABORTED') {
-        setError("Request timed out. Please try again.")
-      } else {
-        setError("An unexpected error occurred")
-      }
+      console.error('Login error:', err)
+      setError("An unexpected error occurred")
     } finally {
-      // Always clear timeout and reset loading state
-      clearTimeout(timeoutId)
       setIsLoading(false)
     }
   }
