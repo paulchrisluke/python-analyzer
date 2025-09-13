@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { Area, AreaChart, CartesianGrid, XAxis, YAxis, Line, LineChart, ComposedChart, ResponsiveContainer, ReferenceLine } from "recharts"
+import { Area, AreaChart, CartesianGrid, XAxis, YAxis } from "recharts"
 
 import { useIsMobile } from "@/hooks/use-mobile"
 
@@ -75,15 +75,6 @@ import {
 } from "@/components/ui/toggle-group"
 
 // Types for revenue data
-interface RevenueDataPoint {
-  date: string
-  year: string
-  month: string
-  revenue: number
-  data_type: "historical" | "projected"
-  file: string
-  structure_type: string
-}
 
 interface RevenueAuditTrail {
   pipeline_run: {
@@ -93,19 +84,92 @@ interface RevenueAuditTrail {
   }
 }
 
-// Load revenue data from the audit trail
-async function loadRevenueData(): Promise<RevenueDataPoint[]> {
+// Cache key for localStorage
+const REVENUE_DATA_CACHE_KEY = 'revenue_data_cache'
+const CACHE_EXPIRY_MS = 5 * 60 * 1000 // 5 minutes
+
+// Sleep utility for retry delays
+function sleep(ms: number): Promise<void> {
+  return new Promise(resolve => setTimeout(resolve, ms))
+}
+
+// Load cached data from localStorage
+function loadCachedData(): RevenueDataPoint[] | null {
   try {
-    const response = await fetch('/data/revenue_audit_trail.json')
-    if (!response.ok) {
-      throw new Error('Failed to load revenue data')
+    const cached = localStorage.getItem(REVENUE_DATA_CACHE_KEY)
+    if (!cached) return null
+    
+    const { data, timestamp } = JSON.parse(cached)
+    const now = Date.now()
+    
+    // Check if cache is still valid
+    if (now - timestamp > CACHE_EXPIRY_MS) {
+      localStorage.removeItem(REVENUE_DATA_CACHE_KEY)
+      return null
     }
-    const data: RevenueAuditTrail = await response.json()
-    return data.pipeline_run.graph_data.monthly_data
+    
+    return data
   } catch (error) {
-    console.error('Error loading revenue data:', error)
-    return []
+    console.warn('Failed to load cached revenue data:', error)
+    localStorage.removeItem(REVENUE_DATA_CACHE_KEY)
+    return null
   }
+}
+
+// Save data to cache
+function saveToCache(data: RevenueDataPoint[]): void {
+  try {
+    const cacheData = {
+      data,
+      timestamp: Date.now()
+    }
+    localStorage.setItem(REVENUE_DATA_CACHE_KEY, JSON.stringify(cacheData))
+  } catch (error) {
+    console.warn('Failed to cache revenue data:', error)
+  }
+}
+
+// Load revenue data from the audit trail with retry logic and cache fallback
+async function loadRevenueData(signal?: AbortSignal): Promise<RevenueDataPoint[]> {
+  const maxRetries = 3
+  const baseDelay = 1000 // 1 second
+  
+  for (let attempt = 1; attempt <= maxRetries; attempt++) {
+    try {
+      const response = await fetch('/data/revenue_audit_trail.json', { signal })
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`)
+      }
+      const data: RevenueAuditTrail = await response.json()
+      const revenueData = data.pipeline_run.graph_data.monthly_data
+      
+      // Save to cache on successful fetch
+      saveToCache(revenueData)
+      
+      return revenueData
+    } catch (error) {
+      console.error(`Attempt ${attempt} failed to load revenue data:`, error)
+      
+      // If this is the last attempt, try cache fallback before failing
+      if (attempt === maxRetries) {
+        const cachedData = loadCachedData()
+        if (cachedData) {
+          console.warn('Using cached revenue data due to network failure')
+          return cachedData
+        }
+        
+        // No cache available, throw the error
+        throw new Error(`Failed to load revenue data after ${maxRetries} attempts. ${error instanceof Error ? error.message : 'Unknown error'}`)
+      }
+      
+      // Wait with exponential backoff before retry
+      const delay = baseDelay * Math.pow(2, attempt - 1)
+      await sleep(delay)
+    }
+  }
+  
+  // This should never be reached, but TypeScript requires it
+  throw new Error('Unexpected error in loadRevenueData')
 }
 
 const chartConfig = {
@@ -120,19 +184,76 @@ const chartConfig = {
 } satisfies ChartConfig
 
 export function FinancialChart() {
-  console.log("📊 FinancialChart rendering");
-  
   const isMobile = useIsMobile()
   const [timeRange, setTimeRange] = React.useState("all")
   const [revenueData, setRevenueData] = React.useState<RevenueDataPoint[]>([])
   const [loading, setLoading] = React.useState(true)
+  const [error, setError] = React.useState<string | null>(null)
+  const [isRetrying, setIsRetrying] = React.useState(false)
+
+  // Load revenue data function that can be called on mount or retry
+  const loadData = React.useCallback(async () => {
+    try {
+      setError(null)
+      setLoading(true)
+      setIsRetrying(false)
+      
+      const data = await loadRevenueData()
+      setRevenueData(data)
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Failed to load revenue data'
+      setError(errorMessage)
+      console.error('Failed to load revenue data:', err)
+    } finally {
+      setLoading(false)
+    }
+  }, [])
+
+  // Retry function for user-initiated retry
+  const handleRetry = React.useCallback(async () => {
+    setIsRetrying(true)
+    await loadData()
+  }, [loadData])
 
   // Load revenue data on component mount
   React.useEffect(() => {
-    loadRevenueData().then(data => {
-      setRevenueData(data)
-      setLoading(false)
-    })
+    const abortController = new AbortController()
+    let isMounted = true
+
+    const loadDataWithCleanup = async () => {
+      try {
+        setError(null)
+        setLoading(true)
+        setIsRetrying(false)
+        
+        const data = await loadRevenueData(abortController.signal)
+        
+        // Only update state if component is still mounted
+        if (isMounted && !abortController.signal.aborted) {
+          setRevenueData(data)
+        }
+      } catch (err) {
+        // Only update state if component is still mounted
+        if (isMounted && !abortController.signal.aborted) {
+          const errorMessage = err instanceof Error ? err.message : 'Failed to load revenue data'
+          setError(errorMessage)
+          console.error('Failed to load revenue data:', err)
+        }
+      } finally {
+        // Always set loading to false if component is still mounted
+        if (isMounted && !abortController.signal.aborted) {
+          setLoading(false)
+        }
+      }
+    }
+
+    loadDataWithCleanup()
+
+    // Cleanup function
+    return () => {
+      isMounted = false
+      abortController.abort()
+    }
   }, [])
 
   React.useEffect(() => {
@@ -146,7 +267,7 @@ export function FinancialChart() {
     if (!revenueData.length) return []
 
     const transformed = revenueData.map((item, index) => ({
-      month: `${item.year}-${item.month.padStart(2, '0')}`,
+      month: `${item.year}-${String(item.month || 1).padStart(2, '0')}`,
       revenue: item.data_type === "historical" ? item.revenue : null,
       projected_revenue: item.data_type === "projected" ? item.revenue : null,
       data_type: item.data_type,
@@ -156,7 +277,7 @@ export function FinancialChart() {
 
     // Debug: Log projected data to see if variation is present
     const projectedData = transformed.filter(item => item.data_type === "projected")
-    if (projectedData.length > 0) {
+    if (projectedData.length > 0 && process.env.NODE_ENV === "development") {
       console.log("Projected data for chart:", projectedData.slice(0, 5).map(item => ({
         month: item.month,
         revenue: item.revenue,
@@ -208,7 +329,19 @@ export function FinancialChart() {
     }
     
     return chartData.filter(item => {
+      // Validate that item.date exists and is not null/undefined
+      if (!item.date) {
+        console.warn('Financial chart: Item missing date field', item)
+        return false
+      }
+      
+      // Create date and validate it's a valid date
       const itemDate = new Date(item.date)
+      if (isNaN(itemDate.getTime())) {
+        console.warn('Financial chart: Invalid date value', { date: item.date, item })
+        return false
+      }
+      
       return itemDate >= cutoffDate
     })
   }, [chartData, timeRange])
@@ -218,11 +351,43 @@ export function FinancialChart() {
       <Card className="@container/card">
         <CardHeader>
           <CardTitle>Financial Performance</CardTitle>
-          <CardDescription>Loading revenue data...</CardDescription>
+          <CardDescription>
+            {isRetrying ? 'Retrying...' : 'Loading revenue data...'}
+          </CardDescription>
         </CardHeader>
         <CardContent className="px-2 pt-4 sm:px-6 sm:pt-6">
           <div className="flex items-center justify-center h-[300px]">
-            <div className="text-muted-foreground">Loading...</div>
+            <div className="text-muted-foreground">
+              {isRetrying ? 'Retrying...' : 'Loading...'}
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    )
+  }
+
+  if (error) {
+    return (
+      <Card className="@container/card">
+        <CardHeader>
+          <CardTitle>Financial Performance</CardTitle>
+          <CardDescription>Unable to load revenue data</CardDescription>
+        </CardHeader>
+        <CardContent className="px-2 pt-4 sm:px-6 sm:pt-6">
+          <div className="flex flex-col items-center justify-center h-[300px] gap-4">
+            <div className="text-center">
+              <div className="text-destructive font-medium mb-2">Failed to load data</div>
+              <div className="text-muted-foreground text-sm max-w-md">
+                {error}
+              </div>
+            </div>
+            <button
+              onClick={handleRetry}
+              disabled={isRetrying}
+              className="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            >
+              {isRetrying ? 'Retrying...' : 'Try Again'}
+            </button>
           </div>
         </CardContent>
       </Card>

@@ -8,9 +8,10 @@ import pandas as pd
 import json
 from pathlib import Path
 from datetime import datetime
-from typing import Dict, List, Any, Tuple
+from typing import Dict, List, Any, Tuple, Optional
 import logging
 from decimal import Decimal, ROUND_HALF_UP
+import statistics
 
 # Configuration
 CONFIG = {
@@ -28,17 +29,187 @@ CONFIG = {
         "optimistic": 1.05     # 5% growth
     },
     "projection_growth_rate": 0.02,  # 2% annual growth
+    "base_growth_rate": 0.02,  # Base monthly growth rate for projections
     "seasonal_variation": {
         "q1": 0.85,  # Q1 significantly lower
         "q2": 1.0,   # Q2 baseline
         "q3": 1.15,  # Q3 significantly higher
         "q4": 1.0    # Q4 baseline
+    },
+    "seasonality_map": {
+        # Monthly seasonal factors (default to 0 if not specified)
+        1: 0.0,   # January
+        2: 0.0,   # February
+        3: 0.0,   # March
+        4: 0.0,   # April
+        5: 0.0,   # May
+        6: 0.0,   # June
+        7: 0.0,   # July
+        8: 0.0,   # August
+        9: 0.0,   # September
+        10: 0.0,  # October
+        11: 0.0,  # November
+        12: 0.0   # December
     }
 }
 
 # Setup logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
+
+
+class ProjectionService:
+    """Service for calculating revenue projections with business-driven parameters."""
+    
+    def __init__(self, 
+                 growth_rate: float = 0.02,
+                 base_growth_rate: float = 0.02,
+                 seasonal_variation: Dict[str, float] = None,
+                 seasonality_map: Dict[int, float] = None,
+                 volatility_factor: float = 0.05,
+                 smoothing_window: int = 3):
+        """
+        Initialize the projection service with configurable business parameters.
+        
+        Args:
+            growth_rate: Annual growth rate (default 2%)
+            base_growth_rate: Base monthly growth rate for projections (default 2%)
+            seasonal_variation: Quarterly seasonal multipliers
+            seasonality_map: Monthly seasonal factors (defaults to 0 for all months)
+            volatility_factor: Monthly volatility as percentage of base revenue
+            smoothing_window: Number of months to use for smoothing transition
+        """
+        self.growth_rate = growth_rate
+        self.base_growth_rate = base_growth_rate
+        self.seasonal_variation = seasonal_variation or {
+            "q1": 0.85,  # Q1 significantly lower
+            "q2": 1.0,   # Q2 baseline
+            "q3": 1.15,  # Q3 significantly higher
+            "q4": 1.0    # Q4 baseline
+        }
+        self.seasonality_map = seasonality_map or {
+            # Default to 0 for all months if not specified
+            month: 0.0 for month in range(1, 13)
+        }
+        self.volatility_factor = volatility_factor
+        self.smoothing_window = smoothing_window
+    
+    def calculate_historical_volatility(self, historical_revenues: List[float]) -> float:
+        """
+        Calculate historical volatility from monthly revenue data.
+        
+        Args:
+            historical_revenues: List of monthly revenue values
+            
+        Returns:
+            Standard deviation as percentage of mean revenue
+        """
+        if len(historical_revenues) < 2:
+            return self.volatility_factor  # Use default if insufficient data
+        
+        mean_revenue = statistics.mean(historical_revenues)
+        if mean_revenue == 0:
+            return self.volatility_factor
+        
+        std_dev = statistics.stdev(historical_revenues)
+        return min(std_dev / mean_revenue, 0.15)  # Cap at 15% volatility
+    
+    def calculate_smoothed_transition(self, 
+                                    last_historical: float, 
+                                    base_projection: float,
+                                    smoothing_weight: float = 0.3) -> float:
+        """
+        Calculate smoothed transition from historical to projected revenue.
+        
+        Args:
+            last_historical: Last historical revenue value
+            base_projection: Base projected revenue for the period
+            smoothing_weight: Weight for historical value (0-1, higher = more historical influence)
+            
+        Returns:
+            Smoothed revenue value
+        """
+        return (smoothing_weight * last_historical + 
+                (1 - smoothing_weight) * base_projection)
+    
+    def get_seasonal_multiplier(self, month: int) -> float:
+        """Get seasonal multiplier for a given month."""
+        if month in [1, 2, 3]:  # Q1
+            return self.seasonal_variation["q1"]
+        elif month in [4, 5, 6]:  # Q2
+            return self.seasonal_variation["q2"]
+        elif month in [7, 8, 9]:  # Q3
+            return self.seasonal_variation["q3"]
+        else:  # Q4
+            return self.seasonal_variation["q4"]
+    
+    def calculate_business_driven_adjustment(self, year: int, month: int) -> float:
+        """
+        Calculate business-driven monthly adjustment using explicit parameters.
+        
+        Args:
+            year: Year for the projection
+            month: Month for the projection
+            
+        Returns:
+            Adjustment factor (e.g., 0.02 for +2% adjustment)
+        """
+        # Apply base growth rate (monthly)
+        base_adjustment = self.base_growth_rate / 12  # Convert annual to monthly
+        
+        # Get seasonal factor from seasonality_map (defaults to 0 if not specified)
+        seasonal_factor = self.seasonality_map.get(month, 0.0)
+        
+        # Combine base growth and seasonal adjustment
+        total_adjustment = base_adjustment + seasonal_factor
+        
+        return total_adjustment
+    
+    def calculate_projected_revenue(self, 
+                                  year: int, 
+                                  month: int, 
+                                  base_revenue: float,
+                                  last_historical_revenue: Optional[float] = None,
+                                  is_first_projection: bool = False,
+                                  historical_revenues: Optional[List[float]] = None) -> float:
+        """
+        Calculate projected revenue for a given year and month.
+        
+        Args:
+            year: Year for the projection
+            month: Month for the projection
+            base_revenue: Base revenue to project from
+            last_historical_revenue: Last historical revenue value
+            is_first_projection: Whether this is the first projection month
+            historical_revenues: Historical revenue data for volatility calculation
+            
+        Returns:
+            Projected revenue value
+        """
+        # Apply annual growth
+        years_from_base = year - 2025  # Assuming 2025 is the base year
+        growth_multiplier = (1 + self.growth_rate) ** years_from_base
+        
+        # Apply seasonal variation
+        seasonal_multiplier = self.get_seasonal_multiplier(month)
+        
+        # Calculate base projected revenue
+        base_projected = base_revenue * growth_multiplier * seasonal_multiplier
+        
+        # Handle first projection month with smoothing
+        if is_first_projection and last_historical_revenue is not None:
+            # Use smoothed transition instead of exact historical value
+            return round(self.calculate_smoothed_transition(
+                last_historical_revenue, base_projected
+            ), 2)
+        
+        # Calculate business-driven adjustment
+        business_adjustment = self.calculate_business_driven_adjustment(year, month)
+        
+        # Apply business-driven adjustment
+        projected_revenue = base_projected * (1 + business_adjustment)
+        
+        return round(projected_revenue, 2)
 
 def normalize_float(value: float) -> float:
     """Normalize float to 2 decimal places to avoid precision artifacts."""
@@ -49,8 +220,16 @@ def normalize_float(value: float) -> float:
 class SimpleRevenuePipeline:
     """Simplified pipeline to calculate Pennsylvania revenue with audit trail."""
     
-    def __init__(self, base_path: str = None):
+    def __init__(self, base_path: str = None, projection_service: ProjectionService = None):
         self.base_path = Path(base_path or CONFIG["base_path"])
+        self.projection_service = projection_service or ProjectionService(
+            growth_rate=CONFIG["projection_growth_rate"],
+            base_growth_rate=CONFIG["base_growth_rate"],
+            seasonal_variation=CONFIG["seasonal_variation"],
+            seasonality_map=CONFIG["seasonality_map"],
+            volatility_factor=0.05,  # 5% default volatility
+            smoothing_window=3
+        )
         self.audit_trail = self._init_audit_trail()
         
     def _init_audit_trail(self) -> Dict[str, Any]:
@@ -332,43 +511,24 @@ class SimpleRevenuePipeline:
             last_historical_revenue = historical_data[-1]["revenue"]
             last_historical_date = historical_data[-1]["date"]
         
-        # Calculate projected revenue with growth and seasonal variation
-        def calculate_projected_revenue(year: int, month: int, is_first_projection: bool = False) -> float:
-            # For the first projection month, start exactly at the last historical revenue
-            if is_first_projection and last_historical_revenue is not None:
-                return round(last_historical_revenue, 2)
-            
-            # Use 2025 average for subsequent months
-            base_revenue = projections["monthly_averages"]["2025"]["monthly_average"]
-            
-            # Apply annual growth (2% per year)
-            years_from_2025 = year - 2025
-            growth_multiplier = (1 + CONFIG["projection_growth_rate"]) ** years_from_2025
-            
-            # Apply seasonal variation
-            if month in [1, 2, 3]:  # Q1
-                seasonal_multiplier = CONFIG["seasonal_variation"]["q1"]
-            elif month in [4, 5, 6]:  # Q2
-                seasonal_multiplier = CONFIG["seasonal_variation"]["q2"]
-            elif month in [7, 8, 9]:  # Q3
-                seasonal_multiplier = CONFIG["seasonal_variation"]["q3"]
-            else:  # Q4
-                seasonal_multiplier = CONFIG["seasonal_variation"]["q4"]
-            
-            # Add some monthly variation (random but consistent)
-            import hashlib
-            month_key = f"{year}-{month:02d}"
-            hash_val = int(hashlib.md5(month_key.encode()).hexdigest()[:8], 16)
-            variation = (hash_val % 2000 - 1000) / 10000  # ±10% variation
-            
-            projected_revenue = base_revenue * growth_multiplier * seasonal_multiplier * (1 + variation)
-            return round(projected_revenue, 2)
+        # Extract historical revenues for volatility calculation
+        historical_revenues = [d["revenue"] for d in historical_data if d["revenue"] > 0]
+        
+        # Get base revenue for projections
+        base_revenue = projections["monthly_averages"]["2025"]["monthly_average"]
         
         # 2025 remaining months (Aug-Dec)
         for i, month_num in enumerate(CONFIG["projection_months_2025"]):
             date_str = f"2025-{month_num:02d}-01"
             is_first_projection = (i == 0)  # First month is the connection point
-            projected_revenue = calculate_projected_revenue(2025, month_num, is_first_projection)
+            projected_revenue = self.projection_service.calculate_projected_revenue(
+                year=2025,
+                month=month_num,
+                base_revenue=base_revenue,
+                last_historical_revenue=last_historical_revenue,
+                is_first_projection=is_first_projection,
+                historical_revenues=historical_revenues
+            )
             graph_data["monthly_data"].append({
                 "date": date_str,
                 "year": "2025",
@@ -382,7 +542,14 @@ class SimpleRevenuePipeline:
         # 2026 full year
         for month_num in CONFIG["projection_year_2026"]:
             date_str = f"2026-{month_num:02d}-01"
-            projected_revenue = calculate_projected_revenue(2026, month_num)
+            projected_revenue = self.projection_service.calculate_projected_revenue(
+                year=2026,
+                month=month_num,
+                base_revenue=base_revenue,
+                last_historical_revenue=last_historical_revenue,
+                is_first_projection=False,
+                historical_revenues=historical_revenues
+            )
             graph_data["monthly_data"].append({
                 "date": date_str,
                 "year": "2026",
