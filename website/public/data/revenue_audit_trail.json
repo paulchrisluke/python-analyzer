@@ -1,6 +1,6 @@
 {
   "pipeline_run": {
-    "timestamp": "2025-09-13T17:05:07.207142",
+    "timestamp": "2025-09-13T17:35:46.480279",
     "purpose": "Calculate total Pennsylvania revenue for business sale",
     "business_rules": {
       "include_locations": [
@@ -1080,7 +1080,7 @@
           "date": "2025-08-01",
           "year": "2025",
           "month": "8",
-          "revenue": 71468.38,
+          "revenue": 91021.13,
           "data_type": "projected",
           "file": "Projected 2025-08",
           "structure_type": "projected"
@@ -1089,7 +1089,7 @@
           "date": "2025-09-01",
           "year": "2025",
           "month": "9",
-          "revenue": 103168.18,
+          "revenue": 99566.55,
           "data_type": "projected",
           "file": "Projected 2025-09",
           "structure_type": "projected"
@@ -1098,7 +1098,7 @@
           "date": "2025-10-01",
           "year": "2025",
           "month": "10",
-          "revenue": 90567.17,
+          "revenue": 86579.61,
           "data_type": "projected",
           "file": "Projected 2025-10",
           "structure_type": "projected"
@@ -1107,7 +1107,7 @@
           "date": "2025-11-01",
           "year": "2025",
           "month": "11",
-          "revenue": 91725.41,
+          "revenue": 86579.61,
           "data_type": "projected",
           "file": "Projected 2025-11",
           "structure_type": "projected"
@@ -1116,7 +1116,7 @@
           "date": "2025-12-01",
           "year": "2025",
           "month": "12",
-          "revenue": 87896.31,
+          "revenue": 86579.61,
           "data_type": "projected",
           "file": "Projected 2025-12",
           "structure_type": "projected"
@@ -1125,7 +1125,7 @@
           "date": "2026-01-01",
           "year": "2026",
           "month": "1",
-          "revenue": 73793.05,
+          "revenue": 75064.52,
           "data_type": "projected",
           "file": "Projected 2026-01",
           "structure_type": "projected"
@@ -1134,7 +1134,7 @@
           "date": "2026-02-01",
           "year": "2026",
           "month": "2",
-          "revenue": 79181.2,
+          "revenue": 75064.52,
           "data_type": "projected",
           "file": "Projected 2026-02",
           "structure_type": "projected"
@@ -1143,7 +1143,7 @@
           "date": "2026-03-01",
           "year": "2026",
           "month": "3",
-          "revenue": 76768.15,
+          "revenue": 75064.52,
           "data_type": "projected",
           "file": "Projected 2026-03",
           "structure_type": "projected"
@@ -1152,7 +1152,7 @@
           "date": "2026-04-01",
           "year": "2026",
           "month": "4",
-          "revenue": 92193.37,
+          "revenue": 88311.2,
           "data_type": "projected",
           "file": "Projected 2026-04",
           "structure_type": "projected"
@@ -1161,7 +1161,7 @@
           "date": "2026-05-01",
           "year": "2026",
           "month": "5",
-          "revenue": 84549.53,
+          "revenue": 88311.2,
           "data_type": "projected",
           "file": "Projected 2026-05",
           "structure_type": "projected"
@@ -1170,7 +1170,7 @@
           "date": "2026-06-01",
           "year": "2026",
           "month": "6",
-          "revenue": 81402.06,
+          "revenue": 88311.2,
           "data_type": "projected",
           "file": "Projected 2026-06",
           "structure_type": "projected"
@@ -1179,7 +1179,7 @@
           "date": "2026-07-01",
           "year": "2026",
           "month": "7",
-          "revenue": 98489.18,
+          "revenue": 101557.88,
           "data_type": "projected",
           "file": "Projected 2026-07",
           "structure_type": "projected"
@@ -1188,7 +1188,7 @@
           "date": "2026-08-01",
           "year": "2026",
           "month": "8",
-          "revenue": 104278.48,
+          "revenue": 101557.88,
           "data_type": "projected",
           "file": "Projected 2026-08",
           "structure_type": "projected"
@@ -1197,7 +1197,7 @@
           "date": "2026-09-01",
           "year": "2026",
           "month": "9",
-          "revenue": 105201.12,
+          "revenue": 101557.88,
           "data_type": "projected",
           "file": "Projected 2026-09",
           "structure_type": "projected"
@@ -1206,7 +1206,7 @@
           "date": "2026-10-01",
           "year": "2026",
           "month": "10",
-          "revenue": 95182.14,
+          "revenue": 88311.2,
           "data_type": "projected",
           "file": "Projected 2026-10",
           "structure_type": "projected"
@@ -1215,7 +1215,7 @@
           "date": "2026-11-01",
           "year": "2026",
           "month": "11",
-          "revenue": 87732.26,
+          "revenue": 88311.2,
           "data_type": "projected",
           "file": "Projected 2026-11",
           "structure_type": "projected"
@@ -1224,7 +1224,7 @@
           "date": "2026-12-01",
           "year": "2026",
           "month": "12",
-          "revenue": 85096.14,
+          "revenue": 88311.2,
           "data_type": "projected",
           "file": "Projected 2026-12",
           "structure_type": "projected"
