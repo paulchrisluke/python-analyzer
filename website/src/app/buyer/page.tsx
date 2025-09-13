@@ -1,8 +1,7 @@
 "use client"
 
-import { useAuth } from "@/lib/simple-auth"
-import { AuthGuard } from "@/components/auth-guard"
-import { AdminOrBuyer } from "@/components/role-guard"
+import { AdminOrBuyer } from "@/components/nextauth-guard"
+import { signOut, useSession } from "next-auth/react"
 import { FinancialChart } from "@/components/financial-chart"
 import { BuyerLocationInformation } from "@/components/buyer-location-information"
 import { InvestmentHighlights } from "@/components/investment-highlights"
@@ -182,7 +181,7 @@ const staticBusinessData = {
 };
 
 function BuyerDashboardContent() {
-  const { user, signOut } = useAuth()
+  const { data: session } = useSession()
 
   return (
     <SidebarProvider>
@@ -200,9 +199,9 @@ function BuyerDashboardContent() {
                 <div className="flex justify-between items-center mb-6">
                   <div>
                     <h1 className="text-4xl font-bold text-gray-900 mb-2">Buyer Dashboard</h1>
-                    <p className="text-lg text-gray-600">Welcome, {user?.name}! Detailed business information for due diligence.</p>
+                    <p className="text-lg text-gray-600">Welcome, {session?.user?.name}! Detailed business information for due diligence.</p>
                   </div>
-                  <Button onClick={signOut} variant="outline">
+                  <Button onClick={() => signOut({ callbackUrl: "/login" })} variant="outline">
                     Sign Out
                   </Button>
                 </div>
@@ -255,10 +254,8 @@ function BuyerDashboardContent() {
 
 export default function BuyerDashboard() {
   return (
-    <AuthGuard>
-      <AdminOrBuyer>
-        <BuyerDashboardContent />
-      </AdminOrBuyer>
-    </AuthGuard>
+    <AdminOrBuyer>
+      <BuyerDashboardContent />
+    </AdminOrBuyer>
   )
 }

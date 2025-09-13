@@ -1,4 +1,4 @@
-import { AuthGuard } from '@/components/auth-guard'
+import { AdminOnly } from '@/components/nextauth-guard'
 import { AppSidebar } from '@/components/app-sidebar'
 import { SiteHeader } from '@/components/site-header'
 import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar'
@@ -8,7 +8,7 @@ export default async function MetricsPage() {
   const adminData = await loadAdminData()
 
   return (
-    <AuthGuard>
+    <AdminOnly>
       <SidebarProvider>
         <AppSidebar variant="inset" />
         <SidebarInset>
@@ -29,6 +29,6 @@ export default async function MetricsPage() {
           </div>
         </SidebarInset>
       </SidebarProvider>
-    </AuthGuard>
+    </AdminOnly>
   )
 }

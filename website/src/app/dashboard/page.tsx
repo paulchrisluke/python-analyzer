@@ -4,13 +4,13 @@ import { DataTable } from "@/components/data-table"
 import { SectionCards } from "@/components/section-cards"
 import { SiteHeader } from "@/components/site-header"
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar"
-import { AuthGuard } from "@/components/auth-guard"
+import { AdminOrBuyer } from "@/components/nextauth-guard"
 
 import data from "./data.json"
 
 export default function Page() {
   return (
-    <AuthGuard>
+    <AdminOrBuyer>
       <SidebarProvider>
         <AppSidebar variant="inset" />
         <SidebarInset>
@@ -28,6 +28,6 @@ export default function Page() {
           </div>
         </SidebarInset>
       </SidebarProvider>
-    </AuthGuard>
+    </AdminOrBuyer>
   )
 }

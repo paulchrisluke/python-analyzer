@@ -7,7 +7,7 @@ import {
   MoreVerticalIcon,
   UserCircleIcon,
 } from "lucide-react"
-import { useAuth } from "@/lib/simple-auth"
+import { useSession, signOut } from "next-auth/react"
 import { useRouter } from "next/navigation"
 
 import {
@@ -42,11 +42,8 @@ export function NavUser({
 }) {
   const { isMobile } = useSidebar()
   const router = useRouter()
-  const { signOut } = useAuth()
-
   const handleLogout = async () => {
-    signOut()
-    router.push("/login")
+    await signOut({ callbackUrl: "/login" })
   }
 
   const handleAccountClick = () => {

@@ -9,8 +9,7 @@ import { RefreshCw, Download, Eye, EyeOff, FileText, Calculator, TrendingUp, Dol
 import { AppSidebar } from "@/components/app-sidebar"
 import { SiteHeader } from "@/components/site-header"
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar"
-import { AuthGuard } from "@/components/auth-guard"
-import { AdminOnly } from "@/components/role-guard"
+import { AdminOnly } from "@/components/nextauth-guard"
 
 // Helper functions for consistent filename parsing
 function extractYearFromFilename(filename: string): string {
@@ -877,16 +876,14 @@ function AdminPageContent() {
 
 export default function AdminPage() {
   return (
-    <AuthGuard>
-      <AdminOnly>
-        <SidebarProvider>
-          <AppSidebar variant="inset" />
-          <SidebarInset>
-            <SiteHeader title="Admin Dashboard" />
-            <AdminPageContent />
-          </SidebarInset>
-        </SidebarProvider>
-      </AdminOnly>
-    </AuthGuard>
+    <AdminOnly>
+      <SidebarProvider>
+        <AppSidebar variant="inset" />
+        <SidebarInset>
+          <SiteHeader title="Admin Dashboard" />
+          <AdminPageContent />
+        </SidebarInset>
+      </SidebarProvider>
+    </AdminOnly>
   )
 }

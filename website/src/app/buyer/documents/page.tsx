@@ -1,8 +1,7 @@
 "use client"
 
-import { useAuth } from "@/lib/simple-auth"
-import { AuthGuard } from "@/components/auth-guard"
-import { AdminOrBuyer } from "@/components/role-guard"
+import { AdminOrBuyer } from "@/components/nextauth-guard"
+import { signOut } from "next-auth/react"
 import { DueDiligenceDocuments } from "@/components/due-diligence-documents"
 import { SiteHeader } from "@/components/site-header"
 import { SiteFooter } from "@/components/site-footer"
@@ -13,7 +12,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { FileText, Download, Eye } from "lucide-react"
 
 function BuyerDocumentsContent() {
-  const { user, signOut } = useAuth()
+  // Removed old auth - using NextAuth now
 
   return (
     <SidebarProvider>
@@ -33,7 +32,7 @@ function BuyerDocumentsContent() {
                     <h1 className="text-4xl font-bold text-gray-900 mb-2">Due Diligence Documents</h1>
                     <p className="text-lg text-gray-600">Access to detailed financial statements, contracts, and operational data</p>
                   </div>
-                  <Button onClick={signOut} variant="outline">
+                  <Button onClick={() => signOut({ callbackUrl: "/login" })} variant="outline">
                     Sign Out
                   </Button>
                 </div>
@@ -202,10 +201,8 @@ function BuyerDocumentsContent() {
 
 export default function BuyerDocuments() {
   return (
-    <AuthGuard>
-      <AdminOrBuyer>
-        <BuyerDocumentsContent />
-      </AdminOrBuyer>
-    </AuthGuard>
+    <AdminOrBuyer>
+      <BuyerDocumentsContent />
+    </AdminOrBuyer>
   )
 }

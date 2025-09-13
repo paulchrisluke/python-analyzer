@@ -1,8 +1,7 @@
 "use client"
 
-import { useAuth } from "@/lib/simple-auth"
-import { AuthGuard } from "@/components/auth-guard"
-import { AdminOrBuyer } from "@/components/role-guard"
+import { AdminOrBuyer } from "@/components/nextauth-guard"
+import { signOut } from "next-auth/react"
 import { FinancialChart } from "@/components/financial-chart"
 import { YearlyRevenueChart } from "@/components/yearly-revenue-chart"
 import { SiteHeader } from "@/components/site-header"
@@ -13,7 +12,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 
 function BuyerFinancialsContent() {
-  const { user, signOut } = useAuth()
+  // Removed old auth - using NextAuth now
 
   return (
     <SidebarProvider>
@@ -33,7 +32,7 @@ function BuyerFinancialsContent() {
                     <h1 className="text-4xl font-bold text-gray-900 mb-2">Financial Analysis</h1>
                     <p className="text-lg text-gray-600">Detailed financial metrics and projections for due diligence</p>
                   </div>
-                  <Button onClick={signOut} variant="outline">
+                  <Button onClick={() => signOut({ callbackUrl: "/login" })} variant="outline">
                     Sign Out
                   </Button>
                 </div>
@@ -127,10 +126,8 @@ function BuyerFinancialsContent() {
 
 export default function BuyerFinancials() {
   return (
-    <AuthGuard>
-      <AdminOrBuyer>
-        <BuyerFinancialsContent />
-      </AdminOrBuyer>
-    </AuthGuard>
+    <AdminOrBuyer>
+      <BuyerFinancialsContent />
+    </AdminOrBuyer>
   )
 }

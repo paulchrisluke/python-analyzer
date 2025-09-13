@@ -19,7 +19,7 @@ import {
   ShieldIcon,
   UserIcon,
 } from "lucide-react"
-import { useSession } from "@/lib/simple-auth"
+import { useSession } from "next-auth/react"
 import { getAnchorUrl, ANCHORS } from "@/lib/anchors"
 import { usePathname } from "next/navigation"
 

@@ -1,8 +1,7 @@
 "use client"
 
-import { useAuth } from "@/lib/simple-auth"
-import { AuthGuard } from "@/components/auth-guard"
-import { AdminOrBuyer } from "@/components/role-guard"
+import { AdminOrBuyer } from "@/components/nextauth-guard"
+import { signOut } from "next-auth/react"
 import { BuyerLocationInformation } from "@/components/buyer-location-information"
 import { SiteHeader } from "@/components/site-header"
 import { SiteFooter } from "@/components/site-footer"
@@ -51,7 +50,7 @@ const staticBusinessData = {
 };
 
 function BuyerLocationsContent() {
-  const { user, signOut } = useAuth()
+  // Removed old auth - using NextAuth now
 
   return (
     <SidebarProvider>
@@ -71,7 +70,7 @@ function BuyerLocationsContent() {
                     <h1 className="text-4xl font-bold text-gray-900 mb-2">Location Details</h1>
                     <p className="text-lg text-gray-600">Detailed location information and property analysis</p>
                   </div>
-                  <Button onClick={signOut} variant="outline">
+                  <Button onClick={() => signOut({ callbackUrl: "/login" })} variant="outline">
                     Sign Out
                   </Button>
                 </div>
@@ -186,10 +185,8 @@ function BuyerLocationsContent() {
 
 export default function BuyerLocations() {
   return (
-    <AuthGuard>
-      <AdminOrBuyer>
-        <BuyerLocationsContent />
-      </AdminOrBuyer>
-    </AuthGuard>
+    <AdminOrBuyer>
+      <BuyerLocationsContent />
+    </AdminOrBuyer>
   )
 }
