@@ -39,24 +39,11 @@ jobs:
         python -m pip install --upgrade pip
         pip install -r requirements-simple.txt
         
-    - name: Run Simple Revenue Pipeline
+    - name: Skip Financial Pipelines (Run Locally)
       run: |
-        cd ..
-        echo "Running simple revenue pipeline..."
-        python simple_revenue_pipeline.py
-        
-    - name: Run Simple EBITDA Pipeline
-      run: |
-        cd ..
-        echo "Running simple EBITDA pipeline..."
-        python simple_ebitda_pipeline.py
-        
-    - name: Verify financial data generated
-      run: |
-        echo "Checking generated revenue data..."
-        ls -la src/data/revenue_audit_trail.json
-        echo "Checking generated EBITDA data..."
-        ls -la src/data/ebitda_audit_trail.json
+        echo "Financial pipelines skipped in CI/CD for security."
+        echo "Run 'python simple_revenue_pipeline.py' and 'python simple_ebitda_pipeline.py' locally."
+        echo "This ensures sensitive financial data stays private."
         
     - name: Setup Node.js
       uses: actions/setup-node@v4
