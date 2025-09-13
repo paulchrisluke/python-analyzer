@@ -12,6 +12,20 @@ import { SiteHeader } from "@/components/site-header"
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar"
 import { AuthGuard } from "@/components/auth-guard"
 
+// Helper functions for consistent filename parsing
+function extractYearFromFilename(filename: string): string {
+  const match = filename.match(/^\s*(\d{4})[-_]/)
+  return match ? match[1] : 'Unknown'
+}
+
+function extractPeriodFromFilename(filename: string): string {
+  const match = filename.match(/^\s*(\d{4})[-_](\d{2})/)
+  if (match) {
+    return `${match[1]}-${match[2]}`
+  }
+  return filename // fallback to original filename
+}
+
 interface PipelineData {
   revenue?: any
   ebitda?: any
@@ -38,7 +52,7 @@ function AdminPageContent() {
       const revenueResponse = await fetch('/data/revenue_audit_trail.json')
       const revenueData = revenueResponse.ok ? await revenueResponse.json() : null
       
-      // Load EBITDA data
+      // Load EBIT data
       const ebitdaResponse = await fetch('/data/ebitda_audit_trail.json')
       const ebitdaData = ebitdaResponse.ok ? await ebitdaResponse.json() : null
       
@@ -123,7 +137,7 @@ function AdminPageContent() {
               <CardDescription>
                 {type === 'revenue' 
                   ? "Revenue pipeline data with projections and audit trail"
-                  : "EBITDA pipeline data with calculations and audit trail"
+                  : "EBIT pipeline data with calculations and audit trail"
                 }
               </CardDescription>
             </div>
@@ -275,7 +289,7 @@ function AdminPageContent() {
 
     // Group files by year for better organization
     const filesByYear = filesWithTotals.reduce((acc: any, file: any) => {
-      const year = file.file.split('-')[0] // Extract year from filename
+      const year = extractYearFromFilename(file.file) // Extract year from filename
       if (!acc[year]) acc[year] = []
       acc[year].push(file)
       return acc
@@ -360,7 +374,7 @@ function AdminPageContent() {
                             <TableCell className="font-medium">
                               <div className="max-w-xs">
                                 <div className="truncate" title={file.file}>
-                                  {file.file.split('_')[0]} {/* Show just the date part */}
+                                  {extractPeriodFromFilename(file.file)} {/* Show just the date part */}
                                 </div>
                                 <div className="text-xs text-muted-foreground">
                                   {file.calculation_details?.method}
@@ -387,9 +401,9 @@ function AdminPageContent() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <FileText className="h-5 w-5" />
-              EBITDA Data Sources
+              EBIT Data Sources
             </CardTitle>
-            <CardDescription>Files used in EBITDA calculations</CardDescription>
+            <CardDescription>Files used in EBIT calculations</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="text-center py-8 text-muted-foreground">
@@ -405,7 +419,7 @@ function AdminPageContent() {
 
     // Group files by year
     const filesByYear = monthlyCalculations.reduce((acc: any, calculation: any) => {
-      const year = calculation.month.split('-')[0]
+      const year = extractYearFromFilename(calculation.month)
       if (!acc[year]) acc[year] = []
       acc[year].push(calculation)
       return acc
@@ -416,9 +430,9 @@ function AdminPageContent() {
         <div>
           <h3 className="text-lg font-semibold flex items-center gap-2">
             <FileText className="h-5 w-5" />
-            EBITDA Calculation Data Sources ({monthlyCalculations.length} files)
+            EBIT Calculation Data Sources ({monthlyCalculations.length} files)
           </h3>
-          <p className="text-sm text-muted-foreground">Files used to calculate EBITDA components and their contribution to final numbers</p>
+          <p className="text-sm text-muted-foreground">Files used to calculate EBIT components and their contribution to final numbers</p>
         </div>
         <div className="space-y-6">
             {/* Files by Year */}
@@ -439,7 +453,7 @@ function AdminPageContent() {
                     </TableHeader>
                     <TableBody>
                       {yearFiles.map((calculation: any, index: number) => {
-                        const month = calculation.month.split('-')[1] || 'Unknown'
+                        const month = extractPeriodFromFilename(calculation.month).split('-')[1] || 'Unknown'
                         const isLastInYear = index === yearFiles.length - 1
                         
                         // Flatten all fields from all locations
@@ -516,7 +530,7 @@ function AdminPageContent() {
                             <TableCell className="font-medium">
                               <div className="max-w-xs">
                                 <div className="truncate" title={calculation.filename}>
-                                  {calculation.filename.split('_')[0]}
+                                  {extractPeriodFromFilename(calculation.filename)}
                                 </div>
                                 <div className="text-xs text-muted-foreground">
                                   P&L Statement
@@ -615,7 +629,7 @@ function AdminPageContent() {
                   <div className="space-y-1">
                     <div>Total Files Processed: {files.length}</div>
                     <div>Files with Data: {files.filter((f: any) => f.has_data).length}</div>
-                    <div>Average per File: {formatNumber(totalRevenue / files.length)}</div>
+                    <div>Average per File: {files.length > 0 ? formatNumber(totalRevenue / files.length) : "—"}</div>
                     <div className="pt-2 border-t font-bold text-lg">
                       Final Total: {formatNumber(totalRevenue)}
                     </div>
@@ -652,9 +666,9 @@ function AdminPageContent() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Calculator className="h-5 w-5" />
-            EBITDA Calculation Methodology
+            EBIT Calculation Methodology
           </CardTitle>
-          <CardDescription>Step-by-step breakdown of how EBITDA numbers were calculated from financial data</CardDescription>
+          <CardDescription>Step-by-step breakdown of how EBIT numbers were calculated from financial data</CardDescription>
         </CardHeader>
         <CardContent>
           {ebitdaSteps ? (
@@ -790,7 +804,7 @@ function AdminPageContent() {
             </div>
           ) : (
             <div className="text-center py-4 text-muted-foreground">
-              No EBITDA calculation details available
+              No EBIT calculation details available
             </div>
           )}
         </CardContent>
@@ -846,7 +860,7 @@ function AdminPageContent() {
               <TabsList>
                 <TabsTrigger value="overview">Overview</TabsTrigger>
                 <TabsTrigger value="revenue">Revenue Pipeline</TabsTrigger>
-                <TabsTrigger value="ebitda">EBITDA Pipeline</TabsTrigger>
+                <TabsTrigger value="ebitda">EBIT Pipeline</TabsTrigger>
               </TabsList>
               
               <TabsContent value="overview" className="space-y-4">
@@ -886,8 +900,8 @@ function AdminPageContent() {
                   
                   <Card>
                     <CardHeader>
-                      <CardTitle>EBITDA Pipeline Status</CardTitle>
-                      <CardDescription>Latest EBITDA calculations and analysis</CardDescription>
+                      <CardTitle>EBIT Pipeline Status</CardTitle>
+                      <CardDescription>Latest EBIT calculations and analysis</CardDescription>
                     </CardHeader>
                     <CardContent>
                       {data.ebitda ? (
@@ -926,7 +940,7 @@ function AdminPageContent() {
               </TabsContent>
               
               <TabsContent value="ebitda" className="space-y-6">
-                {renderJsonSection("EBITDA Pipeline Data", data.ebitda, 'ebitda')}
+                {renderJsonSection("EBIT Pipeline Data", data.ebitda, 'ebitda')}
                 {renderEBITDAFilesTable()}
                 {renderCalculationSteps()}
               </TabsContent>
