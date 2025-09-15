@@ -10,6 +10,13 @@ interface BusinessMetricsProps {
 export function BusinessMetrics({ data }: BusinessMetricsProps) {
   console.log("📈 BusinessMetrics rendering");
   
+  // Compute annualSde with explicit finite number checking
+  const annualSde = Number.isFinite(data.annualSde) 
+    ? data.annualSde 
+    : (Number.isFinite(data.annualRevenue) && Number.isFinite(data.sdeMargin))
+      ? data.annualRevenue * data.sdeMargin
+      : null;
+  
   const metrics = [
     {
       title: "Total Revenue",
@@ -18,9 +25,9 @@ export function BusinessMetrics({ data }: BusinessMetricsProps) {
       icon: TrendingUp
     },
     {
-      title: "Annual EBITDA",
-      value: formatCurrency(data.annualRevenue * (data.ebitdaMargin / 100)),
-      description: "Projected Annual",
+      title: "Annual SDE",
+      value: annualSde !== null ? formatCurrency(annualSde) : 'N/A',
+      description: "Seller's Discretionary Earnings",
       icon: DollarSign
     },
     {
@@ -120,21 +127,20 @@ export function BusinessMetrics({ data }: BusinessMetricsProps) {
                 <CardHeader>
                   <CardTitle className="text-3xl font-bold text-primary">
                     {(() => {
-                      const annualEbitda = data.annualRevenue * (data.ebitdaMargin / 100);
-                      const safeMultiple = (Number.isFinite(data.askingPrice) && Number.isFinite(annualEbitda) && annualEbitda !== 0) 
-                        ? (data.askingPrice / annualEbitda) 
+                      const safeMultiple = (Number.isFinite(data.askingPrice) && annualSde !== null && Number.isFinite(annualSde) && annualSde !== 0) 
+                        ? (data.askingPrice / annualSde) 
                         : null;
                       return safeMultiple != null ? `${safeMultiple.toFixed(1)}x` : '-';
                     })()}
                   </CardTitle>
-                  <CardDescription className="text-lg font-semibold">EBITDA Multiple</CardDescription>
+                  <CardDescription className="text-lg font-semibold">SDE Multiple</CardDescription>
                 </CardHeader>
                 <CardContent>
                   <p className="text-sm text-muted-foreground mb-1">
-                    {formatCurrency(data.askingPrice)} ÷ {formatCurrency(data.annualRevenue * (data.ebitdaMargin / 100))}
+                    {formatCurrency(data.askingPrice)} ÷ {annualSde !== null ? formatCurrency(annualSde) : 'N/A'}
                   </p>
                   <p className="text-xs text-muted-foreground">
-                    Industry range: 3.0x - 5.0x annual EBITDA
+                    Industry range: 2.5x - 4.0x annual SDE
                   </p>
                 </CardContent>
               </Card>

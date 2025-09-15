@@ -93,11 +93,13 @@ interface FinancialHighlights {
   asking_price: number;
   annual_revenue: number;
   annual_ebitda: number;
+  annual_sde: number;
   sde: number;
   monthly_cash_flow: number;
   roi: number;
   payback_period: number;
   ebitda_margin: number;
+  sde_margin: number;
 }
 
 interface BusinessData {
@@ -130,17 +132,26 @@ export function BusinessDetails({ data }: BusinessDetailsProps) {
   
   // Get real data from simple pipelines
   const realRevenueData = revenue?.pipeline_run?.total_revenue;
-  const realEbitdaData = ebitda?.summary?.total_ebit;
+  const realEbitData = ebitda?.summary?.total_ebit;
   
-  // Update the data with real revenue/EBITDA if available
+  // Convert EBIT to SDE by adding back owner salary/benefits
+  const ownerSalary = 175000; // Estimated owner salary/benefits
+  const realSdeData = realEbitData ? realEbitData + ownerSalary : undefined;
+  
+  // Update the data with real revenue/SDE if available
   const updatedData = {
     ...data,
     financial_highlights: {
       ...data.financial_highlights,
       annual_revenue: realRevenueData || data.financial_highlights?.annual_revenue || 0,
-      annual_ebitda: realEbitdaData || data.financial_highlights?.annual_ebitda || 0,
-      ebitda_margin: realRevenueData && realEbitdaData ? realEbitdaData / realRevenueData : data.financial_highlights?.ebitda_margin || 0,
-      payback_period: realEbitdaData && data.financial_highlights?.asking_price ? data.financial_highlights.asking_price / realEbitdaData : 0,
+      // Preserve existing EBITDA values from data
+      annual_ebitda: data.financial_highlights?.annual_ebitda || 0,
+      ebitda_margin: data.financial_highlights?.ebitda_margin || 0,
+      // Add new SDE fields with computed values
+      annual_sde: realSdeData || data.financial_highlights?.annual_sde || 0,
+      sde_margin: realRevenueData && realSdeData ? realSdeData / realRevenueData : data.financial_highlights?.sde_margin || 0,
+      // Payback period now explicitly uses SDE (Seller's Discretionary Earnings)
+      payback_period: realSdeData && data.financial_highlights?.asking_price ? data.financial_highlights.asking_price / realSdeData : data.financial_highlights?.payback_period || 0,
     }
   };
   
@@ -184,24 +195,6 @@ export function BusinessDetails({ data }: BusinessDetailsProps) {
             </>
           )}
           
-          {data.key_benefits && data.key_benefits.length > 0 && (
-            <>
-              <p className="mb-4">
-                <strong>Key Strengths:</strong>
-              </p>
-              <ul className="list-disc pl-6 mb-4">
-                {data.key_benefits.map((benefit, index) => (
-                  <li key={index}>{benefit}</li>
-                ))}
-              </ul>
-            </>
-          )}
-          
-          {data.market_opportunity && (
-            <p className="mb-4">
-              <strong>Market Opportunity:</strong> {data.market_opportunity.growth_potential} - {data.market_opportunity.market_advantage}
-            </p>
-          )}
         </CardContent>
       </Card>
 

@@ -3,6 +3,7 @@ import {
   MapPinIcon, 
   Building2Icon, 
   UsersIcon, 
+  UserCheckIcon,
   CalendarIcon,
   DollarSignIcon,
   TrendingUpIcon,
@@ -63,11 +64,13 @@ interface FinancialHighlights {
   asking_price: number;
   annual_revenue: number;
   annual_ebitda: number;
+  annual_sde: number;
   sde: number;
   monthly_cash_flow: number;
   roi: number;
   payback_period: number;
   ebitda_margin: number;
+  sde_margin: number;
 }
 
 interface BusinessData {
@@ -128,63 +131,66 @@ export function BusinessOverview({ data }: BusinessOverviewProps) {
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="space-y-3">
-            <div className="flex items-center gap-2">
-              <MapPinIcon className="h-4 w-4 text-muted-foreground" />
-              <span className="font-medium">Location:</span>
-              <span>{data.property_details?.primary_location?.city || 'N/A'}, {data.property_details?.primary_location?.state || 'N/A'}</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <Building2Icon className="h-4 w-4 text-muted-foreground" />
-              <span className="font-medium">Business Type:</span>
-              <span>{data.listing_details?.business_type || 'N/A'}</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <UsersIcon className="h-4 w-4 text-muted-foreground" />
-              <span className="font-medium">Locations:</span>
-              <span>{data.listing_details?.locations || 0} locations</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <CalendarIcon className="h-4 w-4 text-muted-foreground" />
-              <span className="font-medium">Established:</span>
-              <span>
-                {data.listing_details?.established || 'N/A'}
-                {yearsInBusiness > 0 && ` (${yearsInBusiness} years)`}
-              </span>
-            </div>
+        <div className="space-y-3">
+          <div className="flex items-center gap-2">
+            <MapPinIcon className="h-4 w-4 text-muted-foreground" />
+            <span className="font-medium">Location:</span>
+            <span>{data.property_details?.primary_location?.city || 'N/A'}, {data.property_details?.primary_location?.state || 'N/A'}</span>
           </div>
-          <div className="space-y-3">
-            <div className="flex items-center gap-2">
-              <DollarSignIcon className="h-4 w-4 text-muted-foreground" />
-              <span className="font-medium">Asking Price:</span>
-              <span className="font-bold">{formatCurrency(data.financial_highlights?.asking_price || 0)}</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <TrendingUpIcon className="h-4 w-4 text-muted-foreground" />
-              <span className="font-medium">Annual Revenue:</span>
-              <span className="font-bold">{formatCurrency(data.financial_highlights?.annual_revenue || 0)}</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <CheckCircleIcon className="h-4 w-4 text-muted-foreground" />
-              <span className="font-medium">EBITDA Margin:</span>
-              <span className="font-bold">{formatPercentage(data.financial_highlights?.ebitda_margin || 0)}</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <ClockIcon className="h-4 w-4 text-muted-foreground" />
-              <span className="font-medium">Payback Period:</span>
-              <span className="font-bold">{(data.financial_highlights?.payback_period || 0).toFixed(1)} years</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <Building2Icon className="h-4 w-4 text-muted-foreground" />
-              <span className="font-medium">Monthly Rent:</span>
-              <span className="font-bold">{formatCurrency(data.property_details?.lease_analysis?.monthly_rent || 0)} + {formatCurrency(data.property_details?.lease_analysis?.monthly_cam || 0)} CAM</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <WrenchIcon className="h-4 w-4 text-muted-foreground" />
-              <span className="font-medium">Inventory:</span>
-              <span className="font-bold">Included in asking price</span>
-            </div>
+          <div className="flex items-center gap-2">
+            <Building2Icon className="h-4 w-4 text-muted-foreground" />
+            <span className="font-medium">Business Type:</span>
+            <span>{data.listing_details?.business_type || 'N/A'}</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <UserCheckIcon className="h-4 w-4 text-muted-foreground" />
+            <span className="font-medium">Employee Count:</span>
+            <span>5 employees</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <UsersIcon className="h-4 w-4 text-muted-foreground" />
+            <span className="font-medium">Locations:</span>
+            <span>{data.listing_details?.locations || 0} locations</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <CalendarIcon className="h-4 w-4 text-muted-foreground" />
+            <span className="font-medium">Years in Business:</span>
+            <span>{yearsInBusiness} years established</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <ClockIcon className="h-4 w-4 text-muted-foreground" />
+            <span className="font-medium">Business Hours:</span>
+            <span>Monday-Friday 9AM-5PM</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <DollarSignIcon className="h-4 w-4 text-muted-foreground" />
+            <span className="font-medium">Asking Price:</span>
+            <span className="font-bold">{formatCurrency(data.financial_highlights?.asking_price || 0)}</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <TrendingUpIcon className="h-4 w-4 text-muted-foreground" />
+            <span className="font-medium">Annual Revenue:</span>
+            <span className="font-bold">{formatCurrency(data.financial_highlights?.annual_revenue || 0)}</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <CheckCircleIcon className="h-4 w-4 text-muted-foreground" />
+            <span className="font-medium">SDE Margin:</span>
+            <span className="font-bold">{formatPercentage(data.financial_highlights?.sde_margin || 0)}</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <ClockIcon className="h-4 w-4 text-muted-foreground" />
+            <span className="font-medium">Payback Period (SDE):</span>
+            <span className="font-bold">{(data.financial_highlights?.payback_period || 0).toFixed(1)} years</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <Building2Icon className="h-4 w-4 text-muted-foreground" />
+            <span className="font-medium">Monthly Rent:</span>
+            <span className="font-bold">{formatCurrency(data.property_details?.lease_analysis?.monthly_rent || 0)} + {formatCurrency(data.property_details?.lease_analysis?.monthly_cam || 0)} CAM</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <WrenchIcon className="h-4 w-4 text-muted-foreground" />
+            <span className="font-medium">Inventory:</span>
+            <span className="font-bold">Included in asking price</span>
           </div>
         </div>
         

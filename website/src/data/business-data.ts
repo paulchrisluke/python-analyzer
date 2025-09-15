@@ -6,9 +6,11 @@
 export const staticBusinessData = {
   businessMetrics: {
     askingPrice: 650000,
-    annualRevenue: 0, // Will be overridden by real data
-    annualEbitda: 0, // Will be overridden by real data
-    ebitdaMargin: 0.43, // Will be calculated from real data
+    annualRevenue: 2400000,
+    annualEbitda: 1032000, // 43% margin of $2.4M revenue
+    annualSde: 839000, // From financial_highlights
+    ebitdaMargin: 0.43,
+    sdeMargin: 0.35, // From financial_highlights
   },
   listing_details: {
     business_name: 'Cranberry Hearing & Balance Center',
@@ -20,13 +22,15 @@ export const staticBusinessData = {
   },
   financial_highlights: {
     asking_price: 650000,
-    annual_revenue: 0, // Will be overridden by real data
-    annual_ebitda: 0, // Will be overridden by real data
-    sde: 0,
-    monthly_cash_flow: 0,
-    roi: 0,
-    payback_period: 0,
-    ebitda_margin: 0.43, // Will be calculated from real data
+    annual_revenue: 2400000,
+    annual_ebitda: 1032000, // 43% margin of $2.4M revenue
+    annual_sde: 839000,
+    sde: 839000,
+    monthly_cash_flow: 69917, // $839K / 12 months
+    roi: 1.29, // $839K / $650K asking price
+    payback_period: 0.78, // $650K / $839K annual SDE
+    ebitda_margin: 0.43,
+    sde_margin: 0.35, // $839K / $2.4M revenue
   },
   property_details: {
     primary_location: {
@@ -54,13 +58,13 @@ export const staticBusinessData = {
       for_sale: true,
     },
     lease_analysis: {
-      monthly_rent: 8500,
-      annual_rent: 102000,
-      monthly_cam: 1200,
-      annual_cam: 14400,
-      total_monthly_cost: 9700,
-      total_annual_cost: 116400,
-      cam_percentage: 12.4,
+      monthly_rent: 4350, // $2,000 (West View) + $2,350 (BDNPL)
+      annual_rent: 52200, // $24,000 + $28,200
+      monthly_cam: 0, // No CAM fees currently
+      annual_cam: 0,
+      total_monthly_cost: 4350,
+      total_annual_cost: 52200,
+      cam_percentage: 0,
     },
     total_locations: 2,
     property_type: 'Medical Office',
@@ -107,7 +111,7 @@ export const staticBusinessData = {
   },
   business_overview: {
     established_year: 2003,
-    total_employees: 8,
+    total_employees: 5,
     services_offered: [
       'Hearing Evaluations',
       'Hearing Aid Sales & Fitting',
@@ -127,24 +131,33 @@ export const staticBusinessData = {
   business_description: {
     paragraphs: [
       {
+        text: 'SIGNIFICANT OPPORTUNITY FOR AN AUDIOLOGIST OR HEALTHCARE ENTREPRENEUR TO ACQUIRE A RAPIDLY GROWING, LONG-ESTABLISHED, INSURANCE-BASED, RECURRING REVENUE AUDIOLOGY PRACTICE IN THE THRIVING PITTSBURGH METRO AREA!',
+        highlight: 'SIGNIFICANT OPPORTUNITY',
+      },
+      {
         text: 'Cranberry Hearing and Balance Center is a well-established, multi-location audiology practice serving the Cranberry Township & Pittsburgh Metro Area. Founded in 2003, the practice has built a strong reputation for providing comprehensive hearing healthcare services to patients of all ages.',
         highlight: 'Cranberry Hearing and Balance Center',
       },
       {
         text: 'The business operates from 2 strategic locations, offering a full range of audiological services including hearing evaluations, hearing aid sales & fitting, balance testing, tinnitus management, and custom ear protection. The practice has developed strong relationships with local healthcare providers and maintains a loyal patient base.',
       },
+      {
+        text: 'With over $2.4M in annual revenue and $839K in Seller\'s Discretionary Earnings, this practice offers exceptional cash flow and growth potential. The aging population demographic (65+ population growing 15% annually in the region) provides a strong foundation for continued expansion.',
+      },
     ],
     keyStrengths: [
       'Established insurance relationships (UPMC since 2006, Aetna since 2015)',
-      'Two prime locations in growing markets',
+      'Two prime locations in growing markets with 4,000 sq ft total space',
       'Professional audiology equipment included ($61,728 value)',
-      'Steady cash flow from insurance payments',
-      'Absentee owner opportunity',
-      'Strong EBITDA margins',
+      'Steady cash flow from insurance payments - 35% SDE margin',
+      'Absentee owner opportunity with 5 experienced staff members',
+      'Strong EBITDA margins with consistent monthly revenue',
       'Over 20 years of established business operations',
+      'Low competition in underserved markets',
+      'Turnkey operation with established patient base',
     ],
     marketOpportunity:
-      'High growth potential due to aging population demographics - Limited local competition with established insurance relationships providing a significant market advantage.',
+      'EXCEPTIONAL growth potential due to aging population demographics - 65+ population in Butler & Allegheny Counties growing 15% annually. Limited local competition with established insurance relationships providing a significant market advantage. Opportunity to expand services and add satellite locations.',
   },
   key_benefits: [
     'Established insurance relationships (UPMC since 2006, Aetna since 2015)',
@@ -167,6 +180,21 @@ export const staticBusinessData = {
     training_period: '30 days',
     reason_for_sale: 'Owner retirement and lifestyle change',
     transition_support: 'Available for smooth transition',
+  },
+  // Location audit trail data for dynamic lease information
+  location_audit_trail: {
+    cranberry_pa: {
+      summary: {
+        current_monthly_rent: 2600.0,
+        lease_end_date: '2027-12-31',
+      },
+    },
+    west_view_pa: {
+      summary: {
+        current_monthly_rent: 2000.0,
+        lease_end_date: '2027-11-30',
+      },
+    },
   },
 }
 

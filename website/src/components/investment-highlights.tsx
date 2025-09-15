@@ -8,8 +8,10 @@ interface InvestmentHighlightsProps {
     businessMetrics: {
       askingPrice: number;
       annualEbitda: number;
+      annualSde: number;
       annualRevenue: number;
       ebitdaMargin: number;
+      sdeMargin: number;
     };
   };
 }
@@ -24,46 +26,58 @@ export function InvestmentHighlights({ data }: InvestmentHighlightsProps) {
   const baseData = data || {
     businessMetrics: {
       askingPrice: 650000,
-      annualEbitda: 266517,
+      annualEbitda: 0, // Legacy EBITDA field
+      annualSde: 839245, // SDE: $664,245 EBIT + $175,000 owner salary
       annualRevenue: 2604167,
-      ebitdaMargin: 0.43,
+      ebitdaMargin: 0, // Legacy EBITDA margin
+      sdeMargin: 0.32, // SDE margin
     }
   };
   
   // Get real data from simple pipelines
   const realRevenueData = revenue?.pipeline_run?.total_revenue;
-  const realEbitdaData = ebitda?.summary?.total_ebit;
+  const realEbitData = ebitda?.summary?.total_ebit;
+  
+  // Convert EBIT to SDE by adding back owner salary/benefits
+  const ownerSalary = 175000; // Estimated owner salary/benefits
+  const realSdeData = realEbitData ? realEbitData + ownerSalary : undefined;
   
   // Determine which data to use - prioritize real data when available
-  const hasRealData = realRevenueData !== undefined && realEbitdaData !== undefined;
+  const hasRealData = realRevenueData !== undefined && realSdeData !== undefined;
   
   const finalData = {
     businessMetrics: {
       askingPrice: baseData.businessMetrics.askingPrice, // Always use hardcoded asking price
-      annualEbitda: hasRealData ? realEbitdaData : baseData.businessMetrics.annualEbitda,
+      annualEbitda: baseData.businessMetrics.annualEbitda, // Preserve legacy EBITDA
+      annualSde: hasRealData ? realSdeData : baseData.businessMetrics.annualSde,
       annualRevenue: hasRealData ? realRevenueData : baseData.businessMetrics.annualRevenue,
-      ebitdaMargin: 0 // Will be calculated below
+      ebitdaMargin: baseData.businessMetrics.ebitdaMargin, // Preserve legacy EBITDA margin
+      sdeMargin: 0 // Will be calculated below
     }
   };
   
-  // Compute ebitdaMargin from real or hardcoded data
-  const computedEbitdaMargin = finalData.businessMetrics.annualRevenue > 0 
-    ? finalData.businessMetrics.annualEbitda / finalData.businessMetrics.annualRevenue
-    : baseData.businessMetrics.ebitdaMargin || 0;
+  // Compute sdeMargin from real or hardcoded data
+  const computedSdeMargin = finalData.businessMetrics.annualRevenue > 0 
+    ? finalData.businessMetrics.annualSde / finalData.businessMetrics.annualRevenue
+    : baseData.businessMetrics.sdeMargin || 0;
   
   const investmentData = {
     businessMetrics: {
       ...finalData.businessMetrics,
-      ebitdaMargin: computedEbitdaMargin
+      sdeMargin: computedSdeMargin,
+      monthlyRent: 4350 // Total monthly rent for both locations ($2,000 + $2,350)
     }
   };
   
   console.log("💰 InvestmentHighlights data:", {
     realRevenue: realRevenueData,
-    realEbitda: realEbitdaData,
+    realEbit: realEbitData,
+    realSde: realSdeData,
+    ownerSalary,
     hasRealData,
     hardcodedData: baseData.businessMetrics,
     finalData: investmentData,
+    computedSdeMargin,
     loading,
     error
   });

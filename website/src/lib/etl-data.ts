@@ -10,7 +10,9 @@ import { formatCurrency } from './format';
 export interface BusinessMetrics {
   annualRevenue: number;
   annualEbitda: number;
+  annualSde: number;
   ebitdaMargin: number;
+  sdeMargin: number;
   roi: number;
   equipmentValue: number;
   askingPrice: number;
@@ -43,7 +45,9 @@ export async function loadETLData() {
     const businessMetrics: BusinessMetrics = {
       annualRevenue: financialHighlights.annual_revenue,
       annualEbitda: financialHighlights.annual_ebitda,
+      annualSde: financialHighlights.sde, // Use the dedicated SDE field from ETL data
       ebitdaMargin: financialHighlights.ebitda_margin,
+      sdeMargin: financialHighlights.sde / financialHighlights.annual_revenue, // Calculate SDE margin from SDE and revenue
       roi: financialHighlights.roi,
       equipmentValue: parseFloat(equipmentData.equipment_summary.total_value),
       askingPrice: financialHighlights.asking_price,
