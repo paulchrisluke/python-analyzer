@@ -2,27 +2,27 @@ import NextAuth from "next-auth"
 import Google from "next-auth/providers/google"
 
 // Module-load validation for required environment variables
-const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID
-const GOOGLE_CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET
-const NEXTAUTH_SECRET = process.env.NEXTAUTH_SECRET
+const GOOGLE_CLIENT_ID = process.env.AUTH_GOOGLE_ID || process.env.GOOGLE_CLIENT_ID
+const GOOGLE_CLIENT_SECRET = process.env.AUTH_GOOGLE_SECRET || process.env.GOOGLE_CLIENT_SECRET
+const AUTH_SECRET = process.env.AUTH_SECRET || process.env.NEXTAUTH_SECRET
 
 if (!GOOGLE_CLIENT_ID) {
   throw new Error(
-    "Missing required environment variable: GOOGLE_CLIENT_ID. " +
+    "Missing required environment variable: AUTH_GOOGLE_ID (or GOOGLE_CLIENT_ID for backward compatibility). " +
     "Please set this in your .env.local file or Vercel secrets."
   )
 }
 
 if (!GOOGLE_CLIENT_SECRET) {
   throw new Error(
-    "Missing required environment variable: GOOGLE_CLIENT_SECRET. " +
+    "Missing required environment variable: AUTH_GOOGLE_SECRET (or GOOGLE_CLIENT_SECRET for backward compatibility). " +
     "Please set this in your .env.local file or Vercel secrets."
   )
 }
 
-if (!NEXTAUTH_SECRET) {
+if (!AUTH_SECRET) {
   throw new Error(
-    "Missing required environment variable: NEXTAUTH_SECRET. " +
+    "Missing required environment variable: AUTH_SECRET (or NEXTAUTH_SECRET for backward compatibility). " +
     "Please set this in your .env.local file or Vercel secrets."
   )
 }
@@ -70,5 +70,5 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     strategy: 'jwt',
     maxAge: 7 * 24 * 60 * 60,
   },
-  secret: NEXTAUTH_SECRET
+  secret: AUTH_SECRET
 })
