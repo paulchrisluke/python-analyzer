@@ -8,8 +8,10 @@ interface InvestmentHighlightsProps {
     businessMetrics: {
       askingPrice: number;
       annualEbitda: number;
+      annualSde: number;
       annualRevenue: number;
       ebitdaMargin: number;
+      sdeMargin: number;
     };
   };
 }
@@ -24,9 +26,11 @@ export function InvestmentHighlights({ data }: InvestmentHighlightsProps) {
   const baseData = data || {
     businessMetrics: {
       askingPrice: 650000,
-      annualEbitda: 839245, // SDE: $664,245 EBIT + $175,000 owner salary
+      annualEbitda: 0, // Legacy EBITDA field
+      annualSde: 839245, // SDE: $664,245 EBIT + $175,000 owner salary
       annualRevenue: 2604167,
-      ebitdaMargin: 0.32, // Updated margin for SDE
+      ebitdaMargin: 0, // Legacy EBITDA margin
+      sdeMargin: 0.32, // SDE margin
     }
   };
   
@@ -44,22 +48,24 @@ export function InvestmentHighlights({ data }: InvestmentHighlightsProps) {
   const finalData = {
     businessMetrics: {
       askingPrice: baseData.businessMetrics.askingPrice, // Always use hardcoded asking price
-      annualEbitda: hasRealData ? realSdeData : baseData.businessMetrics.annualEbitda,
+      annualEbitda: baseData.businessMetrics.annualEbitda, // Preserve legacy EBITDA
+      annualSde: hasRealData ? realSdeData : baseData.businessMetrics.annualSde,
       annualRevenue: hasRealData ? realRevenueData : baseData.businessMetrics.annualRevenue,
-      ebitdaMargin: 0 // Will be calculated below
+      ebitdaMargin: baseData.businessMetrics.ebitdaMargin, // Preserve legacy EBITDA margin
+      sdeMargin: 0 // Will be calculated below
     }
   };
   
-  // Compute ebitdaMargin from real or hardcoded data
-  const computedEbitdaMargin = finalData.businessMetrics.annualRevenue > 0 
-    ? finalData.businessMetrics.annualEbitda / finalData.businessMetrics.annualRevenue
-    : baseData.businessMetrics.ebitdaMargin || 0;
+  // Compute sdeMargin from real or hardcoded data
+  const computedSdeMargin = finalData.businessMetrics.annualRevenue > 0 
+    ? finalData.businessMetrics.annualSde / finalData.businessMetrics.annualRevenue
+    : baseData.businessMetrics.sdeMargin || 0;
   
   const investmentData = {
     businessMetrics: {
       ...finalData.businessMetrics,
-      ebitdaMargin: computedEbitdaMargin,
-      monthlyRent: 9700 // Total monthly rent for both locations
+      sdeMargin: computedSdeMargin,
+      monthlyRent: 4350 // Total monthly rent for both locations ($2,000 + $2,350)
     }
   };
   
@@ -71,6 +77,7 @@ export function InvestmentHighlights({ data }: InvestmentHighlightsProps) {
     hasRealData,
     hardcodedData: baseData.businessMetrics,
     finalData: investmentData,
+    computedSdeMargin,
     loading,
     error
   });

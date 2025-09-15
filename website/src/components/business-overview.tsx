@@ -64,11 +64,13 @@ interface FinancialHighlights {
   asking_price: number;
   annual_revenue: number;
   annual_ebitda: number;
+  annual_sde: number;
   sde: number;
   monthly_cash_flow: number;
   roi: number;
   payback_period: number;
   ebitda_margin: number;
+  sde_margin: number;
 }
 
 interface BusinessData {
@@ -143,7 +145,7 @@ export function BusinessOverview({ data }: BusinessOverviewProps) {
           <div className="flex items-center gap-2">
             <UserCheckIcon className="h-4 w-4 text-muted-foreground" />
             <span className="font-medium">Employee Count:</span>
-            <span>8 employees</span>
+            <span>5 employees</span>
           </div>
           <div className="flex items-center gap-2">
             <UsersIcon className="h-4 w-4 text-muted-foreground" />
@@ -153,7 +155,7 @@ export function BusinessOverview({ data }: BusinessOverviewProps) {
           <div className="flex items-center gap-2">
             <CalendarIcon className="h-4 w-4 text-muted-foreground" />
             <span className="font-medium">Years in Business:</span>
-            <span>21 years established</span>
+            <span>{yearsInBusiness} years established</span>
           </div>
           <div className="flex items-center gap-2">
             <ClockIcon className="h-4 w-4 text-muted-foreground" />
@@ -172,12 +174,12 @@ export function BusinessOverview({ data }: BusinessOverviewProps) {
           </div>
           <div className="flex items-center gap-2">
             <CheckCircleIcon className="h-4 w-4 text-muted-foreground" />
-            <span className="font-medium">EBITDA Margin:</span>
-            <span className="font-bold">{formatPercentage(data.financial_highlights?.ebitda_margin || 0)}</span>
+            <span className="font-medium">SDE Margin:</span>
+            <span className="font-bold">{formatPercentage(data.financial_highlights?.sde_margin || 0)}</span>
           </div>
           <div className="flex items-center gap-2">
             <ClockIcon className="h-4 w-4 text-muted-foreground" />
-            <span className="font-medium">Payback Period:</span>
+            <span className="font-medium">Payback Period (SDE):</span>
             <span className="font-bold">{(data.financial_highlights?.payback_period || 0).toFixed(1)} years</span>
           </div>
           <div className="flex items-center gap-2">

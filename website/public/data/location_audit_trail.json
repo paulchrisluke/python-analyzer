@@ -1,0 +1,343 @@
+{
+  "pipeline_info": {
+    "name": "Simple Location Pipeline",
+    "version": "1.0",
+    "created_at": "2025-09-15T16:15:49.334274",
+    "purpose": "Process location data including lease information and property details"
+  },
+  "configuration": {
+    "lease_data_path": "docs/legal/Leases",
+    "business_rules_path": "etl_pipeline/config/business_rules.yaml",
+    "locations": {
+      "cranberry_pa": {
+        "location_id": "cranberry_pa",
+        "name": "Cranberry Hearing & Balance",
+        "address": "20820 Route 19, Suite A",
+        "city": "Cranberry Twp",
+        "state": "PA",
+        "zip_code": "16066",
+        "phone": "724-779-4444",
+        "google_maps_url": "https://www.google.com/maps/place/20820%20Route%2019+Cranberry%20Twp+PA+16066",
+        "location_type": "primary",
+        "for_sale": true,
+        "lease_file": "2022-01-01_to_2030-12-31_BDNPL_CommercialLease_CranberryPA.csv"
+      },
+      "west_view_pa": {
+        "location_id": "west_view_pa",
+        "name": "Cranberry Hearing & Balance - West View",
+        "address": "999 West View Park Drive",
+        "city": "Pittsburgh",
+        "state": "PA",
+        "zip_code": "15229",
+        "phone": "412-931-9290",
+        "google_maps_url": "https://www.google.com/maps/place/999%20West%20View%20Park%20Drive+Pittsburgh%20PA%2015229",
+        "location_type": "satellite",
+        "for_sale": true,
+        "lease_file": "2023-01-01_to_2030-12-31_WestView_CommercialLease_Renewed.csv"
+      }
+    },
+    "property_analysis": {
+      "square_footage": {
+        "cranberry_pa": 1500,
+        "west_view_pa": 1500
+      },
+      "property_type": "Leased Commercial",
+      "lease_terms": {
+        "analysis_period": "2023-2029",
+        "include_cam_fees": true,
+        "include_escalations": true
+      }
+    }
+  },
+  "lease_data": {
+    "cranberry_pa": {
+      "location_id": "cranberry_pa",
+      "lease_file": "2022-01-01_to_2030-12-31_BDNPL_CommercialLease_CranberryPA.csv",
+      "status": "success",
+      "lease_terms": [
+        {
+          "period": "Current Rental Terms",
+          "start_date": "2022-01-01",
+          "end_date": "2024-12-31",
+          "monthly_rent": 2350.0,
+          "annual_rent": 28200.0,
+          "cam_fee": 0.0,
+          "total_monthly_cost": 2350.0,
+          "total_annual_cost": 28200.0,
+          "notes": "Original lease terms",
+          "lessor": "BDNPL Real Estate LLC",
+          "lessee": "Cranberry Hearing and Balance Center",
+          "execution_date": "2022-01-01"
+        },
+        {
+          "period": "Extension 1",
+          "start_date": "2025-01-01",
+          "end_date": "2027-12-31",
+          "monthly_rent": 2500.0,
+          "annual_rent": 30000.0,
+          "cam_fee": 1200.0,
+          "total_monthly_cost": 2600.0,
+          "total_annual_cost": 31200.0,
+          "notes": "First extension with CAM fee",
+          "lessor": "BDNPL Real Estate LLC",
+          "lessee": "Cranberry Hearing and Balance Center",
+          "execution_date": "2024-09-17"
+        },
+        {
+          "period": "Extension 2",
+          "start_date": "2028-01-01",
+          "end_date": "2030-12-31",
+          "monthly_rent": 2600.0,
+          "annual_rent": 31200.0,
+          "cam_fee": 1200.0,
+          "total_monthly_cost": 2700.0,
+          "total_annual_cost": 32400.0,
+          "notes": "Second extension with CAM fee",
+          "lessor": "BDNPL Real Estate LLC",
+          "lessee": "Cranberry Hearing and Balance Center",
+          "execution_date": "2024-09-17"
+        }
+      ],
+      "summary": {
+        "total_lease_terms": 3,
+        "total_lease_cost": 91800.0,
+        "current_monthly_rent": 2700.0,
+        "lease_end_date": "2030-12-31",
+        "active_terms": 2
+      }
+    },
+    "west_view_pa": {
+      "location_id": "west_view_pa",
+      "lease_file": "2023-01-01_to_2030-12-31_WestView_CommercialLease_Renewed.csv",
+      "status": "success",
+      "lease_terms": [
+        {
+          "period": "Original Lease",
+          "start_date": "2019-10-09",
+          "end_date": "2023-05-31",
+          "monthly_rent": 1875.0,
+          "annual_rent": 22500.0,
+          "cam_fee": 0.0,
+          "total_monthly_cost": 1875.0,
+          "total_annual_cost": 22500.0,
+          "notes": "Original lease for Storeroom #26",
+          "lessor": "1029 West View Plaza L.P.",
+          "lessee": "Cranberry Hearing and Balance Center LLC",
+          "execution_date": "2019-10-09"
+        },
+        {
+          "period": "Amendment Period 1",
+          "start_date": "2023-06-01",
+          "end_date": "2023-11-30",
+          "monthly_rent": 1875.0,
+          "annual_rent": 11250.0,
+          "cam_fee": 0.0,
+          "total_monthly_cost": 1875.0,
+          "total_annual_cost": 11250.0,
+          "notes": "Lease amendment and extension",
+          "lessor": "1029 West View Plaza L.P.",
+          "lessee": "Cranberry Hearing and Balance Center LLC",
+          "execution_date": "2023-06-02"
+        },
+        {
+          "period": "Amendment Period 2",
+          "start_date": "2023-12-01",
+          "end_date": "2027-11-30",
+          "monthly_rent": 2000.0,
+          "annual_rent": 96000.0,
+          "cam_fee": 0.0,
+          "total_monthly_cost": 2000.0,
+          "total_annual_cost": 96000.0,
+          "notes": "Increased rent per amendment",
+          "lessor": "1029 West View Plaza L.P.",
+          "lessee": "Cranberry Hearing and Balance Center LLC",
+          "execution_date": "2023-06-02"
+        },
+        {
+          "period": "Amendment Period 3",
+          "start_date": "2027-12-01",
+          "end_date": "2029-11-30",
+          "monthly_rent": 2131.36,
+          "annual_rent": 51152.64,
+          "cam_fee": 0.0,
+          "total_monthly_cost": 2131.36,
+          "total_annual_cost": 51152.64,
+          "notes": "Final rent increase per amendment",
+          "lessor": "1029 West View Plaza L.P.",
+          "lessee": "Cranberry Hearing and Balance Center LLC",
+          "execution_date": "2023-06-02"
+        }
+      ],
+      "summary": {
+        "total_lease_terms": 4,
+        "total_lease_cost": 180902.64,
+        "current_monthly_rent": 2131.36,
+        "lease_end_date": "2029-11-30",
+        "active_terms": 2
+      }
+    }
+  },
+  "location_summary": {
+    "total_locations": 2,
+    "locations_for_sale": 2,
+    "total_square_footage": 3000,
+    "total_monthly_lease_cost": 4831.36
+  },
+  "property_analysis": {
+    "property_type": "Leased Commercial",
+    "total_square_footage": 3000,
+    "locations": {
+      "cranberry_pa": {
+        "name": "Cranberry Hearing & Balance",
+        "address": "20820 Route 19, Suite A",
+        "city": "Cranberry Twp",
+        "state": "PA",
+        "zip_code": "16066",
+        "phone": "724-779-4444",
+        "google_maps_url": "https://www.google.com/maps/place/20820%20Route%2019+Cranberry%20Twp+PA+16066",
+        "location_type": "primary",
+        "square_footage": 1500,
+        "lease_status": "success",
+        "current_monthly_rent": 2700.0,
+        "lease_end_date": "2030-12-31",
+        "cost_per_sqft": 1.8
+      },
+      "west_view_pa": {
+        "name": "Cranberry Hearing & Balance - West View",
+        "address": "999 West View Park Drive",
+        "city": "Pittsburgh",
+        "state": "PA",
+        "zip_code": "15229",
+        "phone": "412-931-9290",
+        "google_maps_url": "https://www.google.com/maps/place/999%20West%20View%20Park%20Drive+Pittsburgh%20PA%2015229",
+        "location_type": "satellite",
+        "square_footage": 1500,
+        "lease_status": "success",
+        "current_monthly_rent": 2131.36,
+        "lease_end_date": "2029-11-30",
+        "cost_per_sqft": 1.42
+      }
+    },
+    "lease_summary": {
+      "total_monthly_lease_cost": 4831.36,
+      "total_annual_lease_cost": 57976.32,
+      "average_cost_per_sqft": 1.61,
+      "lease_expiration_dates": [
+        {
+          "location": "Cranberry Hearing & Balance",
+          "end_date": "2030-12-31"
+        },
+        {
+          "location": "Cranberry Hearing & Balance - West View",
+          "end_date": "2029-11-30"
+        }
+      ]
+    },
+    "market_analysis": {
+      "competitive_advantages": [
+        "Prime commercial locations in growing markets",
+        "Long-term lease stability",
+        "Professional medical office spaces"
+      ],
+      "location_benefits": [
+        "High-traffic commercial areas",
+        "Easy access and parking",
+        "Professional medical building settings"
+      ]
+    }
+  },
+  "integration_data": {
+    "location_data": [
+      {
+        "name": "Cranberry Hearing & Balance",
+        "type": "Primary location",
+        "address": "20820 Route 19, Suite A, Cranberry Twp, PA 16066",
+        "phone": "724-779-4444",
+        "google_maps_url": "https://www.google.com/maps/place/20820%20Route%2019+Cranberry%20Twp+PA+16066",
+        "square_footage": 1500,
+        "location_type": "primary",
+        "for_sale": true,
+        "lease": {
+          "current_monthly_rent": 2700.0,
+          "lease_end_date": "2030-12-31",
+          "total_lease_terms": 3
+        }
+      },
+      {
+        "name": "Cranberry Hearing & Balance - West View",
+        "type": "Secondary location",
+        "address": "999 West View Park Drive, Pittsburgh, PA 15229",
+        "phone": "412-931-9290",
+        "google_maps_url": "https://www.google.com/maps/place/999%20West%20View%20Park%20Drive+Pittsburgh%20PA%2015229",
+        "square_footage": 1500,
+        "location_type": "satellite",
+        "for_sale": true,
+        "lease": {
+          "current_monthly_rent": 2131.36,
+          "lease_end_date": "2029-11-30",
+          "total_lease_terms": 4
+        }
+      }
+    ],
+    "lease_analysis": {
+      "total_monthly_lease_cost": 4831.36,
+      "total_annual_lease_cost": 57976.32,
+      "cost_per_sqft": 1.61
+    },
+    "property_details": {
+      "primary_location": {
+        "name": "Cranberry Hearing & Balance",
+        "type": "Primary location",
+        "address": "20820 Route 19, Suite A, Cranberry Twp, PA 16066",
+        "phone": "724-779-4444",
+        "google_maps_url": "https://www.google.com/maps/place/20820%20Route%2019+Cranberry%20Twp+PA+16066",
+        "square_footage": 1500,
+        "location_type": "primary",
+        "for_sale": true,
+        "lease": {
+          "current_monthly_rent": 2700.0,
+          "lease_end_date": "2030-12-31",
+          "total_lease_terms": 3
+        }
+      },
+      "secondary_location": {
+        "name": "Cranberry Hearing & Balance - West View",
+        "type": "Secondary location",
+        "address": "999 West View Park Drive, Pittsburgh, PA 15229",
+        "phone": "412-931-9290",
+        "google_maps_url": "https://www.google.com/maps/place/999%20West%20View%20Park%20Drive+Pittsburgh%20PA%2015229",
+        "square_footage": 1500,
+        "location_type": "satellite",
+        "for_sale": true,
+        "lease": {
+          "current_monthly_rent": 2131.36,
+          "lease_end_date": "2029-11-30",
+          "total_lease_terms": 4
+        }
+      },
+      "lease_analysis": {
+        "total_monthly_lease_cost": 4831.36,
+        "total_annual_lease_cost": 57976.32,
+        "average_cost_per_sqft": 1.61,
+        "lease_expiration_dates": [
+          {
+            "location": "Cranberry Hearing & Balance",
+            "end_date": "2030-12-31"
+          },
+          {
+            "location": "Cranberry Hearing & Balance - West View",
+            "end_date": "2029-11-30"
+          }
+        ]
+      },
+      "property_type": "Leased Commercial"
+    },
+    "business_operations": {
+      "locations": 2,
+      "states": [
+        "PA"
+      ],
+      "total_square_footage": 3000
+    }
+  }
+}

@@ -41,13 +41,13 @@
       "for_sale": true
     },
     "lease_analysis": {
-      "monthly_rent": 2500,
-      "annual_rent": 30000,
-      "monthly_cam": 100.0,
-      "annual_cam": 1200,
-      "total_monthly_cost": 2600.0,
-      "total_annual_cost": 31200,
-      "cam_percentage": 4.0
+      "monthly_rent": 4350,
+      "annual_rent": 52200,
+      "monthly_cam": 0,
+      "annual_cam": 0,
+      "total_monthly_cost": 4350,
+      "total_annual_cost": 52200,
+      "cam_percentage": 0
     },
     "total_locations": 2,
     "property_type": "Leased"

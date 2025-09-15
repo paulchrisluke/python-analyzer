@@ -34,13 +34,13 @@ const staticBusinessData = {
       for_sale: true,
     },
     lease_analysis: {
-      monthly_rent: 8500,
-      annual_rent: 102000,
-      monthly_cam: 1200,
-      annual_cam: 14400,
-      total_monthly_cost: 9700,
-      total_annual_cost: 116400,
-      cam_percentage: 14.1,
+      monthly_rent: 4350, // $2,000 (West View) + $2,350 (BDNPL)
+      annual_rent: 52200, // $24,000 + $28,200
+      monthly_cam: 0, // No CAM fees currently
+      annual_cam: 0,
+      total_monthly_cost: 4350,
+      total_annual_cost: 52200,
+      cam_percentage: 0,
     },
     total_locations: 2,
     property_type: "Medical Office",
@@ -149,7 +149,7 @@ function BuyerLocationsContent() {
                           </div>
                           <div className="flex justify-between">
                             <span className="text-muted-foreground">Square Footage:</span>
-                            <span>2,200 sq ft</span>
+                            <span>1,500 sq ft</span>
                           </div>
                           <div className="flex justify-between">
                             <span className="text-muted-foreground">Parking:</span>

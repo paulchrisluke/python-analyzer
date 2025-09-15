@@ -28,8 +28,10 @@ interface SectionCardsProps {
     businessMetrics: {
       askingPrice: number;
       annualEbitda: number;
+      annualSde: number;
       annualRevenue: number;
       ebitdaMargin: number;
+      sdeMargin: number;
       monthlyRent?: number;
     };
   };
@@ -84,18 +86,19 @@ export function SectionCards({ data }: SectionCardsProps) {
         <CardHeader>
           <CardDescription>Cash Flow (SDE)</CardDescription>
           <CardTitle className="text-2xl font-semibold tabular-nums @[250px]/card:text-3xl">
-            {data ? formatCurrency(data.businessMetrics.annualEbitda) : "$839,245"}
+            {/* SDE (Seller's Discretionary Earnings) includes owner benefits and salary */}
+            {data ? formatCurrency(data.businessMetrics.annualSde) : "$839,245"}
           </CardTitle>
           <CardAction>
             <Badge variant="outline" className="text-xs">
               <IconTrendingUp className="h-3 w-3 mr-1" />
-              {data ? formatPercentage(data.businessMetrics.ebitdaMargin) : "34.0%"}
+              {data ? formatPercentage(data.businessMetrics.sdeMargin) : "34.0%"}
             </Badge>
           </CardAction>
         </CardHeader>
         <CardFooter className="flex-col items-start gap-1.5 text-sm">
           <div className="line-clamp-1 flex gap-2 font-medium">
-            Seller's discretionary earnings <IconShield className="size-4" />
+            Seller&apos;s discretionary earnings <IconShield className="size-4" />
           </div>
           <div className="text-muted-foreground">
             Includes owner benefits & salary

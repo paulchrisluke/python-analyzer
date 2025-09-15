@@ -93,11 +93,13 @@ interface FinancialHighlights {
   asking_price: number;
   annual_revenue: number;
   annual_ebitda: number;
+  annual_sde: number;
   sde: number;
   monthly_cash_flow: number;
   roi: number;
   payback_period: number;
   ebitda_margin: number;
+  sde_margin: number;
 }
 
 interface BusinessData {
@@ -142,9 +144,14 @@ export function BusinessDetails({ data }: BusinessDetailsProps) {
     financial_highlights: {
       ...data.financial_highlights,
       annual_revenue: realRevenueData || data.financial_highlights?.annual_revenue || 0,
-      annual_ebitda: realSdeData || data.financial_highlights?.annual_ebitda || 0,
-      ebitda_margin: realRevenueData && realSdeData ? realSdeData / realRevenueData : data.financial_highlights?.ebitda_margin || 0,
-      payback_period: realSdeData && data.financial_highlights?.asking_price ? data.financial_highlights.asking_price / realSdeData : 0,
+      // Preserve existing EBITDA values from data
+      annual_ebitda: data.financial_highlights?.annual_ebitda || 0,
+      ebitda_margin: data.financial_highlights?.ebitda_margin || 0,
+      // Add new SDE fields with computed values
+      annual_sde: realSdeData || data.financial_highlights?.annual_sde || 0,
+      sde_margin: realRevenueData && realSdeData ? realSdeData / realRevenueData : data.financial_highlights?.sde_margin || 0,
+      // Payback period now explicitly uses SDE (Seller's Discretionary Earnings)
+      payback_period: realSdeData && data.financial_highlights?.asking_price ? data.financial_highlights.asking_price / realSdeData : data.financial_highlights?.payback_period || 0,
     }
   };
   
