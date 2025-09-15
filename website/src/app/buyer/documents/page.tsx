@@ -1,6 +1,5 @@
 "use client"
 
-import { signOut } from "next-auth/react"
 import { DueDiligenceDocuments } from "@/components/due-diligence-documents"
 import { SiteHeader } from "@/components/site-header"
 import { SiteFooter } from "@/components/site-footer"
@@ -26,14 +25,9 @@ function BuyerDocumentsContent() {
               
               {/* Header */}
               <div className="px-4 lg:px-6">
-                <div className="flex justify-between items-center mb-6">
-                  <div>
-                    <h1 className="text-4xl font-bold text-gray-900 mb-2">Due Diligence Documents</h1>
-                    <p className="text-lg text-gray-600">Access to detailed financial statements, contracts, and operational data</p>
-                  </div>
-                  <Button onClick={() => signOut({ callbackUrl: "/login" })} variant="outline">
-                    Sign Out
-                  </Button>
+                <div className="mb-6">
+                  <h1 className="text-4xl font-bold text-foreground mb-2">Due Diligence Documents</h1>
+                  <p className="text-lg text-muted-foreground">Access to detailed financial statements, contracts, and operational data</p>
                 </div>
               </div>
 

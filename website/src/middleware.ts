@@ -1,23 +1,34 @@
-import { auth } from "../auth"
 import { NextResponse } from "next/server"
 import type { NextRequest } from "next/server"
+import { auth } from "@/auth"
 
 export default auth((req) => {
   const { pathname } = req.nextUrl
   
   // Public routes that don't require authentication
-  const publicRoutes = ['/', '/login', '/unauthorized']
+  const publicRoutes = ['/', '/unauthorized']
   const isPublicRoute = publicRoutes.includes(pathname)
+  
+  // Skip middleware for API routes, static files, and data files
+  if (pathname.startsWith('/api/') || pathname.startsWith('/_next/') || pathname.startsWith('/data/') || pathname === '/favicon.ico') {
+    return NextResponse.next()
+  }
   
   // If user is not authenticated and trying to access protected route
   if (!req.auth && !isPublicRoute) {
-    const loginUrl = new URL("/login", req.url)
-    loginUrl.searchParams.set("callbackUrl", pathname)
+    const loginUrl = new URL("/api/auth/signin", req.url)
+    // Only set callbackUrl for actual pages, not data files or assets
+    if (!pathname.startsWith('/data/') && !pathname.includes('.')) {
+      loginUrl.searchParams.set("callbackUrl", pathname)
+    } else {
+      // Default to dashboard for data files and assets
+      loginUrl.searchParams.set("callbackUrl", "/dashboard")
+    }
     return NextResponse.redirect(loginUrl)
   }
   
-  // If user is authenticated and trying to access login page, redirect to dashboard
-  if (req.auth && pathname === '/login') {
+  // If user is authenticated and trying to access signin page, redirect to dashboard
+  if (req.auth && pathname === '/api/auth/signin') {
     return NextResponse.redirect(new URL("/dashboard", req.url))
   }
   

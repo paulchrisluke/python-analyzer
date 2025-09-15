@@ -1,6 +1,8 @@
 "use client"
 
 import { MailIcon, PlusCircleIcon, type LucideIcon } from "lucide-react"
+import Link from "next/link"
+import { usePathname } from "next/navigation"
 
 import { Button } from "@/components/ui/button"
 import {
@@ -23,6 +25,12 @@ export function NavMain({
   }[]
   showRequestInfo?: boolean
 }) {
+  const pathname = usePathname()
+  
+  // Debug logging
+  console.log('NavMain - Current pathname:', pathname)
+  console.log('NavMain - Items:', items.map(item => ({ title: item.title, url: item.url })))
+
   return (
     <SidebarGroup>
       <SidebarGroupContent className="flex flex-col gap-2">
@@ -48,16 +56,32 @@ export function NavMain({
           </SidebarMenu>
         )}
         <SidebarMenu>
-          {items.map((item) => (
-            <SidebarMenuItem key={item.url || item.id}>
-              <SidebarMenuButton tooltip={item.title} asChild>
-                <a href={item.url}>
-                  {item.icon && <item.icon />}
-                  <span>{item.title}</span>
-                </a>
-              </SidebarMenuButton>
-            </SidebarMenuItem>
-          ))}
+          {items.map((item) => {
+            // Normalize paths by removing trailing slashes for comparison
+            const normalizedPathname = pathname.replace(/\/$/, '') || '/'
+            const normalizedItemUrl = item.url.replace(/\/$/, '') || '/'
+            const isActive = normalizedPathname === normalizedItemUrl
+            
+            // Debug logging
+            if (isActive) {
+              console.log('Active item:', item.title, 'pathname:', pathname, 'normalized:', normalizedPathname, 'url:', item.url, 'normalized:', normalizedItemUrl)
+            }
+            return (
+              <SidebarMenuItem key={item.url || item.id}>
+                <SidebarMenuButton 
+                  tooltip={item.title} 
+                  asChild 
+                  isActive={isActive}
+                  className={isActive ? "bg-primary text-primary-foreground" : ""}
+                >
+                  <Link href={item.url}>
+                    {item.icon && <item.icon />}
+                    <span>{item.title}</span>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+            )
+          })}
         </SidebarMenu>
       </SidebarGroupContent>
     </SidebarGroup>

@@ -34,12 +34,14 @@ export function InvestmentHighlights({ data }: InvestmentHighlightsProps) {
   const realRevenueData = revenue?.pipeline_run?.total_revenue;
   const realEbitdaData = ebitda?.summary?.total_ebit;
   
-  // Use real revenue/EBITDA data if available, otherwise use hardcoded values
+  // Determine which data to use - prioritize real data when available
+  const hasRealData = realRevenueData !== undefined && realEbitdaData !== undefined;
+  
   const finalData = {
     businessMetrics: {
       askingPrice: baseData.businessMetrics.askingPrice, // Always use hardcoded asking price
-      annualEbitda: realEbitdaData || baseData.businessMetrics.annualEbitda,
-      annualRevenue: realRevenueData || baseData.businessMetrics.annualRevenue,
+      annualEbitda: hasRealData ? realEbitdaData : baseData.businessMetrics.annualEbitda,
+      annualRevenue: hasRealData ? realRevenueData : baseData.businessMetrics.annualRevenue,
       ebitdaMargin: 0 // Will be calculated below
     }
   };
@@ -59,11 +61,32 @@ export function InvestmentHighlights({ data }: InvestmentHighlightsProps) {
   console.log("💰 InvestmentHighlights data:", {
     realRevenue: realRevenueData,
     realEbitda: realEbitdaData,
+    hasRealData,
     hardcodedData: baseData.businessMetrics,
     finalData: investmentData,
     loading,
     error
   });
+  
+  // Show loading state if we're still loading and don't have real data yet
+  if (loading && !hasRealData) {
+    return (
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+        <div className="animate-pulse">
+          <div className="h-32 bg-gray-200 rounded-lg"></div>
+        </div>
+        <div className="animate-pulse">
+          <div className="h-32 bg-gray-200 rounded-lg"></div>
+        </div>
+        <div className="animate-pulse">
+          <div className="h-32 bg-gray-200 rounded-lg"></div>
+        </div>
+        <div className="animate-pulse">
+          <div className="h-32 bg-gray-200 rounded-lg"></div>
+        </div>
+      </div>
+    );
+  }
   
   return <SectionCards data={investmentData} />;
 }

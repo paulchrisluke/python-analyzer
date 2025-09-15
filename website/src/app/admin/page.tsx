@@ -876,7 +876,7 @@ function AdminPageContent() {
 export default function AdminPage() {
   return (
     <SidebarProvider>
-      <AppSidebar variant="inset" />
+      <AppSidebar />
       <SidebarInset>
         <SiteHeader title="Admin Dashboard" />
         <AdminPageContent />

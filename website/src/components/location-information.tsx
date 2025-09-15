@@ -108,7 +108,7 @@ export function LocationInformation({ data }: LocationInformationProps) {
                   </div>
                   <div className="flex justify-between">
                     <span className="text-muted-foreground">Staff:</span>
-                    <span className="font-medium">2</span>
+                    <span className="font-medium">2.5</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-muted-foreground">Square Footage:</span>
@@ -138,7 +138,7 @@ export function LocationInformation({ data }: LocationInformationProps) {
                   </div>
                   <div className="flex justify-between">
                     <span className="text-muted-foreground">Staff:</span>
-                    <span className="font-medium">2</span>
+                    <span className="font-medium">2.5</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-muted-foreground">Square Footage:</span>

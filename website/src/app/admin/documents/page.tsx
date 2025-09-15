@@ -21,19 +21,30 @@ export default async function DocumentsPage() {
 
   return (
     <SidebarProvider>
-      <AppSidebar variant="inset" />
+      <AppSidebar />
       <SidebarInset>
         <SiteHeader title="Data Sources & Documents" />
+
+        {/* Main Content matching dashboard structure */}
         <div className="flex flex-1 flex-col">
           <div className="@container/main flex flex-1 flex-col gap-2">
             <div className="flex flex-col gap-4 py-4 md:gap-6 md:py-6">
+              {/* Header */}
               <div className="px-4 lg:px-6">
-                <h1>Data Sources & Documents</h1>
-                <h2>Business Metrics</h2>
-                <pre>{JSON.stringify(adminData.businessMetrics, null, 2)}</pre>
-                
-                <h2>Coverage Analysis</h2>
-                <pre>{JSON.stringify(adminData.coverageAnalysis, null, 2)}</pre>
+                <h1 className="text-4xl font-bold text-gray-900 mb-2">Data Sources & Documents</h1>
+                <p className="text-lg text-gray-600">Administrative data sources and document analysis</p>
+              </div>
+
+              {/* Business Metrics */}
+              <div className="px-4 lg:px-6">
+                <h2 className="text-2xl font-semibold text-gray-800 mb-4">Business Metrics</h2>
+                <pre className="bg-gray-50 p-4 rounded-lg overflow-auto text-sm">{JSON.stringify(adminData.businessMetrics, null, 2)}</pre>
+              </div>
+              
+              {/* Coverage Analysis */}
+              <div className="px-4 lg:px-6">
+                <h2 className="text-2xl font-semibold text-gray-800 mb-4">Coverage Analysis</h2>
+                <pre className="bg-gray-50 p-4 rounded-lg overflow-auto text-sm">{JSON.stringify(adminData.coverageAnalysis, null, 2)}</pre>
               </div>
             </div>
           </div>

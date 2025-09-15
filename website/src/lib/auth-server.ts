@@ -1,4 +1,4 @@
-import { auth } from '../../auth'
+import { auth } from '@/auth'
 import { redirect } from 'next/navigation'
 
 /**
@@ -89,4 +89,26 @@ export async function requireAdminOrBuyer(): Promise<AuthUser> {
   }
   
   return user
+}
+
+/**
+ * Handle dashboard role-based redirects on the server side
+ * Redirects to appropriate dashboard based on user role
+ */
+export async function handleDashboardRedirect(): Promise<never> {
+  const user = await getServerUser()
+  
+  if (!user) {
+    redirect('/api/auth/signin')
+  }
+  
+  // Redirect based on user role
+  if (user.role === 'admin') {
+    redirect('/admin')
+  } else if (user.role === 'buyer') {
+    redirect('/buyer')
+  } else {
+    // For viewers or any other roles, redirect to unauthorized
+    redirect('/unauthorized')
+  }
 }

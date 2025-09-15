@@ -42,9 +42,6 @@ export function NavUser({
 }) {
   const { isMobile } = useSidebar()
   const router = useRouter()
-  const handleLogout = async () => {
-    await signOut({ callbackUrl: "/login" })
-  }
 
   const handleAccountClick = () => {
     router.push("/account")
@@ -56,6 +53,10 @@ export function NavUser({
 
   const handleNotificationsClick = () => {
     router.push("/notifications")
+  }
+
+  const handleLogout = () => {
+    signOut({ callbackUrl: '/' })
   }
 
   return (
@@ -117,7 +118,7 @@ export function NavUser({
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={handleLogout}>
+            <DropdownMenuItem onClick={handleLogout} className="flex items-center gap-2">
               <LogOutIcon />
               Log out
             </DropdownMenuItem>

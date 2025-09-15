@@ -81,7 +81,7 @@ export function SectionCards({ data }: SectionCardsProps) {
       </Card>
       <Card className="@container/card bg-gradient-to-t from-primary/5 to-card shadow-xs">
         <CardHeader>
-          <CardDescription>Cash Flow (EBITDA)</CardDescription>
+          <CardDescription>Cash Flow (EBIT)</CardDescription>
           <CardTitle className="text-2xl font-semibold tabular-nums @[250px]/card:text-3xl">
             {data ? formatCurrency(data.businessMetrics.annualEbitda) : "$664,245"}
           </CardTitle>
@@ -97,7 +97,7 @@ export function SectionCards({ data }: SectionCardsProps) {
             Consistent cash flow <IconShield className="size-4" />
           </div>
           <div className="text-muted-foreground">
-            Before interest, taxes, depreciation
+            Before interest and taxes
           </div>
         </CardFooter>
       </Card>
