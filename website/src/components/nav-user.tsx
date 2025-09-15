@@ -30,7 +30,7 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@/components/ui/sidebar"
-import { SignOutButton } from "@/components/sign-out-button"
+import Link from "next/link"
 
 export function NavUser({
   user,
@@ -116,7 +116,10 @@ export function NavUser({
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
             <DropdownMenuItem asChild>
-              <SignOutButton />
+              <Link href="/api/auth/signout" className="flex items-center gap-2">
+                <LogOutIcon />
+                Log out
+              </Link>
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
