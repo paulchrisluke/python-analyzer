@@ -1,13 +1,11 @@
 import { LogOutIcon } from "lucide-react"
-import { signOutAction } from "@/lib/actions"
+import Link from "next/link"
 
 export function SignOutButton() {
   return (
-    <form action={signOutAction}>
-      <button type="submit" className="w-full text-left">
-        <LogOutIcon />
-        Log out
-      </button>
-    </form>
+    <Link href="/api/auth/signout" className="w-full text-left flex items-center gap-2">
+      <LogOutIcon />
+      Log out
+    </Link>
   )
 }

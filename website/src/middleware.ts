@@ -6,18 +6,23 @@ export default auth((req) => {
   const { pathname } = req.nextUrl
   
   // Public routes that don't require authentication
-  const publicRoutes = ['/', '/login', '/unauthorized']
+  const publicRoutes = ['/', '/unauthorized']
   const isPublicRoute = publicRoutes.includes(pathname)
+  
+  // Skip middleware for API routes and static files
+  if (pathname.startsWith('/api/') || pathname.startsWith('/_next/') || pathname === '/favicon.ico') {
+    return NextResponse.next()
+  }
   
   // If user is not authenticated and trying to access protected route
   if (!req.auth && !isPublicRoute) {
-    const loginUrl = new URL("/login", req.url)
+    const loginUrl = new URL("/api/auth/signin", req.url)
     loginUrl.searchParams.set("callbackUrl", pathname)
     return NextResponse.redirect(loginUrl)
   }
   
-  // If user is authenticated and trying to access login page, redirect to dashboard
-  if (req.auth && pathname === '/login') {
+  // If user is authenticated and trying to access signin page, redirect to dashboard
+  if (req.auth && pathname === '/api/auth/signin') {
     return NextResponse.redirect(new URL("/dashboard", req.url))
   }
   
