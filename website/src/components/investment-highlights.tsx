@@ -24,23 +24,27 @@ export function InvestmentHighlights({ data }: InvestmentHighlightsProps) {
   const baseData = data || {
     businessMetrics: {
       askingPrice: 650000,
-      annualEbitda: 266517,
+      annualEbitda: 839245, // SDE: $664,245 EBIT + $175,000 owner salary
       annualRevenue: 2604167,
-      ebitdaMargin: 0.43,
+      ebitdaMargin: 0.32, // Updated margin for SDE
     }
   };
   
   // Get real data from simple pipelines
   const realRevenueData = revenue?.pipeline_run?.total_revenue;
-  const realEbitdaData = ebitda?.summary?.total_ebit;
+  const realEbitData = ebitda?.summary?.total_ebit;
+  
+  // Convert EBIT to SDE by adding back owner salary/benefits
+  const ownerSalary = 175000; // Estimated owner salary/benefits
+  const realSdeData = realEbitData ? realEbitData + ownerSalary : undefined;
   
   // Determine which data to use - prioritize real data when available
-  const hasRealData = realRevenueData !== undefined && realEbitdaData !== undefined;
+  const hasRealData = realRevenueData !== undefined && realSdeData !== undefined;
   
   const finalData = {
     businessMetrics: {
       askingPrice: baseData.businessMetrics.askingPrice, // Always use hardcoded asking price
-      annualEbitda: hasRealData ? realEbitdaData : baseData.businessMetrics.annualEbitda,
+      annualEbitda: hasRealData ? realSdeData : baseData.businessMetrics.annualEbitda,
       annualRevenue: hasRealData ? realRevenueData : baseData.businessMetrics.annualRevenue,
       ebitdaMargin: 0 // Will be calculated below
     }
@@ -54,13 +58,16 @@ export function InvestmentHighlights({ data }: InvestmentHighlightsProps) {
   const investmentData = {
     businessMetrics: {
       ...finalData.businessMetrics,
-      ebitdaMargin: computedEbitdaMargin
+      ebitdaMargin: computedEbitdaMargin,
+      monthlyRent: 9700 // Total monthly rent for both locations
     }
   };
   
   console.log("💰 InvestmentHighlights data:", {
     realRevenue: realRevenueData,
-    realEbitda: realEbitdaData,
+    realEbit: realEbitData,
+    realSde: realSdeData,
+    ownerSalary,
     hasRealData,
     hardcodedData: baseData.businessMetrics,
     finalData: investmentData,

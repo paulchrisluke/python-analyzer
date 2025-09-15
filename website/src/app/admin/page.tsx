@@ -5,7 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardAction, 
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { RefreshCw, Download, Eye, EyeOff, FileText, Calculator, TrendingUp, DollarSign, FileCheck } from "lucide-react"
+import { RefreshCw, Download, Eye, EyeOff, FileText, Calculator, TrendingUp, DollarSign, FileCheck, Plus } from "lucide-react"
 import { AppSidebar } from "@/components/app-sidebar"
 import { SiteHeader } from "@/components/site-header"
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar"
@@ -125,7 +125,7 @@ function AdminPageContent() {
     }).format(num)
   }
 
-  const renderSectionCard = (title: string, value: string | number, description: string, icon: React.ReactNode, badge?: string, isCurrency?: boolean) => (
+  const renderSectionCard = (title: string, value: string | number, description: string, icon: React.ReactNode, badge?: string, isCurrency?: boolean, badgeIcon?: React.ReactNode) => (
     <Card className="@container/card bg-gradient-to-t from-primary/5 to-card shadow-xs">
       <CardHeader>
         <CardDescription>{title}</CardDescription>
@@ -135,7 +135,7 @@ function AdminPageContent() {
         {badge && (
           <CardAction>
             <Badge variant="outline" className="text-xs">
-              <TrendingUp className="h-3 w-3 mr-1" aria-hidden="true" />
+              {badgeIcon || <TrendingUp className="h-3 w-3 mr-1" aria-hidden="true" />}
               {badge}
             </Badge>
           </CardAction>
@@ -817,7 +817,8 @@ function AdminPageContent() {
                         "Historical revenue",
                         <DollarSign className="size-4" aria-hidden="true" />,
                         "Loaded",
-                        true
+                        true,
+                        <DollarSign className="h-3 w-3 mr-1" aria-hidden="true" />
                       )}
                       {renderSectionCard(
                         "Projected Revenue",
@@ -825,29 +826,55 @@ function AdminPageContent() {
                         "Future projections",
                         <TrendingUp className="size-4" aria-hidden="true" />,
                         "Projected",
-                        true
+                        true,
+                        <TrendingUp className="h-3 w-3 mr-1" aria-hidden="true" />
                       )}
                       {renderSectionCard(
                         "Files Processed",
                         data.revenue.pipeline_run?.files_processed?.length || 0,
                         "Data sources",
                         <FileCheck className="size-4" aria-hidden="true" />,
-                        undefined,
-                        false
+                        "CSV Files",
+                        false,
+                        <FileText className="h-3 w-3 mr-1" aria-hidden="true" />
                       )}
                     </>
                   )}
                   {data.ebitda && (
-                    renderSectionCard(
-                      "Total EBIT",
-                      data.ebitda.summary?.total_ebit || 0,
-                      "Earnings analysis",
-                      <Calculator className="size-4" aria-hidden="true" />,
-                      "Calculated",
-                      true
-                    )
+                    <>
+                      {renderSectionCard(
+                        "Total EBIT",
+                        data.ebitda.summary?.total_ebit || 0,
+                        "Earnings analysis",
+                        <Calculator className="size-4" aria-hidden="true" />,
+                        "Calculated",
+                        true,
+                        <Calculator className="h-3 w-3 mr-1" aria-hidden="true" />
+                      )}
+                      {renderSectionCard(
+                        "SDE",
+                        (data.ebitda.summary?.total_ebit || 0) + 175000,
+                        "Seller's Discretionary Earnings",
+                        <Calculator className="size-4" aria-hidden="true" />,
+                        "$175,000",
+                        true,
+                        <Plus className="h-3 w-3 mr-1" aria-hidden="true" />
+                      )}
+                    </>
                   )}
                 </div>
+              </div>
+
+              {/* SDE Calculation Note */}
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                <h3 className="text-sm font-semibold text-blue-900 mb-2">SDE Calculation Note</h3>
+                <p className="text-sm text-blue-800">
+                  <strong>Seller's Discretionary Earnings (SDE)</strong> is calculated by adding the estimated owner salary/benefits ($175,000) to the EBIT figure. 
+                  This represents the total cash flow available to a new owner, as they can take out the owner salary that was previously paid to the seller.
+                </p>
+                <p className="text-xs text-blue-700 mt-2">
+                  Formula: SDE = EBIT + Owner Salary ($175,000)
+                </p>
               </div>
 
               {/* Revenue Pipeline Section */}

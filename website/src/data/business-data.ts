@@ -127,24 +127,33 @@ export const staticBusinessData = {
   business_description: {
     paragraphs: [
       {
+        text: 'SIGNIFICANT OPPORTUNITY FOR AN AUDIOLOGIST OR HEALTHCARE ENTREPRENEUR TO ACQUIRE A RAPIDLY GROWING, LONG-ESTABLISHED, INSURANCE-BASED, RECURRING REVENUE AUDIOLOGY PRACTICE IN THE THRIVING PITTSBURGH METRO AREA!',
+        highlight: 'SIGNIFICANT OPPORTUNITY',
+      },
+      {
         text: 'Cranberry Hearing and Balance Center is a well-established, multi-location audiology practice serving the Cranberry Township & Pittsburgh Metro Area. Founded in 2003, the practice has built a strong reputation for providing comprehensive hearing healthcare services to patients of all ages.',
         highlight: 'Cranberry Hearing and Balance Center',
       },
       {
         text: 'The business operates from 2 strategic locations, offering a full range of audiological services including hearing evaluations, hearing aid sales & fitting, balance testing, tinnitus management, and custom ear protection. The practice has developed strong relationships with local healthcare providers and maintains a loyal patient base.',
       },
+      {
+        text: 'With over $2.4M in annual revenue and $839K in Seller\'s Discretionary Earnings, this practice offers exceptional cash flow and growth potential. The aging population demographic (65+ population growing 15% annually in the region) provides a strong foundation for continued expansion.',
+      },
     ],
     keyStrengths: [
       'Established insurance relationships (UPMC since 2006, Aetna since 2015)',
-      'Two prime locations in growing markets',
+      'Two prime locations in growing markets with 4,700 sq ft total space',
       'Professional audiology equipment included ($61,728 value)',
-      'Steady cash flow from insurance payments',
-      'Absentee owner opportunity',
-      'Strong EBITDA margins',
+      'Steady cash flow from insurance payments - 34% SDE margin',
+      'Absentee owner opportunity with 8 experienced staff members',
+      'Strong EBITDA margins with consistent monthly revenue',
       'Over 20 years of established business operations',
+      'Low competition in underserved markets',
+      'Turnkey operation with established patient base',
     ],
     marketOpportunity:
-      'High growth potential due to aging population demographics - Limited local competition with established insurance relationships providing a significant market advantage.',
+      'EXCEPTIONAL growth potential due to aging population demographics - 65+ population in Butler & Allegheny Counties growing 15% annually. Limited local competition with established insurance relationships providing a significant market advantage. Opportunity to expand services and add satellite locations.',
   },
   key_benefits: [
     'Established insurance relationships (UPMC since 2006, Aetna since 2015)',
