@@ -7,7 +7,6 @@ import {
   Building2Icon,
   CalculatorIcon,
   ClipboardListIcon,
-  DatabaseIcon,
   FileIcon,
   FileTextIcon,
   FolderIcon,
@@ -52,14 +51,9 @@ const adminNavItems = [
     icon: ShieldIcon,
   },
   {
-    title: "Data Sources",
+    title: "Documents",
     url: "/admin/documents",
-    icon: DatabaseIcon,
-  },
-  {
-    title: "Business Metrics",
-    url: "/admin/metrics",
-    icon: BarChartIcon,
+    icon: FileTextIcon,
   },
 ]
 

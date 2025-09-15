@@ -21,15 +21,22 @@ export default auth((req) => {
     if (!pathname.startsWith('/data/') && !pathname.includes('.')) {
       loginUrl.searchParams.set("callbackUrl", pathname)
     } else {
-      // Default to dashboard for data files and assets
-      loginUrl.searchParams.set("callbackUrl", "/dashboard")
+      // Default to home page for data files and assets
+      loginUrl.searchParams.set("callbackUrl", "/")
     }
     return NextResponse.redirect(loginUrl)
   }
   
-  // If user is authenticated and trying to access signin page, redirect to dashboard
+  // If user is authenticated and trying to access signin page, redirect based on role
   if (req.auth && pathname === '/api/auth/signin') {
-    return NextResponse.redirect(new URL("/dashboard", req.url))
+    const user = req.auth.user
+    if (user?.role === 'admin') {
+      return NextResponse.redirect(new URL("/admin", req.url))
+    } else if (user?.role === 'buyer') {
+      return NextResponse.redirect(new URL("/buyer", req.url))
+    } else {
+      return NextResponse.redirect(new URL("/", req.url))
+    }
   }
   
   // Check role-based access for admin routes

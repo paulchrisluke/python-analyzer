@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { RefreshCw, Download, Eye, EyeOff, FileText, Calculator, TrendingUp, DollarSign, FileCheck, Plus } from "lucide-react"
+import { LoadingSpinner } from "@/components/ui/loading-spinner"
 import { AppSidebar } from "@/components/app-sidebar"
 import { SiteHeader } from "@/components/site-header"
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar"
@@ -761,14 +762,7 @@ function AdminPageContent() {
   }
 
   if (data.loading) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <div className="text-center">
-          <RefreshCw className="h-8 w-8 animate-spin mx-auto mb-4" />
-          <p className="text-muted-foreground">Loading pipeline data...</p>
-        </div>
-      </div>
-    )
+    return <LoadingSpinner size="lg" text="Loading pipeline data..." centered />
   }
 
   if (data.error) {
@@ -793,7 +787,11 @@ function AdminPageContent() {
             <div className="mb-6">
               <div className="flex items-center gap-4 mb-4">
                 <Button onClick={loadData} disabled={data.loading}>
-                  <RefreshCw className={`h-4 w-4 mr-2 ${data.loading ? 'animate-spin' : ''}`} />
+                  {data.loading ? (
+                    <LoadingSpinner size="sm" />
+                  ) : (
+                    <RefreshCw className="h-4 w-4 mr-2" />
+                  )}
                   Refresh Data
                 </Button>
                 {lastUpdated && (
