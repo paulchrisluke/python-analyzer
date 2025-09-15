@@ -26,6 +26,10 @@ export function NavMain({
   showRequestInfo?: boolean
 }) {
   const pathname = usePathname()
+  
+  // Debug logging
+  console.log('NavMain - Current pathname:', pathname)
+  console.log('NavMain - Items:', items.map(item => ({ title: item.title, url: item.url })))
 
   return (
     <SidebarGroup>
@@ -54,12 +58,17 @@ export function NavMain({
         <SidebarMenu>
           {items.map((item) => {
             const isActive = pathname === item.url
+            // Debug logging
+            if (isActive) {
+              console.log('Active item:', item.title, 'pathname:', pathname, 'url:', item.url)
+            }
             return (
               <SidebarMenuItem key={item.url || item.id}>
                 <SidebarMenuButton 
                   tooltip={item.title} 
                   asChild 
                   isActive={isActive}
+                  className={isActive ? "bg-primary text-primary-foreground" : ""}
                 >
                   <Link href={item.url}>
                     {item.icon && <item.icon />}

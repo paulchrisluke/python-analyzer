@@ -33,7 +33,11 @@ export function NavSecondary({
             const isActive = pathname === item.url
             return (
               <SidebarMenuItem key={item.title}>
-                <SidebarMenuButton asChild isActive={isActive}>
+                <SidebarMenuButton 
+                  asChild 
+                  isActive={isActive}
+                  className={isActive ? "bg-primary text-primary-foreground" : ""}
+                >
                   <Link href={item.url}>
                     <item.icon />
                     <span>{item.title}</span>
