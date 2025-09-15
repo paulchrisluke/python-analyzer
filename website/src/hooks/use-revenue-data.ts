@@ -34,6 +34,8 @@ export function useRevenueData() {
     setData(prev => ({ ...prev, loading: true, error: undefined }))
     
     try {
+      console.log('🔄 Loading revenue and EBITDA data...')
+      
       // Load both data sources in parallel
       const [revenueResponse, ebitdaResponse] = await Promise.all([
         fetch('/data/revenue_audit_trail.json', { 
@@ -48,13 +50,18 @@ export function useRevenueData() {
       
       // Check if responses are ok
       if (!revenueResponse.ok || !ebitdaResponse.ok) {
-        throw new Error('Failed to fetch data from server')
+        throw new Error(`Failed to fetch data from server: ${revenueResponse.status} ${ebitdaResponse.status}`)
       }
       
       const [revenueData, ebitdaData] = await Promise.all([
         revenueResponse.json(),
         ebitdaResponse.json()
       ])
+      
+      console.log('✅ Revenue and EBITDA data loaded:', {
+        revenue: revenueData?.pipeline_run?.total_revenue,
+        ebitda: ebitdaData?.summary?.total_ebit
+      })
       
       // Only update state if component is still mounted and not aborted
       if (mountedRef.current && !signal.aborted) {
@@ -66,6 +73,8 @@ export function useRevenueData() {
         })
       }
     } catch (error: unknown) {
+      console.error('❌ Error loading revenue/EBITDA data:', error)
+      
       // Only update state if component is still mounted and not aborted
       if (mountedRef.current && !signal.aborted) {
         setData(prev => ({
