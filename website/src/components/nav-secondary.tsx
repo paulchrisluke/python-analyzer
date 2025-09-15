@@ -30,7 +30,11 @@ export function NavSecondary({
       <SidebarGroupContent>
         <SidebarMenu>
           {items.map((item) => {
-            const isActive = pathname === item.url
+            // Normalize paths by removing trailing slashes for comparison
+            const normalizedPathname = pathname.replace(/\/$/, '') || '/'
+            const normalizedItemUrl = item.url.replace(/\/$/, '') || '/'
+            const isActive = normalizedPathname === normalizedItemUrl
+            
             return (
               <SidebarMenuItem key={item.title}>
                 <SidebarMenuButton 

@@ -57,10 +57,14 @@ export function NavMain({
         )}
         <SidebarMenu>
           {items.map((item) => {
-            const isActive = pathname === item.url
+            // Normalize paths by removing trailing slashes for comparison
+            const normalizedPathname = pathname.replace(/\/$/, '') || '/'
+            const normalizedItemUrl = item.url.replace(/\/$/, '') || '/'
+            const isActive = normalizedPathname === normalizedItemUrl
+            
             // Debug logging
             if (isActive) {
-              console.log('Active item:', item.title, 'pathname:', pathname, 'url:', item.url)
+              console.log('Active item:', item.title, 'pathname:', pathname, 'normalized:', normalizedPathname, 'url:', item.url, 'normalized:', normalizedItemUrl)
             }
             return (
               <SidebarMenuItem key={item.url || item.id}>
