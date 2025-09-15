@@ -12,7 +12,7 @@ export default function DashboardPage() {
     if (status === "loading") return // Still loading
 
     if (!session) {
-      router.push('/login')
+      router.push('/api/auth/signin')
       return
     }
 

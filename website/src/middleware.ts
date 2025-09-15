@@ -17,7 +17,13 @@ export default auth((req) => {
   // If user is not authenticated and trying to access protected route
   if (!req.auth && !isPublicRoute) {
     const loginUrl = new URL("/api/auth/signin", req.url)
-    loginUrl.searchParams.set("callbackUrl", pathname)
+    // Only set callbackUrl for actual pages, not data files or assets
+    if (!pathname.startsWith('/data/') && !pathname.includes('.')) {
+      loginUrl.searchParams.set("callbackUrl", pathname)
+    } else {
+      // Default to dashboard for data files and assets
+      loginUrl.searchParams.set("callbackUrl", "/dashboard")
+    }
     return NextResponse.redirect(loginUrl)
   }
   
