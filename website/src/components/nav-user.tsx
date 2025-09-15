@@ -7,7 +7,7 @@ import {
   MoreVerticalIcon,
   UserCircleIcon,
 } from "lucide-react"
-import { useSession, signOut } from "next-auth/react"
+import { useSession } from "next-auth/react"
 import { useRouter } from "next/navigation"
 
 import {
@@ -30,6 +30,7 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@/components/ui/sidebar"
+import { SignOutButton } from "@/components/sign-out-button"
 
 export function NavUser({
   user,
@@ -42,9 +43,6 @@ export function NavUser({
 }) {
   const { isMobile } = useSidebar()
   const router = useRouter()
-  const handleLogout = async () => {
-    await signOut({ callbackUrl: "/login" })
-  }
 
   const handleAccountClick = () => {
     router.push("/account")
@@ -117,9 +115,8 @@ export function NavUser({
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={handleLogout}>
-              <LogOutIcon />
-              Log out
+            <DropdownMenuItem asChild>
+              <SignOutButton />
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>

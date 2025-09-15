@@ -1,6 +1,6 @@
 'use client'
 
-import { signOut, useSession } from "next-auth/react"
+import { useSession } from "next-auth/react"
 import { FinancialChart } from "@/components/financial-chart"
 import { BuyerLocationInformation } from "@/components/buyer-location-information"
 import { InvestmentHighlights } from "@/components/investment-highlights"
@@ -30,14 +30,9 @@ function BuyerDashboardContent() {
             <div className="flex flex-col gap-4 py-4 md:gap-6 md:py-6">
               {/* Header */}
               <div className="px-4 lg:px-6">
-                <div className="mb-6 flex items-center justify-between">
-                  <div>
-                    <h1 className="text-4xl font-bold text-gray-900 mb-2">Buyer Dashboard</h1>
-                    <p className="text-lg text-gray-600">Welcome, {session?.user?.name}! Detailed business information for due diligence.</p>
-                  </div>
-                  <Button onClick={() => signOut({ callbackUrl: "/login" })} variant="outline">
-                    Sign Out
-                  </Button>
+                <div className="mb-6">
+                  <h1 className="text-4xl font-bold text-gray-900 mb-2">Buyer Dashboard</h1>
+                  <p className="text-lg text-gray-600">Welcome, {session?.user?.name}! Detailed business information for due diligence.</p>
                 </div>
               </div>
 
