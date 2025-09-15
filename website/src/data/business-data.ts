@@ -169,3 +169,5 @@ export const staticBusinessData = {
     transition_support: 'Available for smooth transition',
   },
 }
+
+

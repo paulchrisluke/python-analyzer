@@ -1,15 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { jwtVerify } from 'jose'
-
-// JWT Payload interface for type safety
-interface JWTPayload {
-  iss?: string
-  aud?: string
-  exp?: number
-  iat?: number
-  role?: string
-  [key: string]: unknown
-}
+import { getToken } from 'next-auth/jwt'
 
 // Protected routes that require authentication
 const protectedRoutes = ['/dashboard', '/docs', '/admin', '/buyer']
@@ -17,63 +7,12 @@ const protectedRoutes = ['/dashboard', '/docs', '/admin', '/buyer']
 // Admin-only routes
 const adminOnlyRoutes = ['/admin']
 
-// Buyer-only routes  
-const buyerOnlyRoutes = ['/buyer']
-
 // Public routes that don't require authentication
-const publicRoutes = ['/', '/login', '/signup']
+const publicRoutes = ['/', '/login', '/signup', '/unauthorized']
 
 // Helper function to check if a pathname matches a route exactly or as a prefix with slash
 function matchesRoute(pathname: string, route: string): boolean {
   return pathname === route || pathname.startsWith(route + '/')
-}
-
-// Valid roles in the system
-const VALID_ROLES = ['admin', 'buyer'] as const
-
-// Get user role from JWT token
-async function getUserRole(req: NextRequest): Promise<string | null> {
-  try {
-    // Development bypass: return configured role when bypass is enabled
-    // Single DEV_AUTH_ROLE variable: if set in development, use it; if not set, use normal auth
-    if (process.env.NODE_ENV !== 'production' && process.env.DEV_AUTH_ROLE) {
-      const devRole = process.env.DEV_AUTH_ROLE.trim()
-      // Validate role against known roles - fail fast on invalid values
-      if (VALID_ROLES.includes(devRole as any)) {
-        return devRole
-      } else {
-        console.error(`Invalid DEV_AUTH_ROLE: "${devRole}". Valid roles are: ${VALID_ROLES.join(', ')}`)
-        return null // Return null instead of defaulting to admin to prevent privilege escalation
-      }
-    }
-
-    const authSecret = process.env.AUTH_SECRET?.trim()
-    if (!authSecret || authSecret.length < 32) {
-      return null
-    }
-
-    const sessionCookie = req.cookies.get('cranberry-auth-session')
-    if (!sessionCookie?.value) return null
-    
-    const token = sessionCookie.value
-    const { payload } = await jwtVerify<JWTPayload>(
-      token,
-      new TextEncoder().encode(authSecret),
-      { issuer: 'cranberry', audience: 'web' }
-    )
-    
-    // Extract role from token payload
-    return payload.role ?? null
-  } catch (error) {
-    console.error('Role extraction failed:', error)
-    return null
-  }
-}
-
-// Simple authentication check using session cookie
-async function isAuthenticated(req: NextRequest): Promise<boolean> {
-  const role = await getUserRole(req)
-  return role !== null
 }
 
 export async function middleware(request: NextRequest) {
@@ -96,14 +35,20 @@ export async function middleware(request: NextRequest) {
 
   // For protected routes, check authentication and authorization
   if (isProtectedRoute) {
-    const userRole = await getUserRole(request)
+    // Get the JWT token using NextAuth's getToken function
+    const token = await getToken({ 
+      req: request, 
+      secret: process.env.NEXTAUTH_SECRET 
+    })
     
-    if (!userRole) {
+    if (!token) {
       // Redirect to login page, preserving the original pathname
       const loginUrl = new URL('/login', request.url)
-      loginUrl.searchParams.set('redirect', pathname)
+      loginUrl.searchParams.set('callbackUrl', pathname)
       return NextResponse.redirect(loginUrl)
     }
+
+    const userRole = token.role
 
     // Check admin-only routes
     const isAdminOnlyRoute = adminOnlyRoutes.some(route => 
@@ -111,24 +56,21 @@ export async function middleware(request: NextRequest) {
     )
     
     if (isAdminOnlyRoute && userRole !== 'admin') {
-      // Redirect to unauthorized page or buyer dashboard
+      // Redirect to unauthorized page
       const unauthorizedUrl = new URL('/unauthorized', request.url)
       return NextResponse.redirect(unauthorizedUrl)
     }
 
-    // Check buyer-only routes (admins can also access buyer routes for oversight)
-    const isBuyerOnlyRoute = buyerOnlyRoutes.some(route => 
-      matchesRoute(pathname, route)
-    )
-    
-    if (isBuyerOnlyRoute && userRole !== 'buyer' && userRole !== 'admin') {
-      // Redirect to unauthorized page or admin dashboard
+    // For buyer routes, allow both admin and buyer roles
+    // (admins can access buyer routes for oversight)
+    const isBuyerRoute = matchesRoute(pathname, '/buyer')
+    if (isBuyerRoute && userRole !== 'buyer' && userRole !== 'admin') {
+      // Redirect to unauthorized page
       const unauthorizedUrl = new URL('/unauthorized', request.url)
       return NextResponse.redirect(unauthorizedUrl)
     }
   }
 
-  // For any other routes, allow access (they can handle their own auth logic)
   return NextResponse.next()
 }
 

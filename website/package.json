@@ -16,7 +16,11 @@
     "test:headed": "playwright test --headed",
     "test:ci": "playwright test --reporter=github",
     "test:auth": "playwright test tests/simple-auth.spec.ts",
-    "test:auth:full": "playwright test tests/simple-auth.spec.ts"
+    "test:auth:full": "playwright test tests/simple-auth.spec.ts",
+    "test:nextauth": "playwright test tests/nextauth.spec.ts",
+    "test:buyer": "playwright test tests/buyer-dashboard.spec.ts",
+    "test:admin": "playwright test tests/admin-dashboard.spec.ts",
+    "test:auth:all": "playwright test tests/nextauth.spec.ts tests/buyer-dashboard.spec.ts tests/admin-dashboard.spec.ts"
   },
   "keywords": [
     "nextjs",
