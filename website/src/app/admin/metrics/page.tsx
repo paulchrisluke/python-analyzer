@@ -3,7 +3,9 @@ import { SiteHeader } from '@/components/site-header'
 import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar'
 import { loadAdminData } from '@/lib/admin-data-server'
 import { requireAdmin } from '@/lib/auth-server'
-import { headers } from 'next/headers'
+import { unstable_noStore } from 'next/cache'
+
+unstable_noStore()
 
 // Disable caching for sensitive admin data
 export const dynamic = 'force-dynamic'
@@ -16,11 +18,6 @@ export default async function MetricsPage() {
   // Only load admin data after confirming user is authenticated as admin
   const adminData = await loadAdminData()
 
-  // Set no-cache headers to prevent sensitive data from being cached
-  const headersList = await headers()
-  headersList.set('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate')
-  headersList.set('Pragma', 'no-cache')
-  headersList.set('Expires', '0')
 
   return (
     <SidebarProvider>

@@ -1,6 +1,5 @@
 "use client"
 
-import { AdminOrBuyer } from "@/components/nextauth-guard"
 import { signOut } from "next-auth/react"
 import { BuyerLocationInformation } from "@/components/buyer-location-information"
 import { SiteHeader } from "@/components/site-header"
@@ -184,9 +183,5 @@ function BuyerLocationsContent() {
 }
 
 export default function BuyerLocations() {
-  return (
-    <AdminOrBuyer>
-      <BuyerLocationsContent />
-    </AdminOrBuyer>
-  )
+  return <BuyerLocationsContent />
 }

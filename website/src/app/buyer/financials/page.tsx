@@ -1,6 +1,5 @@
 "use client"
 
-import { AdminOrBuyer } from "@/components/nextauth-guard"
 import { signOut } from "next-auth/react"
 import { FinancialChart } from "@/components/financial-chart"
 import { YearlyRevenueChart } from "@/components/yearly-revenue-chart"
@@ -125,9 +124,5 @@ function BuyerFinancialsContent() {
 }
 
 export default function BuyerFinancials() {
-  return (
-    <AdminOrBuyer>
-      <BuyerFinancialsContent />
-    </AdminOrBuyer>
-  )
+  return <BuyerFinancialsContent />
 }

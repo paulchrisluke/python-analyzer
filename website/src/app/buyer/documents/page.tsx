@@ -1,6 +1,5 @@
 "use client"
 
-import { AdminOrBuyer } from "@/components/nextauth-guard"
 import { signOut } from "next-auth/react"
 import { DueDiligenceDocuments } from "@/components/due-diligence-documents"
 import { SiteHeader } from "@/components/site-header"
@@ -200,9 +199,5 @@ function BuyerDocumentsContent() {
 }
 
 export default function BuyerDocuments() {
-  return (
-    <AdminOrBuyer>
-      <BuyerDocumentsContent />
-    </AdminOrBuyer>
-  )
+  return <BuyerDocumentsContent />
 }

@@ -1,4 +1,4 @@
-import { auth } from '@/auth'
+import { auth } from '../../auth'
 import { redirect } from 'next/navigation'
 
 /**
@@ -10,7 +10,7 @@ export interface AuthUser {
   id: string
   email: string
   name: string
-  role: 'admin' | 'buyer'
+  role: 'admin' | 'buyer' | 'viewer'
 }
 
 /**
@@ -29,7 +29,7 @@ export async function getServerUser(): Promise<AuthUser | null> {
       id: session.user.id || '',
       email: session.user.email || '',
       name: session.user.name || '',
-      role: session.user.role as 'admin' | 'buyer'
+      role: session.user.role as 'admin' | 'buyer' | 'viewer'
     }
   } catch (error) {
     console.error('Error getting server user:', error)
