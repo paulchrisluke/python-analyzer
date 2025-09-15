@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server"
 import type { NextRequest } from "next/server"
-import { auth } from "@/../auth"
+import { auth } from "@/auth"
 
 export default auth((req) => {
   const { pathname } = req.nextUrl
@@ -9,8 +9,8 @@ export default auth((req) => {
   const publicRoutes = ['/', '/unauthorized']
   const isPublicRoute = publicRoutes.includes(pathname)
   
-  // Skip middleware for API routes and static files
-  if (pathname.startsWith('/api/') || pathname.startsWith('/_next/') || pathname === '/favicon.ico') {
+  // Skip middleware for API routes, static files, and data files
+  if (pathname.startsWith('/api/') || pathname.startsWith('/_next/') || pathname.startsWith('/data/') || pathname === '/favicon.ico') {
     return NextResponse.next()
   }
   

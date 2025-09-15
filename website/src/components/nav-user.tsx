@@ -7,7 +7,7 @@ import {
   MoreVerticalIcon,
   UserCircleIcon,
 } from "lucide-react"
-import { useSession } from "next-auth/react"
+import { useSession, signOut } from "next-auth/react"
 import { useRouter } from "next/navigation"
 
 import {
@@ -30,7 +30,6 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@/components/ui/sidebar"
-import Link from "next/link"
 
 export function NavUser({
   user,
@@ -54,6 +53,10 @@ export function NavUser({
 
   const handleNotificationsClick = () => {
     router.push("/notifications")
+  }
+
+  const handleLogout = () => {
+    signOut({ callbackUrl: '/' })
   }
 
   return (
@@ -115,11 +118,9 @@ export function NavUser({
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
-            <DropdownMenuItem asChild>
-              <Link href="/api/auth/signout" className="flex items-center gap-2">
-                <LogOutIcon />
-                Log out
-              </Link>
+            <DropdownMenuItem onClick={handleLogout} className="flex items-center gap-2">
+              <LogOutIcon />
+              Log out
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>

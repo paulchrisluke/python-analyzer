@@ -26,8 +26,8 @@ function BuyerDocumentsContent() {
               {/* Header */}
               <div className="px-4 lg:px-6">
                 <div className="mb-6">
-                  <h1 className="text-4xl font-bold text-gray-900 mb-2">Due Diligence Documents</h1>
-                  <p className="text-lg text-gray-600">Access to detailed financial statements, contracts, and operational data</p>
+                  <h1 className="text-4xl font-bold text-foreground mb-2">Due Diligence Documents</h1>
+                  <p className="text-lg text-muted-foreground">Access to detailed financial statements, contracts, and operational data</p>
                 </div>
               </div>
 
