@@ -6,7 +6,7 @@ import { useEffect, ReactNode } from 'react'
 
 interface AuthGuardProps {
   children: ReactNode
-  allowedRoles?: ('admin' | 'buyer')[]
+  allowedRoles?: ('admin' | 'buyer' | 'viewer')[]
   fallback?: ReactNode
 }
 

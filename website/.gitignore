@@ -110,3 +110,4 @@ playwright/.cache/
 *.local
 
 .vercel
+.env*.local
