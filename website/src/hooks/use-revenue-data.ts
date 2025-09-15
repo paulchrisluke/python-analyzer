@@ -73,6 +73,12 @@ export function useRevenueData() {
         })
       }
     } catch (error: unknown) {
+      // Don't log or handle abort errors - they're expected when component unmounts
+      if (error instanceof Error && error.name === 'AbortError') {
+        console.log('🔄 Revenue/EBITDA data loading aborted (component unmounted)')
+        return
+      }
+      
       console.error('❌ Error loading revenue/EBITDA data:', error)
       
       // Only update state if component is still mounted and not aborted
@@ -94,14 +100,21 @@ export function useRevenueData() {
     
     return () => {
       mountedRef.current = false
-      controller.abort()
+      // Abort the request when component unmounts
+      if (!signal.aborted) {
+        controller.abort()
+      }
     }
   }, [loadData])
 
   const refetch = useCallback(() => {
     const controller = new AbortController()
     loadData(controller.signal)
-    return () => controller.abort()
+    return () => {
+      if (!controller.signal.aborted) {
+        controller.abort()
+      }
+    }
   }, [loadData])
 
   return {
