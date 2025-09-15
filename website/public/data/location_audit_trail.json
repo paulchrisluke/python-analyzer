@@ -2,7 +2,7 @@
   "pipeline_info": {
     "name": "Simple Location Pipeline",
     "version": "1.0",
-    "created_at": "2025-09-15T16:15:49.334274",
+    "created_at": "2025-09-15T16:47:01.102011",
     "purpose": "Process location data including lease information and property details"
   },
   "configuration": {
@@ -101,9 +101,9 @@
       "summary": {
         "total_lease_terms": 3,
         "total_lease_cost": 91800.0,
-        "current_monthly_rent": 2700.0,
-        "lease_end_date": "2030-12-31",
-        "active_terms": 2
+        "current_monthly_rent": 2600.0,
+        "lease_end_date": "2027-12-31",
+        "active_terms": 1
       }
     },
     "west_view_pa": {
@@ -130,10 +130,10 @@
           "start_date": "2023-06-01",
           "end_date": "2023-11-30",
           "monthly_rent": 1875.0,
-          "annual_rent": 11250.0,
+          "annual_rent": 22500.0,
           "cam_fee": 0.0,
           "total_monthly_cost": 1875.0,
-          "total_annual_cost": 11250.0,
+          "total_annual_cost": 22500.0,
           "notes": "Lease amendment and extension",
           "lessor": "1029 West View Plaza L.P.",
           "lessee": "Cranberry Hearing and Balance Center LLC",
@@ -144,10 +144,10 @@
           "start_date": "2023-12-01",
           "end_date": "2027-11-30",
           "monthly_rent": 2000.0,
-          "annual_rent": 96000.0,
+          "annual_rent": 24000.0,
           "cam_fee": 0.0,
           "total_monthly_cost": 2000.0,
-          "total_annual_cost": 96000.0,
+          "total_annual_cost": 24000.0,
           "notes": "Increased rent per amendment",
           "lessor": "1029 West View Plaza L.P.",
           "lessee": "Cranberry Hearing and Balance Center LLC",
@@ -158,10 +158,10 @@
           "start_date": "2027-12-01",
           "end_date": "2029-11-30",
           "monthly_rent": 2131.36,
-          "annual_rent": 51152.64,
+          "annual_rent": 25576.32,
           "cam_fee": 0.0,
           "total_monthly_cost": 2131.36,
-          "total_annual_cost": 51152.64,
+          "total_annual_cost": 25576.32,
           "notes": "Final rent increase per amendment",
           "lessor": "1029 West View Plaza L.P.",
           "lessee": "Cranberry Hearing and Balance Center LLC",
@@ -170,10 +170,10 @@
       ],
       "summary": {
         "total_lease_terms": 4,
-        "total_lease_cost": 180902.64,
-        "current_monthly_rent": 2131.36,
-        "lease_end_date": "2029-11-30",
-        "active_terms": 2
+        "total_lease_cost": 94576.32,
+        "current_monthly_rent": 2000.0,
+        "lease_end_date": "2027-11-30",
+        "active_terms": 1
       }
     }
   },
@@ -181,7 +181,7 @@
     "total_locations": 2,
     "locations_for_sale": 2,
     "total_square_footage": 3000,
-    "total_monthly_lease_cost": 4831.36
+    "total_monthly_lease_cost": 4600.0
   },
   "property_analysis": {
     "property_type": "Leased Commercial",
@@ -198,9 +198,9 @@
         "location_type": "primary",
         "square_footage": 1500,
         "lease_status": "success",
-        "current_monthly_rent": 2700.0,
-        "lease_end_date": "2030-12-31",
-        "cost_per_sqft": 1.8
+        "current_monthly_rent": 2600.0,
+        "lease_end_date": "2027-12-31",
+        "cost_per_sqft": 1.73
       },
       "west_view_pa": {
         "name": "Cranberry Hearing & Balance - West View",
@@ -213,23 +213,23 @@
         "location_type": "satellite",
         "square_footage": 1500,
         "lease_status": "success",
-        "current_monthly_rent": 2131.36,
-        "lease_end_date": "2029-11-30",
-        "cost_per_sqft": 1.42
+        "current_monthly_rent": 2000.0,
+        "lease_end_date": "2027-11-30",
+        "cost_per_sqft": 1.33
       }
     },
     "lease_summary": {
-      "total_monthly_lease_cost": 4831.36,
-      "total_annual_lease_cost": 57976.32,
-      "average_cost_per_sqft": 1.61,
+      "total_monthly_lease_cost": 4600.0,
+      "total_annual_lease_cost": 55200.0,
+      "average_cost_per_sqft": 1.53,
       "lease_expiration_dates": [
         {
           "location": "Cranberry Hearing & Balance",
-          "end_date": "2030-12-31"
+          "end_date": "2027-12-31"
         },
         {
           "location": "Cranberry Hearing & Balance - West View",
-          "end_date": "2029-11-30"
+          "end_date": "2027-11-30"
         }
       ]
     },
@@ -258,8 +258,8 @@
         "location_type": "primary",
         "for_sale": true,
         "lease": {
-          "current_monthly_rent": 2700.0,
-          "lease_end_date": "2030-12-31",
+          "current_monthly_rent": 2600.0,
+          "lease_end_date": "2027-12-31",
           "total_lease_terms": 3
         }
       },
@@ -273,16 +273,16 @@
         "location_type": "satellite",
         "for_sale": true,
         "lease": {
-          "current_monthly_rent": 2131.36,
-          "lease_end_date": "2029-11-30",
+          "current_monthly_rent": 2000.0,
+          "lease_end_date": "2027-11-30",
           "total_lease_terms": 4
         }
       }
     ],
     "lease_analysis": {
-      "total_monthly_lease_cost": 4831.36,
-      "total_annual_lease_cost": 57976.32,
-      "cost_per_sqft": 1.61
+      "total_monthly_lease_cost": 4600.0,
+      "total_annual_lease_cost": 55200.0,
+      "cost_per_sqft": 1.53
     },
     "property_details": {
       "primary_location": {
@@ -295,8 +295,8 @@
         "location_type": "primary",
         "for_sale": true,
         "lease": {
-          "current_monthly_rent": 2700.0,
-          "lease_end_date": "2030-12-31",
+          "current_monthly_rent": 2600.0,
+          "lease_end_date": "2027-12-31",
           "total_lease_terms": 3
         }
       },
@@ -310,23 +310,23 @@
         "location_type": "satellite",
         "for_sale": true,
         "lease": {
-          "current_monthly_rent": 2131.36,
-          "lease_end_date": "2029-11-30",
+          "current_monthly_rent": 2000.0,
+          "lease_end_date": "2027-11-30",
           "total_lease_terms": 4
         }
       },
       "lease_analysis": {
-        "total_monthly_lease_cost": 4831.36,
-        "total_annual_lease_cost": 57976.32,
-        "average_cost_per_sqft": 1.61,
+        "total_monthly_lease_cost": 4600.0,
+        "total_annual_lease_cost": 55200.0,
+        "average_cost_per_sqft": 1.53,
         "lease_expiration_dates": [
           {
             "location": "Cranberry Hearing & Balance",
-            "end_date": "2030-12-31"
+            "end_date": "2027-12-31"
           },
           {
             "location": "Cranberry Hearing & Balance - West View",
-            "end_date": "2029-11-30"
+            "end_date": "2027-11-30"
           }
         ]
       },

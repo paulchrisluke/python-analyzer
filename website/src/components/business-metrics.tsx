@@ -10,6 +10,13 @@ interface BusinessMetricsProps {
 export function BusinessMetrics({ data }: BusinessMetricsProps) {
   console.log("📈 BusinessMetrics rendering");
   
+  // Compute annualSde with explicit finite number checking
+  const annualSde = Number.isFinite(data.annualSde) 
+    ? data.annualSde 
+    : (Number.isFinite(data.annualRevenue) && Number.isFinite(data.sdeMargin))
+      ? data.annualRevenue * data.sdeMargin
+      : null;
+  
   const metrics = [
     {
       title: "Total Revenue",
@@ -19,7 +26,7 @@ export function BusinessMetrics({ data }: BusinessMetricsProps) {
     },
     {
       title: "Annual SDE",
-      value: formatCurrency(data.annualSde || data.annualRevenue * (data.sdeMargin / 100)),
+      value: annualSde !== null ? formatCurrency(annualSde) : 'N/A',
       description: "Seller's Discretionary Earnings",
       icon: DollarSign
     },
@@ -120,8 +127,7 @@ export function BusinessMetrics({ data }: BusinessMetricsProps) {
                 <CardHeader>
                   <CardTitle className="text-3xl font-bold text-primary">
                     {(() => {
-                      const annualSde = data.annualSde || data.annualRevenue * (data.sdeMargin / 100);
-                      const safeMultiple = (Number.isFinite(data.askingPrice) && Number.isFinite(annualSde) && annualSde !== 0) 
+                      const safeMultiple = (Number.isFinite(data.askingPrice) && annualSde !== null && Number.isFinite(annualSde) && annualSde !== 0) 
                         ? (data.askingPrice / annualSde) 
                         : null;
                       return safeMultiple != null ? `${safeMultiple.toFixed(1)}x` : '-';
@@ -131,7 +137,7 @@ export function BusinessMetrics({ data }: BusinessMetricsProps) {
                 </CardHeader>
                 <CardContent>
                   <p className="text-sm text-muted-foreground mb-1">
-                    {formatCurrency(data.askingPrice)} ÷ {formatCurrency(data.annualSde || data.annualRevenue * (data.sdeMargin / 100))}
+                    {formatCurrency(data.askingPrice)} ÷ {annualSde !== null ? formatCurrency(annualSde) : 'N/A'}
                   </p>
                   <p className="text-xs text-muted-foreground">
                     Industry range: 2.5x - 4.0x annual SDE

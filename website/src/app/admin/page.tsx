@@ -869,7 +869,7 @@ function AdminPageContent() {
               <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
                 <h3 className="text-sm font-semibold text-blue-900 mb-2">SDE Calculation Note</h3>
                 <p className="text-sm text-blue-800">
-                  <strong>Seller's Discretionary Earnings (SDE)</strong> is calculated by adding the estimated owner salary/benefits ($175,000) to the EBIT figure. 
+                  <strong>Seller&apos;s Discretionary Earnings (SDE)</strong> is calculated by adding the estimated owner salary/benefits ($175,000) to the EBIT figure. 
                   This represents the total cash flow available to a new owner, as they can take out the owner salary that was previously paid to the seller.
                 </p>
                 <p className="text-xs text-blue-700 mt-2">

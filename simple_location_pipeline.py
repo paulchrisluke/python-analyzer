@@ -114,13 +114,15 @@ class SimpleLocationPipeline:
         total_lease_cost = 0.0
         current_rent = 0.0
         lease_end_date = None
+        today = pd.to_datetime(datetime.now().date())
         
         for _, row in df.iterrows():
             try:
                 start_date = pd.to_datetime(row['start_date']).strftime('%Y-%m-%d')
                 end_date = pd.to_datetime(row['end_date']).strftime('%Y-%m-%d')
                 monthly_rent = float(row['monthly_rent']) if pd.notna(row['monthly_rent']) else 0.0
-                annual_rent = float(row['annual_rent']) if pd.notna(row['annual_rent']) else 0.0
+                # Calculate annual_rent from monthly_rent * 12 to ensure consistency
+                annual_rent = monthly_rent * 12
                 cam_fee = float(row['cam_fee']) if pd.notna(row['cam_fee']) else 0.0
                 
                 # Calculate total monthly cost (rent + CAM)
@@ -145,15 +147,39 @@ class SimpleLocationPipeline:
                 lease_terms.append(lease_term)
                 total_lease_cost += total_annual
                 
-                # Track current rent (most recent active lease)
-                if pd.to_datetime(end_date) > datetime.now():
-                    current_rent = total_monthly
-                    lease_end_date = end_date
+                # Defer current-term selection until after all rows are processed
                     
             except Exception as e:
                 logging.error(f"Error processing lease term for {location_id}: {e}")
                 continue
         
+        # Select current term by date range
+        def _to_ts(d: str):
+            return pd.to_datetime(d)
+        active = [t for t in lease_terms if _to_ts(t["start_date"]) <= today <= _to_ts(t["end_date"])]
+        if active:
+            # pick one that ends latest
+            sel = max(active, key=lambda t: _to_ts(t["end_date"]))
+        else:
+            upcoming = [t for t in lease_terms if _to_ts(t["start_date"]) > today]
+            if upcoming:
+                sel = min(upcoming, key=lambda t: _to_ts(t["start_date"]))
+            else:
+                past = [t for t in lease_terms if _to_ts(t["end_date"]) < today]
+                sel = max(past, key=lambda t: _to_ts(t["end_date"])) if past else None
+        if sel:
+            current_rent = sel["total_monthly_cost"]
+            lease_end_date = sel["end_date"]
+
+        # Validate annual_rent calculations
+        for term in lease_terms:
+            expected_annual = term["monthly_rent"] * 12
+            actual_annual = term["annual_rent"]
+            if abs(actual_annual - expected_annual) > 1:
+                logging.error(f"Annual rent validation failed for {location_id} {term['period']}: "
+                            f"expected {expected_annual}, got {actual_annual}")
+                raise ValueError(f"Annual rent calculation error: expected {expected_annual}, got {actual_annual}")
+
         return {
             "location_id": location_id,
             "lease_file": lease_file,
@@ -164,7 +190,7 @@ class SimpleLocationPipeline:
                 "total_lease_cost": normalize_float(total_lease_cost),
                 "current_monthly_rent": normalize_float(current_rent),
                 "lease_end_date": lease_end_date,
-                "active_terms": len([t for t in lease_terms if pd.to_datetime(t['end_date']) > datetime.now()])
+                "active_terms": len(active)
             }
         }
 

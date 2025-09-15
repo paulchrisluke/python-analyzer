@@ -8,7 +8,9 @@ export const staticBusinessData = {
     askingPrice: 650000,
     annualRevenue: 2400000,
     annualEbitda: 1032000, // 43% margin of $2.4M revenue
+    annualSde: 839000, // From financial_highlights
     ebitdaMargin: 0.43,
+    sdeMargin: 0.35, // From financial_highlights
   },
   listing_details: {
     business_name: 'Cranberry Hearing & Balance Center',
@@ -178,6 +180,21 @@ export const staticBusinessData = {
     training_period: '30 days',
     reason_for_sale: 'Owner retirement and lifestyle change',
     transition_support: 'Available for smooth transition',
+  },
+  // Location audit trail data for dynamic lease information
+  location_audit_trail: {
+    cranberry_pa: {
+      summary: {
+        current_monthly_rent: 2600.0,
+        lease_end_date: '2027-12-31',
+      },
+    },
+    west_view_pa: {
+      summary: {
+        current_monthly_rent: 2000.0,
+        lease_end_date: '2027-11-30',
+      },
+    },
   },
 }
 
