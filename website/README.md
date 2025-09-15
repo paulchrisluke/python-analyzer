@@ -1,15 +1,14 @@
 # Cranberry Hearing & Balance Center - Business Sale Website
 
-A modern Next.js application for the Cranberry Hearing & Balance Center business sale, featuring a simple admin-only authentication system and comprehensive business data presentation.
+A modern Next.js application for the Cranberry Hearing & Balance Center business sale, featuring Google OAuth authentication with role-based access control and comprehensive business data presentation.
 
 ## 🚀 Features
 
-- **Simple Admin Authentication**: Environment-based authentication for two admin accounts
-- **Session Management**: Local storage-based session handling with 7-day expiration
-- **Protected Routes**: Admin-only access to dashboard and documents
+- **Google OAuth Authentication**: Secure authentication using Auth.js v5 with Google OAuth
+- **Role-Based Access Control**: Admin, buyer, and viewer roles with environment-based configuration
+- **Protected Routes**: Role-based access to admin dashboard, buyer dashboard, and documents
 - **ETL Data Integration**: Real-time business metrics from ETL pipeline
 - **Modern UI**: Clean, responsive design with Tailwind CSS and shadcn/ui
-- **Testing**: Comprehensive Playwright test suite
 - **Static Generation**: Optimized Next.js build with static page generation
 
 ## 📁 Project Structure
@@ -62,12 +61,16 @@ website/
    # Copy the environment template
    cp env.example .env.local
    
-   # Edit .env.local with your admin credentials (server-only variables)
-   # ADMIN_EMAILS=your-email@example.com,admin2@example.com
-   # ADMIN_PASSWORDS=$argon2id$v=19$m=65536,t=3,p=4$hash1,$argon2id$v=19$m=65536,t=3,p=4$hash2
+   # Edit .env.local with your configuration (server-only variables)
+   # GOOGLE_CLIENT_ID=your-google-oauth-client-id
+   # GOOGLE_CLIENT_SECRET=your-google-oauth-client-secret
+   # NEXTAUTH_SECRET=your-super-secret-jwt-key-here-minimum-32-characters
+   # NEXTAUTH_URL=http://localhost:3000
+   # ADMIN_EMAILS=admin@example.com,admin2@example.com
+   # BUYER_EMAILS=buyer@example.com,investor@example.com
    ```
    
-   **Security Note**: Passwords must be stored as secure hashes (argon2id recommended). Never use plaintext passwords or NEXT_PUBLIC_* variables for credentials.
+   **Security Note**: Never expose OAuth secrets or admin emails via NEXT_PUBLIC_* variables. Use Vercel secrets for production deployment.
 
 ## 🚀 Development
 
@@ -128,19 +131,29 @@ npm start
 
 #### Required Environment Variables
 
+- **GOOGLE_CLIENT_ID**: Google OAuth client ID (server-only)
+- **GOOGLE_CLIENT_SECRET**: Google OAuth client secret (server-only)
+- **NEXTAUTH_SECRET**: JWT signing secret (minimum 32 characters, server-only)
+- **NEXTAUTH_URL**: Application URL (http://localhost:3000 for dev, production URL for prod)
 - **ADMIN_EMAILS**: Comma-separated list of admin email addresses (server-only)
-- **ADMIN_PASSWORDS**: Comma-separated list of admin password hashes (argon2id format, server-only)
+- **BUYER_EMAILS**: Comma-separated list of buyer email addresses (server-only)
 - **NEXT_PUBLIC_APP_URL**: Base URL for the application (default: http://localhost:3000)
 - **NODE_ENV**: Environment (development/production)
 
-**Security Implementation**: Credentials must be validated server-side (Route Handler or Middleware) and admin sessions should use HttpOnly, Secure cookies rather than client-exposed variables.
+**Security Implementation**: All OAuth credentials and email allowlists are server-only variables. Never expose these via NEXT_PUBLIC_* variables.
 
 #### Example Environment File
 
 ```bash
-# Admin Configuration (Server-only variables)
-ADMIN_EMAILS=admin1@example.com,admin2@example.com
-ADMIN_PASSWORDS=$argon2id$v=19$m=65536,t=3,p=4$hash1,$argon2id$v=19$m=65536,t=3,p=4$hash2
+# Google OAuth Configuration (Server-only variables)
+GOOGLE_CLIENT_ID=your-google-oauth-client-id
+GOOGLE_CLIENT_SECRET=your-google-oauth-client-secret
+NEXTAUTH_SECRET=your-super-secret-jwt-key-here-minimum-32-characters
+NEXTAUTH_URL=http://localhost:3000
+
+# Role Configuration (Server-only variables)
+ADMIN_EMAILS=admin@example.com,admin2@example.com
+BUYER_EMAILS=buyer@example.com,investor@example.com
 
 # Application URLs
 NEXT_PUBLIC_APP_URL=http://localhost:3000
@@ -149,36 +162,35 @@ NEXT_PUBLIC_APP_URL=http://localhost:3000
 NODE_ENV=development
 ```
 
-⚠️ **Security Note**: In production, use secure password hashes (argon2id), implement server-side credential validation, and use HttpOnly, Secure cookies for admin sessions. Never expose credentials via NEXT_PUBLIC_* variables.
+⚠️ **Security Note**: In production, use Vercel secrets or similar secure environment variable management. Never expose OAuth credentials or email allowlists via NEXT_PUBLIC_* variables.
 
 ## 🔐 Authentication Flow
 
-### Server-Side Protections
+### Google OAuth Authentication
 
-- **Authentication Middleware**: Validates session cookies on protected routes
-- **Session Expiry**: Server-enforced 7-day expiration with automatic cleanup
-- **CSRF Mitigation**: SameSite cookie attributes and optional CSRF tokens
-- **Prefetch Handling**: Middleware blocks unauthorized prefetch requests
-- **Route Protection**: Server-side validation prevents direct URL access to protected content
+- **Auth.js v5**: Modern authentication library with Google OAuth provider
+- **Role-Based Access**: Admin, buyer, and viewer roles determined by email allowlist
+- **Session Management**: JWT-based sessions with 7-day expiration
+- **Protected Routes**: Server-side role validation for admin and buyer dashboards
 
-### Admin Sign In
-1. Admins visit `/login`
-2. Enter email and password credentials
-3. Credentials POSTed to server for validation
-4. Server validates against hashed passwords and sets HttpOnly, Secure cookie
-5. Server returns only non-sensitive client state (user role, session expiry)
-6. Redirected to dashboard after successful authentication
+### User Sign In
+1. Users visit `/login`
+2. Click "Sign in with Google" button
+3. Redirected to Google OAuth consent screen
+4. After consent, redirected back with authorization code
+5. Server exchanges code for user info and determines role based on email
+6. JWT session created with user role and redirected to appropriate dashboard
 
 ### Protected Routes
-- `/dashboard` - Admin dashboard with business metrics
-- `/docs` - Due diligence documents
+- `/admin` - Admin dashboard with business metrics (admin role only)
+- `/buyer` - Buyer dashboard with investment information (buyer role only)
+- `/admin/documents` - Due diligence documents (admin role only)
+- `/admin/metrics` - Business metrics (admin role only)
 
-### Session Management
-- Sessions stored in HttpOnly, Secure cookies (SameSite=Lax for CSRF protection)
-- 7-day automatic expiration enforced server-side
-- Manual sign out clears server-side session and cookie
-- Server middleware validates session on each protected route request
-- Prefetch protection prevents unauthorized data access
+### Role Assignment
+- **Admin**: Emails listed in `ADMIN_EMAILS` environment variable
+- **Buyer**: Emails listed in `BUYER_EMAILS` environment variable  
+- **Viewer**: All other authenticated users (limited access)
 
 ## 🗄️ Data Storage
 

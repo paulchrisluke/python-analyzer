@@ -1,5 +1,4 @@
-import { getToken } from 'next-auth/jwt'
-import { headers } from 'next/headers'
+import { auth } from '@/auth'
 import { redirect } from 'next/navigation'
 
 /**
@@ -15,37 +14,22 @@ export interface AuthUser {
 }
 
 /**
- * Get the current user from the JWT token on the server side
+ * Get the current user from the session on the server side
  * Returns null if not authenticated
  */
 export async function getServerUser(): Promise<AuthUser | null> {
   try {
-    const headersList = await headers()
-    const cookieHeader = headersList.get('cookie')
+    const session = await auth()
     
-    if (!cookieHeader) {
-      return null
-    }
-
-    // Create a mock request object for getToken
-    const token = await getToken({ 
-      req: {
-        headers: {
-          cookie: cookieHeader
-        }
-      } as any,
-      secret: process.env.NEXTAUTH_SECRET 
-    })
-    
-    if (!token) {
+    if (!session?.user) {
       return null
     }
 
     return {
-      id: token.sub || '',
-      email: token.email || '',
-      name: token.name || '',
-      role: token.role as 'admin' | 'buyer'
+      id: session.user.id || '',
+      email: session.user.email || '',
+      name: session.user.name || '',
+      role: session.user.role as 'admin' | 'buyer'
     }
   } catch (error) {
     console.error('Error getting server user:', error)
