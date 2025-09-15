@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -44,14 +44,7 @@ export function DocumentDashboard({ initialData }: DocumentDashboardProps) {
   const [stats, setStats] = useState<DocumentStats | null>(initialData?.stats || null);
   const [loading, setLoading] = useState(false);
 
-  // Fetch data on component mount
-  useEffect(() => {
-    if (!initialData) {
-      fetchDashboardData();
-    }
-  }, []);
-
-  const fetchDashboardData = async () => {
+  const fetchDashboardData = useCallback(async () => {
     setLoading(true);
     try {
       const [documentsData, categoriesData, coverageData] = await Promise.all([
@@ -68,7 +61,14 @@ export function DocumentDashboard({ initialData }: DocumentDashboardProps) {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
+
+  // Fetch data on component mount
+  useEffect(() => {
+    if (!initialData) {
+      fetchDashboardData();
+    }
+  }, [initialData, fetchDashboardData]);
 
   // Show all documents
   const filteredDocuments = documents;
