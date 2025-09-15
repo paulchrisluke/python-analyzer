@@ -1,70 +1,38 @@
 import { NextResponse } from "next/server"
-import type { NextRequest } from "next/server"
 import { auth } from "@/auth"
 
-export default auth((req) => {
+export async function middleware(req: any) {
   const { pathname } = req.nextUrl
-  
-  // Public routes that don't require authentication
-  const publicRoutes = ['/', '/unauthorized']
-  const isPublicRoute = publicRoutes.includes(pathname)
-  
-  // Skip middleware for API routes, static files, and data files
-  if (pathname.startsWith('/api/') || pathname.startsWith('/_next/') || pathname.startsWith('/data/') || pathname === '/favicon.ico') {
+  const session = await auth()
+
+  // Public pages
+  if (["/", "/unauthorized"].includes(pathname)) {
     return NextResponse.next()
   }
-  
-  // If user is not authenticated and trying to access protected route
-  if (!req.auth && !isPublicRoute) {
-    const loginUrl = new URL("/api/auth/signin", req.url)
-    // Only set callbackUrl for actual pages, not data files or assets
-    if (!pathname.startsWith('/data/') && !pathname.includes('.')) {
-      loginUrl.searchParams.set("callbackUrl", pathname)
-    } else {
-      // Default to home page for data files and assets
-      loginUrl.searchParams.set("callbackUrl", "/")
-    }
-    return NextResponse.redirect(loginUrl)
+
+  // Require login for everything else
+  if (!session) {
+    return NextResponse.redirect(new URL("/api/auth/signin", req.url))
   }
-  
-  // If user is authenticated and trying to access signin page, redirect based on role
-  if (req.auth && pathname === '/api/auth/signin') {
-    const user = req.auth.user
-    if (user?.role === 'admin') {
-      return NextResponse.redirect(new URL("/admin", req.url))
-    } else if (user?.role === 'buyer') {
-      return NextResponse.redirect(new URL("/buyer", req.url))
-    } else {
-      return NextResponse.redirect(new URL("/", req.url))
-    }
+
+  // Role gates
+  if (pathname.startsWith("/admin") && session.user?.role !== "admin") {
+    return NextResponse.redirect(new URL("/unauthorized", req.url))
   }
-  
-  // Check role-based access for admin routes
-  if (req.auth && pathname.startsWith('/admin')) {
-    if (req.auth.user?.role !== 'admin') {
-      return NextResponse.redirect(new URL("/unauthorized", req.url))
-    }
+
+  if (pathname.startsWith("/buyer") && !["buyer", "admin"].includes(session.user?.role)) {
+    return NextResponse.redirect(new URL("/unauthorized", req.url))
   }
-  
-  // Check role-based access for buyer routes
-  if (req.auth && pathname.startsWith('/buyer')) {
-    if (req.auth.user?.role !== 'buyer' && req.auth.user?.role !== 'admin') {
-      return NextResponse.redirect(new URL("/unauthorized", req.url))
-    }
-  }
-  
+
   return NextResponse.next()
-})
+}
 
 export const config = {
   matcher: [
-    /*
-     * Match all request paths except for the ones starting with:
-     * - api (API routes)
-     * - _next/static (static files)
-     * - _next/image (image optimization files)
-     * - favicon.ico (favicon file)
-     */
-    "/((?!api|_next/static|_next/image|favicon.ico).*)",
+    // Match all routes except for the ones starting with:
+    // - api (API routes)
+    // - _next (Next.js internals)
+    // - static files like favicon, manifest, assets
+    "/((?!api|_next/static|_next/image|favicon.ico|site.webmanifest).*)",
   ],
 }

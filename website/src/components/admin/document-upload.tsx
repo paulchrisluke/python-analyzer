@@ -10,6 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Upload, FileText, CheckCircle, AlertCircle } from 'lucide-react';
 import { LoadingSpinner } from '@/components/ui/loading-spinner';
 import { DEFAULT_CATEGORIES } from '@/lib/categories';
+import { fetchWithAuth } from '@/lib/fetch-with-auth';
 
 interface DocumentUploadProps {
   onUploadSuccess?: () => void;
@@ -61,12 +62,12 @@ export function DocumentUpload({ onUploadSuccess }: DocumentUploadProps) {
         formData.append('due_date', dueDate);
       }
 
-      const response = await fetch('/api/documents/upload', {
+      const result = await fetchWithAuth('/api/documents/upload', {
         method: 'POST',
         body: formData,
       });
 
-      const result = await response.json();
+      // fetchWithAuth handles error responses and JSON parsing automatically
 
       if (result.success) {
         setUploadResult({ success: true, message: 'Document uploaded successfully!' });
@@ -88,7 +89,9 @@ export function DocumentUpload({ onUploadSuccess }: DocumentUploadProps) {
         setUploadResult({ success: false, message: result.error || 'Upload failed' });
       }
     } catch (error) {
-      setUploadResult({ success: false, message: 'Upload failed. Please try again.' });
+      // Provide more specific error messages to the user
+      const errorMessage = error instanceof Error ? error.message : 'Upload failed. Please try again.';
+      setUploadResult({ success: false, message: errorMessage });
     } finally {
       setUploading(false);
     }

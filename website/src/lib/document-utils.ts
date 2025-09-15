@@ -1,5 +1,35 @@
-import { createHash } from 'crypto';
 import { Document, DocumentCategory } from '@/types/document';
+
+// Browser-compatible async SHA-256 helper
+export async function computeSHA256(input: string | ArrayBuffer): Promise<string> {
+  if (typeof crypto !== 'undefined' && crypto.subtle) {
+    // Browser environment - use Web Crypto API
+    let data: BufferSource;
+    
+    if (typeof input === 'string') {
+      const encoder = new TextEncoder();
+      data = encoder.encode(input);
+    } else {
+      data = input;
+    }
+    
+    const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+    const hashArray = Array.from(new Uint8Array(hashBuffer));
+    return hashArray.map(byte => byte.toString(16).padStart(2, '0')).join('');
+  } else {
+    // Node.js environment - use dynamic import
+    const { createHash } = await import('crypto');
+    const hash = createHash('sha256');
+    
+    if (typeof input === 'string') {
+      hash.update(input);
+    } else {
+      hash.update(Buffer.from(input));
+    }
+    
+    return hash.digest('hex');
+  }
+}
 
 // File size formatting utility
 export function formatFileSize(bytes: number): string {
@@ -20,9 +50,7 @@ export function formatFileSize(bytes: number): string {
 // Calculate file hash
 export async function calculateFileHash(file: File): Promise<string> {
   const buffer = await file.arrayBuffer();
-  const hash = createHash('sha256');
-  hash.update(Buffer.from(buffer));
-  return hash.digest('hex');
+  return await computeSHA256(buffer);
 }
 
 // Validate file type
@@ -182,6 +210,16 @@ export function getCoverageStatus(coverage: number): { status: string; color: st
   return { status: 'Poor', color: 'text-red-600' };
 }
 
+// CSV escaping helper function (RFC 4180 compliant)
+function escapeCSVField(field: any): string {
+  // Convert to string first
+  const stringField = String(field);
+  // Escape internal double quotes by doubling them
+  const escapedField = stringField.replace(/"/g, '""');
+  // Wrap in surrounding double quotes
+  return `"${escapedField}"`;
+}
+
 // Export helpers
 export function exportDocumentsToCSV(documents: Document[], categories: DocumentCategory[]): string {
   const categoryMap = new Map(categories.map(cat => [cat.name, cat.name]));
@@ -217,7 +255,7 @@ export function exportDocumentsToCSV(documents: Document[], categories: Document
   ]);
   
   const csvContent = [headers, ...rows]
-    .map(row => row.map(field => `"${field}"`).join(','))
+    .map(row => row.map(field => escapeCSVField(field)).join(','))
     .join('\n');
   
   return csvContent;

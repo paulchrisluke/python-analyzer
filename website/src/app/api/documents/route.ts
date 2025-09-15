@@ -1,8 +1,19 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { DocumentStorage } from '@/lib/document-storage-server';
+import { auth } from '@/auth';
 
 // GET /api/documents - Get all documents with optional filters
 export async function GET(request: NextRequest) {
+  const session = await auth();
+  
+  if (!session) {
+    return new NextResponse("Unauthorized", { status: 401 });
+  }
+  
+  if (session.user?.role !== 'admin') {
+    return new NextResponse("Forbidden", { status: 403 });
+  }
+
   try {
     const { searchParams } = new URL(request.url);
     
@@ -33,6 +44,16 @@ export async function GET(request: NextRequest) {
 
 // POST /api/documents - Create a new document (metadata only)
 export async function POST(request: NextRequest) {
+  const session = await auth();
+  
+  if (!session) {
+    return new NextResponse("Unauthorized", { status: 401 });
+  }
+  
+  if (session.user?.role !== 'admin') {
+    return new NextResponse("Forbidden", { status: 403 });
+  }
+
   try {
     const body = await request.json();
     const { name, category, blob_url, file_type, file_size, file_size_display, file_hash, status, expected, notes, visibility, due_date } = body;

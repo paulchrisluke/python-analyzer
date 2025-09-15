@@ -16,6 +16,7 @@ import {
 } from 'lucide-react';
 import { LoadingSpinner } from '@/components/ui/loading-spinner';
 import { Document, DocumentCategory, CoverageAnalysis, DocumentStats } from '@/types/document';
+import { DataTable, documentColumns } from '@/components/data-table';
 import { 
   formatFileSize, 
   getDocumentStatusColor, 
@@ -25,6 +26,7 @@ import {
   getCoverageStatus,
   formatDate
 } from '@/lib/document-utils';
+import { fetchWithAuth } from '@/lib/fetch-with-auth';
 
 interface DocumentDashboardProps {
   initialData?: {
@@ -52,16 +54,10 @@ export function DocumentDashboard({ initialData }: DocumentDashboardProps) {
   const fetchDashboardData = async () => {
     setLoading(true);
     try {
-      const [documentsRes, categoriesRes, coverageRes] = await Promise.all([
-        fetch('/api/documents'),
-        fetch('/api/categories?with_counts=true'),
-        fetch('/api/analytics/coverage')
-      ]);
-
       const [documentsData, categoriesData, coverageData] = await Promise.all([
-        documentsRes.json(),
-        categoriesRes.json(),
-        coverageRes.json()
+        fetchWithAuth('/api/documents'),
+        fetchWithAuth('/api/categories?with_counts=true'),
+        fetchWithAuth('/api/analytics/coverage')
       ]);
 
       if (documentsData.success) setDocuments(documentsData.data);
@@ -87,14 +83,13 @@ export function DocumentDashboard({ initialData }: DocumentDashboardProps) {
 
   const handleDocumentUpdate = async (documentId: string, updates: Partial<Document>) => {
     try {
-      const response = await fetch(`/api/documents/${documentId}`, {
+      const updatedDoc = await fetchWithAuth(`/api/documents/${documentId}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(updates)
       });
-
-      if (response.ok) {
-        const updatedDoc = await response.json();
+      
+      if (updatedDoc && updatedDoc.success) {
         setDocuments(prev => prev.map(doc => 
           doc.id === documentId ? updatedDoc.data : doc
         ));
@@ -234,65 +229,12 @@ export function DocumentDashboard({ initialData }: DocumentDashboardProps) {
               <CardTitle>Documents ({filteredDocuments.length})</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="overflow-x-auto">
-                <table className="w-full border-collapse">
-                  <thead>
-                    <tr className="border-b">
-                      <th className="text-left p-2">Name</th>
-                      <th className="text-left p-2">Category</th>
-                      <th className="text-left p-2">Type</th>
-                      <th className="text-left p-2">Size</th>
-                      <th className="text-left p-2">Status</th>
-                      <th className="text-left p-2">Updated</th>
-                      <th className="text-left p-2">Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {filteredDocuments.map((doc) => (
-                      <tr key={doc.id} className="border-b hover:bg-gray-50">
-                        <td className="p-2">
-                          <div className="font-medium">{doc.name}</div>
-                          {doc.notes && (
-                            <div className="text-sm text-gray-500">{doc.notes}</div>
-                          )}
-                        </td>
-                        <td className="p-2">
-                          <Badge className={getCategoryColor(getCategoryName(doc.category))}>
-                            {getCategoryName(doc.category)}
-                          </Badge>
-                        </td>
-                        <td className="p-2">{doc.file_type || 'N/A'}</td>
-                        <td className="p-2">{doc.file_size_display || 'N/A'}</td>
-                        <td className="p-2">
-                          <Badge 
-                            variant={doc.status ? "default" : "destructive"}
-                            className={getDocumentStatusColor(doc.status)}
-                          >
-                            {getDocumentStatusBadge(doc.status)}
-                          </Badge>
-                        </td>
-                        <td className="p-2 text-sm text-gray-500">
-                          {formatDate(doc.updated_at)}
-                        </td>
-                        <td className="p-2">
-                          <div className="flex gap-1">
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              onClick={() => handleDocumentUpdate(doc.id, { status: !doc.status })}
-                            >
-                              {doc.status ? 'Mark Missing' : 'Mark Found'}
-                            </Button>
-                            <Button size="sm" variant="outline">
-                              <Download className="h-3 w-3" />
-                            </Button>
-                          </div>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
+              <DataTable
+                data={filteredDocuments}
+                columns={documentColumns}
+                enableDragDrop={false}
+                enableTabs={false}
+              />
             </CardContent>
           </Card>
 

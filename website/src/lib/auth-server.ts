@@ -45,7 +45,7 @@ export async function requireAdmin(): Promise<AuthUser> {
   const user = await getServerUser()
   
   if (!user) {
-    redirect('/login')
+    redirect('/api/auth/signin')
   }
   
   if (user.role !== 'admin') {
@@ -63,7 +63,7 @@ export async function requireBuyer(): Promise<AuthUser> {
   const user = await getServerUser()
   
   if (!user) {
-    redirect('/login')
+    redirect('/api/auth/signin')
   }
   
   if (user.role !== 'buyer') {
@@ -81,7 +81,7 @@ export async function requireAdminOrBuyer(): Promise<AuthUser> {
   const user = await getServerUser()
   
   if (!user) {
-    redirect('/login')
+    redirect('/api/auth/signin')
   }
   
   if (user.role !== 'admin' && user.role !== 'buyer') {

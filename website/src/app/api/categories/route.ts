@@ -1,9 +1,20 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { loadCategories, saveCategories } from '@/lib/document-storage-server';
 import { DocumentStorage } from '@/lib/document-storage-server';
+import { auth } from '@/auth';
 
 // GET /api/categories - Get all document categories
 export async function GET(request: NextRequest) {
+  const session = await auth();
+  
+  if (!session) {
+    return new NextResponse("Unauthorized", { status: 401 });
+  }
+  
+  if (session.user?.role !== 'admin') {
+    return new NextResponse("Forbidden", { status: 403 });
+  }
+
   try {
     const { searchParams } = new URL(request.url);
     const withCounts = searchParams.get('with_counts') === 'true';
@@ -38,6 +49,16 @@ export async function GET(request: NextRequest) {
 
 // POST /api/categories - Create a new category
 export async function POST(request: NextRequest) {
+  const session = await auth();
+  
+  if (!session) {
+    return new NextResponse("Unauthorized", { status: 401 });
+  }
+  
+  if (session.user?.role !== 'admin') {
+    return new NextResponse("Forbidden", { status: 403 });
+  }
+
   try {
     const body = await request.json();
     const { name, description, required, frequency, period } = body;

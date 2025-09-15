@@ -16,7 +16,7 @@ export async function GET(
       );
     }
 
-    const document = DocumentStorage.findById(id);
+    const document = await DocumentStorage.findById(id);
     
     if (!document) {
       return NextResponse.json(
@@ -56,7 +56,57 @@ export async function PUT(
     const body = await request.json();
     const { name, category, status, expected, notes, visibility, due_date } = body;
 
-    const updatedDocument = DocumentStorage.update(id, {
+    // Validate input fields
+    if (name !== undefined && (typeof name !== 'string' || name.trim().length === 0)) {
+      return NextResponse.json(
+        { success: false, error: 'Name must be a non-empty string' },
+        { status: 400 }
+      );
+    }
+
+    if (category !== undefined && (typeof category !== 'string' || category.trim().length === 0)) {
+      return NextResponse.json(
+        { success: false, error: 'Category must be a non-empty string' },
+        { status: 400 }
+      );
+    }
+
+    if (status !== undefined && typeof status !== 'boolean') {
+      return NextResponse.json(
+        { success: false, error: 'Status must be a boolean value' },
+        { status: 400 }
+      );
+    }
+
+    if (expected !== undefined && typeof expected !== 'boolean') {
+      return NextResponse.json(
+        { success: false, error: 'Expected must be a boolean value' },
+        { status: 400 }
+      );
+    }
+
+    if (notes !== undefined && typeof notes !== 'string') {
+      return NextResponse.json(
+        { success: false, error: 'Notes must be a string' },
+        { status: 400 }
+      );
+    }
+
+    if (visibility !== undefined && (!Array.isArray(visibility) || !visibility.every(v => typeof v === 'string'))) {
+      return NextResponse.json(
+        { success: false, error: 'Visibility must be an array of strings' },
+        { status: 400 }
+      );
+    }
+
+    if (due_date !== undefined && due_date !== null && typeof due_date !== 'string') {
+      return NextResponse.json(
+        { success: false, error: 'Due date must be a string or null' },
+        { status: 400 }
+      );
+    }
+
+    const updatedDocument = await DocumentStorage.update(id, {
       name,
       category,
       status,
@@ -101,7 +151,7 @@ export async function DELETE(
       );
     }
 
-    const deleted = DocumentStorage.delete(id);
+    const deleted = await DocumentStorage.delete(id);
     
     if (!deleted) {
       return NextResponse.json(
