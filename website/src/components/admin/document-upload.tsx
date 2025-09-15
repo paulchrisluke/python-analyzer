@@ -121,6 +121,7 @@ export function DocumentUpload({ onUploadSuccess }: DocumentUploadProps) {
               accept=".pdf,.csv,.xlsx,.xls,.doc,.docx,.txt"
               required
             />
+            {/* Note: accept attribute must match server allowedExtensions in /api/documents/upload/route.ts */}
             {file && (
               <div className="flex items-center gap-2 text-sm text-gray-600">
                 <FileText className="h-4 w-4" />

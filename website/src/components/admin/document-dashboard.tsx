@@ -55,7 +55,13 @@ export function DocumentDashboard({ initialData }: DocumentDashboardProps) {
 
       if (documentsData.success) setDocuments(documentsData.data);
       if (categoriesData.success) setCategories(categoriesData.data);
-      if (coverageData.success) setCoverage(coverageData.data);
+      if (coverageData.success) {
+        setCoverage(coverageData.data);
+        // Set stats from coverage data summary
+        if (coverageData.data && coverageData.data.summary) {
+          setStats(coverageData.data.summary);
+        }
+      }
     } catch (error) {
       console.error('Error fetching dashboard data:', error);
     } finally {

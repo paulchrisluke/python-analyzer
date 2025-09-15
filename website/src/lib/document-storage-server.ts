@@ -1,4 +1,4 @@
-import { readFileSync, writeFileSync, existsSync, mkdirSync, renameSync } from 'fs';
+import { readFileSync, writeFileSync, existsSync, mkdirSync, renameSync, unlinkSync } from 'fs';
 import { join } from 'path';
 import { Document, DocumentCategory, DocumentStats, CoverageAnalysis } from '@/types/document';
 
@@ -6,6 +6,23 @@ import { Document, DocumentCategory, DocumentStats, CoverageAnalysis } from '@/t
 const DATA_DIR = join(process.cwd(), 'data');
 const DOCUMENTS_FILE = join(DATA_DIR, 'documents.json');
 const CATEGORIES_FILE = join(DATA_DIR, 'categories.json');
+
+// In-process write queue to prevent race conditions
+let writeQueue: Promise<void> = Promise.resolve();
+
+// Helper function to enqueue write operations
+function enqueueWrite<T>(operation: () => T): Promise<T> {
+  return new Promise((resolve, reject) => {
+    writeQueue = writeQueue.then(async () => {
+      try {
+        const result = operation();
+        resolve(result);
+      } catch (error) {
+        reject(error);
+      }
+    }).catch(reject);
+  });
+}
 
 // Ensure data directory exists
 function ensureDataDir() {
@@ -156,10 +173,13 @@ export function saveDocuments(documents: Document[]): void {
     // Clean up temp file if it exists
     try {
       if (existsSync(tempFile)) {
-        writeFileSync(tempFile, '', 'utf8'); // Clear temp file
+        unlinkSync(tempFile); // Delete temp file
       }
     } catch (cleanupError) {
-      // Ignore cleanup errors
+      // Ignore ENOENT (file not found) but surface other errors
+      if (cleanupError instanceof Error && (cleanupError as any).code !== 'ENOENT') {
+        console.warn(`Failed to cleanup temp file ${tempFile}:`, cleanupError.message);
+      }
     }
     
     if (error instanceof Error) {
@@ -209,21 +229,23 @@ export function generateId(): string {
 // Document CRUD operations
 export class DocumentStorage {
   // Create a new document
-  static create(data: Omit<Document, 'id' | 'created_at' | 'updated_at'>): Document {
-    const documents = loadDocuments();
-    const now = new Date().toISOString();
-    
-    const document: Document = {
-      id: generateId(),
-      created_at: now,
-      updated_at: now,
-      ...data
-    };
-    
-    documents.push(document);
-    saveDocuments(documents);
-    
-    return document;
+  static async create(data: Omit<Document, 'id' | 'created_at' | 'updated_at'>): Promise<Document> {
+    return enqueueWrite(() => {
+      const documents = loadDocuments();
+      const now = new Date().toISOString();
+      
+      const document: Document = {
+        id: generateId(),
+        created_at: now,
+        updated_at: now,
+        ...data
+      };
+      
+      documents.push(document);
+      saveDocuments(documents);
+      
+      return document;
+    });
   }
 
   // Get all documents
@@ -275,34 +297,38 @@ export class DocumentStorage {
     visibility?: string[];
     due_date?: string;
   }>): Promise<Document | null> {
-    const documents = loadDocuments();
-    const index = documents.findIndex(doc => doc.id === id);
-    
-    if (index === -1) {
-      return null;
-    }
-    
-    documents[index] = {
-      ...documents[index],
-      ...data,
-      updated_at: new Date().toISOString()
-    };
-    
-    saveDocuments(documents);
-    return documents[index];
+    return enqueueWrite(() => {
+      const documents = loadDocuments();
+      const index = documents.findIndex(doc => doc.id === id);
+      
+      if (index === -1) {
+        return null;
+      }
+      
+      documents[index] = {
+        ...documents[index],
+        ...data,
+        updated_at: new Date().toISOString()
+      };
+      
+      saveDocuments(documents);
+      return documents[index];
+    });
   }
 
   // Delete document
   static async delete(id: string): Promise<boolean> {
-    const documents = loadDocuments();
-    const filtered = documents.filter(doc => doc.id !== id);
-    
-    if (filtered.length === documents.length) {
-      return false; // Document not found
-    }
-    
-    saveDocuments(filtered);
-    return true;
+    return enqueueWrite(() => {
+      const documents = loadDocuments();
+      const filtered = documents.filter(doc => doc.id !== id);
+      
+      if (filtered.length === documents.length) {
+        return false; // Document not found
+      }
+      
+      saveDocuments(filtered);
+      return true;
+    });
   }
 
   // Get document statistics

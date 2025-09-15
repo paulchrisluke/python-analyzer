@@ -169,8 +169,19 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // File type validation
-    const allowedExtensions = ['.pdf', '.doc', '.docx', '.txt', '.png', '.jpg', '.jpeg'];
+    // File type validation - matches client accept attribute
+    const allowedExtensions = ['.pdf', '.csv', '.xlsx', '.xls', '.doc', '.docx', '.txt'];
+    
+    // MIME type validation mapping
+    const allowedMimeTypes = {
+      '.pdf': ['application/pdf'],
+      '.csv': ['text/csv', 'application/csv'],
+      '.xlsx': ['application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'],
+      '.xls': ['application/vnd.ms-excel'],
+      '.doc': ['application/msword'],
+      '.docx': ['application/vnd.openxmlformats-officedocument.wordprocessingml.document'],
+      '.txt': ['text/plain']
+    };
     
     // Extract file extension safely with better error handling
     const fileName = file.name;
@@ -192,10 +203,19 @@ export async function POST(request: NextRequest) {
       );
     }
     
-    // Check if file extension is allowed
+    // Check if file extension is allowed (case-insensitive)
     if (!allowedExtensions.includes(fileExtension)) {
       return NextResponse.json(
         { success: false, error: `File type '${fileExtension}' not allowed. Allowed types: ${allowedExtensions.join(', ')}` },
+        { status: 400 }
+      );
+    }
+    
+    // Validate MIME type matches extension
+    const expectedMimeTypes = allowedMimeTypes[fileExtension as keyof typeof allowedMimeTypes];
+    if (expectedMimeTypes && !expectedMimeTypes.includes(file.type)) {
+      return NextResponse.json(
+        { success: false, error: `File MIME type '${file.type}' does not match extension '${fileExtension}'. Expected: ${expectedMimeTypes.join(', ')}` },
         { status: 400 }
       );
     }

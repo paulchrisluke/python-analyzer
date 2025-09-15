@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { DocumentStorage } from '@/lib/document-storage-server';
+import { auth } from '@/auth';
 
 // GET /api/documents/[id] - Get a specific document
 export async function GET(
@@ -16,12 +17,32 @@ export async function GET(
       );
     }
 
+    // Authentication check
+    const session = await auth();
+    if (!session) {
+      console.warn(`Unauthorized access attempt to document ${id} from ${request.headers.get('x-forwarded-for') || 'unknown IP'}`);
+      return NextResponse.json(
+        { success: false, error: 'Unauthorized' },
+        { status: 401 }
+      );
+    }
+
     const document = await DocumentStorage.findById(id);
     
     if (!document) {
       return NextResponse.json(
         { success: false, error: 'Document not found' },
         { status: 404 }
+      );
+    }
+
+    // Authorization check - verify user has access to this document
+    const userRole = session.user?.role;
+    if (!userRole || !document.visibility.includes(userRole)) {
+      console.warn(`Unauthorized access attempt to document ${id} by user ${session.user?.email} with role ${userRole}`);
+      return NextResponse.json(
+        { success: false, error: 'Forbidden' },
+        { status: 403 }
       );
     }
 
@@ -50,6 +71,25 @@ export async function PUT(
       return NextResponse.json(
         { success: false, error: 'Document ID is required' },
         { status: 400 }
+      );
+    }
+
+    // Authentication check
+    const session = await auth();
+    if (!session) {
+      console.warn(`Unauthorized update attempt to document ${id} from ${request.headers.get('x-forwarded-for') || 'unknown IP'}`);
+      return NextResponse.json(
+        { success: false, error: 'Unauthorized' },
+        { status: 401 }
+      );
+    }
+
+    // Authorization check - only admins can update documents
+    if (session.user?.role !== 'admin') {
+      console.warn(`Unauthorized update attempt to document ${id} by user ${session.user?.email} with role ${session.user?.role}`);
+      return NextResponse.json(
+        { success: false, error: 'Forbidden' },
+        { status: 403 }
       );
     }
 
@@ -151,6 +191,37 @@ export async function DELETE(
       );
     }
 
+    // Authentication check
+    const session = await auth();
+    if (!session) {
+      console.warn(`Unauthorized delete attempt to document ${id} from ${request.headers.get('x-forwarded-for') || 'unknown IP'}`);
+      return NextResponse.json(
+        { success: false, error: 'Unauthorized' },
+        { status: 401 }
+      );
+    }
+
+    // Fetch document to check ownership/authorization
+    const document = await DocumentStorage.findById(id);
+    if (!document) {
+      return NextResponse.json(
+        { success: false, error: 'Document not found' },
+        { status: 404 }
+      );
+    }
+
+    // Authorization check - verify user has admin role or ownership
+    const userRole = session.user?.role;
+    const userId = session.user?.id;
+    if (!userRole || (userRole !== 'admin' && !document.visibility.includes(userRole))) {
+      console.warn(`Unauthorized delete attempt to document ${id} by user ${session.user?.email} (ID: ${userId}) with role ${userRole}`);
+      return NextResponse.json(
+        { success: false, error: 'Forbidden' },
+        { status: 403 }
+      );
+    }
+
+    console.info(`Document ${id} deletion authorized for user ${session.user?.email} (ID: ${userId}) with role ${userRole}`);
     const deleted = await DocumentStorage.delete(id);
     
     if (!deleted) {

@@ -25,12 +25,37 @@ export async function GET(request: NextRequest) {
       const documents = DocumentStorage.findAll();
       const stats = DocumentStorage.getStats();
       
-      categories = categories.map(category => ({
-        ...category,
-        document_count: stats.by_category[category.name] || 0,
-        found_count: documents.filter(doc => doc.category === category.name && doc.status).length,
-        missing_count: documents.filter(doc => doc.category === category.name && !doc.status).length
-      }));
+      // Build category counts in a single pass
+      const categoryCounts = new Map<string, { total: number; found: number; missing: number }>();
+      
+      // Initialize all categories with zero counts
+      categories.forEach(category => {
+        categoryCounts.set(category.name, { total: 0, found: 0, missing: 0 });
+      });
+      
+      // Single pass through documents to build counts
+      documents.forEach(doc => {
+        const counts = categoryCounts.get(doc.category);
+        if (counts) {
+          counts.total++;
+          if (doc.status) {
+            counts.found++;
+          } else {
+            counts.missing++;
+          }
+        }
+      });
+      
+      // Map categories to their counts
+      categories = categories.map(category => {
+        const counts = categoryCounts.get(category.name) || { total: 0, found: 0, missing: 0 };
+        return {
+          ...category,
+          document_count: stats.by_category[category.name] || 0,
+          found_count: counts.found,
+          missing_count: counts.missing
+        };
+      });
     }
 
     return NextResponse.json({

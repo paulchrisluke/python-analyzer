@@ -53,6 +53,7 @@ import {
 import { Area, AreaChart, CartesianGrid, XAxis } from "recharts"
 import { toast } from "sonner"
 import { z } from "zod"
+import type { Document as AppDocument } from "@/types/document"
 
 import { useIsMobile } from "@/hooks/use-mobile"
 import { Badge } from "@/components/ui/badge"
@@ -371,7 +372,7 @@ const salesColumns: ColumnDef<z.infer<typeof salesSchema>>[] = [
 ]
 
 // Document columns
-export const documentColumns: ColumnDef<z.infer<typeof documentSchema>>[] = [
+export const documentColumns: ColumnDef<AppDocument>[] = [
   {
     id: "select",
     header: ({ table }) => (

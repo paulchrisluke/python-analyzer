@@ -179,8 +179,14 @@ export function validateDocumentData(data: any): { valid: boolean; errors: strin
     errors.push('Document name must be less than 255 characters');
   }
   
-  if (data.file_size_bytes && data.file_size_bytes < 0) {
-    errors.push('File size cannot be negative');
+  if (data.file_size !== undefined) {
+    if (typeof data.file_size !== 'number') {
+      errors.push('File size must be a number');
+    } else if (data.file_size < 0) {
+      errors.push('File size cannot be negative');
+    } else if (!Number.isInteger(data.file_size)) {
+      errors.push('File size must be an integer');
+    }
   }
   
   if (data.visibility && !Array.isArray(data.visibility)) {
@@ -189,6 +195,19 @@ export function validateDocumentData(data: any): { valid: boolean; errors: strin
   
   if (data.due_date && isNaN(Date.parse(data.due_date))) {
     errors.push('Due date must be a valid date');
+  }
+  
+  // Validate file_hash if present
+  if (data.file_hash !== undefined) {
+    if (typeof data.file_hash !== 'string') {
+      errors.push('File hash must be a string');
+    } else if (data.file_hash.length > 0) {
+      // Check if it matches SHA-256 hex pattern (64 hex characters)
+      const sha256Pattern = /^[a-f0-9]{64}$/i;
+      if (!sha256Pattern.test(data.file_hash)) {
+        errors.push('File hash must be a valid SHA-256 hash (64 hexadecimal characters)');
+      }
+    }
   }
   
   return {
