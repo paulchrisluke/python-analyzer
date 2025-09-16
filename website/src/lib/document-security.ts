@@ -5,6 +5,7 @@
  * including filename validation, access logging, and security checks.
  */
 
+import * as crypto from 'crypto';
 import { Document } from '@/types/document';
 
 /**
@@ -95,7 +96,6 @@ export function shouldCleanupDocument(document: Document): boolean {
  * Generate a secure random filename component
  */
 export function generateSecureFilenameComponent(): string {
-  const crypto = require('crypto');
   return crypto.randomBytes(16).toString('hex');
 }
 

@@ -13,10 +13,10 @@ import {
 // Uses catch-all route to support IDs with '/' characters
 export async function GET(
   request: NextRequest,
-  { params }: { params: Promise<{ id: string[] }> }
+  { params }: { params: { id: string[] } }
 ) {
   try {
-    const { id } = await params;
+    const { id } = params;
     
     if (!id || id.length === 0) {
       return NextResponse.json(
@@ -105,8 +105,8 @@ export async function GET(
       );
     }
 
-    const fileBuffer = await response.arrayBuffer();
     const contentType = response.headers.get('content-type') || 'application/octet-stream';
+    const contentLength = response.headers.get('content-length');
 
     // Log access for audit trail
     logDocumentAccess(
@@ -117,20 +117,26 @@ export async function GET(
       request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || 'unknown'
     );
 
-    // Return the file content with appropriate headers
+    // Return the file content with appropriate headers - stream the response body
     const securityHeaders = getSecurityHeaders();
-    return new NextResponse(fileBuffer, {
+    const headers: Record<string, string> = {
+      'Content-Type': contentType,
+      'Content-Disposition': `inline; filename="${document.name}"`,
+      ...securityHeaders,
+      // Rate limiting headers
+      'X-RateLimit-Limit': '60',
+      'X-RateLimit-Remaining': rateLimit.remaining.toString(),
+      'X-RateLimit-Reset': rateLimit.resetTime.toString()
+    };
+
+    // Add content length if available
+    if (contentLength) {
+      headers['Content-Length'] = contentLength;
+    }
+
+    return new NextResponse(response.body, {
       status: 200,
-      headers: {
-        'Content-Type': contentType,
-        'Content-Length': fileBuffer.byteLength.toString(),
-        'Content-Disposition': `inline; filename="${document.name}"`,
-        ...securityHeaders,
-        // Rate limiting headers
-        'X-RateLimit-Limit': '60',
-        'X-RateLimit-Remaining': rateLimit.remaining.toString(),
-        'X-RateLimit-Reset': rateLimit.resetTime.toString()
-      },
+      headers,
     });
   } catch (error) {
     console.error('Error serving document via proxy:', error);

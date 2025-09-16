@@ -276,17 +276,21 @@ export async function POST(request: NextRequest) {
       addRandomSuffix: true,
     });
 
+    // Extract the actual stored path from the blob URL
+    // The blob.url contains the full URL, we need to extract the pathname
+    const blobUrl = new URL(blob.url);
+    const actualStoredPath = blobUrl.pathname.substring(1); // Remove leading slash
+
     // For blob-only storage, we don't need to create a separate metadata record
     // The document metadata is derived from the blob storage itself
     // Create a document object for the response
-    const stablePath = `documents/${sanitizedCategory}/${uniqueFilename}`;
     const document = {
-      id: stablePath, // Use stable pathname as ID, not full URL
+      id: actualStoredPath, // Use actual stored path as ID to match findById/delete operations
       name: name,
       category: category,
       sanitized_name: sanitizedName,
       path_segment: sanitizedCategory,
-      blob_url: blob.url, // Keep full URL in blob_url field
+      blob_url: '', // Don't expose direct blob URL - use proxy instead
       file_type: fileExtension,
       file_size: file.size,
       file_size_display: formatFileSize(file.size),

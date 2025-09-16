@@ -9,34 +9,13 @@ import { Document } from '@/types/document';
  */
 export async function downloadDocument(doc: Document): Promise<boolean> {
   try {
-    const response = await fetch(`/api/documents/${doc.id}/download`, {
-      method: 'GET',
-      credentials: 'include', // Include cookies for authentication
-    });
-
-    if (!response.ok) {
-      console.error('Failed to download document:', response.status, response.statusText);
-      return false;
-    }
-
-    // Get the filename from the response headers or use document name
-    const contentDisposition = response.headers.get('content-disposition');
-    let filename = doc.name || doc.sanitized_name || 'document';
+    // Use the proxy route instead of direct download
+    const proxyUrl = `/api/documents/proxy/${encodeURIComponent(doc.id)}`;
     
-    if (contentDisposition) {
-      const filenameMatch = contentDisposition.match(/filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/);
-      if (filenameMatch && filenameMatch[1]) {
-        filename = filenameMatch[1].replace(/['"]/g, '');
-      }
-    }
-
-    // Create blob from response and trigger download
-    const blob = await response.blob();
-    const url = window.URL.createObjectURL(blob);
-    
+    // Create a link element and trigger download
     const link = document.createElement('a');
-    link.href = url;
-    link.download = filename;
+    link.href = proxyUrl;
+    link.download = doc.name || doc.sanitized_name || 'document';
     link.target = '_blank';
     link.rel = 'noopener noreferrer';
     
@@ -44,9 +23,6 @@ export async function downloadDocument(doc: Document): Promise<boolean> {
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
-    
-    // Clean up the object URL
-    window.URL.revokeObjectURL(url);
 
     return true;
   } catch (error) {
@@ -60,9 +36,9 @@ export async function downloadDocument(doc: Document): Promise<boolean> {
  */
 export async function viewDocument(doc: Document): Promise<boolean> {
   try {
-    // Open the download endpoint in a new tab - the server will handle streaming
-    const downloadUrl = `/api/documents/${doc.id}/download`;
-    window.open(downloadUrl, '_blank', 'noopener,noreferrer');
+    // Open the proxy endpoint in a new tab - the server will handle streaming
+    const proxyUrl = `/api/documents/proxy/${encodeURIComponent(doc.id)}`;
+    window.open(proxyUrl, '_blank', 'noopener,noreferrer');
     return true;
   } catch (error) {
     console.error('Error viewing document:', error);
