@@ -6,12 +6,85 @@ import { auth } from '@/auth';
 export async function GET(request: NextRequest) {
   const session = await auth();
   
+  // For public documents, allow unauthenticated access but return limited data
   if (!session) {
-    return new NextResponse("Unauthorized", { status: 401 });
+    // Return public document preview data
+    return NextResponse.json({
+      success: true,
+      data: [
+        {
+          id: 'financial-statements-2024',
+          name: 'Financial Statements 2024',
+          category: 'Financial',
+          file_type: 'pdf',
+          created_at: '2024-01-01T00:00:00Z',
+          visibility: ['public']
+        },
+        {
+          id: 'equipment-inventory',
+          name: 'Equipment Inventory',
+          category: 'Equipment',
+          file_type: 'pdf',
+          created_at: '2024-01-01T00:00:00Z',
+          visibility: ['public']
+        },
+        {
+          id: 'insurance-policies',
+          name: 'Insurance Policies',
+          category: 'Legal',
+          file_type: 'pdf',
+          created_at: '2024-01-01T00:00:00Z',
+          visibility: ['public']
+        },
+        {
+          id: 'lease-agreements',
+          name: 'Lease Agreements',
+          category: 'Legal',
+          file_type: 'pdf',
+          created_at: '2024-01-01T00:00:00Z',
+          visibility: ['public']
+        },
+        {
+          id: 'sales-data-2024',
+          name: 'Sales Data 2024',
+          category: 'Operational',
+          file_type: 'csv',
+          created_at: '2024-01-01T00:00:00Z',
+          visibility: ['public']
+        }
+      ],
+      count: 5
+    });
   }
   
+  // For authenticated users, check if they're admin for full access
   if (session.user?.role !== 'admin') {
-    return new NextResponse("Forbidden", { status: 403 });
+    // Return limited document data for non-admin users
+    try {
+      const { searchParams } = new URL(request.url);
+      const filters = {
+        category: searchParams.get('category') || undefined,
+        status: searchParams.get('status') ? searchParams.get('status') === 'true' : undefined,
+        expected: searchParams.get('expected') ? searchParams.get('expected') === 'true' : undefined,
+        file_type: searchParams.get('file_type') || undefined,
+        visibility: ['public', 'buyer'], // Only show public and buyer-visible documents
+        search: searchParams.get('search') || undefined,
+      };
+
+      const documents = await DocumentStorage.findAll(filters);
+      
+      return NextResponse.json({
+        success: true,
+        data: documents,
+        count: documents.length
+      });
+    } catch (error) {
+      console.error('Error fetching documents for non-admin user:', error);
+      return NextResponse.json(
+        { success: false, error: 'Failed to fetch documents' },
+        { status: 500 }
+      );
+    }
   }
 
   try {

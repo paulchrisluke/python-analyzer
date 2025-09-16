@@ -1,16 +1,18 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Mail, Phone, MapPin, CheckCircle, Loader2 } from "lucide-react";
+import { Mail, Phone, MapPin, CheckCircle, Loader2, FileText } from "lucide-react";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
 
 export function ContactForm() {
+  const router = useRouter();
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -26,21 +28,17 @@ export function ContactForm() {
     setIsSubmitting(true);
     
     try {
-      // Mock API call - replace with actual endpoint
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      // Store user information in session storage for NDA personalization
+      sessionStorage.setItem('nda_user_info', JSON.stringify({
+        name: formData.name,
+        email: formData.email,
+        phone: formData.phone,
+        message: formData.message,
+        submittedAt: new Date().toISOString()
+      }));
       
-      // Log submission without PII
-      console.log("Contact form submitted successfully");
-      
-      setIsSubmitted(true);
-      // Reset form after successful submission
-      setFormData({
-        name: "",
-        email: "",
-        phone: "",
-        message: "",
-        agreeToTerms: false,
-      });
+      // Redirect to NDA signing flow
+      router.push('/nda');
     } catch (error) {
       console.error("Form submission error:", error);
       // Could add error state here if needed
@@ -150,10 +148,13 @@ export function ContactForm() {
               {isSubmitting ? (
                 <>
                   <LoadingSpinner size="sm" />
-                  Sending...
+                  Processing...
                 </>
               ) : (
-                "Request Information"
+                <>
+                  <FileText className="h-4 w-4 mr-2" />
+                  Request Information & Sign NDA
+                </>
               )}
             </Button>
           </form>

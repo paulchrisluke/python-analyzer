@@ -1,0 +1,61 @@
+import { NextRequest, NextResponse } from 'next/server';
+import { auth } from '@/auth';
+import { getNDAStatus, getNDASignatureByUserId } from '@/lib/nda-storage';
+import { isNDAExempt } from '@/lib/nda';
+
+// GET /api/nda/status - Get detailed NDA status for user
+export async function GET(request: NextRequest) {
+  try {
+    const session = await auth();
+    
+    if (!session?.user) {
+      return NextResponse.json(
+        { success: false, error: 'Unauthorized' },
+        { status: 401 }
+      );
+    }
+
+    const userId = session.user.id;
+    const userRole = session.user.role;
+
+    // Check if user role is exempt from NDA requirements
+    if (isNDAExempt(userRole)) {
+      return NextResponse.json({
+        success: true,
+        data: {
+          isSigned: true,
+          isExempt: true,
+          canAccessProtectedContent: true,
+          role: userRole,
+          exemptReason: 'Admin users are exempt from NDA requirements'
+        }
+      });
+    }
+
+    // Get detailed NDA status
+    const ndaStatus = await getNDAStatus(userId);
+    const signature = await getNDASignatureByUserId(userId);
+
+    return NextResponse.json({
+      success: true,
+      data: {
+        ...ndaStatus,
+        isExempt: false,
+        role: userRole,
+        signature: signature ? {
+          id: signature.id,
+          signedAt: signature.signedAt,
+          version: signature.ndaVersion,
+          // Don't include sensitive data like signatureData
+        } : null
+      }
+    });
+
+  } catch (error) {
+    console.error('Error getting NDA status:', error);
+    return NextResponse.json(
+      { success: false, error: 'Internal server error' },
+      { status: 500 }
+    );
+  }
+}

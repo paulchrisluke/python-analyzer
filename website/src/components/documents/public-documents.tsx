@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react"
 import { FolderView } from "./FolderView"
+import { ContactFormModal } from "./ContactFormModal"
 import { Document } from "@/types/document"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -13,6 +14,7 @@ export function PublicDocuments() {
   const [documents, setDocuments] = useState<Document[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [isContactModalOpen, setIsContactModalOpen] = useState(false)
 
   useEffect(() => {
     // Fetch documents from API (public endpoint)
@@ -54,9 +56,13 @@ export function PublicDocuments() {
   }, [])
 
   const handleAccessRequest = () => {
-    console.log('Public access request for all documents')
-    // TODO: Implement public access request handling
-    // This could open a contact form or redirect to a signup page
+    console.log('Opening contact form modal for access request')
+    setIsContactModalOpen(true)
+  }
+
+  const handleContactSuccess = () => {
+    console.log('Contact form submitted successfully')
+    // Could redirect to NDA or show success message
   }
 
   if (loading) {
@@ -191,6 +197,13 @@ export function PublicDocuments() {
           </div>
         </div>
       </CardContent>
+      
+      {/* Contact Form Modal */}
+      <ContactFormModal
+        isOpen={isContactModalOpen}
+        onClose={() => setIsContactModalOpen(false)}
+        onSuccess={handleContactSuccess}
+      />
     </Card>
   )
 }

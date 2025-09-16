@@ -46,12 +46,18 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           .split(",")
           .map((e) => e.trim().toLowerCase())
           .filter(Boolean)
+        const lawyerEmails = (process.env.LAWYER_EMAILS ?? "")
+          .split(",")
+          .map((e) => e.trim().toLowerCase())
+          .filter(Boolean)
         const email = (user.email ?? "").toLowerCase()
 
         if (adminEmails.includes(email)) {
           token.role = 'admin'
         } else if (buyerEmails.includes(email)) {
           token.role = 'buyer'
+        } else if (lawyerEmails.includes(email)) {
+          token.role = 'lawyer'
         } else {
           token.role = 'viewer'
         }
@@ -66,10 +72,22 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     async session({ session, token }) {
       if (token) {
         session.user.id = token.sub || ''
-        session.user.role = token.role as 'admin' | 'buyer' | 'viewer'
+        session.user.role = token.role as 'admin' | 'buyer' | 'lawyer' | 'viewer'
         session.user.email = token.email as string
         session.user.name = token.name as string
         session.user.image = token.picture as string
+        
+        // Add NDA status to session
+        if (token.role === 'admin') {
+          // Admin users are exempt from NDA requirements
+          session.user.ndaSigned = true
+          session.user.ndaSignedAt = undefined
+        } else {
+          // For non-admin users, we'll check NDA status on the client side
+          // This avoids Node.js API usage in the Edge Runtime
+          session.user.ndaSigned = false
+          session.user.ndaSignedAt = undefined
+        }
       }
       return session
     }

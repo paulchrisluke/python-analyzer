@@ -6,17 +6,19 @@ declare module 'next-auth' {
       id: string
       email: string
       name: string
-      role: 'admin' | 'buyer' | 'viewer'
+      role: 'admin' | 'buyer' | 'lawyer' | 'viewer'
+      ndaSigned: boolean
+      ndaSignedAt?: string
     }
   }
 
   interface User {
-    role: 'admin' | 'buyer' | 'viewer'
+    role: 'admin' | 'buyer' | 'lawyer' | 'viewer'
   }
 }
 
 declare module 'next-auth/jwt' {
   interface JWT {
-    role: 'admin' | 'buyer' | 'viewer'
+    role: 'admin' | 'buyer' | 'lawyer' | 'viewer'
   }
 }

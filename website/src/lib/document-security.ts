@@ -152,9 +152,17 @@ export function checkDocumentAccessRateLimit(
 /**
  * Check if user has access to document based on role and phase
  */
-export function hasDocumentAccess(userRole: string, document: Document): boolean {
+export function hasDocumentAccess(userRole: string, document: Document, ndaSigned: boolean = false): boolean {
   if (userRole === 'admin') {
     return true;
+  }
+
+  // Check if document phase requires NDA
+  const ndaRequiredPhases = ['p2b', 'p3a', 'p3b', 'p4', 'p5', 'legal'];
+  const documentPhase = document.notes?.match(/Phase:\s*(p[1-5](?:[ab])?|legal|legacy)/)?.[1] || 'legacy';
+  
+  if (ndaRequiredPhases.includes(documentPhase) && !ndaSigned) {
+    return false;
   }
 
   return document.visibility.includes(userRole);
