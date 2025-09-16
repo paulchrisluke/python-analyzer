@@ -42,15 +42,18 @@ import {
   ChevronsLeftIcon,
   ChevronsRightIcon,
   ColumnsIcon,
+  FileTextIcon,
   GripVerticalIcon,
   LoaderIcon,
   MoreVerticalIcon,
   PlusIcon,
   TrendingUpIcon,
+  XCircle,
 } from "lucide-react"
 import { Area, AreaChart, CartesianGrid, XAxis } from "recharts"
 import { toast } from "sonner"
 import { z } from "zod"
+import type { Document as AppDocument } from "@/types/document"
 
 import { useIsMobile } from "@/hooks/use-mobile"
 import { Badge } from "@/components/ui/badge"
@@ -105,7 +108,8 @@ import {
   TabsTrigger,
 } from "@/components/ui/tabs"
 
-export const schema = z.object({
+// Sales page schema (keep for backward compatibility)
+export const salesSchema = z.object({
   id: z.number(),
   header: z.string(),
   type: z.string(),
@@ -113,6 +117,26 @@ export const schema = z.object({
   target: z.string(),
   limit: z.string(),
   reviewer: z.string(),
+})
+
+// Document schema
+export const documentSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  category: z.string(),
+  file_type: z.string(),
+  file_size: z.number(),
+  file_size_display: z.string(),
+  status: z.boolean(),
+  expected: z.boolean(),
+  notes: z.string(),
+  visibility: z.array(z.string()),
+  due_date: z.string().nullable(),
+  last_modified: z.string(),
+  created_at: z.string(),
+  updated_at: z.string(),
+  blob_url: z.string(),
+  file_hash: z.string()
 })
 
 // Create a separate component for the drag handle
@@ -131,7 +155,8 @@ function DragHandle({ attributes, listeners }: { attributes: any; listeners: any
   )
 }
 
-const columns: ColumnDef<z.infer<typeof schema>>[] = [
+// Sales page columns (keep for backward compatibility)
+const salesColumns: ColumnDef<z.infer<typeof salesSchema>>[] = [
   {
     id: "drag",
     header: () => null,
@@ -203,7 +228,7 @@ const columns: ColumnDef<z.infer<typeof schema>>[] = [
     accessorKey: "target",
     header: () => <div className="w-full text-right">Target</div>,
     cell: ({ row, table }) => {
-      const saveRowData = (table.options.meta as { saveRowData?: (id: number, field: string, value: string) => Promise<unknown> })?.saveRowData
+      const saveRowData = (table.options.meta as { saveRowData?: (id: UniqueIdentifier, field: string, value: string) => Promise<unknown> })?.saveRowData
       return (
         <form
           onSubmit={async (e) => {
@@ -240,7 +265,7 @@ const columns: ColumnDef<z.infer<typeof schema>>[] = [
     accessorKey: "limit",
     header: () => <div className="w-full text-right">Limit</div>,
     cell: ({ row, table }) => {
-      const saveRowData = (table.options.meta as { saveRowData?: (id: number, field: string, value: string) => Promise<unknown> })?.saveRowData
+      const saveRowData = (table.options.meta as { saveRowData?: (id: UniqueIdentifier, field: string, value: string) => Promise<unknown> })?.saveRowData
       return (
         <form
           onSubmit={async (e) => {
@@ -278,7 +303,7 @@ const columns: ColumnDef<z.infer<typeof schema>>[] = [
     header: "Reviewer",
     cell: ({ row, table }) => {
       const isAssigned = row.original.reviewer !== "Assign reviewer"
-      const saveRowData = (table.options.meta as { saveRowData?: (id: number, field: string, value: string) => Promise<unknown> })?.saveRowData
+      const saveRowData = (table.options.meta as { saveRowData?: (id: UniqueIdentifier, field: string, value: string) => Promise<unknown> })?.saveRowData
 
       if (isAssigned) {
         return row.original.reviewer
@@ -346,7 +371,120 @@ const columns: ColumnDef<z.infer<typeof schema>>[] = [
   },
 ]
 
-function DraggableRow({ row }: { row: Row<z.infer<typeof schema>> }) {
+// Document columns
+export const documentColumns: ColumnDef<AppDocument>[] = [
+  {
+    id: "select",
+    header: ({ table }) => (
+      <div className="flex items-center justify-center">
+        <Checkbox
+          checked={
+            table.getIsAllPageRowsSelected() ||
+            (table.getIsSomePageRowsSelected() && "indeterminate")
+          }
+          onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
+          aria-label="Select all"
+        />
+      </div>
+    ),
+    cell: ({ row }) => (
+      <div className="flex items-center justify-center">
+        <Checkbox
+          checked={row.getIsSelected()}
+          onCheckedChange={(value) => row.toggleSelected(!!value)}
+          aria-label="Select row"
+        />
+      </div>
+    ),
+    enableSorting: false,
+    enableHiding: false,
+  },
+  {
+    accessorKey: "name",
+    header: "Document Name",
+    cell: ({ row }) => {
+      return (
+        <div className="flex items-center gap-2">
+          <FileTextIcon className="h-4 w-4 text-muted-foreground" />
+          <span className="font-medium">{row.original.name}</span>
+        </div>
+      )
+    },
+    enableHiding: false,
+  },
+  {
+    accessorKey: "category",
+    header: "Category",
+    cell: ({ row }) => (
+      <Badge variant="outline" className="px-1.5 text-muted-foreground">
+        {row.original.category}
+      </Badge>
+    ),
+  },
+  {
+    accessorKey: "status",
+    header: "Status",
+    cell: ({ row }) => (
+      <Badge
+        variant="outline"
+        className="flex gap-1 px-1.5 text-muted-foreground [&_svg]:size-3"
+      >
+        {row.original.status ? (
+          <CheckCircle2Icon className="text-green-500 dark:text-green-400" />
+        ) : (
+          <XCircle className="text-red-500 dark:text-red-400" />
+        )}
+        {row.original.status ? "Found" : "Missing"}
+      </Badge>
+    ),
+  },
+  {
+    accessorKey: "file_size_display",
+    header: "Size",
+  },
+  {
+    accessorKey: "file_type",
+    header: "Type",
+    cell: ({ row }) => (
+      <Badge variant="secondary" className="px-1.5">
+        {row.original.file_type}
+      </Badge>
+    ),
+  },
+  {
+    accessorKey: "created_at",
+    header: "Created",
+    cell: ({ row }) => {
+      return new Date(row.original.created_at).toLocaleDateString()
+    },
+  },
+  {
+    id: "actions",
+    cell: ({ row }) => (
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button
+            variant="ghost"
+            className="flex size-8 text-muted-foreground data-[state=open]:bg-muted"
+            size="icon"
+          >
+            <MoreVerticalIcon />
+            <span className="sr-only">Open menu</span>
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end" className="w-32">
+          <DropdownMenuItem>View</DropdownMenuItem>
+          <DropdownMenuItem>Download</DropdownMenuItem>
+          <DropdownMenuItem>Edit</DropdownMenuItem>
+          <DropdownMenuSeparator />
+          <DropdownMenuItem>Delete</DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+    ),
+  },
+]
+
+function DraggableRow<T extends { id: UniqueIdentifier }>({ row }: { row: Row<T> }) {
   const { transform, transition, setNodeRef, isDragging, attributes, listeners } = useSortable({
     id: row.original.id,
   })
@@ -375,10 +513,16 @@ function DraggableRow({ row }: { row: Row<z.infer<typeof schema>> }) {
   )
 }
 
-export function DataTable({
+export function DataTable<T extends { id: UniqueIdentifier }>({
   data: initialData,
+  columns,
+  enableDragDrop = false,
+  enableTabs = false,
 }: {
-  data: z.infer<typeof schema>[]
+  data: T[]
+  columns: ColumnDef<T>[]
+  enableDragDrop?: boolean
+  enableTabs?: boolean
 }) {
   const [data, setData] = React.useState(() => initialData)
   const [rowSelection, setRowSelection] = React.useState({})
@@ -399,7 +543,11 @@ export function DataTable({
   )
 
   // TODO: Replace with actual API call when backend persistence is available
-  const saveRowData = async (id: number, field: string, value: string): Promise<unknown> => {
+  const saveRowData = async (
+    id: UniqueIdentifier,
+    field: string,
+    value: string
+  ): Promise<unknown> => {
     // Simulate API call delay
     await new Promise(resolve => setTimeout(resolve, 500))
     
@@ -453,7 +601,7 @@ export function DataTable({
     if (active && over && active.id !== over.id) {
       setData((data) => {
         // Check for duplicate IDs in the data array
-        const idCounts = new Map<number, number>()
+        const idCounts = new Map<UniqueIdentifier, number>()
         data.forEach((item, index) => {
           const count = idCounts.get(item.id) || 0
           idCounts.set(item.id, count + 1)
@@ -494,51 +642,54 @@ export function DataTable({
     }
   }
 
-  return (
-    <Tabs
-      defaultValue="outline"
-      className="flex w-full flex-col justify-start gap-6"
-    >
+  const content = (
+    <div className="flex w-full flex-col justify-start gap-6">
       <div className="flex items-center justify-between px-4 lg:px-6">
-        <Label htmlFor="view-selector" className="sr-only">
-          View
-        </Label>
-        <Select defaultValue="outline">
-          <SelectTrigger
-            className="@4xl/main:hidden flex w-fit"
-            id="view-selector"
-          >
-            <SelectValue placeholder="Select a view" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="outline">Outline</SelectItem>
-            <SelectItem value="past-performance">Past Performance</SelectItem>
-            <SelectItem value="key-personnel">Key Personnel</SelectItem>
-            <SelectItem value="focus-documents">Focus Documents</SelectItem>
-          </SelectContent>
-        </Select>
-        <TabsList className="@4xl/main:flex hidden">
-          <TabsTrigger value="outline">Outline</TabsTrigger>
-          <TabsTrigger value="past-performance" className="gap-1">
-            Past Performance{" "}
-            <Badge
-              variant="secondary"
-              className="flex h-5 w-5 items-center justify-center rounded-full bg-muted-foreground/30"
-            >
-              3
-            </Badge>
-          </TabsTrigger>
-          <TabsTrigger value="key-personnel" className="gap-1">
-            Key Personnel{" "}
-            <Badge
-              variant="secondary"
-              className="flex h-5 w-5 items-center justify-center rounded-full bg-muted-foreground/30"
-            >
-              2
-            </Badge>
-          </TabsTrigger>
-          <TabsTrigger value="focus-documents">Focus Documents</TabsTrigger>
-        </TabsList>
+        {enableTabs ? (
+          <>
+            <Label htmlFor="view-selector" className="sr-only">
+              View
+            </Label>
+            <Select defaultValue="outline">
+              <SelectTrigger
+                className="@4xl/main:hidden flex w-fit"
+                id="view-selector"
+              >
+                <SelectValue placeholder="Select a view" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="outline">Outline</SelectItem>
+                <SelectItem value="past-performance">Past Performance</SelectItem>
+                <SelectItem value="key-personnel">Key Personnel</SelectItem>
+                <SelectItem value="focus-documents">Focus Documents</SelectItem>
+              </SelectContent>
+            </Select>
+            <TabsList className="@4xl/main:flex hidden">
+              <TabsTrigger value="outline">Outline</TabsTrigger>
+              <TabsTrigger value="past-performance" className="gap-1">
+                Past Performance{" "}
+                <Badge
+                  variant="secondary"
+                  className="flex h-5 w-5 items-center justify-center rounded-full bg-muted-foreground/30"
+                >
+                  3
+                </Badge>
+              </TabsTrigger>
+              <TabsTrigger value="key-personnel" className="gap-1">
+                Key Personnel{" "}
+                <Badge
+                  variant="secondary"
+                  className="flex h-5 w-5 items-center justify-center rounded-full bg-muted-foreground/30"
+                >
+                  2
+                </Badge>
+              </TabsTrigger>
+              <TabsTrigger value="focus-documents">Focus Documents</TabsTrigger>
+            </TabsList>
+          </>
+        ) : (
+          <div></div>
+        )}
         <div className="flex items-center gap-2">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -575,21 +726,62 @@ export function DataTable({
           </DropdownMenu>
           <Button variant="outline" size="sm">
             <PlusIcon />
-            <span className="hidden lg:inline">Add Section</span>
+            <span className="hidden lg:inline">Add Document</span>
           </Button>
         </div>
       </div>
-      <TabsContent
-        value="outline"
-        className="relative flex flex-col gap-4 overflow-auto px-4 lg:px-6"
-      >
+      <div className="relative flex flex-col gap-4 overflow-auto px-4 lg:px-6">
         <div className="overflow-hidden rounded-lg border">
-          <DndContext
-            collisionDetection={closestCenter}
-            modifiers={[restrictToVerticalAxis]}
-            onDragEnd={handleDragEnd}
-            sensors={sensors}
-          >
+          {enableDragDrop ? (
+            <DndContext
+              collisionDetection={closestCenter}
+              modifiers={[restrictToVerticalAxis]}
+              onDragEnd={handleDragEnd}
+              sensors={sensors}
+            >
+              <Table>
+                <TableHeader className="sticky top-0 z-10 bg-muted">
+                  {table.getHeaderGroups().map((headerGroup) => (
+                    <TableRow key={headerGroup.id}>
+                      {headerGroup.headers.map((header) => {
+                        return (
+                          <TableHead key={header.id} colSpan={header.colSpan}>
+                            {header.isPlaceholder
+                              ? null
+                              : flexRender(
+                                  header.column.columnDef.header,
+                                  header.getContext()
+                                )}
+                          </TableHead>
+                        )
+                      })}
+                    </TableRow>
+                  ))}
+                </TableHeader>
+                <TableBody className="[&>tr>td:first-child]:w-8">
+                  {table.getRowModel().rows?.length ? (
+                    <SortableContext
+                      items={table.getRowModel().rows.map(r => r.id)}
+                      strategy={verticalListSortingStrategy}
+                    >
+                      {table.getRowModel().rows.map((row) => (
+                        <DraggableRow key={row.id} row={row} />
+                      ))}
+                    </SortableContext>
+                  ) : (
+                    <TableRow>
+                      <TableCell
+                        colSpan={columns.length}
+                        className="h-24 text-center"
+                      >
+                        No results.
+                      </TableCell>
+                    </TableRow>
+                  )}
+                </TableBody>
+              </Table>
+            </DndContext>
+          ) : (
             <Table>
               <TableHeader className="sticky top-0 z-10 bg-muted">
                 {table.getHeaderGroups().map((headerGroup) => (
@@ -609,16 +801,20 @@ export function DataTable({
                   </TableRow>
                 ))}
               </TableHeader>
-              <TableBody className="[&>tr>td:first-child]:w-8">
+              <TableBody>
                 {table.getRowModel().rows?.length ? (
-                  <SortableContext
-                    items={table.getRowModel().rows.map(r => r.id)}
-                    strategy={verticalListSortingStrategy}
-                  >
-                    {table.getRowModel().rows.map((row) => (
-                      <DraggableRow key={row.id} row={row} />
-                    ))}
-                  </SortableContext>
+                  table.getRowModel().rows.map((row) => (
+                    <TableRow
+                      key={row.id}
+                      data-state={row.getIsSelected() && "selected"}
+                    >
+                      {row.getVisibleCells().map((cell) => (
+                        <TableCell key={cell.id}>
+                          {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                        </TableCell>
+                      ))}
+                    </TableRow>
+                  ))
                 ) : (
                   <TableRow>
                     <TableCell
@@ -631,7 +827,7 @@ export function DataTable({
                 )}
               </TableBody>
             </Table>
-          </DndContext>
+          )}
         </div>
         <div className="flex items-center justify-between px-4">
           <div className="hidden flex-1 text-sm text-muted-foreground lg:flex">
@@ -710,23 +906,49 @@ export function DataTable({
             </div>
           </div>
         </div>
-      </TabsContent>
-      <TabsContent
-        value="past-performance"
-        className="flex flex-col px-4 lg:px-6"
-      >
-        <div className="aspect-video w-full flex-1 rounded-lg border border-dashed"></div>
-      </TabsContent>
-      <TabsContent value="key-personnel" className="flex flex-col px-4 lg:px-6">
-        <div className="aspect-video w-full flex-1 rounded-lg border border-dashed"></div>
-      </TabsContent>
-      <TabsContent
-        value="focus-documents"
-        className="flex flex-col px-4 lg:px-6"
-      >
-        <div className="aspect-video w-full flex-1 rounded-lg border border-dashed"></div>
-      </TabsContent>
-    </Tabs>
+      </div>
+    </div>
+  )
+
+  if (enableTabs) {
+    return (
+      <Tabs defaultValue="outline" className="flex w-full flex-col justify-start gap-6">
+        {content}
+        <TabsContent
+          value="past-performance"
+          className="flex flex-col px-4 lg:px-6"
+        >
+          <div className="aspect-video w-full flex-1 rounded-lg border border-dashed"></div>
+        </TabsContent>
+        <TabsContent value="key-personnel" className="flex flex-col px-4 lg:px-6">
+          <div className="aspect-video w-full flex-1 rounded-lg border border-dashed"></div>
+        </TabsContent>
+        <TabsContent
+          value="focus-documents"
+          className="flex flex-col px-4 lg:px-6"
+        >
+          <div className="aspect-video w-full flex-1 rounded-lg border border-dashed"></div>
+        </TabsContent>
+      </Tabs>
+    )
+  }
+
+  return content
+}
+
+// Backward compatibility wrapper for sales page
+export function SalesDataTable({
+  data: initialData,
+}: {
+  data: z.infer<typeof salesSchema>[]
+}) {
+  return (
+    <DataTable
+      data={initialData}
+      columns={salesColumns}
+      enableDragDrop={true}
+      enableTabs={true}
+    />
   )
 }
 
@@ -750,7 +972,7 @@ const chartConfig = {
   },
 } satisfies ChartConfig
 
-function TableCellViewer({ item }: { item: z.infer<typeof schema> }) {
+function TableCellViewer({ item }: { item: z.infer<typeof salesSchema> }) {
   const isMobile = useIsMobile()
   
   // Local state for controlled Select components
