@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { put } from '@vercel/blob';
 import { computeSHA256 } from '@/lib/document-utils';
 import { DocumentStorage, loadCategories } from '@/lib/document-storage-server';
+import { auth } from '@/auth';
 
 // Security validation functions
 function sanitizePathComponent(input: string): string {
@@ -52,6 +53,22 @@ function determineBlobAccess(visibility: string[]): 'public' {
 
 // POST /api/documents/upload - Upload a document file
 export async function POST(request: NextRequest) {
+  // Authentication and authorization check
+  const session = await auth();
+  if (!session) {
+    return NextResponse.json(
+      { success: false, error: 'Unauthorized' },
+      { status: 401 }
+    );
+  }
+  
+  if (session.user?.role !== 'admin') {
+    return NextResponse.json(
+      { success: false, error: 'Forbidden' },
+      { status: 403 }
+    );
+  }
+
   try {
     const formData = await request.formData();
     
@@ -172,15 +189,15 @@ export async function POST(request: NextRequest) {
     // File type validation - matches client accept attribute
     const allowedExtensions = ['.pdf', '.csv', '.xlsx', '.xls', '.doc', '.docx', '.txt'];
     
-    // MIME type validation mapping
+    // MIME type validation mapping - tolerant for browser/OS variations
     const allowedMimeTypes = {
       '.pdf': ['application/pdf'],
-      '.csv': ['text/csv', 'application/csv'],
-      '.xlsx': ['application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'],
-      '.xls': ['application/vnd.ms-excel'],
-      '.doc': ['application/msword'],
-      '.docx': ['application/vnd.openxmlformats-officedocument.wordprocessingml.document'],
-      '.txt': ['text/plain']
+      '.csv': ['', 'text/csv', 'application/csv', 'application/vnd.ms-excel'],
+      '.xlsx': ['', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', 'application/vnd.ms-excel'],
+      '.xls': ['', 'application/vnd.ms-excel', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'],
+      '.doc': ['', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'],
+      '.docx': ['', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'application/msword'],
+      '.txt': ['', 'text/plain']
     };
     
     // Extract file extension safely with better error handling
@@ -211,11 +228,13 @@ export async function POST(request: NextRequest) {
       );
     }
     
-    // Validate MIME type matches extension
+    // Validate MIME type matches extension (tolerant approach)
     const expectedMimeTypes = allowedMimeTypes[fileExtension as keyof typeof allowedMimeTypes];
-    if (expectedMimeTypes && !expectedMimeTypes.includes(file.type)) {
+    if (expectedMimeTypes && file.type && !expectedMimeTypes.includes(file.type)) {
+      // Only reject if MIME type is provided and doesn't match expected types
+      // Empty MIME types are acceptable when extension matches
       return NextResponse.json(
-        { success: false, error: `File MIME type '${file.type}' does not match extension '${fileExtension}'. Expected: ${expectedMimeTypes.join(', ')}` },
+        { success: false, error: `File MIME type '${file.type}' does not match extension '${fileExtension}'. Expected: ${expectedMimeTypes.filter(t => t !== '').join(', ')}` },
         { status: 400 }
       );
     }

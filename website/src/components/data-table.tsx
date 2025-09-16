@@ -228,7 +228,7 @@ const salesColumns: ColumnDef<z.infer<typeof salesSchema>>[] = [
     accessorKey: "target",
     header: () => <div className="w-full text-right">Target</div>,
     cell: ({ row, table }) => {
-      const saveRowData = (table.options.meta as { saveRowData?: (id: number, field: string, value: string) => Promise<unknown> })?.saveRowData
+      const saveRowData = (table.options.meta as { saveRowData?: (id: UniqueIdentifier, field: string, value: string) => Promise<unknown> })?.saveRowData
       return (
         <form
           onSubmit={async (e) => {
@@ -265,7 +265,7 @@ const salesColumns: ColumnDef<z.infer<typeof salesSchema>>[] = [
     accessorKey: "limit",
     header: () => <div className="w-full text-right">Limit</div>,
     cell: ({ row, table }) => {
-      const saveRowData = (table.options.meta as { saveRowData?: (id: number, field: string, value: string) => Promise<unknown> })?.saveRowData
+      const saveRowData = (table.options.meta as { saveRowData?: (id: UniqueIdentifier, field: string, value: string) => Promise<unknown> })?.saveRowData
       return (
         <form
           onSubmit={async (e) => {
@@ -303,7 +303,7 @@ const salesColumns: ColumnDef<z.infer<typeof salesSchema>>[] = [
     header: "Reviewer",
     cell: ({ row, table }) => {
       const isAssigned = row.original.reviewer !== "Assign reviewer"
-      const saveRowData = (table.options.meta as { saveRowData?: (id: number, field: string, value: string) => Promise<unknown> })?.saveRowData
+      const saveRowData = (table.options.meta as { saveRowData?: (id: UniqueIdentifier, field: string, value: string) => Promise<unknown> })?.saveRowData
 
       if (isAssigned) {
         return row.original.reviewer
@@ -484,7 +484,7 @@ export const documentColumns: ColumnDef<AppDocument>[] = [
   },
 ]
 
-function DraggableRow<T extends Record<string, any>>({ row }: { row: Row<T> }) {
+function DraggableRow<T extends { id: UniqueIdentifier }>({ row }: { row: Row<T> }) {
   const { transform, transition, setNodeRef, isDragging, attributes, listeners } = useSortable({
     id: row.original.id,
   })
@@ -513,7 +513,7 @@ function DraggableRow<T extends Record<string, any>>({ row }: { row: Row<T> }) {
   )
 }
 
-export function DataTable<T extends Record<string, any>>({
+export function DataTable<T extends { id: UniqueIdentifier }>({
   data: initialData,
   columns,
   enableDragDrop = false,
@@ -543,7 +543,11 @@ export function DataTable<T extends Record<string, any>>({
   )
 
   // TODO: Replace with actual API call when backend persistence is available
-  const saveRowData = async (id: number, field: string, value: string): Promise<unknown> => {
+  const saveRowData = async (
+    id: UniqueIdentifier,
+    field: string,
+    value: string
+  ): Promise<unknown> => {
     // Simulate API call delay
     await new Promise(resolve => setTimeout(resolve, 500))
     
@@ -597,7 +601,7 @@ export function DataTable<T extends Record<string, any>>({
     if (active && over && active.id !== over.id) {
       setData((data) => {
         // Check for duplicate IDs in the data array
-        const idCounts = new Map<number, number>()
+        const idCounts = new Map<UniqueIdentifier, number>()
         data.forEach((item, index) => {
           const count = idCounts.get(item.id) || 0
           idCounts.set(item.id, count + 1)

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { DocumentStorage } from '@/lib/document-storage-server';
+import { DocumentStorage, loadCategories } from '@/lib/document-storage-server';
 import { auth } from '@/auth';
 
 // GET /api/documents/[id] - Get a specific document
@@ -38,7 +38,9 @@ export async function GET(
 
     // Authorization check - verify user has access to this document
     const userRole = session.user?.role;
-    if (!userRole || !document.visibility.includes(userRole)) {
+    const hasAccess = userRole === 'admin' || (userRole && document.visibility.includes(userRole));
+    
+    if (!hasAccess) {
       console.warn(`Unauthorized access attempt to document ${id} by user ${session.user?.email} with role ${userRole}`);
       return NextResponse.json(
         { success: false, error: 'Forbidden' },
@@ -109,6 +111,20 @@ export async function PUT(
         { success: false, error: 'Category must be a non-empty string' },
         { status: 400 }
       );
+    }
+
+    // Validate category against allowed categories
+    if (category !== undefined) {
+      const normalizedCategory = category.trim();
+      const allowedCategories = loadCategories();
+      const categoryExists = allowedCategories.some(cat => cat.name === normalizedCategory);
+      
+      if (!categoryExists) {
+        return NextResponse.json(
+          { success: false, error: 'Invalid category' },
+          { status: 400 }
+        );
+      }
     }
 
     if (status !== undefined && typeof status !== 'boolean') {
