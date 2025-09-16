@@ -170,8 +170,6 @@ NODE_ENV=development
 
 - **Auth.js v5**: Modern authentication library with Google OAuth provider
 - **Role-Based Access**: Admin, buyer, and viewer roles determined by email allowlist
-- **Session Management**: JWT-based sessions with 7-day expiration
-- **Protected Routes**: Server-side role validation for admin and buyer dashboards
 
 ### User Sign In
 1. Users visit `/login`

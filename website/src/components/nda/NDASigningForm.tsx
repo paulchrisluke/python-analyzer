@@ -54,10 +54,10 @@ export function NDASigningForm({
     <Card className={`w-full ${className}`}>
       <CardHeader>
         <CardTitle className="text-lg font-semibold text-center">
-          Agreement & Signature
+          Complete Your NDA
         </CardTitle>
         <p className="text-sm text-muted-foreground text-center">
-          Please confirm your agreement and provide your signature
+          Review the document above, provide your signature, and confirm your agreement
         </p>
       </CardHeader>
       <CardContent className="space-y-6">
@@ -99,50 +99,13 @@ export function NDASigningForm({
           </div>
         </div>
 
-        {/* Status Indicators */}
-        <div className="space-y-2">
-          <div className="flex items-center space-x-2 text-sm">
-            {isDocumentRead ? (
-              <>
-                <CheckCircle className="h-4 w-4 text-green-600" />
-                <span className="text-green-600">Document read completely</span>
-              </>
-            ) : (
-              <>
-                <AlertCircle className="h-4 w-4 text-amber-500" />
-                <span className="text-amber-600">Please read the entire document first</span>
-              </>
-            )}
+        {/* Simple Status Message */}
+        {!isDocumentRead && (
+          <div className="flex items-center space-x-2 text-sm text-amber-600 bg-amber-50 p-3 rounded-lg">
+            <AlertCircle className="h-4 w-4" />
+            <span>Please scroll through and read the entire document above before signing</span>
           </div>
-
-          <div className="flex items-center space-x-2 text-sm">
-            {signatureData ? (
-              <>
-                <CheckCircle className="h-4 w-4 text-green-600" />
-                <span className="text-green-600">Signature provided</span>
-              </>
-            ) : (
-              <>
-                <AlertCircle className="h-4 w-4 text-amber-500" />
-                <span className="text-amber-600">Signature required</span>
-              </>
-            )}
-          </div>
-
-          <div className="flex items-center space-x-2 text-sm">
-            {agreedToTerms && understoodBinding ? (
-              <>
-                <CheckCircle className="h-4 w-4 text-green-600" />
-                <span className="text-green-600">Agreements confirmed</span>
-              </>
-            ) : (
-              <>
-                <AlertCircle className="h-4 w-4 text-amber-500" />
-                <span className="text-amber-600">Please confirm agreements</span>
-              </>
-            )}
-          </div>
-        </div>
+        )}
 
         {/* Error Alert */}
         {error && (

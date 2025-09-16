@@ -1,22 +1,24 @@
 "use client"
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
-import { Loader2, AlertCircle, CheckCircle } from 'lucide-react';
+import { Loader2, AlertCircle, PenTool } from 'lucide-react';
 import { NDADocument } from '@/components/nda/NDADocument';
 import { NDASignaturePad } from '@/components/nda/NDASignaturePad';
-import { NDASigningForm } from '@/components/nda/NDASigningForm';
+import { SiteHeader } from "@/components/site-header";
+import { SiteFooter } from "@/components/site-footer";
+import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
+import { AppSidebar } from "@/components/app-sidebar";
 
 export default function NDASigningPage() {
   const { data: session, status } = useSession();
   const router = useRouter();
+  const signingSectionRef = useRef<HTMLDivElement>(null);
   
   // State management
-  const [isDocumentRead, setIsDocumentRead] = useState(false);
   const [signatureData, setSignatureData] = useState<string | null>(null);
   const [documentHash, setDocumentHash] = useState<string>('');
   const [isSigning, setIsSigning] = useState(false);
@@ -45,7 +47,7 @@ export default function NDASigningPage() {
     if (status === 'loading') return;
 
     if (!session) {
-      router.push('/api/auth/signin');
+      router.push('/signin');
       return;
     }
 
@@ -63,12 +65,17 @@ export default function NDASigningPage() {
     setDocumentHash(hash);
   };
 
-  const handleScrollComplete = () => {
-    setIsDocumentRead(true);
-  };
-
   const handleSignatureChange = (signature: string | null) => {
     setSignatureData(signature);
+  };
+
+  const scrollToSigningSection = () => {
+    if (signingSectionRef.current) {
+      signingSectionRef.current.scrollIntoView({ 
+        behavior: 'smooth',
+        block: 'start'
+      });
+    }
   };
 
   const handleSign = async (signature: string, agreedToTerms: boolean, understoodBinding: boolean) => {
@@ -92,8 +99,8 @@ export default function NDASigningPage() {
       const data = await response.json();
 
       if (data.success) {
-        // Redirect to success page
-        router.push('/nda/success');
+        // Redirect to buyer dashboard since they now have NDA access
+        router.push('/buyer');
       } else {
         setError(data.error || 'Failed to sign NDA');
       }
@@ -128,83 +135,115 @@ export default function NDASigningPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8 px-4">
-      <div className="max-w-4xl mx-auto space-y-8">
-        {/* Header */}
-        <div className="text-center">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">
-            Non-Disclosure Agreement
-          </h1>
-          <p className="text-lg text-gray-600">
-            Please review and sign the NDA to access confidential business information
-          </p>
-        </div>
+    <SidebarProvider>
+      <AppSidebar />
+      <SidebarInset>
+        <SiteHeader />
 
-        {/* Progress Indicator */}
-        <div className="flex justify-center">
-          <div className="flex items-center space-x-4">
-            <div className={`flex items-center space-x-2 ${isDocumentRead ? 'text-green-600' : 'text-gray-400'}`}>
-              <div className={`w-8 h-8 rounded-full flex items-center justify-center ${isDocumentRead ? 'bg-green-100' : 'bg-gray-100'}`}>
-                {isDocumentRead ? <CheckCircle className="h-5 w-5" /> : <span className="text-sm font-semibold">1</span>}
+        {/* Main Content */}
+        <div className="flex flex-1 flex-col">
+          <div className="@container/main flex flex-1 flex-col gap-2">
+            <div className="flex flex-col gap-4 py-4 md:gap-6 md:py-6">
+              {/* Header */}
+              <div className="px-4 lg:px-6">
+                <div className="mb-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h1 className="text-4xl font-bold text-gray-900 mb-2">
+                        Non-Disclosure Agreement
+                      </h1>
+                      <p className="text-lg text-gray-600">
+                        Please review and sign the NDA to access confidential business information
+                      </p>
+                    </div>
+                    <Button 
+                      onClick={scrollToSigningSection}
+                      className="flex items-center gap-2"
+                      size="lg"
+                    >
+                      <PenTool className="h-4 w-4" />
+                      Sign
+                    </Button>
+                  </div>
+                </div>
               </div>
-              <span className="text-sm font-medium">Read Document</span>
-            </div>
-            
-            <div className="w-8 h-0.5 bg-gray-300"></div>
-            
-            <div className={`flex items-center space-x-2 ${signatureData ? 'text-green-600' : 'text-gray-400'}`}>
-              <div className={`w-8 h-8 rounded-full flex items-center justify-center ${signatureData ? 'bg-green-100' : 'bg-gray-100'}`}>
-                {signatureData ? <CheckCircle className="h-5 w-5" /> : <span className="text-sm font-semibold">2</span>}
+
+              {/* Error Alert */}
+              {error && (
+                <div className="px-4 lg:px-6">
+                  <Alert variant="destructive">
+                    <AlertCircle className="h-4 w-4" />
+                    <AlertDescription>{error}</AlertDescription>
+                  </Alert>
+                </div>
+              )}
+
+              {/* NDA Document */}
+              <div className="px-4 lg:px-6">
+                <NDADocument
+                  onDocumentHash={handleDocumentHash}
+                />
               </div>
-              <span className="text-sm font-medium">Sign Document</span>
-            </div>
-            
-            <div className="w-8 h-0.5 bg-gray-300"></div>
-            
-            <div className="flex items-center space-x-2 text-gray-400">
-              <div className="w-8 h-8 rounded-full flex items-center justify-center bg-gray-100">
-                <span className="text-sm font-semibold">3</span>
+
+              {/* Signature Section */}
+              <div ref={signingSectionRef} className="px-4 lg:px-6 space-y-6">
+                <h2 className="text-2xl font-bold text-gray-900">Sign Document</h2>
+                
+                {/* Signer Information - Single Row */}
+                <div className="flex flex-wrap items-center gap-6 text-sm text-gray-600">
+                  <span><strong>Name:</strong> {session?.user?.name || 'Potential Buyer'}</span>
+                  <span><strong>Email:</strong> {session?.user?.email || 'Not provided'}</span>
+                  <span><strong>Date:</strong> {new Date().toLocaleDateString('en-US', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric'
+                  })}</span>
+                </div>
+                
+                {/* Digital Signature */}
+                <div>
+                  <h3 className="font-semibold text-gray-900 mb-2">Digital Signature</h3>
+                  <NDASignaturePad
+                    onSignatureChange={handleSignatureChange}
+                  />
+                </div>
+                
+                {/* Simple Agreement */}
+                <div className="space-y-4">
+                  <div className="flex items-start space-x-3">
+                    <input
+                      type="checkbox"
+                      id="agree-terms"
+                      className="mt-1 h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                      disabled={isSigning}
+                    />
+                    <label htmlFor="agree-terms" className="text-sm text-gray-700 cursor-pointer">
+                      I have read and agree to the terms of this Non-Disclosure Agreement. 
+                      I understand this is legally binding and will remain in effect for two (2) years.
+                    </label>
+                  </div>
+                  
+                  <Button
+                    onClick={() => {
+                      if (signatureData) {
+                        handleSign(signatureData, true, true);
+                      }
+                    }}
+                    disabled={!signatureData || isSigning}
+                    className="w-full h-12 text-lg font-semibold"
+                  >
+                    {isSigning ? 'Signing...' : 'Sign & Accept NDA'}
+                  </Button>
+                </div>
               </div>
-              <span className="text-sm font-medium">Complete</span>
+
             </div>
           </div>
         </div>
 
-        {/* Error Alert */}
-        {error && (
-          <Alert variant="destructive">
-            <AlertCircle className="h-4 w-4" />
-            <AlertDescription>{error}</AlertDescription>
-          </Alert>
-        )}
-
-        {/* NDA Document */}
-        <NDADocument
-          onScrollComplete={handleScrollComplete}
-          onDocumentHash={handleDocumentHash}
-        />
-
-        {/* Signature Pad */}
-        <NDASignaturePad
-          onSignatureChange={handleSignatureChange}
-          disabled={!isDocumentRead}
-        />
-
-        {/* Signing Form */}
-        <NDASigningForm
-          onSign={handleSign}
-          signatureData={signatureData}
-          isDocumentRead={isDocumentRead}
-          disabled={isSigning}
-        />
-
         {/* Footer */}
-        <div className="text-center text-sm text-muted-foreground">
-          <p>
-            Questions about this NDA? Contact Cranberry Hearing and Balance Center
-          </p>
-        </div>
-      </div>
-    </div>
+        <SiteFooter />
+      </SidebarInset>
+    </SidebarProvider>
   );
 }

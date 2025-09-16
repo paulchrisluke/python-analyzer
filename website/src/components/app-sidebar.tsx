@@ -14,6 +14,7 @@ import {
   HomeIcon,
   LayoutDashboardIcon,
   MapPinIcon,
+  PenToolIcon,
   SettingsIcon,
   ShieldIcon,
   UserIcon,
@@ -43,6 +44,15 @@ const salesPageItem = {
   url: "/",
   icon: HomeIcon,
 }
+
+const publicNavItems = [
+  salesPageItem,
+  {
+    title: "Sign NDA",
+    url: "/nda",
+    icon: PenToolIcon,
+  },
+]
 
 const adminNavItems = [
   {
@@ -79,6 +89,11 @@ const buyerNavItems = [
     url: "/buyer/documents",
     icon: FileTextIcon,
   },
+  {
+    title: "Sign NDA",
+    url: "/nda",
+    icon: PenToolIcon,
+  },
 ]
 
 // Get navigation data based on user role
@@ -87,7 +102,7 @@ const getNavData = (user: { name?: string; email?: string; image?: string | null
   const isAdmin = user?.role === 'admin'
   const isBuyer = user?.role === 'buyer'
   
-  let navMain = [salesPageItem]
+  let navMain = isAuthenticated ? [salesPageItem] : publicNavItems
   let sections = []
   
   // Add role-specific navigation with section headers
@@ -189,7 +204,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           <SidebarMenu>
             <SidebarMenuItem>
               <SidebarMenuButton asChild size="lg" className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground">
-                <Link href="/api/auth/signin">
+                <Link href="/signin">
                   <div className="flex items-center gap-2">
                     <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-muted">
                       <UserIcon className="h-4 w-4" />

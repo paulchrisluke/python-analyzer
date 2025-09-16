@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { signIn } from "next-auth/react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -37,8 +38,8 @@ export function ContactForm() {
         submittedAt: new Date().toISOString()
       }));
       
-      // Redirect to NDA signing flow
-      router.push('/nda');
+      // Trigger Google sign-in
+      await signIn('google', { callbackUrl: '/nda' });
     } catch (error) {
       console.error("Form submission error:", error);
       // Could add error state here if needed

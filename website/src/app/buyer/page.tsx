@@ -1,6 +1,8 @@
 'use client'
 
 import { useSession } from "next-auth/react"
+import { useRouter } from "next/navigation"
+import { useEffect, useState } from "react"
 import { FinancialChart } from "@/components/financial-chart"
 import { BuyerLocationInformation } from "@/components/buyer-location-information"
 import { InvestmentHighlights } from "@/components/investment-highlights"
@@ -16,7 +18,59 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { staticBusinessData } from '@/data/business-data'
 
 function BuyerDashboardContent() {
-  const { data: session } = useSession()
+  const { data: session, status } = useSession()
+  const router = useRouter()
+  const [ndaStatus, setNdaStatus] = useState<any>(null)
+  const [isLoading, setIsLoading] = useState(true)
+
+  // Check NDA status
+  useEffect(() => {
+    const checkNDAStatus = async () => {
+      if (status === 'loading') return
+
+      if (!session) {
+        router.push('/api/auth/signin')
+        return
+      }
+
+      try {
+        const response = await fetch('/api/nda/status')
+        if (response.ok) {
+          const data = await response.json()
+          setNdaStatus(data.data)
+          
+          // If user hasn't signed NDA and isn't exempt, redirect to NDA page
+          if (!data.data.isSigned && !data.data.isExempt) {
+            router.push('/nda')
+            return
+          }
+        }
+      } catch (error) {
+        console.error('Error checking NDA status:', error)
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    checkNDAStatus()
+  }, [session, status, router])
+
+  // Show loading while checking authentication and NDA status
+  if (status === 'loading' || isLoading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-muted-foreground">Loading...</p>
+        </div>
+      </div>
+    )
+  }
+
+  // Don't render if not authenticated or NDA not signed
+  if (!session || (!ndaStatus?.isSigned && !ndaStatus?.isExempt)) {
+    return null // Will redirect
+  }
 
   return (
     <SidebarProvider>

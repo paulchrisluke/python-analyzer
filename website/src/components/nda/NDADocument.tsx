@@ -1,30 +1,21 @@
 "use client"
 
-import React, { useState, useEffect, useRef } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { CheckCircle, Circle, ArrowDown } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
 import ReactMarkdown from 'react-markdown';
 import { useNDAUserInfo } from '@/hooks/useNDAUserInfo';
 import '@/styles/nda-prose.css';
 
 interface NDADocumentProps {
-  onScrollComplete: () => void;
   onDocumentHash: (hash: string) => void;
   className?: string;
 }
 
 export function NDADocument({ 
-  onScrollComplete, 
   onDocumentHash,
   className = ""
 }: NDADocumentProps) {
-  const [isScrolledToBottom, setIsScrolledToBottom] = useState(false);
   const [ndaContent, setNdaContent] = useState<string>('');
   const [isLoading, setIsLoading] = useState(true);
-  const scrollAreaRef = useRef<HTMLDivElement>(null);
-  const contentRef = useRef<HTMLDivElement>(null);
   const { userInfo } = useNDAUserInfo();
 
   // Load NDA content
@@ -141,93 +132,25 @@ Cranberry Hearing and Balance Center
     loadNDAContent();
   }, [onDocumentHash, userInfo]);
 
-  // Handle scroll events
-  const handleScroll = () => {
-    if (scrollAreaRef.current && contentRef.current) {
-      const scrollElement = scrollAreaRef.current.querySelector('[data-radix-scroll-area-viewport]');
-      if (scrollElement) {
-        const { scrollTop, scrollHeight, clientHeight } = scrollElement;
-        const isAtBottom = scrollTop + clientHeight >= scrollHeight - 10; // 10px tolerance
-        
-        if (isAtBottom && !isScrolledToBottom) {
-          setIsScrolledToBottom(true);
-          onScrollComplete();
-        }
-      }
-    }
-  };
-
-  // Auto-scroll to bottom when content is loaded
-  useEffect(() => {
-    if (!isLoading && ndaContent && scrollAreaRef.current) {
-      const scrollElement = scrollAreaRef.current.querySelector('[data-radix-scroll-area-viewport]');
-      if (scrollElement) {
-        // Small delay to ensure content is rendered
-        setTimeout(() => {
-          scrollElement.scrollTop = scrollElement.scrollHeight;
-        }, 100);
-      }
-    }
-  }, [isLoading, ndaContent]);
 
   if (isLoading) {
     return (
-      <Card className={`w-full ${className}`}>
-        <CardContent className="p-6">
-          <div className="flex items-center justify-center h-64">
-            <div className="text-center">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
-              <p className="text-muted-foreground">Loading NDA document...</p>
-            </div>
+      <div className={`w-full ${className}`}>
+        <div className="flex items-center justify-center h-64">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
+            <p className="text-muted-foreground">Loading NDA document...</p>
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
     );
   }
 
   return (
-    <Card className={`w-full ${className}`}>
-      <CardHeader>
-        <CardTitle className="text-xl font-bold text-center">
-          Non-Disclosure Agreement
-        </CardTitle>
-        <div className="flex items-center justify-center space-x-2 text-sm text-muted-foreground">
-          {isScrolledToBottom ? (
-            <>
-              <CheckCircle className="h-4 w-4 text-green-600" />
-              <span className="text-green-600 font-medium">Document read completely</span>
-            </>
-          ) : (
-            <>
-              <Circle className="h-4 w-4 text-gray-400" />
-              <span>Please scroll to read the entire document</span>
-            </>
-          )}
-        </div>
-      </CardHeader>
-      <CardContent className="p-0">
-        <ScrollArea 
-          ref={scrollAreaRef}
-          className="h-96 w-full"
-          onScrollCapture={handleScroll}
-        >
-          <div ref={contentRef} className="p-6">
-            <div className="nda-prose">
-              <ReactMarkdown>{ndaContent}</ReactMarkdown>
-            </div>
-            
-            {/* Scroll indicator */}
-            {!isScrolledToBottom && (
-              <div className="mt-8 text-center">
-                <div className="inline-flex items-center space-x-2 text-blue-600 animate-bounce">
-                  <ArrowDown className="h-4 w-4" />
-                  <span className="text-sm font-medium">Scroll down to continue</span>
-                </div>
-              </div>
-            )}
-          </div>
-        </ScrollArea>
-      </CardContent>
-    </Card>
+    <div className={`w-full ${className}`}>
+      <div className="nda-prose max-w-none">
+        <ReactMarkdown>{ndaContent}</ReactMarkdown>
+      </div>
+    </div>
   );
 }

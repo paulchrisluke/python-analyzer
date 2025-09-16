@@ -1,5 +1,3 @@
-# Non-Disclosure Agreement  
-
 This Non-Disclosure Agreement (the "Agreement") is entered into as of **[Date]**, by and between:  
 
 **Disclosing Party:**  
@@ -101,29 +99,13 @@ This Agreement constitutes the entire agreement between the Parties regarding th
 
 ---
 
-> **Disclosing Party**  
-> Cranberry Hearing and Balance Center  
-> 
-> By: X ___________________________  
-> Name: Mark Gustina  
-> Title: Owner  
+**IMPORTANT:** This is a legally binding agreement. Please read all terms carefully before signing.
 
-> **Receiving Party**  
-> Potential Buyer(s)  
-> 
-> By: ___________________________  
-> Name: _________________________  
-> Title: _________________________  
-
----
-
-> **IMPORTANT:** This is a legally binding agreement. Please read all terms carefully before signing.
-
-> **Contact Information:**  
-> Cranberry Hearing and Balance Center  
-> Mark Gustina, Owner  
-> info@cranberryhearing.com  
-> (724) 779-4444
+**Contact Information:**  
+Cranberry Hearing and Balance Center  
+Mark Gustina, Owner  
+info@cranberryhearing.com  
+(724) 779-4444
 
 ---
 

@@ -3,8 +3,7 @@
 import React, { useRef, useEffect, useState } from 'react';
 import SignatureCanvas from 'react-signature-canvas';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Trash2, RotateCcw } from 'lucide-react';
+import { Trash2 } from 'lucide-react';
 
 interface NDASignaturePadProps {
   onSignatureChange: (signatureData: string | null) => void;
@@ -65,56 +64,48 @@ export function NDASignaturePad({
   }, [disabled, onSignatureChange]);
 
   return (
-    <Card className={`w-full ${className}`}>
-      <CardHeader>
-        <CardTitle className="text-lg font-semibold text-center">
-          Digital Signature
-        </CardTitle>
-        <p className="text-sm text-muted-foreground text-center">
-          Please sign your name in the box below using your mouse, finger, or stylus
-        </p>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        {/* Signature Canvas */}
-        <div className="relative">
-          <div 
-            className={`
-              border-2 border-dashed rounded-lg p-4 bg-white
-              ${disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-crosshair'}
-              ${isDrawing ? 'border-blue-500' : isEmpty ? 'border-gray-300' : 'border-green-500'}
-              transition-colors duration-200
-            `}
-            style={{ minHeight: '200px' }}
-          >
-            {!disabled && (
-              <SignatureCanvas
-                ref={signatureRef}
-                canvasProps={{
-                  className: 'w-full h-full',
-                  style: { 
-                    width: '100%', 
-                    height: '200px',
-                    touchAction: 'none' // Prevent scrolling on touch devices
-                  }
-                }}
-                onBegin={handleBegin}
-                onEnd={handleEnd}
-                backgroundColor="transparent"
-                penColor="#000000"
-                minWidth={2}
-                maxWidth={3}
-                throttle={16} // Smooth drawing
-              />
-            )}
-            {disabled && (
-              <div className="w-full h-full flex items-center justify-center text-gray-400">
-                <p>Signature pad disabled</p>
-              </div>
-            )}
-          </div>
-          
-          {/* Signature Status */}
-          <div className="mt-2 text-center">
+    <div className={`w-full ${className}`}>
+      {/* Signature Canvas */}
+      <div className="relative">
+        <div 
+          className={`
+            border-2 border-dashed rounded-lg p-4 bg-white
+            ${disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-crosshair'}
+            ${isDrawing ? 'border-blue-500' : isEmpty ? 'border-gray-300' : 'border-green-500'}
+            transition-colors duration-200
+          `}
+          style={{ minHeight: '150px' }}
+        >
+          {!disabled && (
+            <SignatureCanvas
+              ref={signatureRef}
+              canvasProps={{
+                className: 'w-full h-full',
+                style: { 
+                  width: '100%', 
+                  height: '150px',
+                  touchAction: 'none' // Prevent scrolling on touch devices
+                }
+              }}
+              onBegin={handleBegin}
+              onEnd={handleEnd}
+              backgroundColor="transparent"
+              penColor="#000000"
+              minWidth={2}
+              maxWidth={3}
+              throttle={16} // Smooth drawing
+            />
+          )}
+          {disabled && (
+            <div className="w-full h-full flex items-center justify-center text-gray-400">
+              <p>Signature pad disabled</p>
+            </div>
+          )}
+        </div>
+        
+        {/* Signature Status and Clear Button */}
+        <div className="mt-2 flex items-center justify-between">
+          <div>
             {isEmpty ? (
               <p className="text-sm text-muted-foreground">
                 Signature required
@@ -125,30 +116,20 @@ export function NDASignaturePad({
               </p>
             )}
           </div>
-        </div>
-
-        {/* Controls */}
-        <div className="flex justify-center space-x-2">
+          
           <Button
             type="button"
             variant="outline"
             size="sm"
             onClick={clearSignature}
             disabled={disabled || isEmpty}
-            className="flex items-center space-x-2"
+            className="flex items-center space-x-1"
           >
-            <Trash2 className="h-4 w-4" />
+            <Trash2 className="h-3 w-3" />
             <span>Clear</span>
           </Button>
         </div>
-
-        {/* Instructions */}
-        <div className="text-xs text-muted-foreground text-center space-y-1">
-          <p>• Use your mouse, finger, or stylus to sign</p>
-          <p>• Make sure your signature is clear and readable</p>
-          <p>• You can clear and re-sign if needed</p>
-        </div>
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 }
