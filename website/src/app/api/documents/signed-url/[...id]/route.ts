@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { DocumentStorage } from '@/lib/document-storage-blob';
 import { auth } from '@/auth';
 
-// GET /api/documents/[...id]/signed-url - Generate a secure proxy URL for document access
+// GET /api/documents/signed-url/[...id] - Generate a secure proxy URL for document access
 // This endpoint now returns the secure proxy URL instead of a direct blob URL
 // Uses catch-all route to support IDs with '/' characters
 export async function GET(

@@ -53,7 +53,12 @@ export function validateDocumentFilename(filename: string): { valid: boolean; er
   }
 
   // Check file extension
-  const extension = filename.toLowerCase().substring(filename.lastIndexOf('.'));
+  const dotIndex = filename.lastIndexOf('.');
+  if (dotIndex <= 0) {
+    return { valid: false, error: 'File must have a valid extension' };
+  }
+  
+  const extension = filename.toLowerCase().substring(dotIndex);
   if (!SECURITY_CONFIG.ALLOWED_EXTENSIONS.includes(extension)) {
     return { valid: false, error: `File extension ${extension} not allowed` };
   }

@@ -175,7 +175,7 @@ export class DocumentStorage {
       // Return the secure proxy URL instead of direct blob URL
       // The proxy handles authentication and authorization
       const baseUrl = process.env.NEXTAUTH_URL || 'http://localhost:3000';
-      return `${baseUrl}/api/documents/${encodeURIComponent(documentId)}/proxy`;
+      return `${baseUrl}/api/documents/proxy/${encodeURIComponent(documentId)}`;
     } catch (error) {
       console.error('Error generating secure document URL:', error);
       return null;

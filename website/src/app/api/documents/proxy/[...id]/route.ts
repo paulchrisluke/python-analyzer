@@ -9,7 +9,7 @@ import {
   checkRateLimit 
 } from '@/lib/document-security';
 
-// GET /api/documents/[...id]/proxy - Serve document content through authenticated proxy
+// GET /api/documents/proxy/[...id] - Serve document content through authenticated proxy
 // Uses catch-all route to support IDs with '/' characters
 export async function GET(
   request: NextRequest,
