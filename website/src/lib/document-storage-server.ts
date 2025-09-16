@@ -11,16 +11,22 @@ const CATEGORIES_FILE = join(DATA_DIR, 'categories.json');
 let writeQueue: Promise<void> = Promise.resolve();
 
 // Helper function to enqueue write operations
-function enqueueWrite<T>(operation: () => T): Promise<T> {
+function enqueueWrite<T>(operation: () => T | Promise<T>): Promise<T> {
   return new Promise((resolve, reject) => {
     writeQueue = writeQueue.then(async () => {
       try {
-        const result = operation();
+        const result = await operation();
         resolve(result);
+        return; // Return void to maintain writeQueue type
       } catch (error) {
         reject(error);
+        return; // Return void even on error
       }
-    }).catch(reject);
+    }).catch(() => {
+      // Swallow errors to prevent writeQueue from staying rejected
+      // The error has already been propagated to the caller via reject()
+      return; // Return void to maintain writeQueue type
+    });
   });
 }
 

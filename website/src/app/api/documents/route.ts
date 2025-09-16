@@ -66,7 +66,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const document = DocumentStorage.create({
+    const document = await DocumentStorage.create({
       name,
       category,
       blob_url: blob_url || '',

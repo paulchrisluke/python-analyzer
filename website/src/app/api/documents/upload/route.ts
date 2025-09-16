@@ -259,7 +259,7 @@ export async function POST(request: NextRequest) {
     });
 
     // Create document record
-    const document = DocumentStorage.create({
+    const document = await DocumentStorage.create({
       name: sanitizedName, // Use sanitized name
       category: sanitizedCategory, // Use sanitized category
       blob_url: blob.url,
