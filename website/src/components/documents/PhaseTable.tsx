@@ -6,6 +6,8 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { MoreHorizontal, Lock, Download, Eye, FileText, FileSpreadsheet } from "lucide-react"
 import { Document } from "@/types/document"
 import { Phase, getPhaseLabel, getDocumentTypeLabel, getDocumentDisplayName, getFileIconType, extractPeriod } from "@/lib/document-utils"
+import { downloadDocument, viewDocument } from "@/lib/document-access"
+import { useCallback } from "react"
 
 interface PhaseTableProps {
   phase: Phase
@@ -15,6 +17,22 @@ interface PhaseTableProps {
 
 export function PhaseTable({ phase, documents, hasAccess }: PhaseTableProps) {
   if (documents.length === 0) return null
+
+  const handlePreview = useCallback(async (document: Document) => {
+    try {
+      await viewDocument(document);
+    } catch (error) {
+      console.error('Error previewing document:', error);
+    }
+  }, []);
+
+  const handleDownload = useCallback(async (document: Document) => {
+    try {
+      await downloadDocument(document);
+    } catch (error) {
+      console.error('Error downloading document:', error);
+    }
+  }, []);
 
   return (
     <div className="mb-8">
@@ -82,11 +100,11 @@ export function PhaseTable({ phase, documents, hasAccess }: PhaseTableProps) {
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
-                        <DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => handlePreview(doc)}>
                           <Eye className="h-4 w-4 mr-2" />
                           Preview
                         </DropdownMenuItem>
-                        <DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => handleDownload(doc)}>
                           <Download className="h-4 w-4 mr-2" />
                           Download
                         </DropdownMenuItem>

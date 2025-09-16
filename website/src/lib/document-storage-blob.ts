@@ -1,4 +1,4 @@
-import { list, del, head } from '@vercel/blob';
+import { list, del } from '@vercel/blob';
 import { Document, DocumentCategory, DocumentStats, CoverageAnalysis } from '@/types/document';
 
 // Simple blob-based document storage - no local files needed!
@@ -140,14 +140,35 @@ export class DocumentStorage {
     }
   }
 
+  // Generate signed URL for document access
+  // Note: Vercel Blob doesn't have built-in signed URLs, so we'll use the blob URL
+  // with proper authentication checks at the API level
+  static async generateSignedUrl(documentId: string, expiresInSeconds: number = 900): Promise<string | null> {
+    try {
+      // Get document metadata to verify it exists
+      const document = await this.findById(documentId);
+      if (!document) {
+        return null;
+      }
+
+      // For Vercel Blob, we return the blob URL
+      // The actual access control is handled at the API level with authentication
+      // The URL will be validated when accessed through our API endpoints
+      return document.blob_url;
+    } catch (error) {
+      console.error('Error generating signed URL:', error);
+      return null;
+    }
+  }
+
   // Get document statistics
   static async getStats(): Promise<DocumentStats> {
     const documents = await this.findAll();
     
     const stats: DocumentStats = {
       total: documents.length,
-      found: documents.filter(doc => doc.status).length,
-      missing: documents.filter(doc => !doc.status).length,
+      found: documents.length, // All documents in blob storage are found
+      missing: 0, // Since we only list existing documents, missing is always 0
       expected: documents.filter(doc => doc.expected).length,
       by_category: {},
       by_file_type: {}
@@ -175,7 +196,7 @@ export class DocumentStorage {
     const categoryAnalysis = categories.map(category => {
       const categoryDocs = documents.filter(doc => doc.category === category.name);
       const expected = this.calculateExpectedDocuments(category);
-      const found = categoryDocs.filter(doc => doc.status).length;
+      const found = categoryDocs.length; // All documents in blob storage are found
       const missing = Math.max(0, expected - found);
       const coveragePercentage = expected > 0 ? (found / expected) * 100 : 100;
       

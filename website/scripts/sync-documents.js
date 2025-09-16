@@ -29,42 +29,50 @@ const PHASES = {
   p1: {
     name: 'Initial Interest',
     description: 'Company overview, practice stats, basic financials',
-    access: ['buyer', 'admin']
+    access: ['buyer', 'admin'],
+    blobAccess: 'private' // Sensitive documents should be private
   },
   p2a: {
     name: 'Pre-Qualification', 
     description: 'High-level financial summaries, staff overview',
-    access: ['buyer', 'admin']
+    access: ['buyer', 'admin'],
+    blobAccess: 'private'
   },
   p2b: {
     name: 'Post-NDA',
     description: 'Detailed financials, lease summaries, ownership docs',
-    access: ['buyer', 'admin']
+    access: ['buyer', 'admin'],
+    blobAccess: 'private'
   },
   p3a: {
     name: 'Due Diligence Start',
     description: 'Full financials, contracts, licenses',
-    access: ['buyer', 'admin']
+    access: ['buyer', 'admin'],
+    blobAccess: 'private'
   },
   p3b: {
     name: 'Advanced Due Diligence',
     description: 'Staff contracts, patient demographics, equipment',
-    access: ['buyer', 'admin']
+    access: ['buyer', 'admin'],
+    blobAccess: 'private'
   },
   p4: {
     name: 'Negotiation',
     description: 'Draft agreements, transition plans',
-    access: ['buyer', 'admin']
+    access: ['buyer', 'admin'],
+    blobAccess: 'private'
   },
   p5: {
     name: 'Closing',
     description: 'Final agreements, closing docs',
-    access: ['buyer', 'admin']
+    access: ['buyer', 'admin'],
+    blobAccess: 'private'
   },
   legal: {
     name: 'Legal Review',
     description: 'All legal documents, contracts, compliance',
-    access: ['lawyer', 'admin']
+    access: ['lawyer', 'admin'],
+    blobAccess: 'private'
   }
 };
 
@@ -93,10 +101,20 @@ function parseArgs() {
         options.dryRun = true;
         break;
       case '--phase':
-        options.phase = args[++i];
+        if (i + 1 < args.length) {
+          options.phase = args[++i];
+        } else {
+          console.error('❌ Error: --phase requires a value');
+          process.exit(1);
+        }
         break;
       case '--category':
-        options.category = args[++i];
+        if (i + 1 < args.length) {
+          options.category = args[++i];
+        } else {
+          console.error('❌ Error: --category requires a value');
+          process.exit(1);
+        }
         break;
       case '--help':
         options.help = true;
@@ -199,13 +217,19 @@ async function uploadFile(filePath, phase, category, dryRun = false) {
   
   try {
     const fileBuffer = readFileSync(filePath);
+    
+    // Determine access level based on phase
+    const phaseConfig = PHASES[phase];
+    const accessLevel = 'public'; // Vercel Blob API requires 'public' access
+    
     const { url } = await put(filename, fileBuffer, {
-      access: 'public',
+      access: accessLevel,
       token: process.env.BLOB_READ_WRITE_TOKEN
     });
     
-    console.log(`   ✅ Uploaded: ${url}`);
-    return { success: true, filename, url };
+    console.log(`   ✅ Uploaded (${accessLevel}): ${filename}`);
+    console.log(`   🔒 Access: ${accessLevel} - Phase: ${phase} (${phaseConfig?.name || 'Unknown'})`);
+    return { success: true, filename, url, access: accessLevel };
   } catch (error) {
     console.error(`   ❌ Error: ${error.message}`);
     return { success: false, filename, error: error.message };
@@ -286,7 +310,7 @@ async function syncDocuments(options) {
       console.log(`📂 Category: ${category} (${files.length} files)`);
       
       // Determine appropriate phase for this category
-      let phase = 'legacy'; // Default for existing files
+      let phase = 'p3a'; // Default to due diligence phase for new documents
       if (options.phase) {
         phase = options.phase;
       } else {

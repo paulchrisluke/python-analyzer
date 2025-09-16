@@ -3,6 +3,7 @@ import { put } from '@vercel/blob';
 import { computeSHA256 } from '@/lib/document-utils';
 import { DocumentStorage } from '@/lib/document-storage-blob';
 import { auth } from '@/auth';
+import { getPhaseConfig, getPhaseVisibility, getPhaseBlobAccess, getAllowedPhases } from '@/lib/phase-mapping';
 
 // Security validation functions
 function sanitizePathComponent(input: string): string {
@@ -45,10 +46,10 @@ function generateUniqueFilename(originalName: string, fileHash: string): string 
   return `${hashPrefix}_${timestamp}_${sanitizedName}${extension}`;
 }
 
-function determineBlobAccess(visibility: string[]): 'public' {
-  // Vercel Blob currently only supports 'public' access
-  // Access control will be handled at the application level
-  return 'public';
+function determineBlobAccess(visibility: string[]): 'private' {
+  // Use private access for all documents to ensure security
+  // Access control is handled at the application level through authentication
+  return 'private';
 }
 
 // POST /api/documents/upload - Upload a document file
@@ -150,6 +151,19 @@ export async function POST(request: NextRequest) {
     const visibilityEntry = formData.get('visibility');
     const visibility = visibilityEntry && typeof visibilityEntry === 'string' ? visibilityEntry.trim() : '';
 
+    // Extract and validate optional phase
+    const phaseEntry = formData.get('phase');
+    const phase = phaseEntry && typeof phaseEntry === 'string' ? phaseEntry.trim() : 'p3a'; // Default to due diligence phase
+    
+    // Validate phase against allowed phases
+    const allowedPhases = getAllowedPhases();
+    if (!allowedPhases.includes(phase)) {
+      return NextResponse.json(
+        { success: false, error: `Invalid phase. Allowed phases: ${allowedPhases.join(', ')}` },
+        { status: 400 }
+      );
+    }
+
     // Extract and validate optional due_date
     const dueDateEntry = formData.get('due_date');
     let due_date: string | null = null;
@@ -248,9 +262,17 @@ export async function POST(request: NextRequest) {
     // Sanitize category path to prevent traversal
     const sanitizedCategory = sanitizePathComponent(category);
     
-    // Determine blob access based on visibility
-    const visibilityArray = visibility ? visibility.split(',').map(v => v.trim()) : ['admin'];
-    const blobAccess = determineBlobAccess(visibilityArray);
+    // Determine visibility based on phase if not explicitly provided
+    let visibilityArray: string[];
+    if (visibility) {
+      visibilityArray = visibility.split(',').map(v => v.trim());
+    } else {
+      // Set default visibility based on phase using phase mapping
+      visibilityArray = getPhaseVisibility(phase);
+    }
+    
+    // Get blob access level from phase mapping
+    const blobAccess = getPhaseBlobAccess(phase);
 
     // Upload to Vercel Blob with secure path
     const blob = await put(`documents/${sanitizedCategory}/${uniqueFilename}`, file, {
@@ -274,7 +296,7 @@ export async function POST(request: NextRequest) {
       file_hash: fileHash,
       status: true,
       expected: true,
-      notes: notes || '',
+      notes: notes ? `${notes} | Phase: ${phase}` : `Phase: ${phase}`,
       visibility: visibilityArray,
       due_date: due_date || null,
       last_modified: new Date().toISOString(),

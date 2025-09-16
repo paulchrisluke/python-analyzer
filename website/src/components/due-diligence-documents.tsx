@@ -26,10 +26,13 @@ import { getDocumentTypeLabel, getFileIconType, extractPeriod } from "@/lib/docu
 export function DueDiligenceDocuments() {
   const [documents, setDocuments] = useState<Document[]>([])
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
+    const controller = new AbortController()
+    
     // Fetch real documents
-    fetch('/api/documents')
+    fetch('/api/documents', { signal: controller.signal })
       .then(res => res.json())
       .then(data => {
         if (data.success) {
@@ -37,11 +40,20 @@ export function DueDiligenceDocuments() {
         }
       })
       .catch(error => {
-        console.error('Error fetching documents:', error)
+        if (error.name !== 'AbortError') {
+          console.error('Error fetching documents:', error)
+          setError('Failed to load documents. Please try again later.')
+        }
       })
       .finally(() => {
-        setLoading(false)
+        if (!controller.signal.aborted) {
+          setLoading(false)
+        }
       })
+
+    return () => {
+      controller.abort()
+    }
   }, [])
 
   const getDocumentIcon = (doc: Document) => {
@@ -61,6 +73,22 @@ export function DueDiligenceDocuments() {
         <CardContent>
           <div className="flex items-center justify-center h-32">
             <div className="text-muted-foreground">Loading...</div>
+          </div>
+        </CardContent>
+      </Card>
+    )
+  }
+
+  if (error) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle>Due Diligence Documents</CardTitle>
+          <CardDescription className="text-destructive">{error}</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="flex items-center justify-center h-32">
+            <div className="text-muted-foreground">Unable to load documents</div>
           </div>
         </CardContent>
       </Card>

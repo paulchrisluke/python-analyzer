@@ -14,11 +14,13 @@ interface FolderGridProps {
   selectedItems: Set<string>
   onItemClick: (item: FolderItem) => void
   onItemSelect: (itemId: string, selected: boolean) => void
+  onPreview: (item: FolderItem) => void
+  onDownload: (item: FolderItem) => void
   userRole: string
   viewMode: 'grid' | 'list'
 }
 
-export function FolderGrid({ items, selectedItems, onItemClick, onItemSelect, userRole, viewMode }: FolderGridProps) {
+export function FolderGrid({ items, selectedItems, onItemClick, onItemSelect, onPreview, onDownload, userRole, viewMode }: FolderGridProps) {
 
   if (items.length === 0) {
     return (
@@ -112,11 +114,21 @@ export function FolderGrid({ items, selectedItems, onItemClick, onItemSelect, us
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
-                        <DropdownMenuItem>
+                        <DropdownMenuItem
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            onPreview(item)
+                          }}
+                        >
                           <Eye className="h-4 w-4 mr-2" />
                           Preview
                         </DropdownMenuItem>
-                        <DropdownMenuItem>
+                        <DropdownMenuItem
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            onDownload(item)
+                          }}
+                        >
                           <Download className="h-4 w-4 mr-2" />
                           Download
                         </DropdownMenuItem>

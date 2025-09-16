@@ -12,18 +12,41 @@ import { Lock, FileText, Shield } from "lucide-react"
 export function PublicDocuments() {
   const [documents, setDocuments] = useState<Document[]>([])
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
     // Fetch documents from API (public endpoint)
     fetch('/api/documents')
-      .then(res => res.json())
+      .then(res => {
+        if (!res.ok) {
+          throw new Error(`HTTP ${res.status}: ${res.statusText}`)
+        }
+        return res.json()
+      })
       .then(data => {
+        // Validate response structure
+        if (typeof data !== 'object' || data === null) {
+          throw new Error('Invalid response: expected object but received ' + typeof data)
+        }
+        
+        if (!('success' in data)) {
+          throw new Error('Invalid response: missing "success" field')
+        }
+        
+        if (!('data' in data)) {
+          throw new Error('Invalid response: missing "data" field')
+        }
+        
         if (data.success) {
           setDocuments(data.data || [])
+        } else {
+          throw new Error('API returned success: false')
         }
       })
       .catch(error => {
+        const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred'
         console.error('Error fetching documents:', error)
+        setError(errorMessage)
       })
       .finally(() => {
         setLoading(false)
@@ -46,6 +69,25 @@ export function PublicDocuments() {
         <CardContent>
           <div className="flex items-center justify-center h-32">
             <div className="text-muted-foreground">Loading...</div>
+          </div>
+        </CardContent>
+      </Card>
+    )
+  }
+
+  if (error) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle>Due Diligence Documents</CardTitle>
+          <CardDescription>Error loading documentation</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="flex items-center justify-center h-32">
+            <div className="text-center space-y-2">
+              <div className="text-destructive font-medium">Failed to load documents</div>
+              <div className="text-sm text-muted-foreground">{error}</div>
+            </div>
           </div>
         </CardContent>
       </Card>

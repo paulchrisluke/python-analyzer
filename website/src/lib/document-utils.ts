@@ -64,7 +64,7 @@ export function organizeDocumentsByPhase(documents: Document[]): Record<Phase, D
     let phase: Phase = 'legacy'
     
     if (doc.notes?.includes('Phase: ')) {
-      const phaseMatch = doc.notes.match(/Phase: (p\d+[ab]?|legal)/)
+      const phaseMatch = doc.notes.match(/Phase:\s*(p[1-5](?:[ab])?|legal|legacy)/)
       if (phaseMatch) {
         phase = phaseMatch[1] as Phase
       }

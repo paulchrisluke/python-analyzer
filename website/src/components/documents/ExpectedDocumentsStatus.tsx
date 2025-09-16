@@ -23,7 +23,18 @@ export function ExpectedDocumentsStatus({ documents, phase, userRole }: Expected
   useEffect(() => {
     const status = getPhaseCompletionStatus(phase, documents)
     setCompletionStatus(status)
-    console.log(`Phase ${phase} completion status:`, status)
+    if (process.env.NODE_ENV === "development") {
+      console.log(`Phase ${phase} completion status:`, status)
+      
+      // Log category statuses for debugging
+      const phaseData = getExpectedDocumentsForPhase(phase)
+      if (phaseData) {
+        Object.keys(phaseData.expected_documents).forEach(category => {
+          const statuses = checkDocumentStatus(phase, category, documents)
+          console.log(`Category ${category} statuses:`, statuses)
+        })
+      }
+    }
   }, [phase, documents])
 
   if (!completionStatus) {
@@ -73,7 +84,6 @@ export function ExpectedDocumentsStatus({ documents, phase, userRole }: Expected
         <h4>Category Details:</h4>
         {Object.keys(phaseData.expected_documents).map(category => {
           const statuses = checkDocumentStatus(phase, category, documents)
-          console.log(`Category ${category} statuses:`, statuses)
           
           return (
             <div key={category} style={{ marginLeft: '16px', marginTop: '8px' }}>
