@@ -13,10 +13,10 @@ import {
 // Uses catch-all route to support IDs with '/' characters
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string[] } }
+  { params }: { params: Promise<{ id: string[] }> }
 ) {
   try {
-    const { id } = params;
+    const { id } = await params;
     
     if (!id || id.length === 0) {
       return NextResponse.json(
