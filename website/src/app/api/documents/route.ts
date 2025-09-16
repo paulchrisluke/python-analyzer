@@ -66,9 +66,15 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Sanitize name and category for path segments
+    const sanitizedName = name.replace(/[<>:"/\\|?*]/g, '_');
+    const sanitizedCategory = category.replace(/[<>:"/\\|?*]/g, '_');
+
     const document = await DocumentStorage.create({
       name,
       category,
+      sanitized_name: sanitizedName,
+      path_segment: sanitizedCategory,
       blob_url: blob_url || '',
       file_type: file_type || '',
       file_size: file_size || 0,

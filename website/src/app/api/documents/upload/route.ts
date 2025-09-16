@@ -256,12 +256,15 @@ export async function POST(request: NextRequest) {
     // Upload to Vercel Blob with secure path
     const blob = await put(`documents/${sanitizedCategory}/${uniqueFilename}`, file, {
       access: blobAccess,
+      addRandomSuffix: true,
     });
 
     // Create document record
     const document = await DocumentStorage.create({
-      name: sanitizedName, // Use sanitized name
-      category: sanitizedCategory, // Use sanitized category
+      name: name, // Store original validated name
+      category: category, // Store original validated category
+      sanitized_name: sanitizedName, // Store sanitized name for filesystem paths
+      path_segment: sanitizedCategory, // Store sanitized category for blob paths
       blob_url: blob.url,
       file_type: fileExtension,
       file_size: file.size,

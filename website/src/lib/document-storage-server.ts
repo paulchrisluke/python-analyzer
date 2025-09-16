@@ -44,7 +44,7 @@ function validateDocument(doc: any): doc is Document {
   }
 
   // Check required string fields
-  const requiredStringFields = ['id', 'name', 'category', 'blob_url', 'file_type', 'file_size_display', 'file_hash', 'notes', 'last_modified', 'created_at', 'updated_at'];
+  const requiredStringFields = ['id', 'name', 'category', 'sanitized_name', 'path_segment', 'blob_url', 'file_type', 'file_size_display', 'file_hash', 'notes', 'last_modified', 'created_at', 'updated_at'];
   for (const field of requiredStringFields) {
     if (typeof doc[field] !== 'string') {
       return false;
@@ -143,7 +143,7 @@ export function loadDocuments(): Document[] {
     
     // Validate that parsed data is an array of valid Document objects
     if (!validateDocuments(parsed)) {
-      throw new Error(`Invalid document data structure in ${DOCUMENTS_FILE}. Expected array of Document objects with required fields: id, name, category, blob_url, file_type, file_size, file_size_display, file_hash, status, expected, notes, visibility, last_modified, created_at, updated_at`);
+      throw new Error(`Invalid document data structure in ${DOCUMENTS_FILE}. Expected array of Document objects with required fields: id, name, category, sanitized_name, path_segment, blob_url, file_type, file_size, file_size_display, file_hash, status, expected, notes, visibility, last_modified, created_at, updated_at`);
     }
     
     return parsed;

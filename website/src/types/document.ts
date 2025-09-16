@@ -4,6 +4,8 @@ export interface Document {
   id: string;
   name: string;
   category: string;
+  sanitized_name: string;
+  path_segment: string;
   blob_url: string;
   file_type: string;
   file_size: number;
