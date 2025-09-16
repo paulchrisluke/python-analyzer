@@ -1,305 +1,356 @@
-import { Document, DocumentCategory } from '@/types/document';
+import { Document } from "@/types/document"
+import expectedDocumentsData from "@/data/expected-documents.json"
 
-// Browser-compatible async SHA-256 helper
-export async function computeSHA256(input: string | ArrayBuffer): Promise<string> {
-  if (typeof crypto !== 'undefined' && crypto.subtle) {
-    // Browser environment - use Web Crypto API
-    let data: BufferSource;
+// Type assertion for the JSON data
+const expectedDocs = expectedDocumentsData as {
+  phases: Record<Phase, PhaseExpectedDocuments>
+}
+
+export type UserRole = "admin" | "buyer" | "lawyer"
+export type Phase = "p1" | "p2a" | "p2b" | "p3a" | "p3b" | "p4" | "p5" | "legal" | "legacy"
+
+// Expected documents interfaces
+export interface ExpectedDocument {
+  name: string
+  description: string
+  required: boolean
+  file_types: string[]
+  frequency: string
+  period?: string
+  subtype?: string
+  filename_pattern?: string
+}
+
+export interface PhaseExpectedDocuments {
+  name: string
+  description: string
+  expected_documents: Record<string, ExpectedDocument[]>
+}
+
+export interface DocumentStatus {
+  expected_document: ExpectedDocument
+  actual_documents: Document[]
+  status: 'uploaded' | 'pending'
+  is_required: boolean
+}
+
+export interface PhaseCompletionStatus {
+  phase: Phase
+  total_required: number
+  completed_required: number
+  total_optional: number
+  completed_optional: number
+  completion_percentage: number
+  missing_required: string[]
+  missing_optional: string[]
+}
+
+// Function to organize documents by phase from blob data
+export function organizeDocumentsByPhase(documents: Document[]): Record<Phase, Document[]> {
+  const organized: Record<Phase, Document[]> = {
+    p1: [],
+    p2a: [],
+    p2b: [],
+    p3a: [],
+    p3b: [],
+    p4: [],
+    p5: [],
+    legal: [],
+    legacy: []
+  }
+
+  documents.forEach(doc => {
+    // Extract phase from notes or filename
+    let phase: Phase = 'legacy'
     
-    if (typeof input === 'string') {
-      const encoder = new TextEncoder();
-      data = encoder.encode(input);
-    } else {
-      data = input;
+    if (doc.notes?.includes('Phase: ')) {
+      const phaseMatch = doc.notes.match(/Phase: (p\d+[ab]?|legal)/)
+      if (phaseMatch) {
+        phase = phaseMatch[1] as Phase
+      }
+    } else if (doc.id.includes('p3a_')) {
+      phase = 'p3a'
+    } else if (doc.id.includes('p3b_')) {
+      phase = 'p3b'
+    } else if (doc.id.includes('legal_')) {
+      phase = 'legal'
     }
-    
-    const hashBuffer = await crypto.subtle.digest('SHA-256', data);
-    const hashArray = Array.from(new Uint8Array(hashBuffer));
-    return hashArray.map(byte => byte.toString(16).padStart(2, '0')).join('');
-  } else {
-    // Node.js environment - use dynamic import
-    const { createHash } = await import('crypto');
-    const hash = createHash('sha256');
-    
-    if (typeof input === 'string') {
-      hash.update(input);
-    } else {
-      hash.update(Buffer.from(input));
-    }
-    
-    return hash.digest('hex');
+
+    organized[phase].push(doc)
+  })
+
+  return organized
+}
+
+export function getPhaseAccess(phase: Phase, role: UserRole): boolean {
+  const accessMatrix: Record<UserRole, Phase[]> = {
+    admin: ["p1", "p2a", "p2b", "p3a", "p3b", "p4", "p5", "legal", "legacy"],
+    buyer: ["p1", "p2a", "p2b", "p3a", "p3b", "p4", "p5"],
+    lawyer: ["legal"],
   }
+  return accessMatrix[role].includes(phase)
 }
 
-// File size formatting utility
-export function formatFileSize(bytes: number): string {
-  if (bytes === 0) return '0 B';
-  
-  const sizeNames = ['B', 'KB', 'MB', 'GB', 'TB'];
-  let i = 0;
-  let size = bytes;
-  
-  while (size >= 1024 && i < sizeNames.length - 1) {
-    size /= 1024.0;
-    i++;
+export function getPhaseLabel(phase: Phase): string {
+  const labels: Record<Phase, string> = {
+    "p1": "Phase 1 - Initial Interest",
+    "p2a": "Phase 2a - Pre-Qualification", 
+    "p2b": "Phase 2b - Post-NDA",
+    "p3a": "Phase 3a - Due Diligence Start",
+    "p3b": "Phase 3b - Advanced Due Diligence",
+    "p4": "Phase 4 - Negotiation",
+    "p5": "Phase 5 - Closing",
+    "legal": "Legal Review",
+    "legacy": "Legacy Documents",
   }
+  return labels[phase]
+}
+
+export function getDocumentTypeLabel(doc: Document): string {
+  // Extract subtype from filename or use category
+  const filename = doc.id.toLowerCase()
   
-  return `${size.toFixed(1)} ${sizeNames[i]}`;
-}
-
-// Calculate file hash
-export async function calculateFileHash(file: File): Promise<string> {
-  const buffer = await file.arrayBuffer();
-  return await computeSHA256(buffer);
-}
-
-// Validate file type
-export function validateFileType(file: File, allowedTypes: string[]): boolean {
-  const fileExtension = '.' + file.name.split('.').pop()?.toLowerCase();
-  return allowedTypes.includes(fileExtension);
-}
-
-// Get file type from filename
-export function getFileType(filename: string): string {
-  const extension = filename.split('.').pop()?.toLowerCase();
-  return extension ? `.${extension}` : '';
-}
-
-// Document status helpers
-export function getDocumentStatusColor(status: boolean): string {
-  return status ? 'text-green-600' : 'text-red-600';
-}
-
-export function getDocumentStatusBadge(status: boolean): string {
-  return status ? 'Found' : 'Missing';
-}
-
-export function getDocumentStatusIcon(status: boolean): string {
-  return status ? '✓' : '✗';
-}
-
-// Category helpers
-export function getCategoryColor(categoryName: string): string {
-  const colors: Record<string, string> = {
-    financials: 'bg-blue-100 text-blue-800',
-    legal: 'bg-purple-100 text-purple-800',
-    equipment: 'bg-green-100 text-green-800',
-    operational: 'bg-yellow-100 text-yellow-800',
-    corporate: 'bg-indigo-100 text-indigo-800',
-    other: 'bg-gray-100 text-gray-800'
-  };
+  if (filename.includes('balance')) return "Balance Sheet"
+  if (filename.includes('profit') || filename.includes('p&l')) return "P&L Report"
+  if (filename.includes('tax')) return "Tax Returns"
+  if (filename.includes('bank')) return "Bank Statements"
+  if (filename.includes('cogs')) return "COGS Report"
+  if (filename.includes('ledger')) return "General Ledger"
+  if (filename.includes('lease')) return "Lease Agreement"
+  if (filename.includes('insurance')) return "Insurance Document"
+  if (filename.includes('equipment')) return "Equipment Document"
+  if (filename.includes('sales')) return "Sales Data"
   
-  return colors[categoryName] || colors.other;
+  // Fallback to category
+  return doc.category.charAt(0).toUpperCase() + doc.category.slice(1)
 }
 
-// Visibility helpers
-export function canUserViewDocument(document: Document, userRole: string): boolean {
-  return document.visibility.includes(userRole) || document.visibility.includes('all');
-}
-
-export function getVisibilityBadge(visibility: string[]): string {
-  if (visibility.includes('all')) return 'Public';
-  if (visibility.includes('admin') && visibility.includes('buyer')) return 'Admin & Buyer';
-  if (visibility.includes('admin')) return 'Admin Only';
-  if (visibility.includes('buyer')) return 'Buyer Only';
-  return 'Restricted';
-}
-
-// Document filtering helpers
-export function filterDocumentsByCategory(documents: Document[], categoryName: string): Document[] {
-  return documents.filter(doc => doc.category === categoryName);
-}
-
-export function filterDocumentsByStatus(documents: Document[], status: boolean): Document[] {
-  return documents.filter(doc => doc.status === status);
-}
-
-export function filterDocumentsByVisibility(documents: Document[], userRole: string): Document[] {
-  return documents.filter(doc => canUserViewDocument(doc, userRole));
-}
-
-export function searchDocuments(documents: Document[], searchTerm: string): Document[] {
-  if (!searchTerm) return documents;
+export function getDocumentDisplayName(doc: Document): string {
+  const filename = doc.id
   
-  const term = searchTerm.toLowerCase();
-  return documents.filter(doc => 
-    doc.name.toLowerCase().includes(term) ||
-    doc.notes?.toLowerCase().includes(term) ||
-    doc.file_type?.toLowerCase().includes(term)
-  );
-}
-
-// Document sorting helpers
-export function sortDocuments(documents: Document[], sortBy: string, sortOrder: 'asc' | 'desc' = 'asc'): Document[] {
-  return [...documents].sort((a, b) => {
-    let aValue: any;
-    let bValue: any;
-    
-    switch (sortBy) {
-      case 'name':
-        aValue = a.name.toLowerCase();
-        bValue = b.name.toLowerCase();
-        break;
-      case 'created_at':
-        aValue = new Date(a.created_at);
-        bValue = new Date(b.created_at);
-        break;
-      case 'updated_at':
-        aValue = new Date(a.updated_at);
-        bValue = new Date(b.updated_at);
-        break;
-      case 'file_size':
-        aValue = a.file_size || 0;
-        bValue = b.file_size || 0;
-        break;
-      case 'status':
-        aValue = a.status ? 1 : 0;
-        bValue = b.status ? 1 : 0;
-        break;
-      default:
-        aValue = a.name.toLowerCase();
-        bValue = b.name.toLowerCase();
-    }
-    
-    if (aValue < bValue) return sortOrder === 'asc' ? -1 : 1;
-    if (aValue > bValue) return sortOrder === 'asc' ? 1 : -1;
-    return 0;
-  });
-}
-
-// Document validation helpers
-export function validateDocumentData(data: any): { valid: boolean; errors: string[] } {
-  const errors: string[] = [];
+  // Remove file extension first
+  const nameWithoutExt = filename.replace(/\.[^/.]+$/, '')
+  const extension = filename.split('.').pop()
   
-  if (!data.name || data.name.trim().length === 0) {
-    errors.push('Document name is required');
-  }
+  // Remove phase prefixes like pa_financials_balance_sheet_ or pb_equipment_general_--
+  let displayName = nameWithoutExt
+    .replace(/^p[ab]_[a-z_]+_--_/, '') // Remove pb_equipment_general_--_
+    .replace(/^p[ab]_[a-z_]+_/, '') // Remove pa_financials_balance_sheet_ etc
+    .replace(/^\d{4}(-\d{2}-\d{2}|-Q[1-4])_/, '') // Remove date prefix
+    .replace(/_\d{4}-\d{2}-\d{2}_to_\d{4}-\d{2}-\d{2}_/g, '_') // Remove date ranges
+    .replace(/_\d{4}-\d{2}-\d{2}_/g, '_') // Remove single dates
+    .replace(/_\d{4}_/g, '_') // Remove years
+    .replace(/\d+/g, '') // Remove all remaining numbers
   
-  if (data.name && data.name.length > 255) {
-    errors.push('Document name must be less than 255 characters');
-  }
+  // Split into parts and remove duplicates (case insensitive)
+  const parts = displayName.split('_').filter(part => part.length > 0)
+  const uniqueParts: string[] = []
+  const seen = new Set<string>()
   
-  if (data.file_size !== undefined) {
-    if (typeof data.file_size !== 'number') {
-      errors.push('File size must be a number');
-    } else if (data.file_size < 0) {
-      errors.push('File size cannot be negative');
-    } else if (!Number.isInteger(data.file_size)) {
-      errors.push('File size must be an integer');
-    }
-  }
-  
-  if (data.visibility && !Array.isArray(data.visibility)) {
-    errors.push('Visibility must be an array');
-  }
-  
-  if (data.due_date && isNaN(Date.parse(data.due_date))) {
-    errors.push('Due date must be a valid date');
-  }
-  
-  // Validate file_hash if present
-  if (data.file_hash !== undefined) {
-    if (typeof data.file_hash !== 'string') {
-      errors.push('File hash must be a string');
-    } else if (data.file_hash.length > 0) {
-      // Check if it matches SHA-256 hex pattern (64 hex characters)
-      const sha256Pattern = /^[a-f0-9]{64}$/i;
-      if (!sha256Pattern.test(data.file_hash)) {
-        errors.push('File hash must be a valid SHA-256 hash (64 hexadecimal characters)');
+  for (const part of parts) {
+    const lowerPart = part.toLowerCase()
+    // Skip if we've seen this word before (case insensitive)
+    if (!seen.has(lowerPart)) {
+      // Also skip if this part is contained in a previous part or vice versa
+      const isDuplicate = uniqueParts.some(existingPart => {
+        const existingLower = existingPart.toLowerCase()
+        return existingLower.includes(lowerPart) || lowerPart.includes(existingLower)
+      })
+      
+      if (!isDuplicate) {
+        uniqueParts.push(part)
+        seen.add(lowerPart)
       }
     }
   }
   
+  displayName = uniqueParts.join('_')
+  
+  return displayName + '.' + extension
+}
+
+export function getCategoryColor(category: string): string {
+  switch (category) {
+    case "financials":
+      return "bg-secondary text-secondary-foreground hover:bg-secondary"
+    case "legal":
+      return "bg-secondary text-secondary-foreground hover:bg-secondary"
+    case "equipment":
+      return "bg-secondary text-secondary-foreground hover:bg-secondary"
+    case "operational":
+      return "bg-secondary text-secondary-foreground hover:bg-secondary"
+    case "marketing":
+      return "bg-secondary text-secondary-foreground hover:bg-secondary"
+    case "corporate":
+      return "bg-secondary text-secondary-foreground hover:bg-secondary"
+    default:
+      return "bg-secondary text-secondary-foreground hover:bg-secondary"
+  }
+}
+
+export function getFileIconType(doc: Document): "pdf" | "spreadsheet" | "default" {
+  switch (doc.file_type.toLowerCase()) {
+    case "pdf":
+      return "pdf"
+    case "csv":
+    case "xlsx":
+      return "spreadsheet"
+    default:
+      return "default"
+  }
+}
+
+export function extractPeriod(doc: Document): string {
+  const filename = doc.id
+  
+  // Try to extract date range from structured filenames
+  // Pattern: 2023-11-01_Bank_Statements_2023-11-01_to_2023-11-30_Chase_BusinessChecking_CranberryHearing.pdf
+  const dateRangeMatch = filename.match(/(\d{4}-\d{2}-\d{2})_to_(\d{4}-\d{2}-\d{2})/)
+  if (dateRangeMatch) {
+    const startDate = new Date(dateRangeMatch[1])
+    const endDate = new Date(dateRangeMatch[2])
+    
+    // Format as "Nov 1 - Nov 30, 2023"
+    const startFormatted = startDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+    const endFormatted = endDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+    
+    return `${startFormatted} - ${endFormatted}`
+  }
+  
+  // Try to extract single date and format it
+  const singleDateMatch = filename.match(/(\d{4}-\d{2}-\d{2})/)
+  if (singleDateMatch) {
+    const date = new Date(singleDateMatch[1])
+    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+  }
+  
+  // Fallback to year extraction
+  const filenameLower = filename.toLowerCase()
+  if (filenameLower.includes("2025")) return "2025"
+  if (filenameLower.includes("2024")) return "2024"
+  if (filenameLower.includes("2023")) return "2023"
+  if (filenameLower.includes("2022")) return "2022"
+  if (filenameLower.includes("2021")) return "2021"
+  if (filenameLower.includes("2019")) return "2019"
+  if (filenameLower.includes("q4")) return "Q4 2023"
+  if (filenameLower.includes("q3")) return "Q3 2023"
+  if (filenameLower.includes("q2")) return "Q2 2023"
+  if (filenameLower.includes("q1")) return "Q1 2023"
+
+  // Fallback to extracting year from created_at
+  return new Date(doc.created_at).getFullYear().toString()
+}
+
+// Function to compute SHA256 hash of a file
+export async function computeSHA256(file: File): Promise<string> {
+  const buffer = await file.arrayBuffer()
+  const hashBuffer = await crypto.subtle.digest('SHA-256', buffer)
+  const hashArray = Array.from(new Uint8Array(hashBuffer))
+  const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('')
+  return hashHex
+}
+
+// Expected documents functions
+export function getExpectedDocumentsForPhase(phase: Phase): PhaseExpectedDocuments | null {
+  return expectedDocs.phases[phase] || null
+}
+
+export function getExpectedDocumentsForCategory(phase: Phase, category: string): ExpectedDocument[] {
+  const phaseData = getExpectedDocumentsForPhase(phase)
+  if (!phaseData) return []
+  
+  return phaseData.expected_documents[category] || []
+}
+
+export function checkDocumentStatus(phase: Phase, category: string, actualDocuments: Document[]): DocumentStatus[] {
+  const expectedDocs = getExpectedDocumentsForCategory(phase, category)
+  const statuses: DocumentStatus[] = []
+  
+  // Check each expected document
+  expectedDocs.forEach(expected => {
+    const matchingDocs = actualDocuments.filter(doc => {
+      // Check if document matches the expected pattern
+      const expectedPattern = expected.filename_pattern || `${phase}_${category}_${expected.subtype || 'general'}_{date}_{originalname}`
+      const patternRegex = expectedPattern
+        .replace('{date}', '\\d{4}-\\d{2}-\\d{2}')
+        .replace('{originalname}', '.*')
+        .replace(/\{.*\}/g, '.*')
+      
+      return new RegExp(patternRegex).test(doc.sanitized_name)
+    })
+    
+    statuses.push({
+      expected_document: expected,
+      actual_documents: matchingDocs,
+      status: matchingDocs.length > 0 ? 'uploaded' : 'pending',
+      is_required: expected.required
+    })
+  })
+  
+  return statuses
+}
+
+export function getPhaseCompletionStatus(phase: Phase, allDocuments: Document[]): PhaseCompletionStatus {
+  const phaseData = getExpectedDocumentsForPhase(phase)
+  if (!phaseData) {
+    return {
+      phase,
+      total_required: 0,
+      completed_required: 0,
+      total_optional: 0,
+      completed_optional: 0,
+      completion_percentage: 100,
+      missing_required: [],
+      missing_optional: []
+    }
+  }
+  
+  let totalRequired = 0
+  let completedRequired = 0
+  let totalOptional = 0
+  let completedOptional = 0
+  const missingRequired: string[] = []
+  const missingOptional: string[] = []
+  
+  Object.keys(phaseData.expected_documents).forEach(category => {
+    const statuses = checkDocumentStatus(phase, category, allDocuments)
+    
+    statuses.forEach(status => {
+      if (status.expected_document.required) {
+        totalRequired++
+        if (status.status === 'uploaded') {
+          completedRequired++
+        } else {
+          missingRequired.push(status.expected_document.name)
+        }
+      } else {
+        totalOptional++
+        if (status.status === 'uploaded') {
+          completedOptional++
+        } else {
+          missingOptional.push(status.expected_document.name)
+        }
+      }
+    })
+  })
+  
+  const total = totalRequired + totalOptional
+  const completed = completedRequired + completedOptional
+  const completionPercentage = total > 0 ? Math.round((completed / total) * 100) : 100
+  
   return {
-    valid: errors.length === 0,
-    errors
-  };
+    phase,
+    total_required: totalRequired,
+    completed_required: completedRequired,
+    total_optional: totalOptional,
+    completed_optional: completedOptional,
+    completion_percentage: completionPercentage,
+    missing_required: missingRequired,
+    missing_optional: missingOptional
+  }
 }
 
-// Document statistics helpers
-export function calculateCoveragePercentage(found: number, expected: number): number {
-  if (expected === 0) return 100;
-  return Math.round((found / expected) * 100 * 100) / 100; // Round to 2 decimal places
-}
-
-export function getCoverageStatus(coverage: number): { status: string; color: string } {
-  if (coverage >= 90) return { status: 'Excellent', color: 'text-green-600' };
-  if (coverage >= 75) return { status: 'Good', color: 'text-blue-600' };
-  if (coverage >= 50) return { status: 'Fair', color: 'text-yellow-600' };
-  return { status: 'Poor', color: 'text-red-600' };
-}
-
-// CSV escaping helper function (RFC 4180 compliant)
-function escapeCSVField(field: any): string {
-  // Convert to string first
-  const stringField = String(field);
-  // Escape internal double quotes by doubling them
-  const escapedField = stringField.replace(/"/g, '""');
-  // Wrap in surrounding double quotes
-  return `"${escapedField}"`;
-}
-
-// Export helpers
-export function exportDocumentsToCSV(documents: Document[], categories: DocumentCategory[]): string {
-  const categoryMap = new Map(categories.map(cat => [cat.name, cat.name]));
-  
-  const headers = [
-    'ID',
-    'Name',
-    'Category',
-    'File Type',
-    'File Size',
-    'Status',
-    'Expected',
-    'Notes',
-    'Visibility',
-    'Due Date',
-    'Created At',
-    'Updated At'
-  ];
-  
-  const rows = documents.map(doc => [
-    doc.id,
-    doc.name,
-    doc.category ? categoryMap.get(doc.category) || 'Unknown' : 'Uncategorized',
-    doc.file_type || '',
-    doc.file_size_display || '',
-    doc.status ? 'Found' : 'Missing',
-    doc.expected ? 'Yes' : 'No',
-    doc.notes || '',
-    doc.visibility.join(', '),
-    doc.due_date || '',
-    doc.created_at,
-    doc.updated_at
-  ]);
-  
-  const csvContent = [headers, ...rows]
-    .map(row => row.map(field => escapeCSVField(field)).join(','))
-    .join('\n');
-  
-  return csvContent;
-}
-
-// Date helpers
-export function formatDate(dateString: string): string {
-  return new Date(dateString).toLocaleDateString('en-US', {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit'
-  });
-}
-
-export function isOverdue(dueDate: string | null): boolean {
-  if (!dueDate) return false;
-  return new Date(dueDate) < new Date();
-}
-
-export function getDaysUntilDue(dueDate: string | null): number | null {
-  if (!dueDate) return null;
-  const today = new Date();
-  const due = new Date(dueDate);
-  const diffTime = due.getTime() - today.getTime();
-  return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+export function getAllPhaseCompletionStatuses(allDocuments: Document[]): PhaseCompletionStatus[] {
+  const phases: Phase[] = ['p1', 'p2a', 'p2b', 'p3a', 'p3b', 'p4', 'p5', 'legal', 'legacy']
+  return phases.map(phase => getPhaseCompletionStatus(phase, allDocuments))
 }

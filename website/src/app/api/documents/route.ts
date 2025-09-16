@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { DocumentStorage } from '@/lib/document-storage-server';
+import { DocumentStorage } from '@/lib/document-storage-blob';
 import { auth } from '@/auth';
 
 // GET /api/documents - Get all documents with optional filters
@@ -26,7 +26,7 @@ export async function GET(request: NextRequest) {
       search: searchParams.get('search') || undefined,
     };
 
-    const documents = DocumentStorage.findAll(filters);
+    const documents = await DocumentStorage.findAll(filters);
     
     return NextResponse.json({
       success: true,
@@ -70,28 +70,13 @@ export async function POST(request: NextRequest) {
     const sanitizedName = name.replace(/[<>:"/\\|?*]/g, '_');
     const sanitizedCategory = category.replace(/[<>:"/\\|?*]/g, '_');
 
-    const document = await DocumentStorage.create({
-      name,
-      category,
-      sanitized_name: sanitizedName,
-      path_segment: sanitizedCategory,
-      blob_url: blob_url || '',
-      file_type: file_type || '',
-      file_size: file_size || 0,
-      file_size_display: file_size_display || '0 B',
-      file_hash: file_hash || '',
-      status: status || false,
-      expected: expected !== undefined ? expected : true,
-      notes: notes || '',
-      visibility: visibility || ['admin'],
-      due_date: due_date || null,
-      last_modified: new Date().toISOString()
-    });
-
-    return NextResponse.json({
-      success: true,
-      data: document
-    }, { status: 201 });
+    // For blob-only storage, we don't create metadata records directly
+    // The metadata is derived from the blob storage itself
+    // This endpoint is mainly for compatibility - actual document creation happens via upload
+    return NextResponse.json(
+      { success: false, error: 'Use /api/documents/upload to create documents' },
+      { status: 400 }
+    );
   } catch (error) {
     console.error('Error creating document:', error);
     return NextResponse.json(

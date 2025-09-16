@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { put } from '@vercel/blob';
 import { computeSHA256 } from '@/lib/document-utils';
-import { DocumentStorage, loadCategories } from '@/lib/document-storage-server';
+import { DocumentStorage } from '@/lib/document-storage-blob';
 import { auth } from '@/auth';
 
 // Security validation functions
@@ -16,7 +16,7 @@ function sanitizePathComponent(input: string): string {
 }
 
 function validateCategory(category: string): { valid: boolean; error?: string } {
-  const allowedCategories = loadCategories();
+  const allowedCategories = DocumentStorage.getDefaultCategories();
   const categoryNames = allowedCategories.map(cat => cat.name);
   
   if (!categoryNames.includes(category)) {
@@ -240,8 +240,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Calculate file hash first (needed for unique filename generation)
-    const buffer = await file.arrayBuffer();
-    const fileHash = await computeSHA256(buffer);
+    const fileHash = await computeSHA256(file);
     
     // Generate unique filename to prevent collisions
     const uniqueFilename = generateUniqueFilename(fileName, fileHash);
@@ -259,12 +258,15 @@ export async function POST(request: NextRequest) {
       addRandomSuffix: true,
     });
 
-    // Create document record
-    const document = await DocumentStorage.create({
-      name: name, // Store original validated name
-      category: category, // Store original validated category
-      sanitized_name: sanitizedName, // Store sanitized name for filesystem paths
-      path_segment: sanitizedCategory, // Store sanitized category for blob paths
+    // For blob-only storage, we don't need to create a separate metadata record
+    // The document metadata is derived from the blob storage itself
+    // Create a document object for the response
+    const document = {
+      id: blob.url, // Use blob URL as ID
+      name: name,
+      category: category,
+      sanitized_name: sanitizedName,
+      path_segment: sanitizedCategory,
       blob_url: blob.url,
       file_type: fileExtension,
       file_size: file.size,
@@ -273,10 +275,12 @@ export async function POST(request: NextRequest) {
       status: true,
       expected: true,
       notes: notes || '',
-      visibility: visibilityArray, // Use processed visibility array
+      visibility: visibilityArray,
       due_date: due_date || null,
-      last_modified: new Date().toISOString()
-    });
+      last_modified: new Date().toISOString(),
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString()
+    };
 
     return NextResponse.json({
       success: true,

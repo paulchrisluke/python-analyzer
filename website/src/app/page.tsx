@@ -6,7 +6,7 @@ import { LocationInformation } from '@/components/location-information'
 import { SiteHeader } from '@/components/site-header'
 import { SiteFooter } from '@/components/site-footer'
 import { HeroSection } from '@/components/hero-section'
-import { DueDiligenceDocuments } from '@/components/due-diligence-documents'
+import { PublicDocuments } from '@/components/documents'
 import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar'
 import { AppSidebar } from '@/components/app-sidebar'
 import { staticBusinessData } from '@/data/business-data'
@@ -47,14 +47,14 @@ export default function HomePage() {
                 <YearlyRevenueChart />
               </div>
 
-              {/* Due Diligence */}
-              <div id={ANCHORS.DUE_DILIGENCE} className="px-4 lg:px-6">
-                <DueDiligenceDocuments />
-              </div>
-
               {/* Location Information */}
               <div id={ANCHORS.LOCATION_INFORMATION} className="px-4 lg:px-6">
                 <LocationInformation data={staticBusinessData} />
+              </div>
+
+              {/* Due Diligence */}
+              <div id={ANCHORS.DUE_DILIGENCE} className="px-4 lg:px-6">
+                <PublicDocuments />
               </div>
 
               {/* Call to Action - Temporarily removed */}

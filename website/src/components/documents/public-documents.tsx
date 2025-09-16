@@ -1,34 +1,20 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table"
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
-import { DollarSignIcon, BuildingIcon, ShieldIcon, UsersIcon, FileText, FileSpreadsheet } from "lucide-react"
+import { FolderView } from "./FolderView"
 import { Document } from "@/types/document"
-import { getDocumentTypeLabel, getFileIconType, extractPeriod } from "@/lib/document-utils"
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
+import { Button } from "@/components/ui/button"
+import { Badge } from "@/components/ui/badge"
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import { Lock, FileText, Shield } from "lucide-react"
 
-
-export function DueDiligenceDocuments() {
+export function PublicDocuments() {
   const [documents, setDocuments] = useState<Document[]>([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    // Fetch real documents
+    // Fetch documents from API (public endpoint)
     fetch('/api/documents')
       .then(res => res.json())
       .then(data => {
@@ -44,11 +30,10 @@ export function DueDiligenceDocuments() {
       })
   }, [])
 
-  const getDocumentIcon = (doc: Document) => {
-    const fileType = getFileIconType(doc)
-    if (fileType === 'pdf') return FileText
-    if (fileType === 'spreadsheet') return FileSpreadsheet
-    return FileText
+  const handleAccessRequest = () => {
+    console.log('Public access request for all documents')
+    // TODO: Implement public access request handling
+    // This could open a contact form or redirect to a signup page
   }
 
   if (loading) {
@@ -81,7 +66,7 @@ export function DueDiligenceDocuments() {
       </CardHeader>
       <CardContent>
         <div className="relative">
-          {/* Document table with disabled interactions */}
+          {/* Compact document preview table */}
           <div className="pointer-events-none opacity-75">
             <div className="rounded-md border">
               <Table>
@@ -90,30 +75,33 @@ export function DueDiligenceDocuments() {
                     <TableHead>Document Name</TableHead>
                     <TableHead>Category</TableHead>
                     <TableHead>Type</TableHead>
-                    <TableHead>Size</TableHead>
                     <TableHead>Period</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {documents.slice(0, 8).map((document) => {
+                  {documents.slice(0, 5).map((document) => {
+                    const getDocumentIcon = (doc: any) => {
+                      const fileType = doc.file_type?.toLowerCase()
+                      if (fileType === 'pdf') return FileText
+                      return FileText
+                    }
                     const IconComponent = getDocumentIcon(document)
                     return (
                       <TableRow key={document.id}>
                         <TableCell>
                           <div className="flex items-center gap-2">
                             <IconComponent className="h-4 w-4 text-muted-foreground" />
-                            <span className="font-medium">{document.name || document.id}</span>
+                            <span className="font-medium text-sm">{document.name || document.id}</span>
                           </div>
                         </TableCell>
                         <TableCell>
-                          <Badge variant="outline">{document.category}</Badge>
+                          <Badge variant="outline" className="text-xs">{document.category}</Badge>
                         </TableCell>
                         <TableCell>
-                          <Badge variant="secondary">{document.file_type.toUpperCase()}</Badge>
+                          <Badge variant="secondary" className="text-xs">{document.file_type?.toUpperCase()}</Badge>
                         </TableCell>
-                        <TableCell>{document.file_size_display}</TableCell>
-                        <TableCell>
-                          {extractPeriod(document)}
+                        <TableCell className="text-sm text-muted-foreground">
+                          {document.created_at ? new Date(document.created_at).getFullYear() : 'N/A'}
                         </TableCell>
                       </TableRow>
                     );
@@ -128,7 +116,7 @@ export function DueDiligenceDocuments() {
             <div className="text-center space-y-4 p-6 max-w-lg">
               <div className="flex justify-center">
                 <div className="p-3 rounded-full bg-muted">
-                  <ShieldIcon className="h-8 w-8 text-muted-foreground" />
+                  <Shield className="h-8 w-8 text-muted-foreground" />
                 </div>
               </div>
               
@@ -148,9 +136,10 @@ export function DueDiligenceDocuments() {
               <Button 
                 size="default" 
                 className="bg-black hover:bg-black/90 text-white px-6 py-2"
-                asChild
+                onClick={handleAccessRequest}
               >
-                <a href="/buyer/documents">Request Full Access</a>
+                <FileText className="h-4 w-4 mr-2" />
+                Request Full Access
               </Button>
               
               <p className="text-xs text-muted-foreground">
@@ -163,4 +152,3 @@ export function DueDiligenceDocuments() {
     </Card>
   )
 }
-

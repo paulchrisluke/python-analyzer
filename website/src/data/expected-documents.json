@@ -1,0 +1,539 @@
+{
+  "phases": {
+    "p1": {
+      "name": "Phase 1 - Initial Interest",
+      "description": "Basic business information for initial buyer interest",
+      "expected_documents": {
+        "financials": [
+          {
+            "name": "Business Overview Summary",
+            "description": "High-level business summary with key metrics",
+            "required": true,
+            "file_types": ["pdf", "docx"],
+            "frequency": "current",
+            "subtype": "business_overview",
+            "filename_pattern": "p1_financials_business_overview_{date}_BusinessOverviewSummary"
+          },
+          {
+            "name": "Annual Revenue Summary",
+            "description": "Annual revenue figures for the last 2-3 years",
+            "required": true,
+            "file_types": ["pdf", "xlsx"],
+            "frequency": "annual",
+            "period": "3_years",
+            "subtype": "revenue_summary",
+            "filename_pattern": "p1_financials_revenue_summary_{date}_AnnualRevenueSummary"
+          }
+        ],
+        "operational": [
+          {
+            "name": "Business Description",
+            "description": "Detailed description of business operations and services",
+            "required": true,
+            "file_types": ["pdf", "docx"],
+            "frequency": "current",
+            "subtype": "business_description",
+            "filename_pattern": "p1_operational_business_description_{date}_BusinessDescription"
+          },
+          {
+            "name": "Location Information",
+            "description": "Business location details and facilities information",
+            "required": true,
+            "file_types": ["pdf", "docx"],
+            "frequency": "current",
+            "subtype": "location_info",
+            "filename_pattern": "p1_operational_location_info_{date}_LocationInformation"
+          }
+        ]
+      }
+    },
+    "p2a": {
+      "name": "Phase 2a - Pre-Qualification",
+      "description": "High-level summaries for buyer qualification",
+      "expected_documents": {
+        "financials": [
+          {
+            "name": "P&L Summary",
+            "description": "Profit and Loss statement summary for last 2 years",
+            "required": true,
+            "file_types": ["pdf", "xlsx"],
+            "frequency": "annual",
+            "period": "2_years",
+            "subtype": "profit_loss",
+            "filename_pattern": "p2a_financials_profit_loss_{date}_PLSummary"
+          },
+          {
+            "name": "Balance Sheet Summary",
+            "description": "Balance sheet summary showing assets and liabilities",
+            "required": true,
+            "file_types": ["pdf", "xlsx"],
+            "frequency": "annual",
+            "period": "2_years",
+            "subtype": "balance_sheet",
+            "filename_pattern": "p2a_financials_balance_sheet_{date}_BalanceSheetSummary"
+          },
+          {
+            "name": "Cash Flow Summary",
+            "description": "Cash flow statement summary",
+            "required": true,
+            "file_types": ["pdf", "xlsx"],
+            "frequency": "annual",
+            "period": "2_years",
+            "subtype": "cash_flow",
+            "filename_pattern": "p2a_financials_cash_flow_{date}_CashFlowSummary"
+          }
+        ],
+        "operational": [
+          {
+            "name": "Staff Overview",
+            "description": "Staff count and key personnel overview",
+            "required": true,
+            "file_types": ["pdf", "docx"],
+            "frequency": "current",
+            "subtype": "staff_data",
+            "filename_pattern": "p2a_operational_staff_data_{date}_StaffOverview"
+          },
+          {
+            "name": "Patient Volume Summary",
+            "description": "Patient volume and appointment statistics",
+            "required": true,
+            "file_types": ["pdf", "xlsx"],
+            "frequency": "annual",
+            "period": "2_years",
+            "subtype": "patient_data",
+            "filename_pattern": "p2a_operational_patient_data_{date}_PatientVolumeSummary"
+          }
+        ]
+      }
+    },
+    "p2b": {
+      "name": "Phase 2b - Post-NDA",
+      "description": "Detailed financials and ownership information after NDA",
+      "expected_documents": {
+        "financials": [
+          {
+            "name": "Detailed P&L Statements",
+            "description": "Complete Profit and Loss statements with line items",
+            "required": true,
+            "file_types": ["pdf", "xlsx"],
+            "frequency": "monthly",
+            "period": "24_months",
+            "subtype": "profit_loss",
+            "filename_pattern": "p2b_financials_profit_loss_{date}_DetailedPLStatements"
+          },
+          {
+            "name": "Detailed Balance Sheets",
+            "description": "Complete balance sheets with all line items",
+            "required": true,
+            "file_types": ["pdf", "xlsx"],
+            "frequency": "monthly",
+            "period": "24_months",
+            "subtype": "balance_sheet",
+            "filename_pattern": "p2b_financials_balance_sheet_{date}_DetailedBalanceSheets"
+          },
+          {
+            "name": "Tax Returns",
+            "description": "Business tax returns for last 3 years",
+            "required": true,
+            "file_types": ["pdf"],
+            "frequency": "annual",
+            "period": "3_years",
+            "subtype": "tax_returns",
+            "filename_pattern": "p2b_financials_tax_returns_{date}_TaxReturns"
+          },
+          {
+            "name": "Bank Statements",
+            "description": "Business bank statements for last 12 months",
+            "required": true,
+            "file_types": ["pdf"],
+            "frequency": "monthly",
+            "period": "12_months",
+            "subtype": "bank_statements",
+            "filename_pattern": "p2b_financials_bank_statements_{date}_BankStatements"
+          }
+        ],
+        "corporate": [
+          {
+            "name": "Ownership Structure",
+            "description": "Business ownership and corporate structure documents",
+            "required": true,
+            "file_types": ["pdf", "docx"],
+            "frequency": "current",
+            "subtype": "ownership",
+            "filename_pattern": "p2b_corporate_ownership_{date}_OwnershipStructure"
+          },
+          {
+            "name": "Articles of Incorporation",
+            "description": "Articles of incorporation and corporate formation documents",
+            "required": true,
+            "file_types": ["pdf"],
+            "frequency": "current",
+            "subtype": "incorporation",
+            "filename_pattern": "p2b_corporate_incorporation_{date}_ArticlesOfIncorporation"
+          }
+        ]
+      }
+    },
+    "p3a": {
+      "name": "Phase 3a - Due Diligence Start",
+      "description": "Full financials and contracts for due diligence",
+      "expected_documents": {
+        "financials": [
+          {
+            "name": "General Ledger",
+            "description": "General ledger entries for detailed financial analysis",
+            "required": true,
+            "file_types": ["xlsx", "csv"],
+            "frequency": "monthly",
+            "period": "24_months",
+            "subtype": "general_ledger",
+            "filename_pattern": "p3a_financials_general_ledger_{date}_GeneralLedger"
+          },
+          {
+            "name": "COGS Analysis",
+            "description": "Cost of Goods Sold detailed analysis",
+            "required": true,
+            "file_types": ["pdf", "xlsx"],
+            "frequency": "monthly",
+            "period": "24_months",
+            "subtype": "cogs",
+            "filename_pattern": "p3a_financials_cogs_{date}_COGSAnalysis"
+          },
+          {
+            "name": "Accounts Receivable Aging",
+            "description": "Accounts receivable aging reports",
+            "required": true,
+            "file_types": ["pdf", "xlsx"],
+            "frequency": "monthly",
+            "period": "12_months",
+            "subtype": "ar_aging",
+            "filename_pattern": "p3a_financials_ar_aging_{date}_AccountsReceivableAging"
+          },
+          {
+            "name": "Accounts Payable Aging",
+            "description": "Accounts payable aging reports",
+            "required": true,
+            "file_types": ["pdf", "xlsx"],
+            "frequency": "monthly",
+            "period": "12_months",
+            "subtype": "ap_aging",
+            "filename_pattern": "p3a_financials_ap_aging_{date}_AccountsPayableAging"
+          }
+        ],
+        "legal": [
+          {
+            "name": "Lease Agreements",
+            "description": "All lease agreements for business premises and equipment",
+            "required": true,
+            "file_types": ["pdf"],
+            "frequency": "current",
+            "subtype": "leases",
+            "filename_pattern": "p3a_legal_leases_{date}_LeaseAgreements"
+          },
+          {
+            "name": "Insurance Policies",
+            "description": "Current insurance policies and coverage details",
+            "required": true,
+            "file_types": ["pdf"],
+            "frequency": "current",
+            "subtype": "insurance",
+            "filename_pattern": "p3a_legal_insurance_{date}_InsurancePolicies"
+          },
+          {
+            "name": "Business Licenses",
+            "description": "All required business licenses and permits",
+            "required": true,
+            "file_types": ["pdf"],
+            "frequency": "current",
+            "subtype": "licenses",
+            "filename_pattern": "p3a_legal_licenses_{date}_BusinessLicenses"
+          }
+        ],
+        "operational": [
+          {
+            "name": "Staff Employment Records",
+            "description": "Employment agreements and staff records",
+            "required": true,
+            "file_types": ["pdf", "docx"],
+            "frequency": "current",
+            "subtype": "staff_data",
+            "filename_pattern": "p3a_operational_staff_data_{date}_StaffEmploymentRecords"
+          },
+          {
+            "name": "Patient Records Sample",
+            "description": "Sample patient records (anonymized) for review",
+            "required": true,
+            "file_types": ["pdf"],
+            "frequency": "current",
+            "subtype": "patient_data",
+            "filename_pattern": "p3a_operational_patient_data_{date}_PatientRecordsSample"
+          }
+        ]
+      }
+    },
+    "p3b": {
+      "name": "Phase 3b - Advanced Due Diligence",
+      "description": "Staff, patients, and equipment detailed information",
+      "expected_documents": {
+        "operational": [
+          {
+            "name": "Detailed Staff Information",
+            "description": "Complete staff roster with roles, salaries, and benefits",
+            "required": true,
+            "file_types": ["pdf", "xlsx"],
+            "frequency": "current",
+            "subtype": "staff_data",
+            "filename_pattern": "p3b_operational_staff_data_{date}_DetailedStaffInformation"
+          },
+          {
+            "name": "Patient Database Analysis",
+            "description": "Patient demographics and volume analysis",
+            "required": true,
+            "file_types": ["pdf", "xlsx"],
+            "frequency": "annual",
+            "period": "3_years",
+            "subtype": "patient_data",
+            "filename_pattern": "p3b_operational_patient_data_{date}_PatientDatabaseAnalysis"
+          },
+          {
+            "name": "Appointment Scheduling Data",
+            "description": "Appointment scheduling and utilization data",
+            "required": true,
+            "file_types": ["pdf", "xlsx"],
+            "frequency": "monthly",
+            "period": "12_months",
+            "subtype": "scheduling_data",
+            "filename_pattern": "p3b_operational_scheduling_data_{date}_AppointmentSchedulingData"
+          }
+        ],
+        "equipment": [
+          {
+            "name": "Equipment Inventory",
+            "description": "Complete equipment inventory with values and conditions",
+            "required": true,
+            "file_types": ["pdf", "xlsx"],
+            "frequency": "current",
+            "subtype": "equipment",
+            "filename_pattern": "p3b_equipment_equipment_{date}_EquipmentInventory"
+          },
+          {
+            "name": "Equipment Maintenance Records",
+            "description": "Equipment maintenance and service records",
+            "required": true,
+            "file_types": ["pdf"],
+            "frequency": "as_needed",
+            "period": "current",
+            "subtype": "maintenance",
+            "filename_pattern": "p3b_equipment_maintenance_{date}_EquipmentMaintenanceRecords"
+          },
+          {
+            "name": "Equipment Warranties",
+            "description": "Equipment warranties and service agreements",
+            "required": true,
+            "file_types": ["pdf"],
+            "frequency": "current",
+            "subtype": "warranties",
+            "filename_pattern": "p3b_equipment_warranties_{date}_EquipmentWarranties"
+          }
+        ],
+        "financials": [
+          {
+            "name": "Detailed Revenue Analysis",
+            "description": "Revenue breakdown by service type and time period",
+            "required": true,
+            "file_types": ["pdf", "xlsx"],
+            "frequency": "monthly",
+            "period": "24_months",
+            "subtype": "revenue_analysis",
+            "filename_pattern": "p3b_financials_revenue_analysis_{date}_DetailedRevenueAnalysis"
+          },
+          {
+            "name": "Expense Analysis",
+            "description": "Detailed expense analysis by category",
+            "required": true,
+            "file_types": ["pdf", "xlsx"],
+            "frequency": "monthly",
+            "period": "24_months",
+            "subtype": "expense_analysis",
+            "filename_pattern": "p3b_financials_expense_analysis_{date}_ExpenseAnalysis"
+          }
+        ]
+      }
+    },
+    "p4": {
+      "name": "Phase 4 - Negotiation",
+      "description": "Draft agreements and negotiation documents",
+      "expected_documents": {
+        "legal": [
+          {
+            "name": "Draft Purchase Agreement",
+            "description": "Draft purchase agreement and terms",
+            "required": true,
+            "file_types": ["pdf", "docx"],
+            "frequency": "current"
+          },
+          {
+            "name": "Asset Purchase Agreement",
+            "description": "Asset purchase agreement details",
+            "required": true,
+            "file_types": ["pdf", "docx"],
+            "frequency": "current"
+          },
+          {
+            "name": "Transition Services Agreement",
+            "description": "Transition services agreement if applicable",
+            "required": false,
+            "file_types": ["pdf", "docx"],
+            "frequency": "current"
+          }
+        ],
+        "financials": [
+          {
+            "name": "Financial Projections",
+            "description": "Financial projections and forecasts",
+            "required": true,
+            "file_types": ["pdf", "xlsx"],
+            "frequency": "current"
+          },
+          {
+            "name": "Working Capital Analysis",
+            "description": "Working capital requirements and analysis",
+            "required": true,
+            "file_types": ["pdf", "xlsx"],
+            "frequency": "current"
+          }
+        ]
+      }
+    },
+    "p5": {
+      "name": "Phase 5 - Closing",
+      "description": "Final agreements and closing documents",
+      "expected_documents": {
+        "legal": [
+          {
+            "name": "Final Purchase Agreement",
+            "description": "Executed purchase agreement",
+            "required": true,
+            "file_types": ["pdf"],
+            "frequency": "current"
+          },
+          {
+            "name": "Bill of Sale",
+            "description": "Bill of sale for assets",
+            "required": true,
+            "file_types": ["pdf"],
+            "frequency": "current"
+          },
+          {
+            "name": "Closing Statement",
+            "description": "Final closing statement and settlement",
+            "required": true,
+            "file_types": ["pdf"],
+            "frequency": "current"
+          }
+        ],
+        "financials": [
+          {
+            "name": "Final Financial Statements",
+            "description": "Final audited or reviewed financial statements",
+            "required": true,
+            "file_types": ["pdf"],
+            "frequency": "current"
+          },
+          {
+            "name": "Closing Balance Sheet",
+            "description": "Balance sheet as of closing date",
+            "required": true,
+            "file_types": ["pdf", "xlsx"],
+            "frequency": "current"
+          }
+        ]
+      }
+    },
+    "legal": {
+      "name": "Legal Review",
+      "description": "All legal documents for legal team review",
+      "expected_documents": {
+        "legal": [
+          {
+            "name": "All Legal Documents",
+            "description": "Complete set of all legal documents for review",
+            "required": true,
+            "file_types": ["pdf"],
+            "frequency": "current"
+          },
+          {
+            "name": "Compliance Documentation",
+            "description": "Regulatory compliance and audit documentation",
+            "required": true,
+            "file_types": ["pdf"],
+            "frequency": "current"
+          },
+          {
+            "name": "Litigation History",
+            "description": "History of any litigation or legal disputes",
+            "required": true,
+            "file_types": ["pdf"],
+            "frequency": "current"
+          }
+        ]
+      }
+    },
+    "legacy": {
+      "name": "Legacy Documents",
+      "description": "Historical documents and archives",
+      "expected_documents": {
+        "financials": [
+          {
+            "name": "Historical Financial Records",
+            "description": "Historical financial records and archives",
+            "required": false,
+            "file_types": ["pdf", "xlsx"],
+            "frequency": "as_needed"
+          }
+        ],
+        "operational": [
+          {
+            "name": "Historical Operational Data",
+            "description": "Historical operational data and records",
+            "required": false,
+            "file_types": ["pdf", "xlsx"],
+            "frequency": "as_needed"
+          }
+        ]
+      }
+    }
+  },
+  "categories": {
+    "financials": {
+      "name": "Financial Documents",
+      "description": "All financial statements, reports, and analysis documents",
+      "icon": "dollar-sign"
+    },
+    "legal": {
+      "name": "Legal Documents",
+      "description": "Legal agreements, contracts, and compliance documents",
+      "icon": "shield"
+    },
+    "equipment": {
+      "name": "Equipment Documents",
+      "description": "Equipment inventory, maintenance, and warranty documents",
+      "icon": "building"
+    },
+    "operational": {
+      "name": "Operational Documents",
+      "description": "Staff, patient, and operational data documents",
+      "icon": "users"
+    },
+    "corporate": {
+      "name": "Corporate Documents",
+      "description": "Corporate structure, ownership, and governance documents",
+      "icon": "file-text"
+    },
+    "other": {
+      "name": "Other Documents",
+      "description": "Miscellaneous documents and files",
+      "icon": "file"
+    }
+  }
+}

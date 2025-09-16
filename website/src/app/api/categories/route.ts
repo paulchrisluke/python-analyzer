@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { loadCategories, saveCategories } from '@/lib/document-storage-server';
-import { DocumentStorage } from '@/lib/document-storage-server';
+import { DocumentStorage } from '@/lib/document-storage-blob';
 import { auth } from '@/auth';
 
 // GET /api/categories - Get all document categories
@@ -19,11 +18,11 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const withCounts = searchParams.get('with_counts') === 'true';
 
-    let categories = loadCategories();
+    let categories = DocumentStorage.getDefaultCategories();
 
     if (withCounts) {
-      const documents = DocumentStorage.findAll();
-      const stats = DocumentStorage.getStats();
+      const documents = await DocumentStorage.findAll();
+      const stats = await DocumentStorage.getStats();
       
       // Build category counts in a single pass
       const categoryCounts = new Map<string, { total: number; found: number; missing: number }>();
@@ -96,31 +95,12 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const categories = loadCategories();
-    
-    // Check if category already exists
-    if (categories.find(cat => cat.name === name)) {
-      return NextResponse.json(
-        { success: false, error: 'Category already exists' },
-        { status: 400 }
-      );
-    }
-
-    const newCategory = {
-      name,
-      description: description || '',
-      required: required || false,
-      frequency: frequency || 'as_needed',
-      period: period || 'current'
-    };
-
-    categories.push(newCategory);
-    saveCategories(categories);
-
-    return NextResponse.json({
-      success: true,
-      data: newCategory
-    }, { status: 201 });
+    // For blob-only storage, categories are static and predefined
+    // We don't allow dynamic category creation
+    return NextResponse.json(
+      { success: false, error: 'Categories are predefined and cannot be created dynamically' },
+      { status: 400 }
+    );
   } catch (error) {
     console.error('Error creating category:', error);
     return NextResponse.json(

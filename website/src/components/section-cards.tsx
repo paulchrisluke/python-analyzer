@@ -64,7 +64,7 @@ export function SectionCards({ data }: SectionCardsProps) {
       </Card>
       <Card className="@container/card bg-gradient-to-t from-primary/5 to-card shadow-xs">
         <CardHeader>
-          <CardDescription>Annual Revenue</CardDescription>
+          <CardDescription>Gross Revenue</CardDescription>
           <CardTitle className="text-2xl font-semibold tabular-nums @[250px]/card:text-3xl">
             {data ? formatCurrency(data.businessMetrics.annualRevenue) : "$2,470,115"}
           </CardTitle>
@@ -77,7 +77,7 @@ export function SectionCards({ data }: SectionCardsProps) {
         </CardHeader>
         <CardFooter className="flex-col items-start gap-1.5 text-sm">
           <div className="line-clamp-1 flex gap-2 font-medium">
-            Total revenue <IconBuilding className="size-4" />
+            Two locations <IconBuilding className="size-4" />
           </div>
           <div className="text-muted-foreground">30-month track record</div>
         </CardFooter>

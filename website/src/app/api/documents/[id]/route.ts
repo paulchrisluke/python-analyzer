@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { DocumentStorage, loadCategories } from '@/lib/document-storage-server';
+import { DocumentStorage } from '@/lib/document-storage-blob';
 import { auth } from '@/auth';
 
 // GET /api/documents/[id] - Get a specific document
@@ -116,7 +116,7 @@ export async function PUT(
     // Validate category against allowed categories
     if (category !== undefined) {
       const normalizedCategory = category.trim();
-      const allowedCategories = loadCategories();
+      const allowedCategories = DocumentStorage.getDefaultCategories();
       const categoryExists = allowedCategories.some(cat => cat.name === normalizedCategory);
       
       if (!categoryExists) {
@@ -162,26 +162,23 @@ export async function PUT(
       );
     }
 
-    const updatedDocument = await DocumentStorage.update(id, {
-      name,
-      category,
-      status,
-      expected,
-      notes,
-      visibility,
-      due_date
-    });
-
-    if (!updatedDocument) {
+    // For blob-only storage, we can't easily update metadata
+    // The metadata is derived from the blob storage itself
+    // For now, we'll return the existing document
+    const existingDocument = await DocumentStorage.findById(id);
+    
+    if (!existingDocument) {
       return NextResponse.json(
-        { success: false, error: 'Document not found or failed to update' },
+        { success: false, error: 'Document not found' },
         { status: 404 }
       );
     }
 
+    // Return the existing document (metadata updates not supported in blob-only mode)
     return NextResponse.json({
       success: true,
-      data: updatedDocument
+      data: existingDocument,
+      message: 'Document metadata updates not supported in blob-only storage mode'
     });
   } catch (error) {
     console.error('Error updating document:', error);

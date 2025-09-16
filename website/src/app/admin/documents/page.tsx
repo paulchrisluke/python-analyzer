@@ -1,19 +1,53 @@
+"use client"
+
+import { useEffect, useState } from "react"
 import { AppSidebar } from '@/components/app-sidebar'
 import { SiteHeader } from '@/components/site-header'
 import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar'
-import { DocumentDashboard } from '@/components/admin/document-dashboard'
-import { requireAdmin } from '@/lib/auth-server'
-import { unstable_noStore } from 'next/cache'
+import { FolderView } from '@/components/documents'
+import { ExpectedDocumentsStatus } from '@/components/documents/ExpectedDocumentsStatus'
+import { Document } from '@/types/document'
+import { Phase } from '@/lib/document-utils'
 
-unstable_noStore()
+export default function DocumentsPage() {
+  const [documents, setDocuments] = useState<Document[]>([])
+  const [loading, setLoading] = useState(true)
 
-// Disable caching for sensitive admin data
-export const dynamic = 'force-dynamic'
-export const revalidate = 0
+  useEffect(() => {
+    // Fetch documents from API
+    fetch('/api/documents')
+      .then(res => res.json())
+      .then(data => {
+        if (data.success) {
+          setDocuments(data.data || [])
+        }
+      })
+      .catch(error => {
+        console.error('Error fetching documents:', error)
+      })
+      .finally(() => {
+        setLoading(false)
+      })
+  }, [])
 
-export default async function DocumentsPage() {
-  // Enforce admin authentication on the server before loading sensitive data
-  const user = await requireAdmin()
+  const handleAccessRequest = (folderId: string) => {
+    console.log('Access request for folder:', folderId)
+    // TODO: Implement access request handling
+  }
+
+  if (loading) {
+    return (
+      <SidebarProvider>
+        <AppSidebar />
+        <SidebarInset>
+          <SiteHeader title="Document Management" />
+          <div className="flex flex-1 flex-col items-center justify-center">
+            <div className="text-muted-foreground">Loading documents...</div>
+          </div>
+        </SidebarInset>
+      </SidebarProvider>
+    )
+  }
 
   return (
     <SidebarProvider>
@@ -23,12 +57,28 @@ export default async function DocumentsPage() {
 
         {/* Main Content */}
         <div className="flex flex-1 flex-col">
-          <div className="@container/main flex flex-1 flex-col gap-2">
-            <div className="flex flex-col gap-4 py-4 md:gap-6 md:py-6">
-              <div className="px-4 lg:px-6">
-                <DocumentDashboard />
+          <div className="@container/main flex flex-1 flex-col">
+            {/* Expected Documents Status */}
+            <div className="p-4 border-b bg-gray-50">
+              <h2 className="text-lg font-semibold mb-4">Document Completion Status</h2>
+              <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4">
+                {(['p1', 'p2a', 'p2b', 'p3a', 'p3b', 'p4', 'p5'] as Phase[]).map(phase => (
+                  <ExpectedDocumentsStatus
+                    key={phase}
+                    documents={documents}
+                    phase={phase}
+                    userRole="admin"
+                  />
+                ))}
               </div>
             </div>
+            
+            {/* Document Library */}
+            <FolderView 
+              documents={documents} 
+              userRole="admin"
+              onAccessRequest={handleAccessRequest}
+            />
           </div>
         </div>
       </SidebarInset>
