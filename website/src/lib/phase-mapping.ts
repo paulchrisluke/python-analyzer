@@ -16,56 +16,56 @@ export const PHASE_MAPPING: Record<string, PhaseConfig> = {
     name: 'Initial Interest',
     description: 'Company overview, practice stats, basic financials',
     access: ['buyer', 'admin'],
-    blobAccess: 'private',
+    blobAccess: 'public',
     securityLevel: 'medium'
   },
   p2a: {
     name: 'Pre-Qualification', 
     description: 'High-level financial summaries, staff overview',
     access: ['buyer', 'admin'],
-    blobAccess: 'private',
+    blobAccess: 'public',
     securityLevel: 'medium'
   },
   p2b: {
     name: 'Post-NDA',
     description: 'Detailed financials, lease summaries, ownership docs',
     access: ['buyer', 'admin'],
-    blobAccess: 'private',
+    blobAccess: 'public',
     securityLevel: 'high'
   },
   p3a: {
     name: 'Due Diligence Start',
     description: 'Full financials, contracts, licenses',
     access: ['buyer', 'admin'],
-    blobAccess: 'private',
+    blobAccess: 'public',
     securityLevel: 'high'
   },
   p3b: {
     name: 'Advanced Due Diligence',
     description: 'Staff contracts, patient demographics, equipment',
     access: ['buyer', 'admin'],
-    blobAccess: 'private',
+    blobAccess: 'public',
     securityLevel: 'critical'
   },
   p4: {
     name: 'Negotiation',
     description: 'Draft agreements, transition plans',
     access: ['buyer', 'admin'],
-    blobAccess: 'private',
+    blobAccess: 'public',
     securityLevel: 'critical'
   },
   p5: {
     name: 'Closing',
     description: 'Final agreements, closing docs',
     access: ['buyer', 'admin'],
-    blobAccess: 'private',
+    blobAccess: 'public',
     securityLevel: 'critical'
   },
   legal: {
     name: 'Legal Review',
     description: 'All legal documents, contracts, compliance',
     access: ['lawyer', 'admin'],
-    blobAccess: 'private',
+    blobAccess: 'public',
     securityLevel: 'critical'
   }
 };
@@ -91,7 +91,9 @@ export function getPhaseVisibility(phase: string): string[] {
  * Private access is handled through authentication and authorization logic
  */
 export function getPhaseBlobAccess(phase: string): 'public' {
-  // Vercel Blob only supports public access
+  const config = getPhaseConfig(phase);
+  // Vercel Blob only supports public access, so we always return 'public'
+  // The blobAccess field in config is kept for future compatibility
   // Private access is handled through authentication and authorization
   return 'public';
 }

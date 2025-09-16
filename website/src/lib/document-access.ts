@@ -5,54 +5,48 @@
 import { Document } from '@/types/document';
 
 /**
- * Generate a signed URL for document access
+ * Download a document via server-side proxy (no direct URL exposure)
  */
-export async function getDocumentSignedUrl(documentId: string): Promise<string | null> {
+export async function downloadDocument(doc: Document): Promise<boolean> {
   try {
-    const response = await fetch(`/api/documents/${encodeURIComponent(documentId)}/signed-url`, {
+    const response = await fetch(`/api/documents/${doc.id}/download`, {
       method: 'GET',
       credentials: 'include', // Include cookies for authentication
     });
 
     if (!response.ok) {
-      console.error('Failed to get signed URL:', response.status, response.statusText);
-      return null;
-    }
-
-    const data = await response.json();
-    if (data.success && data.data?.signedUrl) {
-      return data.data.signedUrl;
-    }
-
-    return null;
-  } catch (error) {
-    console.error('Error getting signed URL:', error);
-    return null;
-  }
-}
-
-/**
- * Download a document using signed URL
- */
-export async function downloadDocument(doc: Document): Promise<boolean> {
-  try {
-    const signedUrl = await getDocumentSignedUrl(doc.id);
-    if (!signedUrl) {
-      console.error('Failed to get signed URL for document:', doc.id);
+      console.error('Failed to download document:', response.status, response.statusText);
       return false;
     }
 
-    // Create a temporary link and trigger download
-    const link = globalThis.document.createElement('a');
-    link.href = signedUrl;
-    link.download = doc.name || doc.sanitized_name || 'document';
+    // Get the filename from the response headers or use document name
+    const contentDisposition = response.headers.get('content-disposition');
+    let filename = doc.name || doc.sanitized_name || 'document';
+    
+    if (contentDisposition) {
+      const filenameMatch = contentDisposition.match(/filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/);
+      if (filenameMatch && filenameMatch[1]) {
+        filename = filenameMatch[1].replace(/['"]/g, '');
+      }
+    }
+
+    // Create blob from response and trigger download
+    const blob = await response.blob();
+    const url = window.URL.createObjectURL(blob);
+    
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = filename;
     link.target = '_blank';
     link.rel = 'noopener noreferrer';
     
     // Append to body, click, and remove
-    globalThis.document.body.appendChild(link);
+    document.body.appendChild(link);
     link.click();
-    globalThis.document.body.removeChild(link);
+    document.body.removeChild(link);
+    
+    // Clean up the object URL
+    window.URL.revokeObjectURL(url);
 
     return true;
   } catch (error) {
@@ -62,18 +56,13 @@ export async function downloadDocument(doc: Document): Promise<boolean> {
 }
 
 /**
- * Open a document in a new tab using signed URL
+ * Open a document in a new tab via server-side proxy
  */
 export async function viewDocument(doc: Document): Promise<boolean> {
   try {
-    const signedUrl = await getDocumentSignedUrl(doc.id);
-    if (!signedUrl) {
-      console.error('Failed to get signed URL for document:', doc.id);
-      return false;
-    }
-
-    // Open in new tab
-    window.open(signedUrl, '_blank', 'noopener,noreferrer');
+    // Open the download endpoint in a new tab - the server will handle streaming
+    const downloadUrl = `/api/documents/${doc.id}/download`;
+    window.open(downloadUrl, '_blank', 'noopener,noreferrer');
     return true;
   } catch (error) {
     console.error('Error viewing document:', error);
@@ -86,7 +75,7 @@ export async function viewDocument(doc: Document): Promise<boolean> {
  */
 export async function canAccessDocument(documentId: string): Promise<boolean> {
   try {
-    const response = await fetch(`/api/documents/${encodeURIComponent(documentId)}`, {
+    const response = await fetch(`/api/documents/${documentId}`, {
       method: 'GET',
       credentials: 'include',
     });
@@ -103,7 +92,7 @@ export async function canAccessDocument(documentId: string): Promise<boolean> {
  */
 export async function getDocumentWithAccess(documentId: string): Promise<Document | null> {
   try {
-    const response = await fetch(`/api/documents/${encodeURIComponent(documentId)}`, {
+    const response = await fetch(`/api/documents/${documentId}`, {
       method: 'GET',
       credentials: 'include',
     });

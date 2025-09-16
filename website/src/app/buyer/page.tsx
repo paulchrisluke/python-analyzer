@@ -6,7 +6,7 @@ import { BuyerLocationInformation } from "@/components/buyer-location-informatio
 import { InvestmentHighlights } from "@/components/investment-highlights"
 import { BusinessDetails } from "@/components/business-details"
 import { YearlyRevenueChart } from "@/components/yearly-revenue-chart"
-import { DueDiligenceDocuments } from "@/components/due-diligence-documents"
+import { PublicDocuments } from "@/components/documents"
 import { SiteHeader } from "@/components/site-header"
 import { SiteFooter } from "@/components/site-footer"
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar"
@@ -69,7 +69,7 @@ function BuyerDashboardContent() {
 
               {/* Due Diligence Documents */}
               <div className="px-4 lg:px-6">
-                <DueDiligenceDocuments />
+                <PublicDocuments />
               </div>
             </div>
           </div>

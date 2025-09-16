@@ -126,21 +126,23 @@ export function getDocumentTypeLabel(doc: Document): string {
 }
 
 export function getDocumentDisplayName(doc: Document): string {
-  const filename = doc.id
+  // Use safer filename source with fallback chain
+  const filename = doc.name || doc.sanitized_name || doc.id
   
-  // Remove file extension first
-  const nameWithoutExt = filename.replace(/\.[^/.]+$/, '')
-  const extension = filename.split('.').pop()
+  // Detect extension via regex match and only append when present
+  const extMatch = filename.match(/\.([^.\/]+)$/)
+  const extension = extMatch ? extMatch[1] : ''
+  const nameWithoutExt = extMatch ? filename.slice(0, extMatch.index) : filename
   
-  // Remove phase prefixes like pa_financials_balance_sheet_ or pb_equipment_general_--
+  // Remove phase prefixes with broader patterns covering pa/pb, p1-p5 and variants
   let displayName = nameWithoutExt
-    .replace(/^p[ab]_[a-z_]+_--_/, '') // Remove pb_equipment_general_--_
-    .replace(/^p[ab]_[a-z_]+_/, '') // Remove pa_financials_balance_sheet_ etc
+    .replace(/^p(?:(?:\d+[a-z]?)|[a-z]+)_[a-z_]+_--_/, '') // Remove p3b_equipment_general_--_ etc
+    .replace(/^p(?:(?:\d+[a-z]?)|[a-z]+)_[a-z_]+_/, '') // Remove pa_financials_balance_sheet_ etc
     .replace(/^\d{4}(-\d{2}-\d{2}|-Q[1-4])_/, '') // Remove date prefix
     .replace(/_\d{4}-\d{2}-\d{2}_to_\d{4}-\d{2}-\d{2}_/g, '_') // Remove date ranges
     .replace(/_\d{4}-\d{2}-\d{2}_/g, '_') // Remove single dates
     .replace(/_\d{4}_/g, '_') // Remove years
-    .replace(/\d+/g, '') // Remove all remaining numbers
+    // Note: Removed global .replace(/\d+/g, '') to avoid indiscriminate digit stripping
   
   // Split into parts and remove duplicates (case insensitive)
   const parts = displayName.split('_').filter(part => part.length > 0)
@@ -166,7 +168,8 @@ export function getDocumentDisplayName(doc: Document): string {
   
   displayName = uniqueParts.join('_')
   
-  return displayName + '.' + extension
+  // Only append extension if it was detected
+  return extension ? `${displayName}.${extension}` : displayName
 }
 
 export function getCategoryColor(category: string): string {

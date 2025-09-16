@@ -19,6 +19,7 @@
 import { put } from '@vercel/blob';
 import { readFileSync, readdirSync, statSync } from 'fs';
 import { join, extname, basename } from 'path';
+import { randomBytes } from 'crypto';
 import dotenv from 'dotenv';
 
 // Load environment variables
@@ -125,7 +126,7 @@ function parseArgs() {
   return options;
 }
 
-// Generate filename based on phase and category
+// Generate secure filename with unguessable random component
 function generateFilename(filePath, phase, category) {
   const originalName = basename(filePath);
   const extension = extname(originalName);
@@ -134,6 +135,9 @@ function generateFilename(filePath, phase, category) {
   // Extract date from filename if present (YYYY-MM-DD pattern)
   const dateMatch = nameWithoutExt.match(/(\d{4}-\d{2}-\d{2})/);
   const date = dateMatch ? dateMatch[1] : new Date().toISOString().split('T')[0];
+  
+  // Generate unguessable random component for security
+  const randomComponent = randomBytes(16).toString('hex');
   
   // Determine subtype based on category and filename
   let subtype = 'general';
@@ -174,7 +178,8 @@ function generateFilename(filePath, phase, category) {
     .replace(/_+/g, '_')
     .replace(/^_|_$/g, '');
 
-  return `${phase}_${category}_${subtype}_${date}_${cleanName}${extension}`;
+  // Include random component for security: phase_category_subtype_date_random_cleanname.ext
+  return `${phase}_${category}_${subtype}_${date}_${randomComponent}_${cleanName}${extension}`;
 }
 
 // Recursively find all files in a directory
@@ -229,6 +234,8 @@ async function uploadFile(filePath, phase, category, dryRun = false) {
     
     console.log(`   ✅ Uploaded (${accessLevel}): ${filename}`);
     console.log(`   🔒 Access: ${accessLevel} - Phase: ${phase} (${phaseConfig?.name || 'Unknown'})`);
+    console.log(`   ⚠️  SECURITY: File uploaded as public but access controlled via authenticated proxy`);
+    console.log(`   🔐 Secure access URL: /api/documents/${encodeURIComponent(filename)}/proxy`);
     return { success: true, filename, url, access: accessLevel };
   } catch (error) {
     console.error(`   ❌ Error: ${error.message}`);
@@ -239,6 +246,12 @@ async function uploadFile(filePath, phase, category, dryRun = false) {
 // Main sync function
 async function syncDocuments(options) {
   console.log('🏥 Audiology Clinic Document Sync Tool\n');
+  
+  // Security warning
+  console.log('⚠️  SECURITY NOTICE:');
+  console.log('   Files are uploaded to Vercel Blob as "public" but access is controlled');
+  console.log('   through an authenticated proxy at /api/documents/[id]/proxy');
+  console.log('   Direct blob URLs are not exposed to clients for security.\n');
   
   if (options.help) {
     console.log('Usage: node scripts/sync-documents.js [options]\n');

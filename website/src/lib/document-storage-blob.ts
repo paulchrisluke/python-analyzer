@@ -14,13 +14,21 @@ export class DocumentStorage {
     userRole?: string;
   }): Promise<Document[]> {
     try {
-      const { blobs } = await list({
-        limit: 1000
-      });
-
       const documents: Document[] = [];
+      let cursor: string | undefined;
+      let hasMore = true;
 
-      for (const blob of blobs) {
+      // Paginate through all blobs using cursor-based pagination
+      while (hasMore) {
+        const response = await list({
+          limit: 1000,
+          cursor: cursor
+        });
+
+        const { blobs, hasMore: responseHasMore, cursor: nextCursor } = response;
+        
+        // Process this batch of blobs
+        for (const blob of blobs) {
         // Parse metadata from blob filename
         const filename = blob.pathname;
         
@@ -28,24 +36,32 @@ export class DocumentStorage {
         let originalName: string;
         let phase: string = 'legacy'; // Default for old format
         
-        // Check if it's in the new phase format: p{phase}_{category}_{subtype}_{date}_{originalname}
-        const phaseMatch = filename.match(/^(p\d+[ab]?|legal)_(.+?)_(.+?)_(.+?)_(.+)$/);
-        if (phaseMatch) {
-          phase = phaseMatch[1];
-          category = phaseMatch[2];
-          originalName = phaseMatch[5]; // Last part is the original filename
-        } else if (filename.startsWith('documents/')) {
-          // Check if it's in the new format: documents/category/filename
-          const pathParts = filename.split('/');
-          if (pathParts.length < 3) continue;
-          category = pathParts[1];
-          originalName = pathParts[2];
+        // Check if it's in the new secure phase format: p{phase}_{category}_{subtype}_{date}_{random}_{originalname}
+        const securePhaseMatch = filename.match(/^(p\d+[ab]?|legal)_(.+?)_(.+?)_(.+?)_([a-f0-9]{32})_(.+)$/);
+        if (securePhaseMatch) {
+          phase = securePhaseMatch[1];
+          category = securePhaseMatch[2];
+          originalName = securePhaseMatch[6]; // Last part is the original filename
         } else {
-          // Check if it's in the old format: timestamp_category_originalname
-          const nameMatch = filename.match(/^\d+_(.+?)_(.+)$/);
-          if (!nameMatch) continue; // Skip if doesn't match expected pattern
-          category = nameMatch[1];
-          originalName = nameMatch[2];
+          // Check if it's in the old phase format: p{phase}_{category}_{subtype}_{date}_{originalname}
+          const phaseMatch = filename.match(/^(p\d+[ab]?|legal)_(.+?)_(.+?)_(.+?)_(.+)$/);
+          if (phaseMatch) {
+            phase = phaseMatch[1];
+            category = phaseMatch[2];
+            originalName = phaseMatch[5]; // Last part is the original filename
+          } else if (filename.startsWith('documents/')) {
+            // Check if it's in the new format: documents/category/filename
+            const pathParts = filename.split('/');
+            if (pathParts.length < 3) continue;
+            category = pathParts[1];
+            originalName = pathParts[2];
+          } else {
+            // Check if it's in the old format: timestamp_category_originalname
+            const nameMatch = filename.match(/^\d+_(.+?)_(.+)$/);
+            if (!nameMatch) continue; // Skip if doesn't match expected pattern
+            category = nameMatch[1];
+            originalName = nameMatch[2];
+          }
         }
         
         // Determine file type from extension
@@ -61,7 +77,7 @@ export class DocumentStorage {
           category: category,
           sanitized_name: filename,
           path_segment: category,
-          blob_url: blob.url,
+          blob_url: '', // Don't expose direct blob URL for security
           file_type: fileExtension,
           file_size: blob.size,
           file_size_display: this.formatFileSize(blob.size),
@@ -77,6 +93,11 @@ export class DocumentStorage {
         };
 
         documents.push(document);
+        }
+
+        // Update pagination state
+        hasMore = responseHasMore;
+        cursor = nextCursor;
       }
 
       // Apply filters
@@ -140,27 +161,23 @@ export class DocumentStorage {
     }
   }
 
-  // Generate URL for document access
-  // Note: Vercel Blob doesn't support signed URLs with expiration, so we return the blob URL
-  // with proper authentication checks at the API level
+  // Generate secure URL for document access via authenticated proxy
+  // This ensures documents are only accessible through proper authentication
   static async generateSignedUrl(documentId: string, expiresInSeconds?: number): Promise<string | null> {
     try {
-      // Warn if expiration is requested since Vercel Blob doesn't support it
-      if (expiresInSeconds !== undefined) {
-        console.warn('Vercel Blob URLs do not support expiration. The expiresInSeconds parameter is ignored.');
-      }
-
-      // Get blob metadata directly without scanning all documents
+      // Get blob metadata to verify file exists
       const blobMetadata = await head(documentId);
       if (!blobMetadata) {
         console.error('Document not found:', documentId);
         return null;
       }
 
-      // Return the blob URL - access control is handled at the API level
-      return blobMetadata.url;
+      // Return the secure proxy URL instead of direct blob URL
+      // The proxy handles authentication and authorization
+      const baseUrl = process.env.NEXTAUTH_URL || 'http://localhost:3000';
+      return `${baseUrl}/api/documents/${encodeURIComponent(documentId)}/proxy`;
     } catch (error) {
-      console.error('Error generating document URL:', error);
+      console.error('Error generating secure document URL:', error);
       return null;
     }
   }

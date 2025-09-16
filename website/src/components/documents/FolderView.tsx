@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import { Document } from "@/types/document"
-import { UserRole, Phase, organizeDocumentsByPhase, getPhaseAccess, getPhaseLabel, getDocumentTypeLabel, getFileIconType, extractPeriod } from "@/lib/document-utils"
+import { UserRole, Phase, organizeDocumentsByPhase, getPhaseAccess, getPhaseLabel, getDocumentTypeLabel, getFileIconType, extractPeriod, getDocumentDisplayName } from "@/lib/document-utils"
 import { FolderGrid } from "./FolderGrid"
 import { BreadcrumbNavigation } from "./BreadcrumbNavigation"
 import { AccessRequestModal } from "./AccessRequestModal"
@@ -69,16 +69,30 @@ export function FolderView({ documents, userRole, onAccessRequest }: FolderViewP
   }
 
   const handleBulkDownload = async () => {
-    // Get all documents from all year sections
-    const allDocuments = allItems.flatMap(yearSection => 
-      yearSection.folders
-        .filter(item => item.type === 'document' && selectedItems.has(item.id))
-        .map(item => item.document)
-        .filter(Boolean)
-    ) as Document[]
+    let documentsToDownload: Document[] = []
+    
+    if (selectedFolder) {
+      // If we're in a specific folder, get documents from that folder
+      const folderDocuments = getDocumentsForFolder(organizedDocuments, selectedFolder)
+      
+      // Filter for selected documents if any, otherwise download all documents in the folder
+      if (selectedItems.size > 0) {
+        documentsToDownload = folderDocuments.filter(doc => selectedItems.has(doc.id))
+      } else {
+        documentsToDownload = folderDocuments
+      }
+    } else {
+      // If we're at the top level, get selected documents from all year sections
+      documentsToDownload = allItems.flatMap(yearSection => 
+        yearSection.folders
+          .filter(item => item.type === 'document' && selectedItems.has(item.id))
+          .map(item => item.document)
+          .filter(Boolean)
+      ) as Document[]
+    }
     
     // Download each document sequentially to avoid overwhelming the server
-    for (const document of allDocuments) {
+    for (const document of documentsToDownload) {
       const success = await downloadDocument(document);
       if (!success) {
         console.error('Failed to download document:', document.id);
@@ -251,15 +265,21 @@ function getAllItemsByYear(
       const yearData = organized[year]
       const folders = Object.keys(yearData)
         .sort()
-        .map(documentType => ({
-          id: `type-${year}-${documentType}`,
-          name: documentType,
-          type: 'folder' as const,
-          icon: Folder,
-          itemCount: yearData[documentType].length,
-          year,
-          documentType
-        }))
+        .map(documentType => {
+          const documents = yearData[documentType]
+          const isLocked = !documents.some(doc => isDocumentVisibleToUser(doc, userRole))
+          
+          return {
+            id: `type-${year}-${documentType}`,
+            name: documentType,
+            type: 'folder' as const,
+            icon: Folder,
+            itemCount: documents.length,
+            isLocked,
+            year,
+            documentType
+          }
+        })
       
       return {
         year,
@@ -272,13 +292,26 @@ function getAllItemsByYear(
 // Helper functions
 function extractYear(doc: Document): string {
   const filename = doc.id.toLowerCase()
-  if (filename.includes("2025")) return "2025"
-  if (filename.includes("2024")) return "2024"
-  if (filename.includes("2023")) return "2023"
-  if (filename.includes("2022")) return "2022"
-  if (filename.includes("2021")) return "2021"
-  if (filename.includes("2019")) return "2019"
+  
+  // Use regex to find four-digit year (19xx or 20xx)
+  const yearMatch = filename.match(/\b(19|20)\d{2}\b/)
+  if (yearMatch) {
+    return yearMatch[0]
+  }
+  
+  // Fallback to created_at date
   return new Date(doc.created_at).getFullYear().toString()
+}
+
+// Helper function to check if a document is visible to a user role
+function isDocumentVisibleToUser(doc: Document, userRole: UserRole): boolean {
+  // If no visibility restrictions, document is visible
+  if (!doc.visibility || doc.visibility.length === 0) {
+    return true
+  }
+  
+  // Check if user role has access to this document
+  return doc.visibility.includes(userRole)
 }
 
 
@@ -293,39 +326,3 @@ function getDocumentsForFolder(
   return organized[folder.year]?.[folder.documentType] || []
 }
 
-function getDocumentDisplayName(doc: Document): string {
-  const filename = doc.id
-  const nameWithoutExt = filename.replace(/\.[^/.]+$/, '')
-  const extension = filename.split('.').pop()
-  
-  let displayName = nameWithoutExt
-    .replace(/^p[ab]_[a-z_]+_--_/, '')
-    .replace(/^p[ab]_[a-z_]+_/, '')
-    .replace(/^\d{4}(-\d{2}-\d{2}|-Q[1-4])_/, '')
-    .replace(/_\d{4}-\d{2}-\d{2}_to_\d{4}-\d{2}-\d{2}_/g, '_')
-    .replace(/_\d{4}-\d{2}-\d{2}_/g, '_')
-    .replace(/_\d{4}_/g, '_')
-    .replace(/\d+/g, '')
-  
-  const parts = displayName.split('_').filter(part => part.length > 0)
-  const uniqueParts: string[] = []
-  const seen = new Set<string>()
-  
-  for (const part of parts) {
-    const lowerPart = part.toLowerCase()
-    if (!seen.has(lowerPart)) {
-      const isDuplicate = uniqueParts.some(existingPart => {
-        const existingLower = existingPart.toLowerCase()
-        return existingLower.includes(lowerPart) || lowerPart.includes(existingLower)
-      })
-      
-      if (!isDuplicate) {
-        uniqueParts.push(part)
-        seen.add(lowerPart)
-      }
-    }
-  }
-  
-  displayName = uniqueParts.join('_')
-  return displayName + '.' + extension
-}

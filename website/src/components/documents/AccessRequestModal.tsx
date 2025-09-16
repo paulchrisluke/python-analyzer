@@ -9,15 +9,24 @@ import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Lock, Mail, User, Building } from "lucide-react"
 
+interface FormData {
+  name: string
+  email: string
+  company: string
+  role: string
+  reason: string
+  phone: string
+}
+
 interface AccessRequestModalProps {
   isOpen: boolean
   onClose: () => void
-  onRequestAccess: () => void
+  onRequestAccess: (payload: { folderName: string; formData: FormData }) => Promise<void> | void
   folderName: string
 }
 
 export function AccessRequestModal({ isOpen, onClose, onRequestAccess, folderName }: AccessRequestModalProps) {
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<FormData>({
     name: '',
     email: '',
     company: '',
@@ -25,15 +34,35 @@ export function AccessRequestModal({ isOpen, onClose, onRequestAccess, folderNam
     reason: '',
     phone: ''
   })
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    // TODO: Implement access request submission
-    console.log('Access request submitted:', { folderName, ...formData })
-    onRequestAccess()
+    setIsSubmitting(true)
+    setError(null)
+    
+    try {
+      const payload = { folderName, formData }
+      await onRequestAccess(payload)
+      // Reset form and close modal on success
+      setFormData({
+        name: '',
+        email: '',
+        company: '',
+        role: '',
+        reason: '',
+        phone: ''
+      })
+      onClose()
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to submit access request')
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
-  const handleInputChange = (field: string, value: string) => {
+  const handleInputChange = <K extends keyof FormData>(field: K, value: FormData[K]) => {
     setFormData(prev => ({ ...prev, [field]: value }))
   }
 
@@ -51,6 +80,11 @@ export function AccessRequestModal({ isOpen, onClose, onRequestAccess, folderNam
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-4">
+          {error && (
+            <div className="p-3 text-sm text-red-600 bg-red-50 border border-red-200 rounded-md">
+              {error}
+            </div>
+          )}
           <div className="space-y-2">
             <Label htmlFor="name">Full Name *</Label>
             <div className="relative">
@@ -139,8 +173,8 @@ export function AccessRequestModal({ isOpen, onClose, onRequestAccess, folderNam
             <Button type="button" variant="outline" onClick={onClose}>
               Cancel
             </Button>
-            <Button type="submit">
-              Request Access
+            <Button type="submit" disabled={isSubmitting}>
+              {isSubmitting ? 'Submitting...' : 'Request Access'}
             </Button>
           </DialogFooter>
         </form>

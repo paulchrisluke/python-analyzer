@@ -2,15 +2,26 @@ import { NextRequest, NextResponse } from 'next/server';
 import { DocumentStorage } from '@/lib/document-storage-blob';
 import { auth } from '@/auth';
 
-// GET /api/documents/[id] - Get a specific document
+// GET /api/documents/[...id] - Get a specific document
+// Uses catch-all route to support IDs with '/' characters
 export async function GET(
   request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: Promise<{ id: string[] }> }
 ) {
   try {
     const { id } = await params;
     
-    if (!id) {
+    if (!id || id.length === 0) {
+      return NextResponse.json(
+        { success: false, error: 'Document ID is required' },
+        { status: 400 }
+      );
+    }
+
+    // Reconstruct the original ID by joining the array and decoding
+    const documentId = decodeURIComponent(id.join('/'));
+    
+    if (!documentId) {
       return NextResponse.json(
         { success: false, error: 'Document ID is required' },
         { status: 400 }
@@ -20,14 +31,14 @@ export async function GET(
     // Authentication check
     const session = await auth();
     if (!session) {
-      console.warn(`Unauthorized access attempt to document ${id} from ${request.headers.get('x-forwarded-for') || 'unknown IP'}`);
+      console.warn(`Unauthorized access attempt to document ${documentId} from ${request.headers.get('x-forwarded-for') || 'unknown IP'}`);
       return NextResponse.json(
         { success: false, error: 'Unauthorized' },
         { status: 401 }
       );
     }
 
-    const document = await DocumentStorage.findById(id);
+    const document = await DocumentStorage.findById(documentId);
     
     if (!document) {
       return NextResponse.json(
@@ -41,7 +52,7 @@ export async function GET(
     const hasAccess = userRole === 'admin' || (userRole && document.visibility.includes(userRole));
     
     if (!hasAccess) {
-      console.warn(`Unauthorized access attempt to document ${id} by user ${session.user?.email} with role ${userRole}`);
+      console.warn(`Unauthorized access attempt to document ${documentId} by user ${session.user?.email} with role ${userRole}`);
       return NextResponse.json(
         { success: false, error: 'Forbidden' },
         { status: 403 }
@@ -61,15 +72,26 @@ export async function GET(
   }
 }
 
-// PUT /api/documents/[id] - Update a specific document
+// PUT /api/documents/[...id] - Update a specific document
+// Uses catch-all route to support IDs with '/' characters
 export async function PUT(
   request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: Promise<{ id: string[] }> }
 ) {
   try {
     const { id } = await params;
     
-    if (!id) {
+    if (!id || id.length === 0) {
+      return NextResponse.json(
+        { success: false, error: 'Document ID is required' },
+        { status: 400 }
+      );
+    }
+
+    // Reconstruct the original ID by joining the array and decoding
+    const documentId = decodeURIComponent(id.join('/'));
+    
+    if (!documentId) {
       return NextResponse.json(
         { success: false, error: 'Document ID is required' },
         { status: 400 }
@@ -79,7 +101,7 @@ export async function PUT(
     // Authentication check
     const session = await auth();
     if (!session) {
-      console.warn(`Unauthorized update attempt to document ${id} from ${request.headers.get('x-forwarded-for') || 'unknown IP'}`);
+      console.warn(`Unauthorized update attempt to document ${documentId} from ${request.headers.get('x-forwarded-for') || 'unknown IP'}`);
       return NextResponse.json(
         { success: false, error: 'Unauthorized' },
         { status: 401 }
@@ -88,7 +110,7 @@ export async function PUT(
 
     // Authorization check - only admins can update documents
     if (session.user?.role !== 'admin') {
-      console.warn(`Unauthorized update attempt to document ${id} by user ${session.user?.email} with role ${session.user?.role}`);
+      console.warn(`Unauthorized update attempt to document ${documentId} by user ${session.user?.email} with role ${session.user?.role}`);
       return NextResponse.json(
         { success: false, error: 'Forbidden' },
         { status: 403 }
@@ -165,7 +187,7 @@ export async function PUT(
     // For blob-only storage, we can't easily update metadata
     // The metadata is derived from the blob storage itself
     // For now, we'll return the existing document
-    const existingDocument = await DocumentStorage.findById(id);
+    const existingDocument = await DocumentStorage.findById(documentId);
     
     if (!existingDocument) {
       return NextResponse.json(
@@ -174,11 +196,15 @@ export async function PUT(
       );
     }
 
-    // Return the existing document (metadata updates not supported in blob-only mode)
+    // Document metadata updates not supported in blob-only storage mode
     return NextResponse.json({
-      success: true,
-      data: existingDocument,
-      message: 'Document metadata updates not supported in blob-only storage mode'
+      success: false,
+      error: 'Document metadata updates not supported in blob-only storage mode'
+    }, { 
+      status: 501,
+      headers: {
+        'Allow': 'GET, DELETE'
+      }
     });
   } catch (error) {
     console.error('Error updating document:', error);
@@ -189,15 +215,26 @@ export async function PUT(
   }
 }
 
-// DELETE /api/documents/[id] - Delete a specific document
+// DELETE /api/documents/[...id] - Delete a specific document
+// Uses catch-all route to support IDs with '/' characters
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: Promise<{ id: string[] }> }
 ) {
   try {
     const { id } = await params;
     
-    if (!id) {
+    if (!id || id.length === 0) {
+      return NextResponse.json(
+        { success: false, error: 'Document ID is required' },
+        { status: 400 }
+      );
+    }
+
+    // Reconstruct the original ID by joining the array and decoding
+    const documentId = decodeURIComponent(id.join('/'));
+    
+    if (!documentId) {
       return NextResponse.json(
         { success: false, error: 'Document ID is required' },
         { status: 400 }
@@ -207,7 +244,7 @@ export async function DELETE(
     // Authentication check
     const session = await auth();
     if (!session) {
-      console.warn(`Unauthorized delete attempt to document ${id} from ${request.headers.get('x-forwarded-for') || 'unknown IP'}`);
+      console.warn(`Unauthorized delete attempt to document ${documentId} from ${request.headers.get('x-forwarded-for') || 'unknown IP'}`);
       return NextResponse.json(
         { success: false, error: 'Unauthorized' },
         { status: 401 }
@@ -215,7 +252,7 @@ export async function DELETE(
     }
 
     // Fetch document to check ownership/authorization
-    const document = await DocumentStorage.findById(id);
+    const document = await DocumentStorage.findById(documentId);
     if (!document) {
       return NextResponse.json(
         { success: false, error: 'Document not found' },
@@ -227,15 +264,15 @@ export async function DELETE(
     const userRole = session.user?.role;
     const userId = session.user?.id;
     if (!userRole || (userRole !== 'admin' && !document.visibility.includes(userRole))) {
-      console.warn(`Unauthorized delete attempt to document ${id} by user ${session.user?.email} (ID: ${userId}) with role ${userRole}`);
+      console.warn(`Unauthorized delete attempt to document ${documentId} by user ${session.user?.email} (ID: ${userId}) with role ${userRole}`);
       return NextResponse.json(
         { success: false, error: 'Forbidden' },
         { status: 403 }
       );
     }
 
-    console.info(`Document ${id} deletion authorized for user ${session.user?.email} (ID: ${userId}) with role ${userRole}`);
-    const deleted = await DocumentStorage.delete(id);
+    console.info(`Document ${documentId} deletion authorized for user ${session.user?.email} (ID: ${userId}) with role ${userRole}`);
+    const deleted = await DocumentStorage.delete(documentId);
     
     if (!deleted) {
       return NextResponse.json(

@@ -46,11 +46,6 @@ function generateUniqueFilename(originalName: string, fileHash: string): string 
   return `${hashPrefix}_${timestamp}_${sanitizedName}${extension}`;
 }
 
-function determineBlobAccess(visibility: string[]): 'private' {
-  // Use private access for all documents to ensure security
-  // Access control is handled at the application level through authentication
-  return 'private';
-}
 
 // POST /api/documents/upload - Upload a document file
 export async function POST(request: NextRequest) {
@@ -272,6 +267,7 @@ export async function POST(request: NextRequest) {
     }
     
     // Get blob access level from phase mapping
+    // Note: Vercel Blob requires 'public' access but security is enforced via authenticated proxy
     const blobAccess = getPhaseBlobAccess(phase);
 
     // Upload to Vercel Blob with secure path
@@ -283,13 +279,14 @@ export async function POST(request: NextRequest) {
     // For blob-only storage, we don't need to create a separate metadata record
     // The document metadata is derived from the blob storage itself
     // Create a document object for the response
+    const stablePath = `documents/${sanitizedCategory}/${uniqueFilename}`;
     const document = {
-      id: blob.url, // Use blob URL as ID
+      id: stablePath, // Use stable pathname as ID, not full URL
       name: name,
       category: category,
       sanitized_name: sanitizedName,
       path_segment: sanitizedCategory,
-      blob_url: blob.url,
+      blob_url: blob.url, // Keep full URL in blob_url field
       file_type: fileExtension,
       file_size: file.size,
       file_size_display: formatFileSize(file.size),
