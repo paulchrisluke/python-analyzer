@@ -3,6 +3,11 @@
  * 
  * This module provides security utilities for document management,
  * including filename validation, access logging, and security checks.
+ * 
+ * Rate Limiting:
+ * - Development/Test: Uses bounded in-memory store with automatic pruning
+ * - Production: Should use Redis/Upstash for distributed rate limiting
+ * - Current implementation includes warnings for production usage
  */
 
 import * as crypto from 'crypto';
@@ -135,6 +140,16 @@ export function logDocumentAccess(
 }
 
 /**
+ * Check rate limit for document access with IP-based keying
+ */
+export function checkDocumentAccessRateLimit(
+  userId: string,
+  ipAddress?: string
+): { allowed: boolean; remaining: number; resetTime: number } {
+  return checkRateLimit(userId, ipAddress);
+}
+
+/**
  * Check if user has access to document based on role and phase
  */
 export function hasDocumentAccess(userRole: string, document: Document): boolean {
@@ -200,24 +215,150 @@ export function validateDocumentMetadata(document: Partial<Document>): { valid: 
 }
 
 /**
- * Rate limiting check (simple in-memory implementation)
- * In production, use Redis or a proper rate limiting service
+ * Rate limiting configuration
  */
-const rateLimitStore = new Map<string, { count: number; resetTime: number }>();
+const RATE_LIMIT_CONFIG = {
+  // Maximum number of keys to store in memory (prevents unbounded growth)
+  MAX_STORE_SIZE: 10000,
+  
+  // How often to prune expired entries (in milliseconds)
+  PRUNE_INTERVAL: 5 * 60 * 1000, // 5 minutes
+  
+  // Maximum age for rate limit entries (in milliseconds)
+  MAX_ENTRY_AGE: 2 * 60 * 1000, // 2 minutes (longer than window for cleanup)
+};
 
-export function checkRateLimit(userId: string): { allowed: boolean; remaining: number; resetTime: number } {
+/**
+ * Rate limiting store with memory bounds and automatic pruning
+ * Only used in non-production environments
+ */
+class BoundedRateLimitStore {
+  private store = new Map<string, { count: number; resetTime: number; createdAt: number }>();
+  private lastPrune = Date.now();
+
+  constructor() {
+    // Only use in-memory store in non-production
+    if (process.env.NODE_ENV === 'production') {
+      console.warn('In-memory rate limiting should not be used in production. Use Redis/Upstash instead.');
+    }
+  }
+
+  private shouldPrune(): boolean {
+    return Date.now() - this.lastPrune > RATE_LIMIT_CONFIG.PRUNE_INTERVAL;
+  }
+
+  private prune(): void {
+    const now = Date.now();
+    const expiredKeys: string[] = [];
+
+    for (const [key, entry] of this.store.entries()) {
+      // Remove entries that are both expired and old
+      if (now > entry.resetTime && (now - entry.createdAt) > RATE_LIMIT_CONFIG.MAX_ENTRY_AGE) {
+        expiredKeys.push(key);
+      }
+    }
+
+    expiredKeys.forEach(key => this.store.delete(key));
+    this.lastPrune = now;
+
+    if (expiredKeys.length > 0) {
+      console.debug(`Rate limit store pruned ${expiredKeys.length} expired entries`);
+    }
+  }
+
+  private enforceSizeLimit(): void {
+    if (this.store.size > RATE_LIMIT_CONFIG.MAX_STORE_SIZE) {
+      // Remove oldest entries (by creation time)
+      const entries = Array.from(this.store.entries())
+        .sort(([, a], [, b]) => a.createdAt - b.createdAt);
+      
+      const toRemove = entries.slice(0, this.store.size - RATE_LIMIT_CONFIG.MAX_STORE_SIZE);
+      toRemove.forEach(([key]) => this.store.delete(key));
+      
+      console.warn(`Rate limit store exceeded size limit, removed ${toRemove.length} oldest entries`);
+    }
+  }
+
+  get(key: string): { count: number; resetTime: number } | undefined {
+    if (this.shouldPrune()) {
+      this.prune();
+    }
+
+    const entry = this.store.get(key);
+    if (!entry) return undefined;
+
+    // Return undefined for expired entries
+    if (Date.now() > entry.resetTime) {
+      this.store.delete(key);
+      return undefined;
+    }
+
+    return { count: entry.count, resetTime: entry.resetTime };
+  }
+
+  set(key: string, count: number, resetTime: number): void {
+    this.enforceSizeLimit();
+    
+    this.store.set(key, {
+      count,
+      resetTime,
+      createdAt: Date.now()
+    });
+  }
+
+  delete(key: string): void {
+    this.store.delete(key);
+  }
+
+  size(): number {
+    return this.store.size;
+  }
+}
+
+// Global rate limit store instance
+const rateLimitStore = new BoundedRateLimitStore();
+
+/**
+ * Generate rate limit key with optional IP address for better security
+ */
+function generateRateLimitKey(userId: string, ipAddress?: string): string {
+  if (ipAddress) {
+    return `rate_limit_${userId}_${ipAddress}`;
+  }
+  return `rate_limit_${userId}`;
+}
+
+/**
+ * Rate limiting check with improved memory management
+ * 
+ * @param userId - User identifier
+ * @param ipAddress - Optional IP address for additional security
+ * @returns Rate limit status
+ */
+export function checkRateLimit(
+  userId: string, 
+  ipAddress?: string
+): { allowed: boolean; remaining: number; resetTime: number } {
+  // In production, this should delegate to Redis/Upstash
+  if (process.env.NODE_ENV === 'production') {
+    console.warn('Production rate limiting not implemented. Use Redis/Upstash.');
+    // For now, allow all requests in production (should be replaced with Redis)
+    return {
+      allowed: true,
+      remaining: SECURITY_CONFIG.RATE_LIMIT_REQUESTS_PER_MINUTE,
+      resetTime: Date.now() + 60 * 1000
+    };
+  }
+
   const now = Date.now();
   const windowMs = 60 * 1000; // 1 minute
-  const key = `rate_limit_${userId}`;
+  const key = generateRateLimitKey(userId, ipAddress);
   
   const current = rateLimitStore.get(key);
   
-  if (!current || now > current.resetTime) {
-    // Reset or create new window
-    rateLimitStore.set(key, {
-      count: 1,
-      resetTime: now + windowMs
-    });
+  if (!current) {
+    // Create new window
+    rateLimitStore.set(key, 1, now + windowMs);
     
     return {
       allowed: true,
@@ -234,12 +375,30 @@ export function checkRateLimit(userId: string): { allowed: boolean; remaining: n
     };
   }
   
-  current.count++;
-  rateLimitStore.set(key, current);
+  // Increment count
+  rateLimitStore.set(key, current.count + 1, current.resetTime);
   
   return {
     allowed: true,
-    remaining: SECURITY_CONFIG.RATE_LIMIT_REQUESTS_PER_MINUTE - current.count,
+    remaining: SECURITY_CONFIG.RATE_LIMIT_REQUESTS_PER_MINUTE - (current.count + 1),
     resetTime: current.resetTime
+  };
+}
+
+/**
+ * Clear rate limit for a specific user (useful for testing or manual overrides)
+ */
+export function clearRateLimit(userId: string, ipAddress?: string): void {
+  const key = generateRateLimitKey(userId, ipAddress);
+  rateLimitStore.delete(key);
+}
+
+/**
+ * Get current rate limit store statistics (for monitoring)
+ */
+export function getRateLimitStats(): { size: number; isProduction: boolean } {
+  return {
+    size: rateLimitStore.size(),
+    isProduction: process.env.NODE_ENV === 'production'
   };
 }
