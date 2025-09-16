@@ -7,6 +7,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { CheckCircle, Circle, ArrowDown } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import { useNDAUserInfo } from '@/hooks/useNDAUserInfo';
+import '@/styles/nda-prose.css';
 
 interface NDADocumentProps {
   onScrollComplete: () => void;
@@ -33,7 +34,7 @@ export function NDADocument({
         const response = await fetch('/api/nda/document');
         if (response.ok) {
           const data = await response.json();
-          let content = data.content;
+          let content = data.data?.content || data.content;
           
           // If we have user info from session storage, personalize the content further
           if (userInfo && content) {
@@ -44,7 +45,7 @@ export function NDADocument({
           }
           
           setNdaContent(content);
-          onDocumentHash(data.hash);
+          onDocumentHash(data.data?.hash || data.hash);
         } else {
           // Fallback to static content if API fails
           setNdaContent(`
@@ -211,7 +212,7 @@ Cranberry Hearing and Balance Center
           onScrollCapture={handleScroll}
         >
           <div ref={contentRef} className="p-6">
-            <div className="prose prose-sm max-w-none">
+            <div className="nda-prose">
               <ReactMarkdown>{ndaContent}</ReactMarkdown>
             </div>
             
