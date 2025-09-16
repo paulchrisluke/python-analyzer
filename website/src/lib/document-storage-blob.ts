@@ -1,4 +1,4 @@
-import { list, del } from '@vercel/blob';
+import { list, del, head } from '@vercel/blob';
 import { Document, DocumentCategory, DocumentStats, CoverageAnalysis } from '@/types/document';
 
 // Simple blob-based document storage - no local files needed!
@@ -140,23 +140,27 @@ export class DocumentStorage {
     }
   }
 
-  // Generate signed URL for document access
-  // Note: Vercel Blob doesn't have built-in signed URLs, so we'll use the blob URL
+  // Generate URL for document access
+  // Note: Vercel Blob doesn't support signed URLs with expiration, so we return the blob URL
   // with proper authentication checks at the API level
-  static async generateSignedUrl(documentId: string, expiresInSeconds: number = 900): Promise<string | null> {
+  static async generateSignedUrl(documentId: string, expiresInSeconds?: number): Promise<string | null> {
     try {
-      // Get document metadata to verify it exists
-      const document = await this.findById(documentId);
-      if (!document) {
+      // Warn if expiration is requested since Vercel Blob doesn't support it
+      if (expiresInSeconds !== undefined) {
+        console.warn('Vercel Blob URLs do not support expiration. The expiresInSeconds parameter is ignored.');
+      }
+
+      // Get blob metadata directly without scanning all documents
+      const blobMetadata = await head(documentId);
+      if (!blobMetadata) {
+        console.error('Document not found:', documentId);
         return null;
       }
 
-      // For Vercel Blob, we return the blob URL
-      // The actual access control is handled at the API level with authentication
-      // The URL will be validated when accessed through our API endpoints
-      return document.blob_url;
+      // Return the blob URL - access control is handled at the API level
+      return blobMetadata.url;
     } catch (error) {
-      console.error('Error generating signed URL:', error);
+      console.error('Error generating document URL:', error);
       return null;
     }
   }

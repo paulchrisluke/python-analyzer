@@ -34,25 +34,25 @@ export async function getDocumentSignedUrl(documentId: string): Promise<string |
 /**
  * Download a document using signed URL
  */
-export async function downloadDocument(document: Document): Promise<boolean> {
+export async function downloadDocument(doc: Document): Promise<boolean> {
   try {
-    const signedUrl = await getDocumentSignedUrl(document.id);
+    const signedUrl = await getDocumentSignedUrl(doc.id);
     if (!signedUrl) {
-      console.error('Failed to get signed URL for document:', document.id);
+      console.error('Failed to get signed URL for document:', doc.id);
       return false;
     }
 
     // Create a temporary link and trigger download
-    const link = document.createElement('a');
+    const link = globalThis.document.createElement('a');
     link.href = signedUrl;
-    link.download = document.name || document.sanitized_name || 'document';
+    link.download = doc.name || doc.sanitized_name || 'document';
     link.target = '_blank';
     link.rel = 'noopener noreferrer';
     
     // Append to body, click, and remove
-    document.body.appendChild(link);
+    globalThis.document.body.appendChild(link);
     link.click();
-    document.body.removeChild(link);
+    globalThis.document.body.removeChild(link);
 
     return true;
   } catch (error) {
@@ -64,11 +64,11 @@ export async function downloadDocument(document: Document): Promise<boolean> {
 /**
  * Open a document in a new tab using signed URL
  */
-export async function viewDocument(document: Document): Promise<boolean> {
+export async function viewDocument(doc: Document): Promise<boolean> {
   try {
-    const signedUrl = await getDocumentSignedUrl(document.id);
+    const signedUrl = await getDocumentSignedUrl(doc.id);
     if (!signedUrl) {
-      console.error('Failed to get signed URL for document:', document.id);
+      console.error('Failed to get signed URL for document:', doc.id);
       return false;
     }
 

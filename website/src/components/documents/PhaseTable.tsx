@@ -16,8 +16,6 @@ interface PhaseTableProps {
 }
 
 export function PhaseTable({ phase, documents, hasAccess }: PhaseTableProps) {
-  if (documents.length === 0) return null
-
   const handlePreview = useCallback(async (document: Document) => {
     try {
       await viewDocument(document);
@@ -33,6 +31,8 @@ export function PhaseTable({ phase, documents, hasAccess }: PhaseTableProps) {
       console.error('Error downloading document:', error);
     }
   }, []);
+
+  if (documents.length === 0) return null
 
   return (
     <div className="mb-8">

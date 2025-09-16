@@ -87,10 +87,13 @@ export function getPhaseVisibility(phase: string): string[] {
 
 /**
  * Get blob access level for a phase
+ * Note: Vercel Blob only supports 'public' access, so this always returns 'public'
+ * Private access is handled through authentication and authorization logic
  */
-export function getPhaseBlobAccess(phase: string): 'private' | 'public' {
-  const config = getPhaseConfig(phase);
-  return config?.blobAccess || 'private'; // Default to private for security
+export function getPhaseBlobAccess(phase: string): 'public' {
+  // Vercel Blob only supports public access
+  // Private access is handled through authentication and authorization
+  return 'public';
 }
 
 /**
