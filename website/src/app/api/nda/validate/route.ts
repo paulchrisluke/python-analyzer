@@ -1,12 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/auth';
-import { validateNDASignature } from '@/lib/nda-storage';
+import { validateNDASignature, enableNDAStorage } from '@/lib/nda-storage';
 import { generateDocumentHash } from '@/lib/nda';
 import { NDAValidationRequest, NDAValidationResponse } from '@/types/nda';
 
 // POST /api/nda/validate - Validate NDA signature integrity
 export async function POST(request: NextRequest) {
   try {
+    // Initialize NDA storage (in-memory only for API routes)
+    await enableNDAStorage({ enablePersistence: false });
+    
     const session = await auth();
     
     if (!session?.user) {

@@ -11,7 +11,7 @@
  */
 
 import * as crypto from 'crypto';
-import { Document } from '@/types/document';
+import { Document, DocumentPhase } from '@/types/document';
 
 /**
  * Security configuration for document handling
@@ -150,16 +150,47 @@ export function checkDocumentAccessRateLimit(
 }
 
 /**
+ * Parse document phase from notes as fallback (for backward compatibility)
+ * @deprecated Use structured document.phase field instead
+ */
+export function parsePhaseFromNotes(notes: string): DocumentPhase {
+  const match = notes?.match(/Phase:\s*(p[1-5](?:[ab])?|legal|legacy)/i);
+  if (match) {
+    const phase = match[1].toLowerCase() as DocumentPhase;
+    // Validate the parsed phase
+    const validPhases: DocumentPhase[] = ['p1', 'p2a', 'p2b', 'p3a', 'p3b', 'p4', 'p5', 'legal', 'legacy'];
+    if (validPhases.includes(phase)) {
+      return phase;
+    }
+  }
+  // Default to 'legacy' for unknown phases to be restrictive
+  return 'legacy';
+}
+
+/**
+ * Get document phase with fallback to notes parsing
+ */
+export function getDocumentPhase(document: Document): DocumentPhase {
+  // Use structured phase field if available
+  if (document.phase) {
+    return document.phase;
+  }
+  
+  // Fallback to parsing from notes (backward compatibility)
+  return parsePhaseFromNotes(document.notes);
+}
+
+/**
  * Check if user has access to document based on role and phase
  */
-export function hasDocumentAccess(userRole: string, document: Document, ndaSigned: boolean = false): boolean {
+export function hasDocumentAccess(userRole: string, document: Document, ndaSigned: boolean): boolean {
   if (userRole === 'admin') {
     return true;
   }
 
   // Check if document phase requires NDA
-  const ndaRequiredPhases = ['p2b', 'p3a', 'p3b', 'p4', 'p5', 'legal'];
-  const documentPhase = document.notes?.match(/Phase:\s*(p[1-5](?:[ab])?|legal|legacy)/)?.[1] || 'legacy';
+  const ndaRequiredPhases: DocumentPhase[] = ['p2b', 'p3a', 'p3b', 'p4', 'p5', 'legal'];
+  const documentPhase = getDocumentPhase(document);
   
   if (ndaRequiredPhases.includes(documentPhase) && !ndaSigned) {
     return false;

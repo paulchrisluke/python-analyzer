@@ -8,6 +8,8 @@ import {
   getSecurityHeaders, 
   checkRateLimit 
 } from '@/lib/document-security';
+import { hasUserSignedNDA, enableNDAStorage } from '@/lib/nda-storage';
+import { isNDAExempt } from '@/lib/nda';
 
 // GET /api/documents/proxy/[...id] - Serve document content through authenticated proxy
 // Uses catch-all route to support IDs with '/' characters
@@ -16,6 +18,9 @@ export async function GET(
   { params }: { params: Promise<{ id: string[] }> }
 ) {
   try {
+    // Initialize NDA storage (in-memory only for API routes)
+    await enableNDAStorage({ enablePersistence: false });
+    
     const { id } = await params;
     
     if (!id || id.length === 0) {
@@ -76,10 +81,24 @@ export async function GET(
 
     // Authorization check - verify user has access to this document
     const userRole = session.user?.role;
-    const hasAccess = hasDocumentAccess(userRole, document);
+    
+    // Check NDA status for non-admin users
+    let ndaSigned = false;
+    if (userRole !== 'admin') {
+      const userId = session.user?.id;
+      if (userId && !isNDAExempt(userRole)) {
+        ndaSigned = await hasUserSignedNDA(userId);
+      } else if (isNDAExempt(userRole)) {
+        ndaSigned = true; // Admin users are exempt
+      }
+    } else {
+      ndaSigned = true; // Admin users have full access
+    }
+    
+    const hasAccess = hasDocumentAccess(userRole, document, ndaSigned);
     
     if (!hasAccess) {
-      console.warn(`Unauthorized proxy request for document ${documentId} by user ${session.user?.email} with role ${userRole}`);
+      console.warn(`Unauthorized proxy request for document ${documentId} by user ${session.user?.email} with role ${userRole}, ndaSigned: ${ndaSigned}`);
       return NextResponse.json(
         { success: false, error: 'Forbidden' },
         { status: 403 }

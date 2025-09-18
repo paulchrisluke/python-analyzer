@@ -24,6 +24,8 @@ export default function NDASigningPage() {
   const [isSigning, setIsSigning] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [ndaStatus, setNdaStatus] = useState<any>(null);
+  const [consentA, setConsentA] = useState(false);
+  const [consentB, setConsentB] = useState(false);
 
   const checkNDAStatus = useCallback(async () => {
     try {
@@ -47,7 +49,7 @@ export default function NDASigningPage() {
     if (status === 'loading') return;
 
     if (!session) {
-      router.push('/signin');
+      window.location.href = '/api/auth/signin?callbackUrl=/nda';
       return;
     }
 
@@ -79,6 +81,12 @@ export default function NDASigningPage() {
   };
 
   const handleSign = async (signature: string, agreedToTerms: boolean, understoodBinding: boolean) => {
+    // Early return if consents are not satisfied
+    if (!consentA || !consentB) {
+      setError('You must agree to both terms before signing the NDA.');
+      return;
+    }
+
     setIsSigning(true);
     setError(null);
 
@@ -214,11 +222,26 @@ export default function NDASigningPage() {
                     <input
                       type="checkbox"
                       id="agree-terms"
+                      checked={consentA}
+                      onChange={(e) => setConsentA(e.target.checked)}
                       className="mt-1 h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
                       disabled={isSigning}
                     />
                     <label htmlFor="agree-terms" className="text-sm text-gray-700 cursor-pointer">
-                      I have read and agree to the terms of this Non-Disclosure Agreement. 
+                      I have read and agree to the terms of this Non-Disclosure Agreement.
+                    </label>
+                  </div>
+                  
+                  <div className="flex items-start space-x-3">
+                    <input
+                      type="checkbox"
+                      id="understand-binding"
+                      checked={consentB}
+                      onChange={(e) => setConsentB(e.target.checked)}
+                      className="mt-1 h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                      disabled={isSigning}
+                    />
+                    <label htmlFor="understand-binding" className="text-sm text-gray-700 cursor-pointer">
                       I understand this is legally binding and will remain in effect for two (2) years.
                     </label>
                   </div>
@@ -226,10 +249,10 @@ export default function NDASigningPage() {
                   <Button
                     onClick={() => {
                       if (signatureData) {
-                        handleSign(signatureData, true, true);
+                        handleSign(signatureData, consentA, consentB);
                       }
                     }}
-                    disabled={!signatureData || isSigning}
+                    disabled={!signatureData || !consentA || !consentB || isSigning}
                     className="w-full h-12 text-lg font-semibold"
                   >
                     {isSigning ? 'Signing...' : 'Sign & Accept NDA'}

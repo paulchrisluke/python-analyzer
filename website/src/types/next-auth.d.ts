@@ -7,7 +7,7 @@ declare module 'next-auth' {
       email: string
       name: string
       role: 'admin' | 'buyer' | 'lawyer' | 'viewer'
-      ndaSigned: boolean
+      ndaSigned?: boolean
       ndaSignedAt?: string
     }
   }

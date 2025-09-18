@@ -3,7 +3,19 @@
 import React, { useState, useEffect } from 'react';
 import ReactMarkdown from 'react-markdown';
 import { useNDAUserInfo } from '@/hooks/useNDAUserInfo';
+// Note: generateDocumentHash is not imported here as it's server-only
+// The hash is provided by the /api/nda/document endpoint
 import '@/styles/nda-prose.css';
+
+// Function to escape HTML entities to prevent injection
+function escapeHtml(text: string): string {
+  return text
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#x27;');
+}
 
 interface NDADocumentProps {
   onDocumentHash: (hash: string) => void;
@@ -29,9 +41,10 @@ export function NDADocument({
           
           // If we have user info from session storage, personalize the content further
           if (userInfo && content) {
+            const escapedName = escapeHtml(userInfo.name || 'Potential Buyer');
             content = content
-              .replace(/Potential Buyer\(s\)/g, userInfo.name || 'Potential Buyer')
-              .replace(/Name: _________________________/g, `Name: ${userInfo.name || 'Potential Buyer'}`)
+              .replace(/Potential Buyer\(s\)/g, escapedName)
+              .replace(/Name: _________________________/g, `Name: ${escapedName}`)
               .replace(/Title: _________________________/g, 'Title: Potential Buyer');
           }
           
@@ -39,7 +52,7 @@ export function NDADocument({
           onDocumentHash(data.data?.hash || data.hash);
         } else {
           // Fallback to static content if API fails
-          setNdaContent(`
+          const fallbackContent = `
 # Non-Disclosure Agreement (NDA)
 
 **Effective Date:** January 15, 2025  
@@ -120,7 +133,13 @@ Cranberry Hearing and Balance Center
 ---
 
 *This document was generated on [Date] and is version 1.0 of the NDA for Cranberry Hearing and Balance Center business acquisition.*
-          `);
+          `;
+          
+          setNdaContent(fallbackContent);
+          
+          // Note: Hash computation is handled server-side
+          // For fallback content, we'll use a placeholder hash
+          onDocumentHash('fallback-content-hash');
         }
       } catch (error) {
         console.error('Error loading NDA content:', error);

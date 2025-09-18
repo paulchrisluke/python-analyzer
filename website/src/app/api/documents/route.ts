@@ -59,15 +59,29 @@ export async function GET(request: NextRequest) {
   
   // For authenticated users, check if they're admin for full access
   if (session.user?.role !== 'admin') {
-    // Return limited document data for non-admin users
+    // Return limited document data for non-admin users based on their role
     try {
       const { searchParams } = new URL(request.url);
+      const userRole = session.user?.role;
+      
+      // Scope visibility by role - only show documents appropriate for the user's role
+      let visibility: string[] = ['public'];
+      if (userRole === 'buyer') {
+        visibility = ['public', 'buyer'];
+      } else if (userRole === 'lawyer') {
+        visibility = ['public', 'lawyer'];
+      } else if (userRole === 'viewer') {
+        visibility = ['public', 'viewer'];
+      }
+      
       const filters = {
         category: searchParams.get('category') || undefined,
         status: searchParams.get('status') ? searchParams.get('status') === 'true' : undefined,
         expected: searchParams.get('expected') ? searchParams.get('expected') === 'true' : undefined,
         file_type: searchParams.get('file_type') || undefined,
-        visibility: ['public', 'buyer'], // Only show public and buyer-visible documents
+        visibility: visibility,
+        phase: searchParams.get('phase') || undefined,
+        userRole: userRole,
         search: searchParams.get('search') || undefined,
       };
 

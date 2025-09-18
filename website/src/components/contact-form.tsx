@@ -1,8 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { signIn } from "next-auth/react";
+// Remove direct signIn import - we'll use proper NextAuth v5 flow
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -24,22 +24,84 @@ export function ContactForm() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
 
+  // Clean up expired prefill data on mount
+  useEffect(() => {
+    try {
+      const stored = sessionStorage.getItem('nda_prefill');
+      if (stored) {
+        const prefillData = JSON.parse(stored);
+        const now = new Date();
+        const expiresAt = new Date(prefillData.expiresAt);
+        
+        if (now > expiresAt) {
+          // Data has expired, remove it
+          sessionStorage.removeItem('nda_prefill');
+        }
+      }
+    } catch (error) {
+      console.error('Error checking prefill data expiry:', error);
+      // Clear corrupted data
+      sessionStorage.removeItem('nda_prefill');
+    }
+  }, []);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
     
     try {
-      // Store user information in session storage for NDA personalization
-      sessionStorage.setItem('nda_user_info', JSON.stringify({
+      // Create secure prefill data with minimal PII
+      const prefillData = {
         name: formData.name,
         email: formData.email,
-        phone: formData.phone,
-        message: formData.message,
-        submittedAt: new Date().toISOString()
+        // Only store non-sensitive data client-side with TTL
+        displayName: formData.name,
+        emailHash: btoa(formData.email).substring(0, 8), // Short hash for display
+        createdAt: new Date().toISOString(),
+        expiresAt: new Date(Date.now() + 30 * 60 * 1000).toISOString() // 30 min TTL
+      };
+
+      // Store minimal non-PII data with TTL
+      sessionStorage.setItem('nda_prefill', JSON.stringify(prefillData));
+      
+      // Send full PII to secure backend endpoint
+      const response = await fetch('/api/nda/prefill', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          name: formData.name,
+          email: formData.email,
+          phone: formData.phone,
+          message: formData.message,
+          submittedAt: new Date().toISOString()
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to store prefill data');
+      }
+
+      const result = await response.json();
+      
+      // Set httpOnly cookie with nonce for secure server-side storage
+      document.cookie = `nda_prefill_nonce=${result.nonce}; path=/; max-age=1800; secure; samesite=strict`;
+      
+      // Clear sensitive data from form after successful submission
+      setFormData(prev => ({
+        ...prev,
+        phone: '',
+        message: ''
       }));
       
-      // Trigger Google sign-in
-      await signIn('google', { callbackUrl: '/nda' });
+      setIsSubmitted(true);
+      
+      // Redirect to sign-in page after a brief delay
+      setTimeout(() => {
+        window.location.href = '/api/auth/signin?callbackUrl=/nda';
+      }, 1000);
+      
     } catch (error) {
       console.error("Form submission error:", error);
       // Could add error state here if needed

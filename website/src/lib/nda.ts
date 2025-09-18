@@ -1,29 +1,26 @@
 /**
- * NDA (Non-Disclosure Agreement) utilities
+ * Server-only NDA (Non-Disclosure Agreement) utilities
+ * 
+ * This module contains NDA utilities that require Node.js crypto APIs
+ * and can only be used in server-side contexts (API routes, server components).
+ * 
+ * For edge-safe utilities, use the nda-edge.ts module instead.
  */
 
 import * as crypto from 'crypto';
-import { NDASignature, NDAStatus, NDADocumentConfig, NDARateLimit } from '@/types/nda';
+import type { NDASignature, NDAStatus, NDARateLimit } from '@/types/nda';
+import { NDA_CONFIG, NDA_RATE_LIMIT } from './nda-edge';
 
-// NDA Configuration
-export const NDA_CONFIG: NDADocumentConfig = {
-  version: '1.0',
-  effectiveDate: '2025-01-15',
-  title: 'Non-Disclosure Agreement',
-  description: 'Confidentiality agreement for business acquisition evaluation',
-  requiredRoles: ['buyer', 'lawyer', 'viewer'],
-  exemptRoles: ['admin']
-};
-
-// Phases that require NDA signature
-export const NDA_REQUIRED_PHASES = ['p2b', 'p3a', 'p3b', 'p4', 'p5', 'legal'];
-
-// Rate limiting configuration
-export const NDA_RATE_LIMIT = {
-  MAX_ATTEMPTS: 5,
-  WINDOW_MS: 60 * 60 * 1000, // 1 hour
-  STORAGE_KEY_PREFIX: 'nda_rate_limit_'
-};
+// Re-export edge-safe utilities for convenience
+export {
+  NDA_REQUIRED_PHASES,
+  requiresNDA,
+  isNDAExempt,
+  phaseRequiresNDA,
+  getClientIP,
+  sanitizeUserAgent,
+  logNDAActivity
+} from './nda-edge';
 
 /**
  * Generate a unique signature ID
@@ -60,26 +57,6 @@ export function validateSignatureData(signatureData: string): { valid: boolean; 
   return { valid: true };
 }
 
-/**
- * Check if user role requires NDA signature
- */
-export function requiresNDA(userRole: string): boolean {
-  return NDA_CONFIG.requiredRoles.includes(userRole);
-}
-
-/**
- * Check if user role is exempt from NDA requirements
- */
-export function isNDAExempt(userRole: string): boolean {
-  return NDA_CONFIG.exemptRoles.includes(userRole);
-}
-
-/**
- * Check if a document phase requires NDA
- */
-export function phaseRequiresNDA(phase: string): boolean {
-  return NDA_REQUIRED_PHASES.includes(phase);
-}
 
 /**
  * Create NDA status object
@@ -177,44 +154,3 @@ export function checkNDARateLimit(userId: string): NDARateLimit {
   };
 }
 
-/**
- * Log NDA activity for audit trail
- */
-export function logNDAActivity(
-  userId: string,
-  action: 'sign' | 'view' | 'access_denied' | 'rate_limited',
-  details?: Record<string, any>
-): void {
-  const timestamp = new Date().toISOString();
-  const logEntry = {
-    timestamp,
-    userId,
-    action,
-    details: details || {}
-  };
-
-  // In production, this should be sent to a proper logging service
-  console.info('NDA_ACTIVITY:', JSON.stringify(logEntry));
-}
-
-/**
- * Get client IP address from request
- */
-export function getClientIP(request: Request): string {
-  const forwarded = request.headers.get('x-forwarded-for');
-  const realIP = request.headers.get('x-real-ip');
-  const cfConnectingIP = request.headers.get('cf-connecting-ip');
-  
-  if (cfConnectingIP) return cfConnectingIP;
-  if (realIP) return realIP;
-  if (forwarded) return forwarded.split(',')[0].trim();
-  
-  return 'unknown';
-}
-
-/**
- * Sanitize user agent string
- */
-export function sanitizeUserAgent(userAgent: string): string {
-  return userAgent.substring(0, 500); // Limit length
-}

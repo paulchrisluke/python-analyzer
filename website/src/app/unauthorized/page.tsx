@@ -57,7 +57,7 @@ export default function UnauthorizedPage() {
             
             <Button 
               variant="ghost" 
-              onClick={() => signOut({ callbackUrl: "/login" })}
+              onClick={() => signOut({ callbackUrl: "/" })}
               className="w-full text-gray-500"
             >
               Sign Out

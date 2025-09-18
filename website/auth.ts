@@ -34,7 +34,29 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       clientSecret: GOOGLE_CLIENT_SECRET,
     }),
   ],
+  // Use default NextAuth pages to avoid redirect loops
+  // pages: {
+  //   signIn: '/api/auth/signin',
+  //   signOut: '/api/auth/signout',
+  //   error: '/api/auth/error',
+  // },
   callbacks: {
+    async redirect({ url, baseUrl }) {
+      console.log("🔀 Redirect callback called:", { url, baseUrl })
+      
+      // Force redirect to home page after signin
+      if (url.includes("/api/auth/signin")) {
+        console.log("🔀 Redirecting to home page")
+        return baseUrl
+      }
+      
+      // If it's a relative URL, make it absolute
+      if (url.startsWith("/")) return `${baseUrl}${url}`
+      // If it's the same origin, allow it
+      if (url.startsWith(baseUrl)) return url
+      // Default to home page
+      return baseUrl
+    },
     async jwt({ token, user, account }) {
       if (user) {
         // Get admin and buyer emails from environment variables (Vercel secrets)
@@ -83,9 +105,8 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           session.user.ndaSigned = true
           session.user.ndaSignedAt = undefined
         } else {
-          // For non-admin users, we'll check NDA status on the client side
-          // This avoids Node.js API usage in the Edge Runtime
-          session.user.ndaSigned = false
+          // For non-admin users, NDA status is checked server-side in API endpoints
+          // Don't set ndaSigned here to avoid hardcoding false
           session.user.ndaSignedAt = undefined
         }
       }
@@ -94,7 +115,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   },
   session: {
     strategy: 'jwt',
-    maxAge: 7 * 24 * 60 * 60,
+    maxAge: 7 * 24 * 60 * 60, // 7 days
   },
   secret: AUTH_SECRET,
   trustHost: true,

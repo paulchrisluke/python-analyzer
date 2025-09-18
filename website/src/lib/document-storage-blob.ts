@@ -1,5 +1,5 @@
 import { list, del, head } from '@vercel/blob';
-import { Document, DocumentCategory, DocumentStats, CoverageAnalysis } from '@/types/document';
+import { Document, DocumentCategory, DocumentStats, CoverageAnalysis, DocumentPhase } from '@/types/document';
 
 // Simple blob-based document storage - no local files needed!
 export class DocumentStorage {
@@ -12,6 +12,7 @@ export class DocumentStorage {
     visibility?: string[];
     phase?: string;
     userRole?: string;
+    search?: string;
   }): Promise<Document[]> {
     try {
       const documents: Document[] = [];
@@ -85,6 +86,7 @@ export class DocumentStorage {
           status: true, // If it's in blob storage, it exists
           expected: true,
           notes: `Phase: ${phase}`,
+          phase: phase as DocumentPhase,
           visibility: visibility,
           due_date: null,
           last_modified: blob.uploadedAt.toISOString(),

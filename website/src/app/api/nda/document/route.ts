@@ -2,6 +2,22 @@ import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/auth';
 import { generateDocumentHash } from '@/lib/nda';
 
+// Force Node.js runtime for file system access
+export const runtime = 'nodejs';
+
+// Force dynamic rendering to prevent static caching
+export const dynamic = 'force-dynamic';
+
+// Function to escape HTML entities to prevent injection
+function escapeHtml(text: string): string {
+  return text
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#x27;');
+}
+
 // GET /api/nda/document - Get NDA document content and hash with dynamic fields
 export async function GET(request: NextRequest) {
   try {
@@ -32,9 +48,9 @@ export async function GET(request: NextRequest) {
       day: 'numeric'
     });
 
-    // Use session user data or fallback to defaults
-    const userName = session?.user?.name || 'Potential Buyer';
-    const userEmail = session?.user?.email || 'buyer@example.com';
+    // Use session user data or fallback to defaults, with HTML escaping
+    const userName = escapeHtml(session?.user?.name || 'Potential Buyer');
+    const userEmail = escapeHtml(session?.user?.email || 'buyer@example.com');
 
     const personalizedContent = ndaContent
       .replace(/\[Date\]/g, currentDate)
@@ -54,8 +70,8 @@ export async function GET(request: NextRequest) {
         version: '1.0',
         effectiveDate: currentDate,
         userInfo: {
-          name: session?.user?.name || 'Potential Buyer',
-          email: session?.user?.email || 'buyer@example.com',
+          name: userName,
+          email: userEmail,
           role: session?.user?.role || 'buyer'
         }
       }

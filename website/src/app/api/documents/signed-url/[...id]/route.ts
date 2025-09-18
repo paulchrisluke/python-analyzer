@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { DocumentStorage } from '@/lib/document-storage-blob';
 import { auth } from '@/auth';
+import { hasUserSignedNDA, enableNDAStorage } from '@/lib/nda-storage';
+import { isNDAExempt } from '@/lib/nda';
 
 // GET /api/documents/signed-url/[...id] - Generate a secure proxy URL for document access
 // This endpoint now returns the secure proxy URL instead of a direct blob URL
@@ -10,6 +12,9 @@ export async function GET(
   { params }: { params: Promise<{ id: string[] }> }
 ) {
   try {
+    // Initialize NDA storage (in-memory only for API routes)
+    await enableNDAStorage({ enablePersistence: false });
+    
     const { id } = await params;
     
     if (!id || id.length === 0) {
@@ -59,6 +64,29 @@ export async function GET(
         { success: false, error: 'Forbidden' },
         { status: 403 }
       );
+    }
+
+    // NDA verification for non-admin users accessing NDA-required documents
+    if (userRole !== 'admin' && document.visibility.includes('nda')) {
+      const userId = session.user?.id;
+      if (!userId) {
+        return NextResponse.json(
+          { success: false, error: 'User ID not found' },
+          { status: 400 }
+        );
+      }
+
+      // Check if user is exempt from NDA requirements
+      if (!isNDAExempt(userRole)) {
+        const hasSignedNDA = await hasUserSignedNDA(userId);
+        if (!hasSignedNDA) {
+          console.warn(`NDA required but not signed for document ${documentId} by user ${session.user?.email}`);
+          return NextResponse.json(
+            { success: false, error: 'NDA signature required to access this document' },
+            { status: 403 }
+          );
+        }
+      }
     }
 
     // Generate secure proxy URL

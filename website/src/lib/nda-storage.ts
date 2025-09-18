@@ -1,21 +1,40 @@
+'use server';
+
 /**
  * NDA Storage utilities for persisting NDA signatures
  * 
+ * IMPORTANT: This module requires explicit initialization via enableNDAStorage()
+ * before use. It will not auto-initialize on import.
+ * 
  * In a production environment, this would typically use a database.
  * For this implementation, we'll use a simple in-memory store with
- * file-based persistence for development.
+ * optional file-based persistence for development (requires ENABLE_DEV_PERSISTENCE=true).
+ * 
+ * This module is server-only and should not be imported into client components.
+ * 
+ * Usage:
+ * 1. Call enableNDAStorage({ enablePersistence: true }) to enable file persistence
+ * 2. Or call enableNDAStorage() for in-memory only storage
+ * 3. Never call enableNDAStorage() in production - use a proper database instead
  */
 
-import { NDASignature, NDAStatus } from '@/types/nda';
-import { createNDAStatus, generateSignatureId } from './nda';
+import type { NDASignature, NDAStatus } from '@/types/nda';
+import { createNDAStatus, generateSignatureId, validateSignatureIntegrity } from './nda';
 
 // In-memory storage for development
 // In production, replace with database operations
 const signatureStore = new Map<string, NDASignature>();
 
-// File path for persistence (development only) - only use in Node.js environment
+// Check if dev persistence is enabled
+const isDevPersistenceEnabled = (): boolean => {
+  return process.env.ENABLE_DEV_PERSISTENCE === 'true' && 
+         typeof process !== 'undefined' && 
+         typeof process.cwd === 'function';
+};
+
+// File path for persistence (development only) - only use when explicitly enabled
 const getStorageFile = () => {
-  if (typeof process !== 'undefined' && process.cwd) {
+  if (isDevPersistenceEnabled()) {
     const path = require('path');
     return path.join(process.cwd(), 'data', 'nda-signatures.json');
   }
@@ -24,11 +43,18 @@ const getStorageFile = () => {
 
 /**
  * Initialize storage - load from file if it exists (Node.js only)
+ * Only works when ENABLE_DEV_PERSISTENCE=true and in Node.js environment
+ * @deprecated Use enableNDAStorage() instead for explicit opt-in
  */
-export function initializeNDAStorage(): void {
+export async function initializeNDAStorage(): Promise<void> {
+  if (!isDevPersistenceEnabled()) {
+    console.log('NDA storage persistence disabled - using in-memory only');
+    return;
+  }
+
   try {
     const storageFile = getStorageFile();
-    if (storageFile && typeof require !== 'undefined') {
+    if (storageFile) {
       const fs = require('fs');
       if (fs.existsSync(storageFile)) {
         const data = fs.readFileSync(storageFile, 'utf8');
@@ -48,12 +74,61 @@ export function initializeNDAStorage(): void {
 }
 
 /**
+ * Enable NDA storage with explicit opt-in
+ * This function must be called explicitly to enable storage functionality
+ * 
+ * @param options Configuration options for storage
+ * @returns Promise that resolves when storage is enabled
+ */
+export async function enableNDAStorage(options: {
+  enablePersistence?: boolean;
+  requireExplicitOptIn?: boolean;
+} = {}): Promise<void> {
+  const { enablePersistence = false, requireExplicitOptIn = true } = options;
+  
+  if (requireExplicitOptIn && !enablePersistence) {
+    console.log('NDA storage enabled with in-memory only (no persistence)');
+    return;
+  }
+  
+  if (enablePersistence && !isDevPersistenceEnabled()) {
+    throw new Error(
+      'NDA storage persistence requires ENABLE_DEV_PERSISTENCE=true environment variable. ' +
+      'In production, use a proper database instead of file-based storage.'
+    );
+  }
+  
+  if (enablePersistence) {
+    console.log('NDA storage enabled with file-based persistence (development only)');
+    await initializeNDAStorage();
+  } else {
+    console.log('NDA storage enabled with in-memory only');
+  }
+}
+
+/**
  * Save signatures to file (development only, Node.js only)
+ * Only works when ENABLE_DEV_PERSISTENCE=true and in Node.js environment
+ * Never writes raw PII - data is already sanitized in memory
+ * 
+ * WARNING: This function performs file I/O operations. In production,
+ * use a proper database instead of file-based storage.
  */
 function saveSignaturesToFile(): void {
+  if (!isDevPersistenceEnabled()) {
+    // No-op when persistence is disabled
+    return;
+  }
+
+  // Additional safety check - refuse to perform disk I/O without explicit opt-in
+  if (process.env.NODE_ENV === 'production') {
+    console.warn('NDA storage: File I/O disabled in production. Use a database instead.');
+    return;
+  }
+
   try {
     const storageFile = getStorageFile();
-    if (storageFile && typeof require !== 'undefined') {
+    if (storageFile) {
       const fs = require('fs');
       const path = require('path');
       
@@ -74,16 +149,41 @@ function saveSignaturesToFile(): void {
 }
 
 /**
- * Store a new NDA signature
+ * Store or update an NDA signature (upsert by userId)
  */
 export async function storeNDASignature(signature: Omit<NDASignature, 'id'>): Promise<NDASignature> {
-  const id = generateSignatureId();
-  const fullSignature: NDASignature = {
-    ...signature,
-    id
-  };
+  // First, look for existing signature with the same userId
+  let existingSignature: NDASignature | null = null;
+  let existingId: string | null = null;
   
-  signatureStore.set(id, fullSignature);
+  for (const [id, existingSig] of signatureStore.entries()) {
+    if (existingSig.userId === signature.userId) {
+      existingSignature = existingSig;
+      existingId = id;
+      break;
+    }
+  }
+  
+  let fullSignature: NDASignature;
+  
+  if (existingSignature && existingId) {
+    // Update existing signature, keeping the same ID
+    fullSignature = {
+      ...existingSignature,
+      ...signature,
+      id: existingId
+    };
+    signatureStore.set(existingId, fullSignature);
+  } else {
+    // Create new signature
+    const id = generateSignatureId();
+    fullSignature = {
+      ...signature,
+      id
+    };
+    signatureStore.set(id, fullSignature);
+  }
+  
   saveSignaturesToFile();
   
   return fullSignature;
@@ -190,22 +290,15 @@ export async function validateNDASignature(
     return { valid: false, error: 'Signature not found' };
   }
   
-  // Check document hash
-  if (signature.documentHash !== documentHash) {
-    return { valid: false, error: 'Document hash mismatch' };
-  }
+  // Use central validation function for consistency
+  const validationResult = validateSignatureIntegrity(signature, documentHash);
   
-  // Check if signature is not expired (2 years)
-  const signedDate = new Date(signature.signedAt);
-  const now = new Date();
-  const daysSinceSigned = (now.getTime() - signedDate.getTime()) / (1000 * 60 * 60 * 24);
-  
-  if (daysSinceSigned > 730) {
-    return { valid: false, error: 'Signature has expired' };
+  if (!validationResult.valid) {
+    return { valid: false, error: validationResult.error };
   }
   
   return { valid: true, signature };
 }
 
-// Initialize storage on module load
-initializeNDAStorage();
+// Storage initialization is now opt-in via enableNDAStorage() function
+// This prevents automatic initialization on import and requires explicit enablement

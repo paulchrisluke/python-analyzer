@@ -1,11 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/auth';
-import { getNDAStatus, getNDASignatureByUserId } from '@/lib/nda-storage';
+import { getNDAStatus, getNDASignatureByUserId, enableNDAStorage } from '@/lib/nda-storage';
 import { isNDAExempt } from '@/lib/nda';
+
+// Force dynamic rendering to prevent static caching
+export const dynamic = 'force-dynamic';
 
 // GET /api/nda/status - Get detailed NDA status for user
 export async function GET(request: NextRequest) {
   try {
+    // Initialize NDA storage (in-memory only for API routes)
+    await enableNDAStorage({ enablePersistence: false });
+    
     const session = await auth();
     
     if (!session?.user) {

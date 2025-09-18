@@ -7,8 +7,7 @@ import {
   MoreVerticalIcon,
   UserCircleIcon,
 } from "lucide-react"
-import { useSession, signOut } from "next-auth/react"
-import { useRouter } from "next/navigation"
+import { signOutAction } from "@/lib/auth-actions"
 
 import {
   Avatar,
@@ -30,6 +29,7 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@/components/ui/sidebar"
+import Link from "next/link"
 
 export function NavUser({
   user,
@@ -41,23 +41,7 @@ export function NavUser({
   }
 }) {
   const { isMobile } = useSidebar()
-  const router = useRouter()
 
-  const handleAccountClick = () => {
-    router.push("/account")
-  }
-
-  const handleBillingClick = () => {
-    router.push("/billing")
-  }
-
-  const handleNotificationsClick = () => {
-    router.push("/notifications")
-  }
-
-  const handleLogout = () => {
-    signOut({ callbackUrl: '/' })
-  }
 
   return (
     <SidebarMenu>
@@ -104,23 +88,33 @@ export function NavUser({
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
-              <DropdownMenuItem onClick={handleAccountClick}>
-                <UserCircleIcon />
-                Account
+              <DropdownMenuItem asChild>
+                <Link href="/account">
+                  <UserCircleIcon />
+                  Account
+                </Link>
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={handleBillingClick}>
-                <CreditCardIcon />
-                Billing
+              <DropdownMenuItem asChild>
+                <Link href="/billing">
+                  <CreditCardIcon />
+                  Billing
+                </Link>
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={handleNotificationsClick}>
-                <BellIcon />
-                Notifications
+              <DropdownMenuItem asChild>
+                <Link href="/notifications">
+                  <BellIcon />
+                  Notifications
+                </Link>
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={handleLogout} className="flex items-center gap-2">
-              <LogOutIcon />
-              Log out
+            <DropdownMenuItem asChild className="flex items-center gap-2">
+              <form action={signOutAction}>
+                <button type="submit" className="flex items-center gap-2 w-full text-left">
+                  <LogOutIcon />
+                  Log out
+                </button>
+              </form>
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>

@@ -27,8 +27,10 @@ export function NDASignaturePad({
       setIsEmpty(isEmpty);
       
       if (!isEmpty) {
-        const signatureData = signatureRef.current.toDataURL('image/png');
-        onSignatureChange(signatureData);
+        const dataURL = signatureRef.current.toDataURL('image/png');
+        // Extract raw base64 data by removing the "data:image/png;base64," prefix
+        const base64Data = dataURL.split(',')[1];
+        onSignatureChange(base64Data);
       } else {
         onSignatureChange(null);
       }

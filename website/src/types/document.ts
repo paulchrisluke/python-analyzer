@@ -1,5 +1,8 @@
 // Document Management System TypeScript Interfaces - Blob Storage Version
 
+// Document phase types for structured metadata
+export type DocumentPhase = 'p1' | 'p2a' | 'p2b' | 'p3a' | 'p3b' | 'p4' | 'p5' | 'legal' | 'legacy';
+
 export interface Document {
   id: string;
   name: string;
@@ -14,6 +17,7 @@ export interface Document {
   status: boolean; // exists/missing
   expected: boolean;
   notes: string;
+  phase: DocumentPhase; // Structured phase metadata
   visibility: string[];
   due_date: string | null;
   last_modified: string;
