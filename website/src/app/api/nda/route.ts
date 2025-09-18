@@ -8,13 +8,14 @@ import {
 } from '@/lib/nda-storage';
 import { 
   validateSignatureData, 
-  generateDocumentHash, 
+  generateDocumentHash
+} from '@/lib/nda';
+import { 
   getClientIP, 
   sanitizeUserAgent,
   logNDAActivity,
-  requiresNDA,
   isNDAExempt
-} from '@/lib/nda';
+} from '@/lib/nda-edge';
 import { NDASigningRequest, NDASigningResponse } from '@/types/nda';
 import { promises as fs } from 'fs';
 import path from 'path';
@@ -218,7 +219,16 @@ export async function POST(request: NextRequest) {
       message: 'NDA signed successfully'
     };
 
-    return NextResponse.json(response, { status: 201 });
+    // Set httpOnly cookie to indicate NDA has been signed
+    const responseWithCookie = NextResponse.json(response, { status: 201 });
+    responseWithCookie.cookies.set('nda_signed', 'true', {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      maxAge: 60 * 60 * 24 * 365 * 2 // 2 years (matches NDA term)
+    });
+
+    return responseWithCookie;
 
   } catch (error) {
     console.error('Error processing NDA signature:', error);

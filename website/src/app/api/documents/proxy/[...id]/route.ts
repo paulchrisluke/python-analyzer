@@ -9,7 +9,7 @@ import {
   checkRateLimit 
 } from '@/lib/document-security';
 import { hasUserSignedNDA, enableNDAStorage } from '@/lib/nda-storage';
-import { isNDAExempt } from '@/lib/nda';
+import { isNDAExempt } from '@/lib/nda-edge';
 
 // GET /api/documents/proxy/[...id] - Serve document content through authenticated proxy
 // Uses catch-all route to support IDs with '/' characters
@@ -80,7 +80,7 @@ export async function GET(
     }
 
     // Authorization check - verify user has access to this document
-    const userRole = session.user?.role;
+    const userRole = session.user?.role || 'guest'; // Safe default for undefined role
     
     // Check NDA status - exempt roles (admin and NDA-exempt roles) don't need NDA signature
     let ndaSigned = false;

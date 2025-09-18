@@ -57,7 +57,11 @@ export async function GET(request: NextRequest) {
       .replace(/\[User Name\]/g, userName)
       .replace(/\[User Email\]/g, userEmail)
       .replace(/Mark Gustina/g, 'Mark Gustina')
-      .replace(/Cranberry Hearing and Balance Center/g, 'Cranberry Hearing and Balance Center');
+      .replace(/Cranberry Hearing and Balance Center/g, 'Cranberry Hearing and Balance Center')
+      // Additional client-side replacements that were causing hash mismatch
+      .replace(/Potential Buyer\(s\)/g, userName)
+      .replace(/Name: _________________________/g, `Name: ${userName}`)
+      .replace(/Title: _________________________/g, 'Title: Potential Buyer');
 
     // Generate document hash based on the personalized content
     const documentHash = generateDocumentHash(personalizedContent);

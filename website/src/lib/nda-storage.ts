@@ -185,7 +185,15 @@ async function loadSignaturesFromBlob(): Promise<void> {
     // List blobs to check if our key exists
     const { blobs } = await list({ prefix: BLOB_STORE_KEY });
     console.log(`Found ${blobs.length} blobs with prefix ${BLOB_STORE_KEY}`);
-    const existingBlob = blobs.find(blob => blob.pathname === BLOB_STORE_KEY);
+    // Filter blobs that start with our key prefix and select the latest one
+    const matchingBlobs = blobs.filter(blob => blob.pathname.startsWith(BLOB_STORE_KEY));
+    const existingBlob = matchingBlobs.length > 0 
+      ? matchingBlobs.reduce((latest, current) => 
+          (current.size && latest.size && current.size > latest.size) 
+            ? current 
+            : latest
+        )
+      : null;
     
     if (!existingBlob) {
       console.log('No existing NDA signatures found in blob storage');
@@ -227,7 +235,7 @@ async function saveSignaturesToBlob(): Promise<void> {
     
     await put(BLOB_STORE_KEY, data, {
       access: 'public',
-      addRandomSuffix: true,
+      addRandomSuffix: false,
     });
     
     console.log(`Saved ${signatures.length} NDA signatures to blob storage`);
@@ -271,7 +279,7 @@ async function saveUserRolesToBlob(roleStore: Map<string, UserRole>): Promise<vo
     const data = JSON.stringify(roles, null, 2);
     await put(USER_ROLES_BLOB_KEY, data, {
       access: 'public',
-      addRandomSuffix: true,
+      addRandomSuffix: false,
     });
     console.log(`Saved ${roles.length} user roles to blob storage`);
   }, 'saveUserRolesToBlob');
@@ -361,10 +369,38 @@ export async function enableNDAStorage(options: {
 
 /**
  * Save signatures to Vercel Blob
- * Never writes raw PII - data is already sanitized in memory
+ * Sanitizes PII before persistence - only stores non-identifying metadata
+ * Raw PII is never written to persistent storage in production
  */
 async function saveSignaturesToFile(): Promise<void> {
-  await saveSignaturesToBlob();
+  // Only persist in development mode with explicit opt-in
+  if (process.env.NODE_ENV !== 'development' || !process.env.ENABLE_NDA_PERSISTENCE) {
+    console.log('NDA signature persistence disabled in production for PII protection');
+    return;
+  }
+
+  await withRetry(async () => {
+    const signatures = Array.from(signatureStore.values());
+    
+    // Sanitize signatures - remove PII before persistence
+    const sanitizedSignatures = signatures.map(sig => ({
+      id: sig.id,
+      signedAt: sig.signedAt,
+      ndaVersion: sig.ndaVersion,
+      documentHash: sig.documentHash.substring(0, 8) + '...', // Truncated hash
+      // Remove PII: userId, userEmail, userName, signatureData, ipAddress, userAgent
+      userRole: 'anonymous' // Anonymized role
+    }));
+    
+    const data = JSON.stringify(sanitizedSignatures, null, 2);
+    
+    await put(BLOB_STORE_KEY, data, {
+      access: 'public',
+      addRandomSuffix: false,
+    });
+    
+    console.log(`Saved ${sanitizedSignatures.length} sanitized NDA signatures to blob storage (dev only)`);
+  }, 'saveSignaturesToFile');
 }
 
 /**

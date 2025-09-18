@@ -39,14 +39,8 @@ export function NDADocument({
           const data = await response.json();
           let content = data.data?.content || data.content;
           
-          // If we have user info from session storage, personalize the content further
-          if (userInfo && content) {
-            const escapedName = escapeHtml(userInfo.name || 'Potential Buyer');
-            content = content
-              .replace(/Potential Buyer\(s\)/g, escapedName)
-              .replace(/Name: _________________________/g, `Name: ${escapedName}`)
-              .replace(/Title: _________________________/g, 'Title: Potential Buyer');
-          }
+          // Content is already personalized on the server side
+          // No additional client-side modifications needed
           
           setNdaContent(content);
           onDocumentHash(data.data?.hash || data.hash);

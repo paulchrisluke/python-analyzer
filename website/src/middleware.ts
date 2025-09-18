@@ -59,7 +59,11 @@ export async function middleware(req: any) {
   // NDA enforcement for protected content
   const requiresNDA = checkIfRequiresNDA(req.nextUrl, session.user?.role)
   if (requiresNDA && (!session.user?.role || !isNDAExempt(session.user.role))) {
-    return NextResponse.redirect(new URL("/nda/required", req.url))
+    // Check if user has already signed NDA via cookie
+    const ndaSignedCookie = req.cookies.get('nda_signed')?.value
+    if (!ndaSignedCookie || ndaSignedCookie !== 'true') {
+      return NextResponse.redirect(new URL("/nda/required", req.url))
+    }
   }
 
   return NextResponse.next()

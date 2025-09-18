@@ -52,7 +52,34 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const currentDocumentHash = generateDocumentHash(ndaContent);
+    // Generate personalized content (same logic as POST endpoint)
+    const currentDate = new Date().toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    });
+
+    // Function to escape HTML entities to prevent injection
+    function escapeHtml(text: string): string {
+      return text
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#x27;');
+    }
+
+    const userName = escapeHtml(session.user.name || 'Potential Buyer');
+    const userEmail = escapeHtml(session.user.email || 'buyer@example.com');
+
+    const personalizedContent = ndaContent
+      .replace(/\[Date\]/g, currentDate)
+      .replace(/\[User Name\]/g, userName)
+      .replace(/\[User Email\]/g, userEmail)
+      .replace(/Mark Gustina/g, 'Mark Gustina')
+      .replace(/Cranberry Hearing and Balance Center/g, 'Cranberry Hearing and Balance Center');
+
+    const currentDocumentHash = generateDocumentHash(personalizedContent);
 
     // Validate signature
     const validation = await validateNDASignature(body.signatureId, body.documentHash);

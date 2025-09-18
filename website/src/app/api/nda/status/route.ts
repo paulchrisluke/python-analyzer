@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/auth';
 import { getNDAStatus, getNDASignatureByUserId, enableNDAStorage } from '@/lib/nda-storage';
-import { isNDAExempt } from '@/lib/nda';
+import { isNDAExempt } from '@/lib/nda-edge';
 
 // Force dynamic rendering to prevent static caching
 export const dynamic = 'force-dynamic';

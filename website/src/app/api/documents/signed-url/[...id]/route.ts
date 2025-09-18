@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { DocumentStorage } from '@/lib/document-storage-blob';
 import { auth } from '@/auth';
 import { hasUserSignedNDA, enableNDAStorage } from '@/lib/nda-storage';
-import { isNDAExempt } from '@/lib/nda';
+import { isNDAExempt } from '@/lib/nda-edge';
 
 // GET /api/documents/signed-url/[...id] - Generate a secure proxy URL for document access
 // This endpoint now returns the secure proxy URL instead of a direct blob URL
@@ -77,7 +77,9 @@ export async function GET(
       }
 
       // Check if user is exempt from NDA requirements
-      if (!isNDAExempt(userRole)) {
+      // Guard against undefined userRole - treat as non-exempt
+      const safeUserRole = typeof userRole === 'string' ? userRole : 'guest';
+      if (!isNDAExempt(safeUserRole)) {
         const hasSignedNDA = await hasUserSignedNDA(userId);
         if (!hasSignedNDA) {
           console.warn(`NDA required but not signed for document ${documentId} by user ${session.user?.email}`);
