@@ -5,8 +5,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Checkbox } from "@/components/ui/checkbox"
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
-import { MoreHorizontal, Download, Eye, Lock } from "lucide-react"
+import { Download, Lock } from "lucide-react"
 import { cn } from "@/lib/utils"
 
 interface FolderGridProps {
@@ -14,13 +13,12 @@ interface FolderGridProps {
   selectedItems: Set<string>
   onItemClick: (item: FolderItem) => void
   onItemSelect: (itemId: string, selected: boolean) => void
-  onPreview: (item: FolderItem) => void
   onDownload: (item: FolderItem) => void
   userRole: string
   viewMode: 'grid' | 'list'
 }
 
-export function FolderGrid({ items, selectedItems, onItemClick, onItemSelect, onPreview, onDownload, userRole, viewMode }: FolderGridProps) {
+export function FolderGrid({ items, selectedItems, onItemClick, onItemSelect, onDownload, userRole, viewMode }: FolderGridProps) {
 
   if (items.length === 0) {
     return (
@@ -103,37 +101,16 @@ export function FolderGrid({ items, selectedItems, onItemClick, onItemSelect, on
                   </div>
                   
                   {item.type === 'document' && (
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={(e) => e.stopPropagation()}
-                        >
-                          <MoreHorizontal className="h-4 w-4" />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuItem
-                          onClick={(e) => {
-                            e.stopPropagation()
-                            onPreview(item)
-                          }}
-                        >
-                          <Eye className="h-4 w-4 mr-2" />
-                          Preview
-                        </DropdownMenuItem>
-                        <DropdownMenuItem
-                          onClick={(e) => {
-                            e.stopPropagation()
-                            onDownload(item)
-                          }}
-                        >
-                          <Download className="h-4 w-4 mr-2" />
-                          Download
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        onDownload(item)
+                      }}
+                    >
+                      <Download className="h-4 w-4" />
+                    </Button>
                   )}
                 </div>
               </CardContent>

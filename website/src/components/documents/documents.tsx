@@ -1,6 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react"
+import { useSession } from "next-auth/react"
 import { FolderView } from "./FolderView"
 import { ContactForm } from "@/components/contact-form"
 import { Document } from "@/types/document"
@@ -8,17 +9,22 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { Lock, FileText, Shield } from "lucide-react"
+import { Lock, FileText, Shield, CheckCircle } from "lucide-react"
 
-export function PublicDocuments() {
+export function Documents() {
+  const { data: session } = useSession()
   const [documents, setDocuments] = useState<Document[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [showContactForm, setShowContactForm] = useState(false)
+  
+  const userRole = session?.user?.role
+  const isAuthenticated = !!session?.user
 
   useEffect(() => {
-    // Fetch documents from API (public endpoint)
-    fetch('/api/documents?public=true')
+    // Fetch documents from API (authenticated endpoint for logged-in users, public for others)
+    const endpoint = isAuthenticated ? '/api/documents' : '/api/documents?public=true'
+    fetch(endpoint)
       .then(res => {
         if (!res.ok) {
           throw new Error(`HTTP ${res.status}: ${res.statusText}`)
@@ -53,7 +59,7 @@ export function PublicDocuments() {
       .finally(() => {
         setLoading(false)
       })
-  }, [])
+  }, [isAuthenticated])
 
   const handleAccessRequest = () => {
     console.log('Opening contact form for access request')
@@ -122,6 +128,28 @@ export function PublicDocuments() {
     )
   }
 
+  // For authenticated users, show full document access
+  if (isAuthenticated) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle>Due Diligence Documents</CardTitle>
+          <CardDescription>
+            Business documentation ({documents.length} documents)
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <FolderView 
+            documents={documents} 
+            userRole={userRole || 'buyer'}
+            onAccessRequest={() => {}}
+          />
+        </CardContent>
+      </Card>
+    )
+  }
+
+  // For public users, show the contact form overlay
   return (
     <Card>
       <CardHeader>

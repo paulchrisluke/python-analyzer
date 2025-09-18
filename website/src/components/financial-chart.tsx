@@ -217,8 +217,8 @@ export function FinancialChart() {
 
   // Load revenue data on component mount
   React.useEffect(() => {
-    const abortController = new AbortController()
     let isMounted = true
+    let abortController: AbortController | null = null
 
     const loadDataWithCleanup = async () => {
       try {
@@ -226,22 +226,24 @@ export function FinancialChart() {
         setLoading(true)
         setIsRetrying(false)
         
+        // Create new abort controller for this request
+        abortController = new AbortController()
         const data = await loadRevenueData(abortController.signal)
         
         // Only update state if component is still mounted
-        if (isMounted && !abortController.signal.aborted) {
+        if (isMounted) {
           setRevenueData(data)
         }
       } catch (err) {
-        // Only update state if component is still mounted
-        if (isMounted && !abortController.signal.aborted) {
+        // Only update state if component is still mounted and it's not an abort error
+        if (isMounted && !(err instanceof Error && err.name === 'AbortError')) {
           const errorMessage = err instanceof Error ? err.message : 'Failed to load revenue data'
           setError(errorMessage)
           console.error('Failed to load revenue data:', err)
         }
       } finally {
         // Always set loading to false if component is still mounted
-        if (isMounted && !abortController.signal.aborted) {
+        if (isMounted) {
           setLoading(false)
         }
       }
@@ -252,7 +254,14 @@ export function FinancialChart() {
     // Cleanup function
     return () => {
       isMounted = false
-      abortController.abort()
+      if (abortController) {
+        try {
+          abortController.abort()
+        } catch (error) {
+          // Ignore abort errors during cleanup
+          console.debug('AbortController cleanup error (ignored):', error)
+        }
+      }
     }
   }, [])
 
@@ -298,7 +307,7 @@ export function FinancialChart() {
       const bridgePoint = {
         ...firstProjected,
         revenue: lastHistorical.revenue,
-        projected_revenue: firstProjected.projected_revenue,
+        projected_revenue: lastHistorical.revenue, // Use historical value to create smooth transition
         isBridge: true
       }
       
@@ -515,7 +524,7 @@ export function FinancialChart() {
               stroke="var(--color-revenue)"
               fill="url(#historicalGradient)"
               strokeWidth={2}
-              connectNulls={false}
+              connectNulls={true}
             />
             {/* Projected Revenue Area */}
             <Area
@@ -525,7 +534,7 @@ export function FinancialChart() {
               fill="url(#projectedGradient)"
               strokeWidth={2}
               strokeDasharray="5 5"
-              connectNulls={false}
+              connectNulls={true}
             />
           </AreaChart>
         </ChartContainer>

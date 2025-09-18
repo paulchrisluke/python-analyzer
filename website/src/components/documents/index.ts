@@ -4,7 +4,7 @@ export { FolderGrid } from './FolderGrid'
 export { BreadcrumbNavigation } from './BreadcrumbNavigation'
 export { AccessRequestModal } from './AccessRequestModal'
 export { PhaseTable } from './PhaseTable'
-export { PublicDocuments } from './public-documents'
+export { Documents } from './documents'
 
 // Types
 export type { FolderItem } from './FolderView'

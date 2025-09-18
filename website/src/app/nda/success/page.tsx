@@ -9,6 +9,10 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { CheckCircle, Download, ArrowRight, AlertCircle } from 'lucide-react';
 import Link from 'next/link';
 import { NDAStatusResponse } from '@/types/nda';
+import { SiteHeader } from '@/components/site-header';
+import { SiteFooter } from '@/components/site-footer';
+import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar';
+import { AppSidebar } from '@/components/app-sidebar';
 
 export default function NDASuccessPage() {
   const { data: session, status } = useSession();
@@ -100,86 +104,103 @@ export default function NDASuccessPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8 px-4">
-      <div className="max-w-2xl mx-auto">
-        {/* Success Card */}
-        <Card className="text-center">
-          <CardHeader>
-            <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-green-100">
-              <CheckCircle className="h-8 w-8 text-green-600" />
-            </div>
-            <CardTitle className="text-2xl font-bold text-green-600">
-              NDA Signed Successfully!
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-6">
-            <div className="text-center">
-              <p className="text-lg text-gray-600 mb-4">
-                Thank you, <strong>{session.user.name}</strong>! Your Non-Disclosure Agreement has been successfully signed and recorded.
-              </p>
-              
-              {ndaStatus?.signature && (
-                <div className="bg-gray-50 rounded-lg p-4 text-left">
-                  <h3 className="font-semibold text-gray-900 mb-2">Signature Details:</h3>
-                  <div className="space-y-1 text-sm text-gray-600">
-                    <p><strong>Signed:</strong> {new Date(ndaStatus.signature.signedAt).toLocaleString()}</p>
-                    <p><strong>Version:</strong> {ndaStatus.signature.version}</p>
-                    <p><strong>Signature ID:</strong> {ndaStatus.signature.id}</p>
-                  </div>
+    <SidebarProvider>
+      <AppSidebar />
+      <SidebarInset>
+        <SiteHeader />
+
+        {/* Main Content */}
+        <div className="flex flex-1 flex-col">
+          <div className="@container/main flex flex-1 flex-col gap-2">
+            <div className="flex flex-col gap-4 py-4 md:gap-6 md:py-6">
+              <div className="px-4 lg:px-6">
+                <div className="max-w-2xl mx-auto">
+                  {/* Success Card */}
+                  <Card className="text-center">
+                    <CardHeader>
+                      <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-green-100">
+                        <CheckCircle className="h-8 w-8 text-green-600" />
+                      </div>
+                      <CardTitle className="text-2xl font-bold text-green-600">
+                        NDA Signed Successfully!
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-6">
+                      <div className="text-center">
+                        <p className="text-lg text-gray-600 mb-4">
+                          Thank you, <strong>{session.user.name}</strong>! Your Non-Disclosure Agreement has been successfully signed and recorded.
+                        </p>
+                        
+                        {ndaStatus?.signature && (
+                          <div className="bg-gray-50 rounded-lg p-4 text-left">
+                            <h3 className="font-semibold text-gray-900 mb-2">Signature Details:</h3>
+                            <div className="space-y-1 text-sm text-gray-600">
+                              <p><strong>Signed:</strong> {new Date(ndaStatus.signature.signedAt).toLocaleString()}</p>
+                              <p><strong>Version:</strong> {ndaStatus.signature.version}</p>
+                              <p><strong>Signature ID:</strong> {ndaStatus.signature.id}</p>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+
+                      {/* What's Next */}
+                      <div className="bg-blue-50 rounded-lg p-4">
+                        <h3 className="font-semibold text-blue-900 mb-2">What&apos;s Next?</h3>
+                        <p className="text-blue-800 text-sm">
+                          You now have access to confidential business information for the Cranberry Hearing and Balance Center acquisition. 
+                          You can proceed to review due diligence documents and other sensitive materials.
+                        </p>
+                      </div>
+
+                      {/* Action Buttons */}
+                      <div className="flex flex-col sm:flex-row gap-3 justify-center">
+                        <Button asChild size="lg" className="flex items-center space-x-2">
+                          <Link href={getNextStepUrl()}>
+                            <span>{getNextStepText()}</span>
+                            <ArrowRight className="h-4 w-4" />
+                          </Link>
+                        </Button>
+                        
+                        <Button 
+                          variant="outline" 
+                          size="lg" 
+                          onClick={handleDownloadNDA}
+                          className="flex items-center space-x-2"
+                        >
+                          <Download className="h-4 w-4" />
+                          <span>Download NDA Copy</span>
+                        </Button>
+                      </div>
+
+                      {/* Important Notice */}
+                      <Alert>
+                        <AlertCircle className="h-4 w-4" />
+                        <AlertDescription>
+                          <strong>Important:</strong> This NDA is legally binding and remains in effect for 2 years. 
+                          Please ensure you understand and comply with all confidentiality obligations.
+                        </AlertDescription>
+                      </Alert>
+
+                      {/* Footer Links */}
+                      <div className="pt-4 border-t text-sm text-muted-foreground">
+                        <p>
+                          Need help? Contact{' '}
+                          <a href="mailto:support@cranberryhearing.com" className="text-blue-600 hover:underline">
+                            Cranberry Hearing and Balance Center
+                          </a>
+                        </p>
+                      </div>
+                    </CardContent>
+                  </Card>
                 </div>
-              )}
+              </div>
             </div>
+          </div>
+        </div>
 
-            {/* What's Next */}
-            <div className="bg-blue-50 rounded-lg p-4">
-              <h3 className="font-semibold text-blue-900 mb-2">What&apos;s Next?</h3>
-              <p className="text-blue-800 text-sm">
-                You now have access to confidential business information for the Cranberry Hearing and Balance Center acquisition. 
-                You can proceed to review due diligence documents and other sensitive materials.
-              </p>
-            </div>
-
-            {/* Action Buttons */}
-            <div className="flex flex-col sm:flex-row gap-3 justify-center">
-              <Button asChild size="lg" className="flex items-center space-x-2">
-                <Link href={getNextStepUrl()}>
-                  <span>{getNextStepText()}</span>
-                  <ArrowRight className="h-4 w-4" />
-                </Link>
-              </Button>
-              
-              <Button 
-                variant="outline" 
-                size="lg" 
-                onClick={handleDownloadNDA}
-                className="flex items-center space-x-2"
-              >
-                <Download className="h-4 w-4" />
-                <span>Download NDA Copy</span>
-              </Button>
-            </div>
-
-            {/* Important Notice */}
-            <Alert>
-              <AlertCircle className="h-4 w-4" />
-              <AlertDescription>
-                <strong>Important:</strong> This NDA is legally binding and remains in effect for 2 years. 
-                Please ensure you understand and comply with all confidentiality obligations.
-              </AlertDescription>
-            </Alert>
-
-            {/* Footer Links */}
-            <div className="pt-4 border-t text-sm text-muted-foreground">
-              <p>
-                Need help? Contact{' '}
-                <a href="mailto:support@cranberryhearing.com" className="text-blue-600 hover:underline">
-                  Cranberry Hearing and Balance Center
-                </a>
-              </p>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-    </div>
+        {/* Footer */}
+        <SiteFooter />
+      </SidebarInset>
+    </SidebarProvider>
   );
 }

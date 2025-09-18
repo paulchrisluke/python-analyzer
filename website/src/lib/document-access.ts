@@ -31,20 +31,6 @@ export async function downloadDocument(doc: Document): Promise<boolean> {
   }
 }
 
-/**
- * Open a document in a new tab via server-side proxy
- */
-export async function viewDocument(doc: Document): Promise<boolean> {
-  try {
-    // Open the proxy endpoint in a new tab - the server will handle streaming
-    const proxyUrl = `/api/documents/proxy/${encodeURIComponent(doc.id)}`;
-    window.open(proxyUrl, '_blank', 'noopener,noreferrer');
-    return true;
-  } catch (error) {
-    console.error('Error viewing document:', error);
-    return false;
-  }
-}
 
 /**
  * Check if a document can be accessed by the current user

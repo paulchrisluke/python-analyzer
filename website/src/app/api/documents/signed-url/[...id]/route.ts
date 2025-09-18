@@ -13,7 +13,7 @@ export async function GET(
 ) {
   try {
     // Initialize NDA storage (in-memory only for API routes)
-    await enableNDAStorage({ enablePersistence: false });
+    await enableNDAStorage({ enablePersistence: true });
     
     const { id } = await params;
     

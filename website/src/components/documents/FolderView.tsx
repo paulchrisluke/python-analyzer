@@ -10,9 +10,9 @@ import { PhaseTable } from "./PhaseTable"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { Folder, FileText, FileSpreadsheet, Lock, Download, Eye, MoreHorizontal } from "lucide-react"
+import { Folder, FileText, FileSpreadsheet, Lock, Download, MoreHorizontal } from "lucide-react"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
-import { downloadDocument, viewDocument } from "@/lib/document-access"
+import { downloadDocument } from "@/lib/document-access"
 
 export interface FolderItem {
   id: string
@@ -100,16 +100,6 @@ export function FolderView({ documents, userRole, onAccessRequest }: FolderViewP
       }
       // Add a small delay between downloads
       await new Promise(resolve => setTimeout(resolve, 500));
-    }
-  }
-
-  const handlePreview = async (item: FolderItem) => {
-    if (item.type === 'document' && item.document) {
-      const success = await viewDocument(item.document);
-      if (!success) {
-        console.error('Failed to preview document:', item.document.id);
-        // TODO: Show error toast/notification
-      }
     }
   }
 
@@ -212,7 +202,6 @@ export function FolderView({ documents, userRole, onAccessRequest }: FolderViewP
                   }
                   setSelectedItems(newSelected)
                 }}
-                onPreview={handlePreview}
                 onDownload={handleDownload}
                 userRole={userRole}
                 viewMode={viewMode}

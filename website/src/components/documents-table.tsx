@@ -15,15 +15,7 @@ import {
 } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { FileTextIcon, DownloadIcon, EyeIcon, MoreHorizontalIcon } from "lucide-react"
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
+import { FileTextIcon, DownloadIcon } from "lucide-react"
 
 const documents = [
   {
@@ -100,7 +92,8 @@ export function DocumentsTable() {
         </div>
       </CardHeader>
       <CardContent>
-        <div className="rounded-md border">
+        {/* Desktop Table View */}
+        <div className="hidden md:block rounded-md border">
           <Table>
             <TableHeader>
               <TableRow>
@@ -140,34 +133,50 @@ export function DocumentsTable() {
                     {new Date(document.lastModified).toLocaleDateString()}
                   </TableCell>
                   <TableCell>
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" className="h-8 w-8 p-0">
-                          <span className="sr-only">Open menu</span>
-                          <MoreHorizontalIcon className="h-4 w-4" />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                        <DropdownMenuItem>
-                          <EyeIcon className="h-4 w-4 mr-2" />
-                          View Document
-                        </DropdownMenuItem>
-                        <DropdownMenuItem>
-                          <DownloadIcon className="h-4 w-4 mr-2" />
-                          Download
-                        </DropdownMenuItem>
-                        <DropdownMenuSeparator />
-                        <DropdownMenuItem>
-                          Copy document ID
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
+                    <Button variant="ghost" className="h-8 w-8 p-0">
+                      <DownloadIcon className="h-4 w-4" />
+                    </Button>
                   </TableCell>
                 </TableRow>
               ))}
             </TableBody>
           </Table>
+        </div>
+
+        {/* Mobile Card View */}
+        <div className="md:hidden space-y-4">
+          {documents.map((document) => (
+            <div key={document.id} className="border rounded-lg p-4 space-y-3">
+              <div className="flex items-start justify-between">
+                <div className="flex items-center gap-2 flex-1 min-w-0">
+                  <FileTextIcon className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+                  <span className="font-medium text-sm truncate">{document.name}</span>
+                </div>
+                <Button variant="ghost" className="h-8 w-8 p-0 flex-shrink-0">
+                  <DownloadIcon className="h-4 w-4" />
+                </Button>
+              </div>
+              
+              <div className="flex flex-wrap gap-2">
+                <Badge variant="outline" className="text-xs">{document.type}</Badge>
+                <Badge 
+                  variant={
+                    document.status === "completed" ? "default" :
+                    document.status === "in-progress" ? "secondary" : "outline"
+                  }
+                  className="text-xs"
+                >
+                  {document.status === "completed" ? "Completed" :
+                   document.status === "in-progress" ? "In Progress" : "Pending"}
+                </Badge>
+              </div>
+              
+              <div className="flex justify-between text-xs text-muted-foreground">
+                <span>{document.size}</span>
+                <span>{new Date(document.lastModified).toLocaleDateString()}</span>
+              </div>
+            </div>
+          ))}
         </div>
       </CardContent>
     </Card>

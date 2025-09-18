@@ -18,8 +18,8 @@ export async function GET(
   { params }: { params: Promise<{ id: string[] }> }
 ) {
   try {
-    // Initialize NDA storage (in-memory only for API routes)
-    await enableNDAStorage({ enablePersistence: false });
+    // Initialize NDA storage with persistence to load existing signatures
+    await enableNDAStorage({ enablePersistence: true });
     
     const { id } = await params;
     

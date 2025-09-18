@@ -18,6 +18,7 @@
     "test:auth": "playwright test tests/auth.spec.ts",
     "test:auth:full": "npm run test:auth:all",
     "test:buyer": "playwright test tests/buyer-dashboard.spec.ts",
+    "upload-data": "node scripts/upload-data-to-blob.js",
     "test:admin": "playwright test tests/admin-dashboard.spec.ts",
     "test:auth:all": "playwright test tests/auth.spec.ts tests/buyer-dashboard.spec.ts tests/admin-dashboard.spec.ts"
   },

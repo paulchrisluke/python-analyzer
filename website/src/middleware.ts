@@ -15,6 +15,11 @@ export async function middleware(req: any) {
     return NextResponse.next()
   }
   
+  // Skip middleware for data API routes to allow unauthenticated access
+  if (pathname.startsWith("/api/data") || pathname.startsWith("/api/test-data")) {
+    return NextResponse.next()
+  }
+  
   // Skip middleware for public API routes
   if (pathname.startsWith("/api/documents") && /^\/api\/documents\/public(\/|$)/.test(pathname)) {
     return NextResponse.next()

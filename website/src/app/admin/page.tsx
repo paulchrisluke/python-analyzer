@@ -47,13 +47,15 @@ function AdminPageContent() {
     setData(prev => ({ ...prev, loading: true, error: undefined }))
     
     try {
-      // Load revenue data
-      const revenueResponse = await fetch('/data/revenue_audit_trail.json')
-      const revenueData = revenueResponse.ok ? await revenueResponse.json() : null
+      // Load revenue data from blob storage
+      const revenueResponse = await fetch('/api/data/revenue_audit_trail')
+      const revenueResult = revenueResponse.ok ? await revenueResponse.json() : null
+      const revenueData = revenueResult?.success ? revenueResult.data : null
       
-      // Load EBIT data
-      const ebitdaResponse = await fetch('/data/ebitda_audit_trail.json')
-      const ebitdaData = ebitdaResponse.ok ? await ebitdaResponse.json() : null
+      // Load EBIT data from blob storage
+      const ebitdaResponse = await fetch('/api/data/ebitda_audit_trail')
+      const ebitdaResult = ebitdaResponse.ok ? await ebitdaResponse.json() : null
+      const ebitdaData = ebitdaResult?.success ? ebitdaResult.data : null
       
       setData({
         revenue: revenueData,

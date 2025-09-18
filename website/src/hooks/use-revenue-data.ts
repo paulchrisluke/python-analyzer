@@ -34,15 +34,15 @@ export function useRevenueData() {
     setData(prev => ({ ...prev, loading: true, error: undefined }))
     
     try {
-      console.log('🔄 Loading revenue and EBITDA data...')
+      console.log('🔄 Loading revenue and EBITDA data from blob storage...')
       
-      // Load both data sources in parallel
+      // Load both data sources in parallel from blob storage
       const [revenueResponse, ebitdaResponse] = await Promise.all([
-        fetch('/data/revenue_audit_trail.json', { 
+        fetch('/api/data/revenue_audit_trail', { 
           signal, 
           cache: 'no-store' 
         }),
-        fetch('/data/ebitda_audit_trail.json', { 
+        fetch('/api/data/ebitda_audit_trail', { 
           signal, 
           cache: 'no-store' 
         })
@@ -53,14 +53,20 @@ export function useRevenueData() {
         throw new Error(`Failed to fetch data from server: ${revenueResponse.status} ${ebitdaResponse.status}`)
       }
       
-      const [revenueData, ebitdaData] = await Promise.all([
+      const [revenueResult, ebitdaResult] = await Promise.all([
         revenueResponse.json(),
         ebitdaResponse.json()
       ])
       
-      console.log('✅ Revenue and EBITDA data loaded:', {
+      // Extract data from the API response format
+      const revenueData = revenueResult.success ? revenueResult.data : null;
+      const ebitdaData = ebitdaResult.success ? ebitdaResult.data : null;
+      
+      console.log('✅ Revenue and EBITDA data loaded from blob storage:', {
         revenue: revenueData?.pipeline_run?.total_revenue,
-        ebitda: ebitdaData?.summary?.total_ebit
+        ebitda: ebitdaData?.summary?.total_ebit,
+        revenueSuccess: revenueResult.success,
+        ebitdaSuccess: ebitdaResult.success
       })
       
       // Only update state if component is still mounted and not aborted

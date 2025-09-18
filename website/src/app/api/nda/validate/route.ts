@@ -10,7 +10,7 @@ import path from 'path';
 export async function POST(request: NextRequest) {
   try {
     // Initialize NDA storage (in-memory only for API routes)
-    await enableNDAStorage({ enablePersistence: false });
+    await enableNDAStorage({ enablePersistence: true });
     
     const session = await auth();
     

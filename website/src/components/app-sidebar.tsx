@@ -23,6 +23,7 @@ import { useSession } from "next-auth/react"
 import { getAnchorUrl, ANCHORS } from "@/lib/anchors"
 import { usePathname } from "next/navigation"
 import Link from "next/link"
+import { NDAStatusResponse } from "@/types/nda"
 
 import { NavDocuments } from "@/components/nav-documents"
 import { NavMain } from "@/components/nav-main"
@@ -70,24 +71,9 @@ const adminNavItems = [
 // Buyer-specific navigation items
 const buyerNavItems = [
   {
-    title: "Dashboard",
+    title: "Buyer Dashboard",
     url: "/buyer",
     icon: LayoutDashboardIcon,
-  },
-  {
-    title: "Financial Analysis",
-    url: "/buyer/financials",
-    icon: BarChartIcon,
-  },
-  {
-    title: "Location Details",
-    url: "/buyer/locations",
-    icon: MapPinIcon,
-  },
-  {
-    title: "Documents",
-    url: "/buyer/documents",
-    icon: FileTextIcon,
   },
   {
     title: "Sign NDA",
@@ -97,12 +83,21 @@ const buyerNavItems = [
 ]
 
 // Get navigation data based on user role
-const getNavData = (user: { name?: string; email?: string; image?: string | null; role?: string } | null) => {
+const getNavData = (user: { name?: string; email?: string; image?: string | null; role?: string } | null, ndaStatus: NDAStatusResponse | null) => {
   const isAuthenticated = !!user
   const isAdmin = user?.role === 'admin'
   const isBuyer = user?.role === 'buyer'
   
-  let navMain = isAuthenticated ? [salesPageItem] : publicNavItems
+  // Create NDA items with status
+  const createNDAItem = (baseItem: any) => ({
+    ...baseItem,
+    title: ndaStatus?.isSigned ? `${baseItem.title} (Signed)` : baseItem.title,
+    badge: ndaStatus?.isSigned ? "Signed" : undefined
+  })
+  
+  let navMain = isAuthenticated ? [salesPageItem] : publicNavItems.map(item => 
+    item.title === "Sign NDA" ? createNDAItem(item) : item
+  )
   let sections = []
   
   // Add role-specific navigation with section headers
@@ -110,7 +105,9 @@ const getNavData = (user: { name?: string; email?: string; image?: string | null
     // Admins can see buyer pages for oversight (shown first)
     sections.push({
       title: "Buyer Pages",
-      items: buyerNavItems
+      items: buyerNavItems.map(item => 
+        item.title === "Sign NDA" ? createNDAItem(item) : item
+      )
     })
     // Admin section comes last
     sections.push({
@@ -120,7 +117,9 @@ const getNavData = (user: { name?: string; email?: string; image?: string | null
   } else if (isBuyer) {
     sections.push({
       title: "Buyer",
-      items: buyerNavItems
+      items: buyerNavItems.map(item => 
+        item.title === "Sign NDA" ? createNDAItem(item) : item
+      )
     })
   }
   
@@ -152,6 +151,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   
   const { data: session } = useSession()
   const isAuthenticated = !!session?.user
+  const [ndaStatus, setNdaStatus] = React.useState<NDAStatusResponse | null>(null)
   
   console.log("🔍 Sidebar Debug:", {
     isAuthenticated,
@@ -159,8 +159,30 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     userEmail: session?.user?.email
   })
   
+  // Fetch NDA status for authenticated users
+  React.useEffect(() => {
+    if (!isAuthenticated) {
+      setNdaStatus(null)
+      return
+    }
+
+    const fetchNDAStatus = async () => {
+      try {
+        const response = await fetch('/api/nda/status')
+        if (response.ok) {
+          const data = await response.json()
+          setNdaStatus(data.data)
+        }
+      } catch (error) {
+        console.error('Error fetching NDA status:', error)
+      }
+    }
+
+    fetchNDAStatus()
+  }, [isAuthenticated])
+  
   // Get navigation data based on user role
-  const data = getNavData(session?.user || null)
+  const data = getNavData(session?.user || null, ndaStatus)
 
   return (
     <Sidebar collapsible="offcanvas" {...props}>

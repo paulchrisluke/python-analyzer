@@ -6,7 +6,7 @@ import { LocationInformation } from '@/components/location-information'
 import { SiteHeader } from '@/components/site-header'
 import { SiteFooter } from '@/components/site-footer'
 import { HeroSection } from '@/components/hero-section'
-import { PublicDocuments } from '@/components/documents'
+import { Documents } from '@/components/documents'
 import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar'
 import { AppSidebar } from '@/components/app-sidebar'
 import { staticBusinessData } from '@/data/business-data'
@@ -54,7 +54,7 @@ export default function HomePage() {
 
               {/* Due Diligence */}
               <div id={ANCHORS.DUE_DILIGENCE} className="px-4 lg:px-6">
-                <PublicDocuments />
+                <Documents />
               </div>
 
               {/* Call to Action - Temporarily removed */}

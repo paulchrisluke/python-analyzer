@@ -1,12 +1,11 @@
 "use client"
 
 import { Button } from "@/components/ui/button"
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { MoreHorizontal, Lock, Download, Eye, FileText, FileSpreadsheet } from "lucide-react"
+import { Lock, Download, FileText, FileSpreadsheet } from "lucide-react"
 import { Document } from "@/types/document"
 import { Phase, getPhaseLabel, getDocumentTypeLabel, getDocumentDisplayName, getFileIconType, extractPeriod } from "@/lib/document-utils"
-import { downloadDocument, viewDocument } from "@/lib/document-access"
+import { downloadDocument } from "@/lib/document-access"
 import { useCallback } from "react"
 
 interface PhaseTableProps {
@@ -16,14 +15,6 @@ interface PhaseTableProps {
 }
 
 export function PhaseTable({ phase, documents, hasAccess }: PhaseTableProps) {
-  const handlePreview = useCallback(async (document: Document) => {
-    try {
-      await viewDocument(document);
-    } catch (error) {
-      console.error('Error previewing document:', error);
-    }
-  }, []);
-
   const handleDownload = useCallback(async (document: Document) => {
     try {
       await downloadDocument(document);
@@ -93,23 +84,13 @@ export function PhaseTable({ phase, documents, hasAccess }: PhaseTableProps) {
                 </TableCell>
                 <TableCell>
                   {hasAccess && (
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="sm">
-                          <MoreHorizontal className="h-4 w-4" />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuItem onClick={() => handlePreview(doc)}>
-                          <Eye className="h-4 w-4 mr-2" />
-                          Preview
-                        </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => handleDownload(doc)}>
-                          <Download className="h-4 w-4 mr-2" />
-                          Download
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
+                    <Button 
+                      variant="ghost" 
+                      size="sm"
+                      onClick={() => handleDownload(doc)}
+                    >
+                      <Download className="h-4 w-4" />
+                    </Button>
                   )}
                 </TableCell>
               </TableRow>
