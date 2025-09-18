@@ -11,8 +11,6 @@ import {
   generateDocumentHash
 } from '@/lib/nda';
 import { 
-  getClientIP, 
-  sanitizeUserAgent,
   logNDAActivity,
   isNDAExempt
 } from '@/lib/nda-edge';
@@ -194,10 +192,6 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Get client information
-    const ipAddress = getClientIP(request);
-    const userAgent = sanitizeUserAgent(request.headers.get('user-agent') || '');
-
     // Store NDA signature with createOnly to prevent overwriting existing signatures
     let signature;
     try {
@@ -212,8 +206,6 @@ export async function POST(request: NextRequest) {
         userName: session.user.name,
         signatureData: body.signatureData,
         signedAt,
-        ipAddress,
-        userAgent,
         ndaVersion: '1.0',
         documentHash
       }, { createOnly: true });
@@ -230,8 +222,7 @@ export async function POST(request: NextRequest) {
     // Log successful signing
     logNDAActivity(userId, 'sign', {
       signatureId: signature.id,
-      userRole: 'buyer', // User is now a buyer
-      ipAddress
+      userRole: 'buyer' // User is now a buyer
     });
 
     const response: NDASigningResponse = {

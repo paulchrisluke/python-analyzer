@@ -124,7 +124,6 @@ npm start
 
 - **Vercel**: Recommended for Next.js applications
 - **Netlify**: Static site generation support
-- **Cloudflare Pages**: Static site hosting
 - **Any Node.js hosting**: Standard Next.js deployment
 
 ### Environment Configuration

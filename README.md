@@ -1,93 +1,211 @@
-# ETL Pipeline for Business Analysis
+# Cranberry Hearing & Balance Center - Business Sale Platform
 
-A comprehensive Extract, Transform, Load (ETL) pipeline for business analysis and valuation, with specialized features for due diligence data management.
+A comprehensive business sale platform featuring simple data processing pipelines and a modern Next.js website for presenting business metrics and due diligence information.
 
 ## 🚀 Quick Start
 
-1. **Install dependencies**:
-   ```bash
-   pip install -r requirements.txt
-   ```
+### 1. **Run Data Processing Pipelines**
+```bash
+# Install Python dependencies
+pip install -r requirements.txt
 
-2. **Run the pipeline**:
-   ```bash
-   python run_pipeline.py
-   ```
+# Run individual pipelines
+python simple_revenue_pipeline.py
+python simple_ebitda_pipeline.py  
+python simple_location_pipeline.py
+```
 
-3. **Deploy to website**:
-   ```bash
-   ./deploy_website.sh
-   ```
+### 2. **Start the Website**
+```bash
+cd website
+npm install
+npm run dev
+```
 
-## 📁 Repository Structure
+The website will be available at `http://localhost:3000`
+
+## 📁 Project Structure
 
 ```
-├── etl_pipeline/                # Core ETL pipeline modules
-│   ├── config/                  # Configuration files
-│   ├── extract/                 # Data extraction modules
-│   ├── transform/               # Data transformation modules
-│   ├── load/                    # Data loading modules
-│   ├── utils/                   # Utility functions
-│   └── pipeline_runner.py       # Internal pipeline runner
-├── data/                        # Data storage and processing
-│   ├── final/                   # Processed output data
-│   ├── normalized/              # Normalized data files
-│   ├── raw/                     # Raw input data
-│   └── pipeline_summary.json    # Pipeline execution summary
-├── reports/                     # Generated analysis reports
-├── logs/                        # Pipeline execution logs
-├── tests/                       # Test suite
-├── examples/                    # Example scripts and usage
-├── docs/                        # Documentation
-├── website/                     # Cloudflare Pages website
-├── run_pipeline.py              # Main pipeline runner
-├── deploy_to_website.py         # Website deployment script
-├── deploy_website.sh            # Website deployment shell script
-├── requirements.txt             # Python dependencies
-├── ETL_PIPELINE_TECHNICAL_DOCUMENTATION.md  # Technical documentation
-└── README.md                    # This file
+├── simple_revenue_pipeline.py      # Revenue calculation pipeline
+├── simple_ebitda_pipeline.py       # EBITDA calculation pipeline  
+├── simple_location_pipeline.py     # Location/lease data pipeline
+├── data/                           # Generated data files
+│   ├── final/                      # Processed business data
+│   │   ├── business_sale_data.json
+│   │   ├── revenue_audit_trail.json
+│   │   ├── ebitda_audit_trail.json
+│   │   ├── location_data.json
+│   │   └── due_diligence_stages/   # Due diligence data
+│   ├── normalized/                 # Normalized data
+│   └── raw/                        # Raw input data
+├── docs/                           # Source business documents
+│   ├── financials/                 # P&L, balance sheets, tax docs
+│   ├── equipment/                  # Equipment quotes and specs
+│   ├── legal/                      # Leases, insurance contracts
+│   └── operational/                # Sales data, operations
+├── reports/                        # Generated HTML reports
+├── website/                        # Next.js business sale website
+│   ├── src/                        # Website source code
+│   ├── public/data/                # Data files for website
+│   └── vercel.json                 # Vercel deployment config
+├── requirements.txt                # Python dependencies
+├── vercel.json                     # Root Vercel config
+└── README.md                       # This file
 ```
 
 ## ✨ Key Features
 
-- **Multi-Source Data Processing**: CSV files, PDF documents, financial statements
-- **Configurable Business Rules**: Location filtering, date ranges, financial metrics
-- **Real Financial Calculations**: EBITDA, ROI, revenue projections
-- **Data Coverage Analysis**: Due diligence completeness assessment
-- **Website Integration**: Automatic deployment to Cloudflare Pages
+### **Data Processing Pipelines**
+- **Revenue Analysis**: Calculate Pennsylvania revenue from P&L reports with projections
+- **EBITDA Calculation**: Compute EBIT from financial data with audit trails
+- **Location Management**: Process lease data and property information
+- **Standalone Scripts**: No complex dependencies, just pandas and standard libraries
+
+### **Business Sale Website**
+- **Modern Next.js Application**: Built with React, TypeScript, and Tailwind CSS
+- **Role-Based Authentication**: Admin, buyer, and viewer access levels
+- **Google OAuth Integration**: Secure authentication with Auth.js
+- **Real-Time Data**: Dynamic business metrics and financial visualizations
+- **Document Management**: Protected due diligence document access
+- **NDA System**: Digital signature and compliance tracking
+
+### **Data Integration**
+- **Automatic Data Flow**: Pipelines generate JSON files consumed by website
+- **Audit Trails**: Complete transparency in all calculations
+- **Projections**: Revenue and EBITDA projections through 2026
+- **Due Diligence**: Comprehensive data coverage analysis
 
 ## 🔧 Configuration
 
-Configure business rules and data sources in `etl_pipeline/config/`:
-
-- `business_rules.yaml` - Business logic and analysis parameters
-- `data_sources.yaml` - Data source paths and processing options
-
-### Environment Variables
-
-- **WEBSITE_DATA_DIR** (optional): Path to website data directory for automatic file copying
-  - When set: ETL pipeline copies JSON files to the specified directory for website integration
-  - When not set: Pipeline skips website file publishing (safe for CI/non-monorepo deployments)
-  - Example: `export WEBSITE_DATA_DIR="website/src/data"`
-
-## 📊 Output
-
-The pipeline generates:
-- `business_sale_data.json` - Main business metrics
-- `due_diligence_coverage.json` - Data coverage analysis
-- `equipment_analysis.json` - Equipment valuation
-
-## 🧪 Testing
-
+### **Python Dependencies**
 ```bash
-python -m pytest tests/
+pip install -r requirements.txt
 ```
 
-## 🔒 Privacy & Security
+Required packages:
+- `pandas` - Data processing
+- `numpy` - Numerical calculations  
+- `pyyaml` - Configuration files
+- Standard libraries: `json`, `os`, `pathlib`, `datetime`, `logging`
 
-- **Anonymized Data Only**: All business data in this repository is anonymized/synthetic for demonstration purposes
-- **Production Pipeline**: Real business data is processed only in a separate, secured production pipeline with proper safeguards
-- **Comprehensive Git Ignore**: Prevents accidental commits of sensitive data
+### **Website Dependencies**
+```bash
+cd website
+npm install
+```
+
+Key dependencies:
+- `next` - React framework
+- `@vercel/analytics` - Analytics
+- `@vercel/blob` - File storage
+- `next-auth` - Authentication
+- `tailwindcss` - Styling
+
+## 📊 Data Processing
+
+### **Revenue Pipeline**
+- Processes P&L reports from 2023-2025
+- Filters to Pennsylvania locations only (Cranberry + West View)
+- Calculates monthly and annual revenue totals
+- Generates projections through 2026
+- Output: `revenue_audit_trail.json`
+
+### **EBITDA Pipeline**  
+- Calculates EBIT from P&L data (depreciation not available)
+- Processes multiple location formats (2023 vs 2024-2025)
+- Creates comprehensive audit trails
+- Generates projections with growth scenarios
+- Output: `ebitda_audit_trail.json`
+
+### **Location Pipeline**
+- Processes lease agreements and property data
+- Calculates lease costs and property metrics
+- Manages location information for both sites
+- Output: `location_data.json`
+
+## 🌐 Website Features
+
+### **Public Pages**
+- Business sale landing page with key metrics
+- NDA signature system for document access
+- Public business overview and financial highlights
+
+### **Protected Areas**
+- **Admin Dashboard**: Complete business metrics and analytics
+- **Buyer Dashboard**: Investment information and projections  
+- **Document Access**: Due diligence documents with NDA compliance
+- **User Management**: Role-based access control
+
+### **Authentication**
+- Google OAuth integration
+- Role-based access (admin, buyer, viewer)
+- Secure session management
+- Environment-based configuration
+
+## 🚀 Deployment
+
+### **Vercel Deployment**
+The website is configured for Vercel deployment:
+
+```bash
+# Deploy to Vercel
+vercel --prod
+```
+
+Configuration files:
+- `vercel.json` - Root deployment config
+- `website/vercel.json` - Website-specific config
+
+### **Environment Variables**
+Required for production:
+- `GOOGLE_CLIENT_ID` - Google OAuth client ID
+- `GOOGLE_CLIENT_SECRET` - Google OAuth client secret  
+- `NEXTAUTH_SECRET` - JWT signing secret
+- `NEXTAUTH_URL` - Application URL
+- `ADMIN_EMAILS` - Admin user emails
+- `BUYER_EMAILS` - Buyer user emails
+
+## 📈 Business Metrics
+
+The platform calculates and presents:
+
+- **Revenue**: $2.1M+ annual revenue (Pennsylvania locations)
+- **EBITDA**: $975K+ annual EBIT (depreciation not available)
+- **Locations**: 2 Pennsylvania locations (Cranberry + West View)
+- **Projections**: Growth scenarios through 2026
+- **Equipment**: Comprehensive equipment valuation
+- **Due Diligence**: Data coverage and readiness assessment
+
+## 🔒 Security & Privacy
+
+- **Server-Side Authentication**: All auth logic runs server-side
+- **Environment Variables**: Sensitive data in environment variables only
+- **No Database**: Stateless authentication with JWT sessions
+- **Protected Routes**: Middleware-based access control
+- **Audit Trails**: Complete transparency in all calculations
+
+## 🧪 Development
+
+### **Local Development**
+```bash
+# Start data processing
+python simple_revenue_pipeline.py
+
+# Start website
+cd website
+npm run dev
+```
+
+### **Testing**
+```bash
+# Website tests
+cd website
+npm test
+
+# Run with UI
+npm run test:ui
+```
 
 ## 📝 License
 
@@ -95,4 +213,6 @@ MIT License - see LICENSE file for details.
 
 ---
 
-**Note**: This system demonstrates ETL pipeline functionality using anonymized/synthetic data. Real business data is processed only in a separate, secured production pipeline with proper data handling and privacy controls.
+**Built for Cranberry Hearing & Balance Center Business Sale** 🏢
+
+*This platform provides comprehensive business analysis and presentation tools for the sale of Cranberry Hearing & Balance Center, featuring automated data processing and a modern web interface for potential buyers.*

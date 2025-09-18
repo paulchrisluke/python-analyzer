@@ -5,14 +5,13 @@
 export interface NDASignature {
   id: string;
   userId: string;
-  userEmail: string;
-  userName: string;
+  userEmail: string | null; // Anonymized in public data
+  userName: string | null; // Anonymized in public data
   signatureData: string; // Base64 encoded signature
   signedAt: string;
-  ipAddress: string;
-  userAgent: string;
   ndaVersion: string;
   documentHash: string; // Hash of NDA text for integrity
+  // Note: ipAddress and userAgent removed for privacy compliance
 }
 
 export interface NDAStatus {
