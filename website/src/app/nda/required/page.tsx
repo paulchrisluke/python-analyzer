@@ -8,31 +8,38 @@ import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Shield, Lock, FileText, ArrowRight, AlertTriangle } from 'lucide-react';
 import Link from 'next/link';
+import { NDAStatusResponse } from '@/types/nda';
 
 export default function NDARequiredPage() {
   const { data: session, status } = useSession();
   const router = useRouter();
-  const [ndaStatus, setNdaStatus] = useState<any>(null);
+  const [ndaStatus, setNdaStatus] = useState<NDAStatusResponse | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   const checkNDAStatus = useCallback(async () => {
+    setError(null);
     try {
       const response = await fetch('/api/nda/status');
       if (response.ok) {
         const data = await response.json();
-        setNdaStatus(data.data);
+        const ndaStatusData: NDAStatusResponse = data.data;
+        setNdaStatus(ndaStatusData);
         
         // If already signed or exempt, redirect appropriately
-        if (data.data.isSigned || data.data.isExempt) {
-          if (data.data.isExempt) {
+        if (ndaStatusData.isSigned || ndaStatusData.isExempt) {
+          if (ndaStatusData.isExempt) {
             router.push('/admin');
           } else {
             router.push('/nda/success');
           }
         }
+      } else {
+        setError('Failed to check NDA status. Please try again.');
       }
     } catch (error) {
       console.error('Error checking NDA status:', error);
+      setError('An error occurred while checking NDA status. Please refresh the page.');
     } finally {
       setIsLoading(false);
     }
@@ -123,6 +130,16 @@ export default function NDARequiredPage() {
             Access to confidential information requires a signed Non-Disclosure Agreement
           </p>
         </div>
+
+        {/* Error Alert */}
+        {error && (
+          <Alert variant="destructive">
+            <AlertTriangle className="h-4 w-4" />
+            <AlertDescription>
+              {error}
+            </AlertDescription>
+          </Alert>
+        )}
 
         {/* Main Card */}
         <Card>

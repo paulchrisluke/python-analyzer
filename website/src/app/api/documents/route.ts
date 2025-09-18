@@ -8,53 +8,39 @@ export async function GET(request: NextRequest) {
   
   // For public documents, allow unauthenticated access but return limited data
   if (!session) {
-    // Return public document preview data
-    return NextResponse.json({
-      success: true,
-      data: [
-        {
-          id: 'financial-statements-2024',
-          name: 'Financial Statements 2024',
-          category: 'Financial',
-          file_type: 'pdf',
-          created_at: '2024-01-01T00:00:00Z',
-          visibility: ['public']
-        },
-        {
-          id: 'equipment-inventory',
-          name: 'Equipment Inventory',
-          category: 'Equipment',
-          file_type: 'pdf',
-          created_at: '2024-01-01T00:00:00Z',
-          visibility: ['public']
-        },
-        {
-          id: 'insurance-policies',
-          name: 'Insurance Policies',
-          category: 'Legal',
-          file_type: 'pdf',
-          created_at: '2024-01-01T00:00:00Z',
-          visibility: ['public']
-        },
-        {
-          id: 'lease-agreements',
-          name: 'Lease Agreements',
-          category: 'Legal',
-          file_type: 'pdf',
-          created_at: '2024-01-01T00:00:00Z',
-          visibility: ['public']
-        },
-        {
-          id: 'sales-data-2024',
-          name: 'Sales Data 2024',
-          category: 'Operational',
-          file_type: 'csv',
-          created_at: '2024-01-01T00:00:00Z',
-          visibility: ['public']
-        }
-      ],
-      count: 5
-    });
+    try {
+      const { searchParams } = new URL(request.url);
+      const filters = {
+        category: searchParams.get('category') || undefined,
+        file_type: searchParams.get('file_type') || undefined,
+        visibility: ['public'],
+        search: searchParams.get('search') || undefined,
+      };
+      
+      const documents = await DocumentStorage.findAll(filters);
+      
+      // Optionally limit fields returned for public access
+      const publicDocuments = documents.map(doc => ({
+        id: doc.id,
+        name: doc.name,
+        category: doc.category,
+        file_type: doc.file_type,
+        created_at: doc.created_at,
+        visibility: doc.visibility
+      }));
+      
+      return NextResponse.json({
+        success: true,
+        data: publicDocuments,
+        count: publicDocuments.length
+      });
+    } catch (error) {
+      console.error('Error fetching public documents:', error);
+      return NextResponse.json(
+        { success: false, error: 'Failed to fetch documents' },
+        { status: 500 }
+      );
+    }
   }
   
   // For authenticated users, check if they're admin for full access

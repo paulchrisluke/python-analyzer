@@ -8,11 +8,12 @@ import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { CheckCircle, Download, ArrowRight, AlertCircle } from 'lucide-react';
 import Link from 'next/link';
+import { NDAStatusResponse } from '@/types/nda';
 
 export default function NDASuccessPage() {
   const { data: session, status } = useSession();
   const router = useRouter();
-  const [ndaStatus, setNdaStatus] = useState<any>(null);
+  const [ndaStatus, setNdaStatus] = useState<NDAStatusResponse | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   const checkNDAStatus = useCallback(async () => {
@@ -20,10 +21,11 @@ export default function NDASuccessPage() {
       const response = await fetch('/api/nda/status');
       if (response.ok) {
         const data = await response.json();
-        setNdaStatus(data.data);
+        const ndaStatusData: NDAStatusResponse = data.data;
+        setNdaStatus(ndaStatusData);
         
         // If not signed, redirect to signing page
-        if (!data.data.isSigned && !data.data.isExempt) {
+        if (!ndaStatusData.isSigned && !ndaStatusData.isExempt) {
           router.push('/nda');
         }
       }

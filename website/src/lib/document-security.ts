@@ -37,6 +37,11 @@ export const SECURITY_CONFIG = {
 };
 
 /**
+ * Document phases that require NDA signature for access
+ */
+export const NDA_REQUIRED_PHASES: DocumentPhase[] = ['p2b', 'p3a', 'p3b', 'p4', 'p5', 'legal'];
+
+/**
  * Validate document filename for security
  */
 export function validateDocumentFilename(filename: string): { valid: boolean; error?: string } {
@@ -182,21 +187,45 @@ export function getDocumentPhase(document: Document): DocumentPhase {
 
 /**
  * Check if user has access to document based on role and phase
+ * 
+ * @param userRole - The user's role (e.g., 'admin', 'investor', 'buyer')
+ * @param document - The document to check access for
+ * @param ndaSigned - Optional NDA signature status (defaults to false for security)
+ * @returns true if user has access, false otherwise
+ * 
+ * @deprecated For callers that need to pass the real NDA status, use:
+ * hasDocumentAccessWithNDA(userRole, document, actualNdaStatus)
  */
-export function hasDocumentAccess(userRole: string, document: Document, ndaSigned: boolean): boolean {
+export function hasDocumentAccess(userRole: string, document: Document, ndaSigned?: boolean): boolean {
   if (userRole === 'admin') {
     return true;
   }
 
-  // Check if document phase requires NDA
-  const ndaRequiredPhases: DocumentPhase[] = ['p2b', 'p3a', 'p3b', 'p4', 'p5', 'legal'];
+  // Default to false for security (secure default)
+  const hasNda = ndaSigned ?? false;
   const documentPhase = getDocumentPhase(document);
   
-  if (ndaRequiredPhases.includes(documentPhase) && !ndaSigned) {
+  // Check if document phase requires NDA
+  if (NDA_REQUIRED_PHASES.includes(documentPhase) && !hasNda) {
     return false;
   }
 
   return document.visibility.includes(userRole);
+}
+
+/**
+ * Migration helper: Check document access with explicit NDA status
+ * 
+ * Use this function when you have the actual NDA signature status
+ * and want to avoid the secure default behavior.
+ * 
+ * @param userRole - The user's role
+ * @param document - The document to check access for  
+ * @param ndaSigned - The actual NDA signature status
+ * @returns true if user has access, false otherwise
+ */
+export function hasDocumentAccessWithNDA(userRole: string, document: Document, ndaSigned: boolean): boolean {
+  return hasDocumentAccess(userRole, document, ndaSigned);
 }
 
 /**

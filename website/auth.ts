@@ -59,27 +59,16 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     },
     async jwt({ token, user, account }) {
       if (user) {
-        // Get admin and buyer emails from environment variables (Vercel secrets)
+        // Get admin emails from environment variables (only for admin role)
         const adminEmails = (process.env.ADMIN_EMAILS ?? "")
-          .split(",")
-          .map((e) => e.trim().toLowerCase())
-          .filter(Boolean)
-        const buyerEmails = (process.env.BUYER_EMAILS ?? "")
-          .split(",")
-          .map((e) => e.trim().toLowerCase())
-          .filter(Boolean)
-        const lawyerEmails = (process.env.LAWYER_EMAILS ?? "")
           .split(",")
           .map((e) => e.trim().toLowerCase())
           .filter(Boolean)
         const email = (user.email ?? "").toLowerCase()
 
+        // Only admin role is determined by email - all others start as viewer
         if (adminEmails.includes(email)) {
           token.role = 'admin'
-        } else if (buyerEmails.includes(email)) {
-          token.role = 'buyer'
-        } else if (lawyerEmails.includes(email)) {
-          token.role = 'lawyer'
         } else {
           token.role = 'viewer'
         }
@@ -89,6 +78,19 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         token.name = user.name
         token.picture = user.image
       }
+      
+      // Check user role from Vercel Blob storage
+      if (token.sub) {
+        try {
+          const { getUserRole } = await import('@/lib/nda-storage')
+          const userRole = await getUserRole(token.sub, token.email as string)
+          token.role = userRole
+        } catch (error) {
+          console.error('Error getting user role from blob:', error)
+          // Keep the original role if there's an error
+        }
+      }
+      
       return token
     },
     async session({ session, token }) {
@@ -99,16 +101,9 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         session.user.name = token.name as string
         session.user.image = token.picture as string
         
-        // Add NDA status to session
-        if (token.role === 'admin') {
-          // Admin users are exempt from NDA requirements
-          session.user.ndaSigned = true
-          session.user.ndaSignedAt = undefined
-        } else {
-          // For non-admin users, NDA status is checked server-side in API endpoints
-          // Don't set ndaSigned here to avoid hardcoding false
-          session.user.ndaSignedAt = undefined
-        }
+        // NDA status is checked server-side in API endpoints
+        session.user.ndaSigned = undefined
+        session.user.ndaSignedAt = undefined
       }
       return session
     }

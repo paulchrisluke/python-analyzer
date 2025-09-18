@@ -23,6 +23,23 @@ export interface NDAStatus {
   signatureId?: string;
 }
 
+// Extended NDA status response from API that includes additional fields
+export interface NDAStatusResponse {
+  isSigned: boolean;
+  isExempt: boolean;
+  canAccessProtectedContent: boolean;
+  role: string;
+  signedAt?: string;
+  version?: string;
+  signatureId?: string;
+  exemptReason?: string;
+  signature?: {
+    id: string;
+    signedAt: string;
+    version: string;
+  } | null;
+}
+
 export interface NDASigningRequest {
   signatureData: string;
   agreedToTerms: boolean;
@@ -69,10 +86,3 @@ export interface NDADocumentConfig {
   exemptRoles: string[];
 }
 
-// Rate limiting for NDA signing
-export interface NDARateLimit {
-  attempts: number;
-  maxAttempts: number;
-  resetTime: number;
-  allowed: boolean;
-}

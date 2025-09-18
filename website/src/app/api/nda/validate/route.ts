@@ -3,6 +3,8 @@ import { auth } from '@/auth';
 import { validateNDASignature, enableNDAStorage } from '@/lib/nda-storage';
 import { generateDocumentHash } from '@/lib/nda';
 import { NDAValidationRequest, NDAValidationResponse } from '@/types/nda';
+import { promises as fs } from 'fs';
+import path from 'path';
 
 // POST /api/nda/validate - Validate NDA signature integrity
 export async function POST(request: NextRequest) {
@@ -40,10 +42,8 @@ export async function POST(request: NextRequest) {
     let ndaContent: string;
     
     try {
-      const fs = require('fs');
-      const path = require('path');
       const ndaPath = path.join(process.cwd(), 'src', 'data', 'nda-document.md');
-      ndaContent = fs.readFileSync(ndaPath, 'utf8');
+      ndaContent = await fs.readFile(ndaPath, 'utf8');
     } catch (error) {
       console.error('Error reading NDA document:', error);
       return NextResponse.json(

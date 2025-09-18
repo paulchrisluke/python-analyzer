@@ -7,7 +7,7 @@
  * For crypto-dependent functions, use the server-only nda.ts module instead.
  */
 
-import type { NDADocumentConfig, NDARateLimit } from '@/types/nda';
+import type { NDADocumentConfig } from '@/types/nda';
 
 // NDA Configuration (edge-safe)
 export const NDA_CONFIG: NDADocumentConfig = {
@@ -22,12 +22,6 @@ export const NDA_CONFIG: NDADocumentConfig = {
 // Phases that require NDA signature (edge-safe)
 export const NDA_REQUIRED_PHASES = ['p2b', 'p3a', 'p3b', 'p4', 'p5', 'legal'];
 
-// Rate limiting configuration (edge-safe)
-export const NDA_RATE_LIMIT = {
-  MAX_ATTEMPTS: 5,
-  WINDOW_MS: 60 * 60 * 1000, // 1 hour
-  STORAGE_KEY_PREFIX: 'nda_rate_limit_'
-};
 
 /**
  * Check if user role requires NDA signature (edge-safe)
@@ -77,7 +71,7 @@ export function sanitizeUserAgent(userAgent: string): string {
  */
 export function logNDAActivity(
   userId: string,
-  action: 'sign' | 'view' | 'access_denied' | 'rate_limited',
+  action: 'sign' | 'view' | 'access_denied',
   details?: Record<string, any>
 ): void {
   const timestamp = new Date().toISOString();

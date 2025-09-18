@@ -266,11 +266,11 @@ export class DocumentStorage {
     switch (phase) {
       case 'p1':
         // Initial Interest - Basic business info
-        visibility.push('buyer');
+        visibility.push('buyer', 'viewer', 'public');
         break;
       case 'p2a':
         // Pre-Qualification - High-level summaries
-        visibility.push('buyer');
+        visibility.push('buyer', 'viewer', 'public');
         break;
       case 'p2b':
         // Post-NDA - Detailed financials, ownership
@@ -278,7 +278,12 @@ export class DocumentStorage {
         break;
       case 'p3a':
         // Due Diligence Start - Full financials, contracts
-        visibility.push('buyer');
+        // Make some financial documents public for demo purposes
+        if (['financials', 'equipment'].includes(category)) {
+          visibility.push('buyer', 'viewer', 'public');
+        } else {
+          visibility.push('buyer');
+        }
         break;
       case 'p3b':
         // Advanced Due Diligence - Staff, patients, equipment
@@ -297,8 +302,12 @@ export class DocumentStorage {
         visibility.push('lawyer');
         break;
       case 'legacy':
-        // Legacy files - default to buyer access for now
-        visibility.push('buyer');
+        // Legacy files - make some public for demo purposes
+        if (['financials', 'equipment', 'operational'].includes(category)) {
+          visibility.push('buyer', 'viewer', 'public');
+        } else {
+          visibility.push('buyer');
+        }
         break;
       default:
         // Unknown phase - admin only

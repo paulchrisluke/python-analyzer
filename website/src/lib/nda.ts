@@ -8,8 +8,8 @@
  */
 
 import * as crypto from 'crypto';
-import type { NDASignature, NDAStatus, NDARateLimit } from '@/types/nda';
-import { NDA_CONFIG, NDA_RATE_LIMIT } from './nda-edge';
+import type { NDASignature, NDAStatus } from '@/types/nda';
+import { NDA_CONFIG } from './nda-edge';
 
 // Re-export edge-safe utilities for convenience
 export {
@@ -57,11 +57,10 @@ export function validateSignatureData(signatureData: string): { valid: boolean; 
   return { valid: true };
 }
 
-
 /**
- * Create NDA status object
+ * Create NDA status from signature
  */
-export function createNDAStatus(signature?: NDASignature | null): NDAStatus {
+export function createNDAStatus(signature: NDASignature | null): NDAStatus {
   if (!signature) {
     return {
       isSigned: false,
@@ -69,6 +68,18 @@ export function createNDAStatus(signature?: NDASignature | null): NDAStatus {
     };
   }
 
+  // Validate signature integrity before granting access
+  const validation = validateSignatureIntegrity(signature, signature.documentHash);
+  
+  if (!validation.valid) {
+    // Signature exists but is invalid - don't grant access
+    return {
+      isSigned: true,
+      canAccessProtectedContent: false
+    };
+  }
+
+  // All validations passed - grant access
   return {
     isSigned: true,
     signedAt: signature.signedAt,
@@ -108,49 +119,4 @@ export function validateSignatureIntegrity(
   return { valid: true };
 }
 
-/**
- * Rate limiting for NDA signing attempts
- */
-const rateLimitStore = new Map<string, { attempts: number; resetTime: number }>();
-
-export function checkNDARateLimit(userId: string): NDARateLimit {
-  const now = Date.now();
-  const key = `${NDA_RATE_LIMIT.STORAGE_KEY_PREFIX}${userId}`;
-  
-  const current = rateLimitStore.get(key);
-  
-  if (!current || now > current.resetTime) {
-    // Reset or create new window
-    rateLimitStore.set(key, {
-      attempts: 1,
-      resetTime: now + NDA_RATE_LIMIT.WINDOW_MS
-    });
-    
-    return {
-      attempts: 1,
-      maxAttempts: NDA_RATE_LIMIT.MAX_ATTEMPTS,
-      resetTime: now + NDA_RATE_LIMIT.WINDOW_MS,
-      allowed: true
-    };
-  }
-  
-  if (current.attempts >= NDA_RATE_LIMIT.MAX_ATTEMPTS) {
-    return {
-      attempts: current.attempts,
-      maxAttempts: NDA_RATE_LIMIT.MAX_ATTEMPTS,
-      resetTime: current.resetTime,
-      allowed: false
-    };
-  }
-  
-  current.attempts++;
-  rateLimitStore.set(key, current);
-  
-  return {
-    attempts: current.attempts,
-    maxAttempts: NDA_RATE_LIMIT.MAX_ATTEMPTS,
-    resetTime: current.resetTime,
-    allowed: true
-  };
-}
 

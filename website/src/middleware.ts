@@ -16,12 +16,12 @@ export async function middleware(req: any) {
   }
   
   // Skip middleware for public API routes
-  if (pathname.startsWith("/api/documents") && pathname.includes("public")) {
+  if (pathname.startsWith("/api/documents") && /^\/api\/documents\/public(\/|$)/.test(pathname)) {
     return NextResponse.next()
   }
   
-  // Allow access to documents API for public document previews
-  if (pathname === "/api/documents") {
+  // Allow access to documents API for public document previews only
+  if (pathname === "/api/documents" && req.method === "GET" && req.nextUrl.searchParams.has("public")) {
     return NextResponse.next()
   }
   
@@ -52,18 +52,14 @@ export async function middleware(req: any) {
     return NextResponse.redirect(new URL("/unauthorized", req.url))
   }
 
-  if (pathname.startsWith("/buyer") && !["buyer", "admin"].includes(session.user?.role)) {
+  if (pathname.startsWith("/buyer") && !["buyer", "admin", "viewer"].includes(session.user?.role)) {
     return NextResponse.redirect(new URL("/unauthorized", req.url))
   }
 
   // NDA enforcement for protected content
   const requiresNDA = checkIfRequiresNDA(req.nextUrl, session.user?.role)
-  if (requiresNDA) {
-    // For non-exempt users, redirect to NDA required page
-    // The NDA required page will check the actual NDA status via API
-    if (session.user?.role && !isNDAExempt(session.user.role)) {
-      return NextResponse.redirect(new URL("/nda/required", req.url))
-    }
+  if (requiresNDA && (!session.user?.role || !isNDAExempt(session.user.role))) {
+    return NextResponse.redirect(new URL("/nda/required", req.url))
   }
 
   return NextResponse.next()

@@ -16,11 +16,12 @@ import { AppSidebar } from "@/components/app-sidebar"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { staticBusinessData } from '@/data/business-data'
+import { NDAStatusResponse } from '@/types/nda'
 
 function BuyerDashboardContent() {
   const { data: session, status } = useSession()
   const router = useRouter()
-  const [ndaStatus, setNdaStatus] = useState<any>(null)
+  const [ndaStatus, setNdaStatus] = useState<NDAStatusResponse | null>(null)
   const [isLoading, setIsLoading] = useState(true)
 
   // Check NDA status
@@ -37,10 +38,11 @@ function BuyerDashboardContent() {
         const response = await fetch('/api/nda/status')
         if (response.ok) {
           const data = await response.json()
-          setNdaStatus(data.data)
+          const ndaStatusData: NDAStatusResponse = data.data
+          setNdaStatus(ndaStatusData)
           
           // If user hasn't signed NDA and isn't exempt, redirect to NDA page
-          if (!data.data.isSigned && !data.data.isExempt) {
+          if (!ndaStatusData.isSigned && !ndaStatusData.isExempt) {
             router.push('/nda')
             return
           }

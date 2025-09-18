@@ -20,57 +20,284 @@
 
 import type { NDASignature, NDAStatus } from '@/types/nda';
 import { createNDAStatus, generateSignatureId, validateSignatureIntegrity } from './nda';
+import { auth } from '@/auth';
+import { put, del, list, head } from '@vercel/blob';
 
 // In-memory storage for development
 // In production, replace with database operations
 const signatureStore = new Map<string, NDASignature>();
 
-// Check if dev persistence is enabled
-const isDevPersistenceEnabled = (): boolean => {
-  return process.env.ENABLE_DEV_PERSISTENCE === 'true' && 
-         typeof process !== 'undefined' && 
-         typeof process.cwd === 'function';
-};
+// Flag to track if storage has been initialized
+let storageInitialized = false;
 
-// File path for persistence (development only) - only use when explicitly enabled
-const getStorageFile = () => {
-  if (isDevPersistenceEnabled()) {
-    const path = require('path');
-    return path.join(process.cwd(), 'data', 'nda-signatures.json');
-  }
-  return null;
+// Vercel Blob configuration
+const BLOB_STORE_KEY = 'nda-signatures.json';
+const USER_ROLES_BLOB_KEY = 'user-roles.json';
+
+// User role management
+interface UserRole {
+  userId: string;
+  email: string;
+  role: 'admin' | 'buyer' | 'lawyer' | 'viewer';
+  updatedAt: string;
+}
+
+// Audit log for admin operations
+interface AdminAuditLog {
+  id: string;
+  adminUserId: string;
+  adminEmail: string;
+  action: 'get_all_signatures' | 'delete_signature';
+  targetSignatureId?: string;
+  timestamp: string;
+  ipAddress?: string;
+  userAgent?: string;
+}
+
+const auditLog: AdminAuditLog[] = [];
+
+// Simple mutex for thread safety in concurrent environments
+// In production, this should be replaced with proper database transactions
+let storeLock = false;
+const acquireLock = (): boolean => {
+  if (storeLock) return false;
+  storeLock = true;
+  return true;
+};
+const releaseLock = (): void => {
+  storeLock = false;
 };
 
 /**
- * Initialize storage - load from file if it exists (Node.js only)
- * Only works when ENABLE_DEV_PERSISTENCE=true and in Node.js environment
+ * Admin authentication utilities
+ */
+
+/**
+ * Verify that the current user is authenticated and has admin role
+ * @returns Promise<{ isAdmin: boolean; user?: { id: string; email: string; role: string } }>
+ */
+async function verifyAdminAuth(): Promise<{ 
+  isAdmin: boolean; 
+  user?: { id: string; email: string; role: string }; 
+  error?: string 
+}> {
+  try {
+    const session = await auth();
+    
+    if (!session?.user) {
+      return { isAdmin: false, error: 'Not authenticated' };
+    }
+    
+    if (session.user.role !== 'admin') {
+      return { 
+        isAdmin: false, 
+        user: { 
+          id: session.user.id, 
+          email: session.user.email || '', 
+          role: session.user.role 
+        },
+        error: 'Insufficient permissions - admin role required' 
+      };
+    }
+    
+    return { 
+      isAdmin: true, 
+      user: { 
+        id: session.user.id, 
+        email: session.user.email || '', 
+        role: session.user.role 
+      } 
+    };
+  } catch (error) {
+    console.error('Error verifying admin auth:', error);
+    return { isAdmin: false, error: 'Authentication verification failed' };
+  }
+}
+
+/**
+ * Log admin operations for audit trail
+ */
+function logAdminOperation(
+  adminUser: { id: string; email: string },
+  action: AdminAuditLog['action'],
+  targetSignatureId?: string,
+  ipAddress?: string,
+  userAgent?: string
+): void {
+  const auditEntry: AdminAuditLog = {
+    id: `audit_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+    adminUserId: adminUser.id,
+    adminEmail: adminUser.email,
+    action,
+    targetSignatureId,
+    timestamp: new Date().toISOString(),
+    ipAddress,
+    userAgent
+  };
+  
+  auditLog.push(auditEntry);
+  
+  // Keep only last 1000 audit entries to prevent memory bloat
+  if (auditLog.length > 1000) {
+    auditLog.splice(0, auditLog.length - 1000);
+  }
+  
+  console.log(`Admin audit: ${adminUser.email} performed ${action}${targetSignatureId ? ` on signature ${targetSignatureId}` : ''}`);
+}
+
+// Vercel Blob storage functions
+async function loadSignaturesFromBlob(): Promise<void> {
+  try {
+    console.log('Loading NDA signatures from blob storage...');
+    // List blobs to check if our key exists
+    const { blobs } = await list({ prefix: BLOB_STORE_KEY });
+    console.log(`Found ${blobs.length} blobs with prefix ${BLOB_STORE_KEY}`);
+    const existingBlob = blobs.find(blob => blob.pathname === BLOB_STORE_KEY);
+    
+    if (!existingBlob) {
+      console.log('No existing NDA signatures found in blob storage');
+      return;
+    }
+    
+    console.log(`Found NDA signatures blob: ${existingBlob.pathname}, size: ${existingBlob.size}`);
+
+    // Get the blob content using the download URL
+    console.log(`Fetching blob content from: ${existingBlob.downloadUrl}`);
+    const response = await fetch(existingBlob.downloadUrl);
+    console.log(`Fetch response status: ${response.status}, ok: ${response.ok}`);
+    
+    if (!response.ok) {
+      console.log('No existing NDA signatures found in blob storage - fetch failed');
+      return;
+    }
+
+    const data = await response.text();
+    console.log(`Fetched data length: ${data.length} characters`);
+    console.log(`First 200 characters: ${data.substring(0, 200)}`);
+    
+    const signatures: NDASignature[] = JSON.parse(data);
+    console.log(`Parsed ${signatures.length} signatures from blob`);
+    
+    // Load signatures into memory
+    signatures.forEach(sig => {
+      signatureStore.set(sig.id, sig);
+    });
+    
+    console.log(`Loaded ${signatures.length} NDA signatures from blob storage`);
+  } catch (error) {
+    console.error('Error loading NDA signatures from blob:', error);
+  }
+}
+
+async function saveSignaturesToBlob(): Promise<void> {
+  try {
+    const signatures = Array.from(signatureStore.values());
+    const data = JSON.stringify(signatures, null, 2);
+    
+    await put(BLOB_STORE_KEY, data, {
+      access: 'public',
+      addRandomSuffix: false,
+    });
+    
+    console.log(`Saved ${signatures.length} NDA signatures to blob storage`);
+  } catch (error) {
+    console.error('Error saving NDA signatures to blob:', error);
+  }
+}
+
+// User role management functions
+async function loadUserRolesFromBlob(): Promise<Map<string, UserRole>> {
+  const roleStore = new Map<string, UserRole>();
+  try {
+    const { blobs } = await list({ prefix: USER_ROLES_BLOB_KEY });
+    const existingBlob = blobs.find(blob => blob.pathname === USER_ROLES_BLOB_KEY);
+    
+    if (!existingBlob) {
+      console.log('No existing user roles found in blob storage');
+      return roleStore;
+    }
+    
+    const response = await fetch(existingBlob.downloadUrl);
+    if (!response.ok) {
+      console.log('No existing user roles found in blob storage');
+      return roleStore;
+    }
+    
+    const data = await response.text();
+    const roles: UserRole[] = JSON.parse(data);
+    roles.forEach(role => {
+      roleStore.set(role.userId, role);
+    });
+    console.log(`Loaded ${roles.length} user roles from blob storage`);
+  } catch (error) {
+    console.error('Error loading user roles from blob:', error);
+  }
+  return roleStore;
+}
+
+async function saveUserRolesToBlob(roleStore: Map<string, UserRole>): Promise<void> {
+  try {
+    const roles = Array.from(roleStore.values());
+    const data = JSON.stringify(roles, null, 2);
+    await put(USER_ROLES_BLOB_KEY, data, {
+      access: 'public',
+      addRandomSuffix: false,
+    });
+    console.log(`Saved ${roles.length} user roles to blob storage`);
+  } catch (error) {
+    console.error('Error saving user roles to blob:', error);
+  }
+}
+
+// Public functions for user role management
+export async function getUserRole(userId: string, email?: string): Promise<'admin' | 'buyer' | 'lawyer' | 'viewer'> {
+  try {
+    const roleStore = await loadUserRolesFromBlob();
+    
+    // First try to find by userId
+    let userRole = roleStore.get(userId);
+    
+    // If not found and email is provided, try to find by email
+    if (!userRole && email) {
+      for (const [id, role] of roleStore.entries()) {
+        if (role.email === email) {
+          userRole = role;
+          break;
+        }
+      }
+    }
+    
+    return userRole?.role || 'viewer';
+  } catch (error) {
+    console.error('Error getting user role:', error);
+    return 'viewer';
+  }
+}
+
+export async function updateUserRole(userId: string, email: string, role: 'admin' | 'buyer' | 'lawyer' | 'viewer'): Promise<void> {
+  try {
+    const roleStore = await loadUserRolesFromBlob();
+    roleStore.set(userId, {
+      userId,
+      email,
+      role,
+      updatedAt: new Date().toISOString()
+    });
+    await saveUserRolesToBlob(roleStore);
+    console.log(`Updated user ${userId} role to ${role}`);
+  } catch (error) {
+    console.error('Error updating user role:', error);
+  }
+}
+
+/**
+ * Initialize storage - load from Vercel Blob
  * @deprecated Use enableNDAStorage() instead for explicit opt-in
  */
 export async function initializeNDAStorage(): Promise<void> {
-  if (!isDevPersistenceEnabled()) {
-    console.log('NDA storage persistence disabled - using in-memory only');
-    return;
-  }
-
-  try {
-    const storageFile = getStorageFile();
-    if (storageFile) {
-      const fs = require('fs');
-      if (fs.existsSync(storageFile)) {
-        const data = fs.readFileSync(storageFile, 'utf8');
-        const signatures: NDASignature[] = JSON.parse(data);
-        
-        // Load signatures into memory
-        signatures.forEach(sig => {
-          signatureStore.set(sig.id, sig);
-        });
-        
-        console.log(`Loaded ${signatures.length} NDA signatures from storage`);
-      }
-    }
-  } catch (error) {
-    console.error('Error loading NDA signatures:', error);
-  }
+  console.log('Initializing NDA storage...');
+  await loadSignaturesFromBlob();
+  console.log(`NDA storage initialized. Current signature count: ${signatureStore.size}`);
 }
 
 /**
@@ -91,128 +318,130 @@ export async function enableNDAStorage(options: {
     return;
   }
   
-  if (enablePersistence && !isDevPersistenceEnabled()) {
-    throw new Error(
-      'NDA storage persistence requires ENABLE_DEV_PERSISTENCE=true environment variable. ' +
-      'In production, use a proper database instead of file-based storage.'
-    );
-  }
-  
   if (enablePersistence) {
-    console.log('NDA storage enabled with file-based persistence (development only)');
-    await initializeNDAStorage();
+    if (!storageInitialized) {
+      console.log('NDA storage enabled with Vercel Blob persistence');
+      await initializeNDAStorage();
+      storageInitialized = true;
+    } else {
+      console.log('NDA storage already initialized with Vercel Blob persistence');
+    }
   } else {
     console.log('NDA storage enabled with in-memory only');
   }
 }
 
 /**
- * Save signatures to file (development only, Node.js only)
- * Only works when ENABLE_DEV_PERSISTENCE=true and in Node.js environment
+ * Save signatures to Vercel Blob
  * Never writes raw PII - data is already sanitized in memory
- * 
- * WARNING: This function performs file I/O operations. In production,
- * use a proper database instead of file-based storage.
  */
-function saveSignaturesToFile(): void {
-  if (!isDevPersistenceEnabled()) {
-    // No-op when persistence is disabled
-    return;
-  }
-
-  // Additional safety check - refuse to perform disk I/O without explicit opt-in
-  if (process.env.NODE_ENV === 'production') {
-    console.warn('NDA storage: File I/O disabled in production. Use a database instead.');
-    return;
-  }
-
-  try {
-    const storageFile = getStorageFile();
-    if (storageFile) {
-      const fs = require('fs');
-      const path = require('path');
-      
-      const signatures = Array.from(signatureStore.values());
-      const data = JSON.stringify(signatures, null, 2);
-      
-      // Ensure directory exists
-      const dir = path.dirname(storageFile);
-      if (!fs.existsSync(dir)) {
-        fs.mkdirSync(dir, { recursive: true });
-      }
-      
-      fs.writeFileSync(storageFile, data, 'utf8');
-    }
-  } catch (error) {
-    console.error('Error saving NDA signatures:', error);
-  }
+async function saveSignaturesToFile(): Promise<void> {
+  await saveSignaturesToBlob();
 }
 
 /**
  * Store or update an NDA signature (upsert by userId)
  */
 export async function storeNDASignature(signature: Omit<NDASignature, 'id'>): Promise<NDASignature> {
-  // First, look for existing signature with the same userId
-  let existingSignature: NDASignature | null = null;
-  let existingId: string | null = null;
+  // Acquire lock for thread safety
+  if (!acquireLock()) {
+    throw new Error('Service temporarily unavailable - please try again');
+  }
   
-  for (const [id, existingSig] of signatureStore.entries()) {
-    if (existingSig.userId === signature.userId) {
-      existingSignature = existingSig;
-      existingId = id;
-      break;
+  try {
+    // First, look for existing signature with the same userId
+    let existingSignature: NDASignature | null = null;
+    let existingId: string | null = null;
+    
+    for (const [id, existingSig] of signatureStore.entries()) {
+      if (existingSig.userId === signature.userId) {
+        existingSignature = existingSig;
+        existingId = id;
+        break;
+      }
     }
+    
+    let fullSignature: NDASignature;
+    
+    if (existingSignature && existingId) {
+      // Update existing signature, keeping the same ID
+      fullSignature = {
+        ...existingSignature,
+        ...signature,
+        id: existingId
+      };
+      signatureStore.set(existingId, fullSignature);
+    } else {
+      // Create new signature
+      const id = generateSignatureId();
+      fullSignature = {
+        ...signature,
+        id
+      };
+      signatureStore.set(id, fullSignature);
+    }
+    
+    await saveSignaturesToFile();
+    
+    return fullSignature;
+  } finally {
+    releaseLock();
   }
-  
-  let fullSignature: NDASignature;
-  
-  if (existingSignature && existingId) {
-    // Update existing signature, keeping the same ID
-    fullSignature = {
-      ...existingSignature,
-      ...signature,
-      id: existingId
-    };
-    signatureStore.set(existingId, fullSignature);
-  } else {
-    // Create new signature
-    const id = generateSignatureId();
-    fullSignature = {
-      ...signature,
-      id
-    };
-    signatureStore.set(id, fullSignature);
-  }
-  
-  saveSignaturesToFile();
-  
-  return fullSignature;
 }
 
 /**
  * Get NDA signature by ID
  */
 export async function getNDASignature(signatureId: string): Promise<NDASignature | null> {
-  return signatureStore.get(signatureId) || null;
+  // Acquire lock for thread safety
+  if (!acquireLock()) {
+    throw new Error('Service temporarily unavailable - please try again');
+  }
+  
+  try {
+    return signatureStore.get(signatureId) || null;
+  } finally {
+    releaseLock();
+  }
 }
 
 /**
  * Get NDA signature by user ID
  */
-export async function getNDASignatureByUserId(userId: string): Promise<NDASignature | null> {
-  for (const signature of signatureStore.values()) {
-    if (signature.userId === userId) {
-      return signature;
-    }
+export async function getNDASignatureByUserId(userId: string, email?: string): Promise<NDASignature | null> {
+  // Acquire lock for thread safety
+  if (!acquireLock()) {
+    throw new Error('Service temporarily unavailable - please try again');
   }
-  return null;
+  
+  try {
+    // First try to find by userId
+    for (const signature of signatureStore.values()) {
+      if (signature.userId === userId) {
+        return signature;
+      }
+    }
+    
+    // If not found and email is provided, try to find by email
+    if (email) {
+      for (const signature of signatureStore.values()) {
+        if (signature.userEmail === email) {
+          return signature;
+        }
+      }
+    }
+    
+    return null;
+  } finally {
+    releaseLock();
+  }
 }
 
 /**
  * Get NDA status for a user
  */
-export async function getNDAStatus(userId: string): Promise<NDAStatus> {
-  const signature = await getNDASignatureByUserId(userId);
+export async function getNDAStatus(userId: string, email?: string): Promise<NDAStatus> {
+  const signature = await getNDASignatureByUserId(userId, email);
   return createNDAStatus(signature);
 }
 
@@ -226,20 +455,87 @@ export async function hasUserSignedNDA(userId: string): Promise<boolean> {
 
 /**
  * Get all NDA signatures (admin only)
+ * @param ipAddress Optional IP address for audit logging
+ * @param userAgent Optional user agent for audit logging
+ * @returns Promise<{ signatures: NDASignature[] } | { error: string; statusCode: number }>
  */
-export async function getAllNDASignatures(): Promise<NDASignature[]> {
-  return Array.from(signatureStore.values());
+export async function getAllNDASignatures(
+  ipAddress?: string,
+  userAgent?: string
+): Promise<{ signatures: NDASignature[] } | { error: string; statusCode: number }> {
+  // Verify admin authentication
+  const authResult = await verifyAdminAuth();
+  if (!authResult.isAdmin || !authResult.user) {
+    return { 
+      error: authResult.error || 'Authentication failed', 
+      statusCode: authResult.user ? 403 : 401 
+    };
+  }
+  
+  // Log admin operation
+  logAdminOperation(authResult.user, 'get_all_signatures', undefined, ipAddress, userAgent);
+  
+  // Acquire lock for thread safety
+  if (!acquireLock()) {
+    return { error: 'Service temporarily unavailable', statusCode: 503 };
+  }
+  
+  try {
+    const signatures = Array.from(signatureStore.values());
+    return { signatures };
+  } finally {
+    releaseLock();
+  }
 }
 
 /**
  * Delete NDA signature (admin only)
+ * @param signatureId The ID of the signature to delete
+ * @param ipAddress Optional IP address for audit logging
+ * @param userAgent Optional user agent for audit logging
+ * @returns Promise<{ success: boolean; signature?: NDASignature } | { error: string; statusCode: number }>
  */
-export async function deleteNDASignature(signatureId: string): Promise<boolean> {
-  const deleted = signatureStore.delete(signatureId);
-  if (deleted) {
-    saveSignaturesToFile();
+export async function deleteNDASignature(
+  signatureId: string,
+  ipAddress?: string,
+  userAgent?: string
+): Promise<{ success: boolean; signature?: NDASignature } | { error: string; statusCode: number }> {
+  // Verify admin authentication
+  const authResult = await verifyAdminAuth();
+  if (!authResult.isAdmin || !authResult.user) {
+    return { 
+      error: authResult.error || 'Authentication failed', 
+      statusCode: authResult.user ? 403 : 401 
+    };
   }
-  return deleted;
+  
+  // Acquire lock for thread safety
+  if (!acquireLock()) {
+    return { error: 'Service temporarily unavailable', statusCode: 503 };
+  }
+  
+  try {
+    // Check if signature exists before deletion
+    const existingSignature = signatureStore.get(signatureId);
+    if (!existingSignature) {
+      return { error: 'Signature not found', statusCode: 404 };
+    }
+    
+    // Delete the signature
+    const deleted = signatureStore.delete(signatureId);
+    if (deleted) {
+      await saveSignaturesToFile();
+      
+      // Log admin operation with target signature info
+      logAdminOperation(authResult.user, 'delete_signature', signatureId, ipAddress, userAgent);
+      
+      return { success: true, signature: existingSignature };
+    }
+    
+    return { error: 'Failed to delete signature', statusCode: 500 };
+  } finally {
+    releaseLock();
+  }
 }
 
 /**
@@ -251,30 +547,64 @@ export async function getNDAStatistics(): Promise<{
   signaturesByRole: Record<string, number>;
   recentSignatures: NDASignature[];
 }> {
-  const signatures = Array.from(signatureStore.values());
+  // Acquire lock for thread safety
+  if (!acquireLock()) {
+    throw new Error('Service temporarily unavailable - please try again');
+  }
   
-  const signaturesByVersion: Record<string, number> = {};
-  const signaturesByRole: Record<string, number> = {};
-  
-  signatures.forEach(sig => {
-    // Count by version
-    signaturesByVersion[sig.ndaVersion] = (signaturesByVersion[sig.ndaVersion] || 0) + 1;
+  try {
+    const signatures = Array.from(signatureStore.values());
     
-    // Count by role (we'd need to get this from user data)
-    // For now, we'll just count total
-  });
+    const signaturesByVersion: Record<string, number> = {};
+    const signaturesByRole: Record<string, number> = {};
+    
+    signatures.forEach(sig => {
+      // Count by version
+      signaturesByVersion[sig.ndaVersion] = (signaturesByVersion[sig.ndaVersion] || 0) + 1;
+      
+      // Count by role (we'd need to get this from user data)
+      // For now, we'll just count total
+    });
+    
+    // Get recent signatures (last 10)
+    const recentSignatures = signatures
+      .sort((a, b) => new Date(b.signedAt).getTime() - new Date(a.signedAt).getTime())
+      .slice(0, 10);
+    
+    return {
+      totalSignatures: signatures.length,
+      signaturesByVersion,
+      signaturesByRole,
+      recentSignatures
+    };
+  } finally {
+    releaseLock();
+  }
+}
+
+/**
+ * Get admin audit logs (admin only)
+ * @param ipAddress Optional IP address for audit logging
+ * @param userAgent Optional user agent for audit logging
+ * @returns Promise<{ auditLogs: AdminAuditLog[] } | { error: string; statusCode: number }>
+ */
+export async function getAdminAuditLogs(
+  ipAddress?: string,
+  userAgent?: string
+): Promise<{ auditLogs: AdminAuditLog[] } | { error: string; statusCode: number }> {
+  // Verify admin authentication
+  const authResult = await verifyAdminAuth();
+  if (!authResult.isAdmin || !authResult.user) {
+    return { 
+      error: authResult.error || 'Authentication failed', 
+      statusCode: authResult.user ? 403 : 401 
+    };
+  }
   
-  // Get recent signatures (last 10)
-  const recentSignatures = signatures
-    .sort((a, b) => new Date(b.signedAt).getTime() - new Date(a.signedAt).getTime())
-    .slice(0, 10);
+  // Log admin operation
+  logAdminOperation(authResult.user, 'get_all_signatures', undefined, ipAddress, userAgent);
   
-  return {
-    totalSignatures: signatures.length,
-    signaturesByVersion,
-    signaturesByRole,
-    recentSignatures
-  };
+  return { auditLogs: [...auditLog] }; // Return a copy to prevent external modification
 }
 
 /**
@@ -302,3 +632,32 @@ export async function validateNDASignature(
 
 // Storage initialization is now opt-in via enableNDAStorage() function
 // This prevents automatic initialization on import and requires explicit enablement
+
+/**
+ * ADMIN FUNCTIONS SECURITY NOTES:
+ * 
+ * 1. Admin Authentication: All admin functions (getAllNDASignatures, deleteNDASignature, getAdminAuditLogs)
+ *    now require explicit admin authentication via verifyAdminAuth().
+ * 
+ * 2. Audit Logging: All admin operations are logged with:
+ *    - Admin user ID and email
+ *    - Action performed
+ *    - Target signature ID (for deletions)
+ *    - Timestamp
+ *    - IP address and user agent (when available)
+ * 
+ * 3. Thread Safety: A simple mutex mechanism prevents race conditions in concurrent environments.
+ *    In production, this should be replaced with proper database transactions.
+ * 
+ * 4. API Endpoints: Admin functions are exposed via:
+ *    - GET /api/admin/nda - List all signatures
+ *    - DELETE /api/admin/nda/[signatureId] - Delete signature
+ *    - GET /api/admin/nda/statistics - Get statistics
+ *    - GET /api/admin/nda/audit - Get audit logs
+ * 
+ * 5. Error Handling: Functions return structured error responses with appropriate HTTP status codes:
+ *    - 401: Not authenticated
+ *    - 403: Insufficient permissions (not admin)
+ *    - 404: Signature not found (for deletions)
+ *    - 503: Service temporarily unavailable (lock contention)
+ */

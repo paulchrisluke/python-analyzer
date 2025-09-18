@@ -9,8 +9,8 @@ export const dynamic = 'force-dynamic';
 // GET /api/nda/status - Get detailed NDA status for user
 export async function GET(request: NextRequest) {
   try {
-    // Initialize NDA storage (in-memory only for API routes)
-    await enableNDAStorage({ enablePersistence: false });
+    // Initialize NDA storage with Vercel Blob persistence
+    await enableNDAStorage({ enablePersistence: true });
     
     const session = await auth();
     
@@ -39,8 +39,8 @@ export async function GET(request: NextRequest) {
     }
 
     // Get detailed NDA status
-    const ndaStatus = await getNDAStatus(userId);
-    const signature = await getNDASignatureByUserId(userId);
+    const ndaStatus = await getNDAStatus(userId, session.user.email);
+    const signature = await getNDASignatureByUserId(userId, session.user.email);
 
     return NextResponse.json({
       success: true,

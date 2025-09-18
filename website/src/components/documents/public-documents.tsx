@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react"
 import { FolderView } from "./FolderView"
-import { ContactFormModal } from "./ContactFormModal"
+import { ContactForm } from "@/components/contact-form"
 import { Document } from "@/types/document"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -14,11 +14,11 @@ export function PublicDocuments() {
   const [documents, setDocuments] = useState<Document[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const [isContactModalOpen, setIsContactModalOpen] = useState(false)
+  const [showContactForm, setShowContactForm] = useState(false)
 
   useEffect(() => {
     // Fetch documents from API (public endpoint)
-    fetch('/api/documents')
+    fetch('/api/documents?public=true')
       .then(res => {
         if (!res.ok) {
           throw new Error(`HTTP ${res.status}: ${res.statusText}`)
@@ -56,13 +56,8 @@ export function PublicDocuments() {
   }, [])
 
   const handleAccessRequest = () => {
-    console.log('Opening contact form modal for access request')
-    setIsContactModalOpen(true)
-  }
-
-  const handleContactSuccess = () => {
-    console.log('Contact form submitted successfully')
-    // Could redirect to NDA or show success message
+    console.log('Opening contact form for access request')
+    setShowContactForm(true)
   }
 
   if (loading) {
@@ -97,6 +92,33 @@ export function PublicDocuments() {
           </div>
         </CardContent>
       </Card>
+    )
+  }
+
+  // If contact form is shown, display it instead of the document preview
+  if (showContactForm) {
+    return (
+      <div className="space-y-4">
+        <Card>
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <div>
+                <CardTitle>Request Document Access</CardTitle>
+                <CardDescription>
+                  Complete the form below to access our comprehensive due diligence documents
+                </CardDescription>
+              </div>
+              <Button 
+                variant="outline" 
+                onClick={() => setShowContactForm(false)}
+              >
+                Back to Preview
+              </Button>
+            </div>
+          </CardHeader>
+        </Card>
+        <ContactForm />
+      </div>
     )
   }
 
@@ -191,19 +213,12 @@ export function PublicDocuments() {
               </Button>
               
               <p className="text-xs text-muted-foreground">
-                Provide your information and business details
+                Provide your information and sign NDA for access
               </p>
             </div>
           </div>
         </div>
       </CardContent>
-      
-      {/* Contact Form Modal */}
-      <ContactFormModal
-        isOpen={isContactModalOpen}
-        onClose={() => setIsContactModalOpen(false)}
-        onSuccess={handleContactSuccess}
-      />
     </Card>
   )
 }

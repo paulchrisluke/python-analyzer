@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { auth } from '@/auth';
+import { auth, signIn } from '@/auth';
 import { 
   storeNDASignature, 
   getNDAStatus, 
@@ -9,7 +9,6 @@ import {
 import { 
   validateSignatureData, 
   generateDocumentHash, 
-  checkNDARateLimit, 
   getClientIP, 
   sanitizeUserAgent,
   logNDAActivity,
@@ -17,12 +16,14 @@ import {
   isNDAExempt
 } from '@/lib/nda';
 import { NDASigningRequest, NDASigningResponse } from '@/types/nda';
+import { promises as fs } from 'fs';
+import path from 'path';
 
 // GET /api/nda - Get user's NDA status
 export async function GET(request: NextRequest) {
   try {
-    // Initialize NDA storage (in-memory only for API routes)
-    await enableNDAStorage({ enablePersistence: false });
+    // Initialize NDA storage with Vercel Blob persistence
+    await enableNDAStorage({ enablePersistence: true });
     
     const session = await auth();
     
@@ -73,8 +74,8 @@ export async function GET(request: NextRequest) {
 // POST /api/nda - Submit NDA signature
 export async function POST(request: NextRequest) {
   try {
-    // Initialize NDA storage (in-memory only for API routes)
-    await enableNDAStorage({ enablePersistence: false });
+    // Initialize NDA storage with Vercel Blob persistence
+    await enableNDAStorage({ enablePersistence: true });
     
     const session = await auth();
     
@@ -96,27 +97,6 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Check rate limiting
-    const rateLimit = checkNDARateLimit(userId);
-    if (!rateLimit.allowed) {
-      logNDAActivity(userId, 'rate_limited', { 
-        attempts: rateLimit.attempts,
-        resetTime: rateLimit.resetTime 
-      });
-      
-      return NextResponse.json(
-        { 
-          success: false, 
-          error: 'Too many signing attempts. Please try again later.',
-          rateLimit: {
-            attempts: rateLimit.attempts,
-            maxAttempts: rateLimit.maxAttempts,
-            resetTime: rateLimit.resetTime
-          }
-        },
-        { status: 429 }
-      );
-    }
 
     // Check if user has already signed NDA
     const alreadySigned = await hasUserSignedNDA(userId);
@@ -151,10 +131,8 @@ export async function POST(request: NextRequest) {
     let ndaContent: string;
     
     try {
-      const fs = require('fs');
-      const path = require('path');
       const ndaPath = path.join(process.cwd(), 'src', 'data', 'nda-document.md');
-      ndaContent = fs.readFileSync(ndaPath, 'utf8');
+      ndaContent = await fs.readFile(ndaPath, 'utf8');
     } catch (error) {
       console.error('Error reading NDA document:', error);
       return NextResponse.json(
@@ -217,10 +195,21 @@ export async function POST(request: NextRequest) {
       documentHash
     });
 
+    // Update user role to buyer after successful NDA signing
+    if (userRole === 'viewer') {
+      try {
+        const { updateUserRole } = await import('@/lib/nda-storage')
+        await updateUserRole(userId, session.user.email, 'buyer')
+        console.log(`Updated user ${userId} role from viewer to buyer after NDA signing`)
+      } catch (error) {
+        console.error('Error updating user role after NDA signing:', error)
+      }
+    }
+
     // Log successful signing
     logNDAActivity(userId, 'sign', {
       signatureId: signature.id,
-      userRole,
+      userRole: 'buyer', // User is now a buyer
       ipAddress
     });
 

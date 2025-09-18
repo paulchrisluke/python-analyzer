@@ -82,17 +82,12 @@ export async function GET(
     // Authorization check - verify user has access to this document
     const userRole = session.user?.role;
     
-    // Check NDA status for non-admin users
+    // Check NDA status - exempt roles (admin and NDA-exempt roles) don't need NDA signature
     let ndaSigned = false;
-    if (userRole !== 'admin') {
-      const userId = session.user?.id;
-      if (userId && !isNDAExempt(userRole)) {
-        ndaSigned = await hasUserSignedNDA(userId);
-      } else if (isNDAExempt(userRole)) {
-        ndaSigned = true; // Admin users are exempt
-      }
-    } else {
-      ndaSigned = true; // Admin users have full access
+    if (userRole === 'admin' || isNDAExempt(userRole)) {
+      ndaSigned = true; // Admin and NDA-exempt roles have full access
+    } else if (session.user?.id) {
+      ndaSigned = await hasUserSignedNDA(session.user.id);
     }
     
     const hasAccess = hasDocumentAccess(userRole, document, ndaSigned);

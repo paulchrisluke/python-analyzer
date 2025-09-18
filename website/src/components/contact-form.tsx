@@ -24,45 +24,13 @@ export function ContactForm() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
 
-  // Clean up expired prefill data on mount
-  useEffect(() => {
-    try {
-      const stored = sessionStorage.getItem('nda_prefill');
-      if (stored) {
-        const prefillData = JSON.parse(stored);
-        const now = new Date();
-        const expiresAt = new Date(prefillData.expiresAt);
-        
-        if (now > expiresAt) {
-          // Data has expired, remove it
-          sessionStorage.removeItem('nda_prefill');
-        }
-      }
-    } catch (error) {
-      console.error('Error checking prefill data expiry:', error);
-      // Clear corrupted data
-      sessionStorage.removeItem('nda_prefill');
-    }
-  }, []);
+  // No client-side storage needed - data is handled securely server-side
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
     
     try {
-      // Create secure prefill data with minimal PII
-      const prefillData = {
-        name: formData.name,
-        email: formData.email,
-        // Only store non-sensitive data client-side with TTL
-        displayName: formData.name,
-        emailHash: btoa(formData.email).substring(0, 8), // Short hash for display
-        createdAt: new Date().toISOString(),
-        expiresAt: new Date(Date.now() + 30 * 60 * 1000).toISOString() // 30 min TTL
-      };
-
-      // Store minimal non-PII data with TTL
-      sessionStorage.setItem('nda_prefill', JSON.stringify(prefillData));
       
       // Send full PII to secure backend endpoint
       const response = await fetch('/api/nda/prefill', {
@@ -85,14 +53,17 @@ export function ContactForm() {
 
       const result = await response.json();
       
-      // Set httpOnly cookie with nonce for secure server-side storage
-      document.cookie = `nda_prefill_nonce=${result.nonce}; path=/; max-age=1800; secure; samesite=strict`;
+      // Cookie is automatically set by the API response with HttpOnly, Secure, SameSite flags
+      // No client-side cookie manipulation needed - handled securely server-side
       
       // Clear sensitive data from form after successful submission
       setFormData(prev => ({
         ...prev,
+        name: '',
+        email: '',
         phone: '',
-        message: ''
+        message: '',
+        agreeToTerms: false
       }));
       
       setIsSubmitted(true);
@@ -192,12 +163,11 @@ export function ContactForm() {
 
             <div className="flex items-center space-x-2">
               <Checkbox
-                id="terms"
                 checked={formData.agreeToTerms}
                 onCheckedChange={(checked) => handleInputChange("agreeToTerms", checked as boolean)}
                 disabled={isSubmitting}
               />
-              <Label htmlFor="terms" className="text-sm">
+              <Label className="text-sm cursor-pointer" onClick={() => handleInputChange("agreeToTerms", !formData.agreeToTerms)}>
                 I agree to receive communications about this business opportunity
               </Label>
             </div>

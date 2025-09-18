@@ -43,6 +43,7 @@ export interface CreateDocumentData {
   status?: boolean;
   expected?: boolean;
   notes?: string;
+  phase: DocumentPhase;
   visibility?: string[];
   due_date?: string;
 }
@@ -53,6 +54,7 @@ export interface UpdateDocumentData {
   status?: boolean;
   expected?: boolean;
   notes?: string;
+  phase?: DocumentPhase;
   visibility?: string[];
   due_date?: string;
 }

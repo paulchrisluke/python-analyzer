@@ -24,29 +24,20 @@ export function useNDAUserInfo() {
   useEffect(() => {
     const loadUserInfo = async () => {
       try {
-        // First try to get nonce from httpOnly cookie
-        const cookies = document.cookie.split(';');
-        const nonceCookie = cookies.find(cookie => 
-          cookie.trim().startsWith('nda_prefill_nonce=')
-        );
-        
-        if (nonceCookie) {
-          const nonce = nonceCookie.split('=')[1];
-          
-          // Fetch non-PII data from server using nonce
-          const response = await fetch(`/api/nda/prefill?nonce=${nonce}`);
-          if (response.ok) {
-            const result = await response.json();
-            if (result.success) {
-              // Use server data for display
-              setUserInfo({
-                name: result.data.displayName,
-                email: `***@${result.data.emailHash}`, // Masked email
-                submittedAt: result.data.submittedAt
-              });
-              setIsLoading(false);
-              return;
-            }
+        // Try to get prefill data from server using httpOnly cookie
+        // The server will read the httpOnly cookie and return the data
+        const response = await fetch('/api/nda/prefill');
+        if (response.ok) {
+          const result = await response.json();
+          if (result.success) {
+            // Use server data for display
+            setUserInfo({
+              name: result.data.displayName,
+              email: `***@${result.data.emailHash}`, // Masked email
+              submittedAt: result.data.submittedAt
+            });
+            setIsLoading(false);
+            return;
           }
         }
 
@@ -81,11 +72,17 @@ export function useNDAUserInfo() {
     loadUserInfo();
   }, []);
 
-  const clearUserInfo = () => {
+  const clearUserInfo = async () => {
     try {
+      // Clear local storage
       sessionStorage.removeItem('nda_prefill');
-      // Clear the httpOnly cookie by setting it to expire
-      document.cookie = 'nda_prefill_nonce=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
+      
+      // Clear server-side session and httpOnly cookie
+      await fetch('/api/nda/prefill', {
+        method: 'DELETE',
+        credentials: 'include'
+      });
+      
       setUserInfo(null);
     } catch (error) {
       console.error('Error clearing NDA user info:', error);

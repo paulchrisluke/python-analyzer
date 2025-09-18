@@ -12,6 +12,7 @@ import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/app-sidebar";
+import { NDAStatusResponse } from '@/types/nda';
 
 export default function NDASigningPage() {
   const { data: session, status } = useSession();
@@ -23,7 +24,7 @@ export default function NDASigningPage() {
   const [documentHash, setDocumentHash] = useState<string>('');
   const [isSigning, setIsSigning] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [ndaStatus, setNdaStatus] = useState<any>(null);
+  const [ndaStatus, setNdaStatus] = useState<NDAStatusResponse | null>(null);
   const [consentA, setConsentA] = useState(false);
   const [consentB, setConsentB] = useState(false);
 
@@ -32,10 +33,11 @@ export default function NDASigningPage() {
       const response = await fetch('/api/nda/status');
       if (response.ok) {
         const data = await response.json();
-        setNdaStatus(data.data);
+        const ndaStatusData: NDAStatusResponse = data.data;
+        setNdaStatus(ndaStatusData);
         
         // If already signed, redirect to success page
-        if (data.data.isSigned) {
+        if (ndaStatusData.isSigned) {
           router.push('/nda/success');
         }
       }
@@ -80,7 +82,7 @@ export default function NDASigningPage() {
     }
   };
 
-  const handleSign = async (signature: string, agreedToTerms: boolean, understoodBinding: boolean) => {
+  const handleSign = async (signature: string) => {
     // Early return if consents are not satisfied
     if (!consentA || !consentB) {
       setError('You must agree to both terms before signing the NDA.');
@@ -98,8 +100,8 @@ export default function NDASigningPage() {
         },
         body: JSON.stringify({
           signatureData: signature,
-          agreedToTerms,
-          understoodBinding,
+          agreedToTerms: consentA,
+          understoodBinding: consentB,
           documentHash
         }),
       });
@@ -107,8 +109,8 @@ export default function NDASigningPage() {
       const data = await response.json();
 
       if (data.success) {
-        // Redirect to buyer dashboard since they now have NDA access
-        router.push('/buyer');
+        // Force a page reload to refresh the session with the new buyer role
+        window.location.href = '/buyer';
       } else {
         setError(data.error || 'Failed to sign NDA');
       }
@@ -249,7 +251,7 @@ export default function NDASigningPage() {
                   <Button
                     onClick={() => {
                       if (signatureData) {
-                        handleSign(signatureData, consentA, consentB);
+                        handleSign(signatureData);
                       }
                     }}
                     disabled={!signatureData || !consentA || !consentB || isSigning}
