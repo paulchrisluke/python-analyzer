@@ -34,7 +34,7 @@ export default function HomePage() {
 
               {/* Investment Highlights */}
               <div id={ANCHORS.INVESTMENT_HIGHLIGHTS} className="px-4 lg:px-6">
-                <InvestmentHighlights data={staticBusinessData} />
+                <InvestmentHighlights />
               </div>
 
               {/* Business Details */}

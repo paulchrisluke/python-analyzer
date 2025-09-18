@@ -6,7 +6,7 @@ const expectedDocs = expectedDocumentsData as {
   phases: Record<Phase, PhaseExpectedDocuments>
 }
 
-export type UserRole = "admin" | "buyer" | "lawyer"
+export type UserRole = "admin" | "buyer" | "lawyer" | "viewer"
 export type Phase = "p1" | "p2a" | "p2b" | "p3a" | "p3b" | "p4" | "p5" | "legal" | "legacy"
 
 // Expected documents interfaces
@@ -87,6 +87,7 @@ export function getPhaseAccess(phase: Phase, role: UserRole): boolean {
     admin: ["p1", "p2a", "p2b", "p3a", "p3b", "p4", "p5", "legal", "legacy"],
     buyer: ["p1", "p2a", "p2b", "p3a", "p3b", "p4", "p5"],
     lawyer: ["legal"],
+    viewer: ["p1", "p2a", "p2b"],
   }
   return accessMatrix[role].includes(phase)
 }

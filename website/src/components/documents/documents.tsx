@@ -9,7 +9,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { Lock, FileText, Shield, CheckCircle } from "lucide-react"
+import { Lock, FileText, Shield } from "lucide-react"
 
 export function Documents() {
   const { data: session } = useSession()

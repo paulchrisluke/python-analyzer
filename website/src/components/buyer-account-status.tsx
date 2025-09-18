@@ -62,7 +62,7 @@ export function BuyerAccountStatus({ ndaStatus }: BuyerAccountStatusProps) {
                     <Shield className="h-4 w-4 text-muted-foreground flex-shrink-0" />
                     <div className="min-w-0 flex-1">
                       <p className="text-sm font-medium">
-                        {ndaStatus.signature.ndaVersion || '1.0'}
+                        {ndaStatus.signature.version || '1.0'}
                       </p>
                       <p className="text-xs text-muted-foreground">NDA Version</p>
                     </div>
