@@ -10,7 +10,7 @@ export async function GET(request: NextRequest) {
     // Check admin authorization first
     const session = await auth();
     if (!session || !session.user) {
-      console.warn(`Unauthorized statistics request from ${request.headers.get('x-forwarded-for') || 'unknown IP'}`);
+      console.warn('Unauthorized statistics request from redacted origin');
       return NextResponse.json(
         { success: false, error: 'Unauthorized' },
         { status: 401 }
@@ -18,7 +18,7 @@ export async function GET(request: NextRequest) {
     }
 
     if (session.user.role !== 'admin') {
-      console.warn(`Non-admin user ${session.user.email} attempted to access NDA statistics`);
+      console.warn('Non-admin user attempted to access NDA statistics - origin redacted');
       return NextResponse.json(
         { success: false, error: 'Forbidden - Admin access required' },
         { status: 403 }

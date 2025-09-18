@@ -109,22 +109,27 @@ export async function POST(request: NextRequest) {
     }
 
 
-    // Check if user has already signed NDA
-    const alreadySigned = await hasUserSignedNDA(userId);
-    if (alreadySigned) {
-      return NextResponse.json(
-        { success: false, error: 'NDA has already been signed' },
-        { status: 400 }
-      );
-    }
+    // Note: We no longer pre-check if user has signed NDA to avoid TOCTOU race condition
+    // The storeNDASignature function will handle this atomically with createOnly option
 
     // Parse request body
     const body: NDASigningRequest = await request.json();
     
     // Validate required fields
-    if (!body.signatureData || !body.agreedToTerms || !body.understoodBinding) {
+    if (!body.signatureData || !body.agreedToTerms || !body.understoodBinding || !body.effectiveDate) {
       return NextResponse.json(
         { success: false, error: 'Missing required fields' },
+        { status: 400 }
+      );
+    }
+
+    // Validate effectiveDate format
+    const dateRegex = /^(January|February|March|April|May|June|July|August|September|October|November|December)\s+\d{1,2},\s+\d{4}$/;
+    const isoDateRegex = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d{3})?Z?$/;
+    
+    if (!dateRegex.test(body.effectiveDate) && !isoDateRegex.test(body.effectiveDate)) {
+      return NextResponse.json(
+        { success: false, error: 'Invalid effectiveDate format. Expected "Month DD, YYYY" or ISO string' },
         { status: 400 }
       );
     }
@@ -152,12 +157,8 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Generate personalized content (same logic as GET endpoint)
-    const currentDate = new Date().toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric'
-    });
+    // Use client-provided effectiveDate for consistent hashing
+    const currentDate = body.effectiveDate;
 
     // Function to escape HTML entities to prevent injection
     function escapeHtml(text: string): string {
@@ -177,7 +178,11 @@ export async function POST(request: NextRequest) {
       .replace(/\[User Name\]/g, userName)
       .replace(/\[User Email\]/g, userEmail)
       .replace(/Mark Gustina/g, 'Mark Gustina')
-      .replace(/Cranberry Hearing and Balance Center/g, 'Cranberry Hearing and Balance Center');
+      .replace(/Cranberry Hearing and Balance Center/g, 'Cranberry Hearing and Balance Center')
+      // Additional client-side replacements to match document route
+      .replace(/Potential Buyer\(s\)/g, userName)
+      .replace(/Name: _________________________/g, `Name: ${userName}`)
+      .replace(/Title: _________________________/g, 'Title: Potential Buyer');
 
     const documentHash = generateDocumentHash(personalizedContent);
 
@@ -193,18 +198,34 @@ export async function POST(request: NextRequest) {
     const ipAddress = getClientIP(request);
     const userAgent = sanitizeUserAgent(request.headers.get('user-agent') || '');
 
-    // Store NDA signature
-    const signature = await storeNDASignature({
-      userId,
-      userEmail: session.user.email,
-      userName: session.user.name,
-      signatureData: body.signatureData,
-      signedAt: new Date().toISOString(),
-      ipAddress,
-      userAgent,
-      ndaVersion: '1.0',
-      documentHash
-    });
+    // Store NDA signature with createOnly to prevent overwriting existing signatures
+    let signature;
+    try {
+      // Convert effectiveDate to ISO string for storage
+      const signedAt = dateRegex.test(body.effectiveDate) 
+        ? new Date(body.effectiveDate).toISOString()
+        : body.effectiveDate; // Already ISO format
+
+      signature = await storeNDASignature({
+        userId,
+        userEmail: session.user.email,
+        userName: session.user.name,
+        signatureData: body.signatureData,
+        signedAt,
+        ipAddress,
+        userAgent,
+        ndaVersion: '1.0',
+        documentHash
+      }, { createOnly: true });
+    } catch (error) {
+      if (error instanceof Error && error.message === 'NDA signature already exists for this user') {
+        return NextResponse.json(
+          { success: false, error: 'NDA has already been signed' },
+          { status: 400 }
+        );
+      }
+      throw error; // Re-throw unexpected errors
+    }
 
     // Log successful signing
     logNDAActivity(userId, 'sign', {

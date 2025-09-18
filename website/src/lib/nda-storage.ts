@@ -406,7 +406,10 @@ async function saveSignaturesToFile(): Promise<void> {
 /**
  * Store or update an NDA signature (upsert by userId)
  */
-export async function storeNDASignature(signature: Omit<NDASignature, 'id'>): Promise<NDASignature> {
+export async function storeNDASignature(
+  signature: Omit<NDASignature, 'id'>, 
+  options: { createOnly?: boolean } = {}
+): Promise<NDASignature> {
   // Acquire lock for thread safety using proper async mutex
   const release = await mutex.acquire();
   
@@ -426,6 +429,9 @@ export async function storeNDASignature(signature: Omit<NDASignature, 'id'>): Pr
     let fullSignature: NDASignature;
     
     if (existingSignature && existingId) {
+      if (options.createOnly) {
+        throw new Error('NDA signature already exists for this user');
+      }
       // Update existing signature, keeping the same ID
       fullSignature = {
         ...existingSignature,

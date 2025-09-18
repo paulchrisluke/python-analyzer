@@ -2,6 +2,8 @@
 
 import React, { useState, useEffect } from 'react';
 import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
+import rehypeSanitize from 'rehype-sanitize';
 import { useNDAUserInfo } from '@/hooks/useNDAUserInfo';
 // Note: generateDocumentHash is not imported here as it's server-only
 // The hash is provided by the /api/nda/document endpoint
@@ -162,7 +164,17 @@ Cranberry Hearing and Balance Center
   return (
     <div className={`w-full ${className}`}>
       <div className="nda-prose max-w-none">
-        <ReactMarkdown>{ndaContent}</ReactMarkdown>
+        <ReactMarkdown
+          remarkPlugins={[remarkGfm]}
+          rehypePlugins={[rehypeSanitize]}
+          components={{
+            a: ({node, ...props}) => (
+              <a {...props} target="_blank" rel="noopener noreferrer" />
+            )
+          }}
+        >
+          {ndaContent}
+        </ReactMarkdown>
       </div>
     </div>
   );
