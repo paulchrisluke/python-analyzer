@@ -34,6 +34,7 @@ let storageInitialized = false;
 // Vercel Blob configuration
 const BLOB_STORE_KEY = 'nda-signatures.json';
 const USER_ROLES_BLOB_KEY = 'user-roles.json';
+const SANITIZED_EXPORT_BLOB_KEY = 'nda-signatures-sanitized.json';
 
 // User role management
 interface UserRole {
@@ -236,6 +237,7 @@ async function saveSignaturesToBlob(): Promise<void> {
     await put(BLOB_STORE_KEY, data, {
       access: 'public',
       addRandomSuffix: false,
+      allowOverwrite: true,
     });
     
     console.log(`Saved ${signatures.length} NDA signatures to blob storage`);
@@ -280,6 +282,7 @@ async function saveUserRolesToBlob(roleStore: Map<string, UserRole>): Promise<vo
     await put(USER_ROLES_BLOB_KEY, data, {
       access: 'public',
       addRandomSuffix: false,
+      allowOverwrite: true,
     });
     console.log(`Saved ${roles.length} user roles to blob storage`);
   }, 'saveUserRolesToBlob');
@@ -394,9 +397,10 @@ async function saveSignaturesToFile(): Promise<void> {
     
     const data = JSON.stringify(sanitizedSignatures, null, 2);
     
-    await put(BLOB_STORE_KEY, data, {
+    await put(SANITIZED_EXPORT_BLOB_KEY, data, {
       access: 'public',
       addRandomSuffix: false,
+      allowOverwrite: true,
     });
     
     console.log(`Saved ${sanitizedSignatures.length} sanitized NDA signatures to blob storage (dev only)`);
