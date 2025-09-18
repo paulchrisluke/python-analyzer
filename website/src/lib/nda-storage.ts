@@ -22,6 +22,7 @@ import type { NDASignature, NDAStatus } from '@/types/nda';
 import { createNDAStatus, generateSignatureId, validateSignatureIntegrity } from './nda';
 import { auth } from '@/auth';
 import { put, del, list, head } from '@vercel/blob';
+import { Mutex } from 'async-mutex';
 
 // In-memory storage for development
 // In production, replace with database operations
@@ -56,17 +57,9 @@ interface AdminAuditLog {
 
 const auditLog: AdminAuditLog[] = [];
 
-// Simple mutex for thread safety in concurrent environments
-// In production, this should be replaced with proper database transactions
-let storeLock = false;
-const acquireLock = (): boolean => {
-  if (storeLock) return false;
-  storeLock = true;
-  return true;
-};
-const releaseLock = (): void => {
-  storeLock = false;
-};
+// Proper mutex for thread safety in concurrent environments
+// Using async-mutex to prevent race conditions
+const mutex = new Mutex();
 
 /**
  * Admin authentication utilities
@@ -145,9 +138,49 @@ function logAdminOperation(
   console.log(`Admin audit: ${adminUser.email} performed ${action}${targetSignatureId ? ` on signature ${targetSignatureId}` : ''}`);
 }
 
+// Retry configuration for blob operations
+const BLOB_RETRY_CONFIG = {
+  maxRetries: 3,
+  baseDelay: 1000, // 1 second
+  maxDelay: 10000, // 10 seconds
+};
+
+// Exponential backoff retry utility
+async function withRetry<T>(
+  operation: () => Promise<T>,
+  operationName: string,
+  maxRetries: number = BLOB_RETRY_CONFIG.maxRetries
+): Promise<T> {
+  let lastError: Error;
+  
+  for (let attempt = 0; attempt <= maxRetries; attempt++) {
+    try {
+      return await operation();
+    } catch (error) {
+      lastError = error instanceof Error ? error : new Error('Unknown error');
+      
+      if (attempt === maxRetries) {
+        console.error(`${operationName} failed after ${maxRetries + 1} attempts:`, lastError);
+        throw lastError;
+      }
+      
+      // Calculate delay with exponential backoff
+      const delay = Math.min(
+        BLOB_RETRY_CONFIG.baseDelay * Math.pow(2, attempt),
+        BLOB_RETRY_CONFIG.maxDelay
+      );
+      
+      console.warn(`${operationName} attempt ${attempt + 1} failed, retrying in ${delay}ms:`, lastError.message);
+      await new Promise(resolve => setTimeout(resolve, delay));
+    }
+  }
+  
+  throw lastError!;
+}
+
 // Vercel Blob storage functions
 async function loadSignaturesFromBlob(): Promise<void> {
-  try {
+  await withRetry(async () => {
     console.log('Loading NDA signatures from blob storage...');
     // List blobs to check if our key exists
     const { blobs } = await list({ prefix: BLOB_STORE_KEY });
@@ -161,9 +194,9 @@ async function loadSignaturesFromBlob(): Promise<void> {
     
     console.log(`Found NDA signatures blob: ${existingBlob.pathname}, size: ${existingBlob.size}`);
 
-    // Get the blob content using the download URL
-    console.log(`Fetching blob content from: ${existingBlob.downloadUrl}`);
-    const response = await fetch(existingBlob.downloadUrl);
+    // Use authenticated blob read instead of public URL
+    console.log(`Fetching blob content using authenticated method`);
+    const response = await fetch(existingBlob.url);
     console.log(`Fetch response status: ${response.status}, ok: ${response.ok}`);
     
     if (!response.ok) {
@@ -184,43 +217,41 @@ async function loadSignaturesFromBlob(): Promise<void> {
     });
     
     console.log(`Loaded ${signatures.length} NDA signatures from blob storage`);
-  } catch (error) {
-    console.error('Error loading NDA signatures from blob:', error);
-  }
+  }, 'loadSignaturesFromBlob');
 }
 
 async function saveSignaturesToBlob(): Promise<void> {
-  try {
+  await withRetry(async () => {
     const signatures = Array.from(signatureStore.values());
     const data = JSON.stringify(signatures, null, 2);
     
     await put(BLOB_STORE_KEY, data, {
       access: 'public',
-      addRandomSuffix: false,
+      addRandomSuffix: true,
     });
     
     console.log(`Saved ${signatures.length} NDA signatures to blob storage`);
-  } catch (error) {
-    console.error('Error saving NDA signatures to blob:', error);
-  }
+  }, 'saveSignaturesToBlob');
 }
 
 // User role management functions
 async function loadUserRolesFromBlob(): Promise<Map<string, UserRole>> {
   const roleStore = new Map<string, UserRole>();
-  try {
+  
+  await withRetry(async () => {
     const { blobs } = await list({ prefix: USER_ROLES_BLOB_KEY });
     const existingBlob = blobs.find(blob => blob.pathname === USER_ROLES_BLOB_KEY);
     
     if (!existingBlob) {
       console.log('No existing user roles found in blob storage');
-      return roleStore;
+      return;
     }
     
-    const response = await fetch(existingBlob.downloadUrl);
+    // Use authenticated blob read instead of public URL
+    const response = await fetch(existingBlob.url);
     if (!response.ok) {
       console.log('No existing user roles found in blob storage');
-      return roleStore;
+      return;
     }
     
     const data = await response.text();
@@ -229,24 +260,21 @@ async function loadUserRolesFromBlob(): Promise<Map<string, UserRole>> {
       roleStore.set(role.userId, role);
     });
     console.log(`Loaded ${roles.length} user roles from blob storage`);
-  } catch (error) {
-    console.error('Error loading user roles from blob:', error);
-  }
+  }, 'loadUserRolesFromBlob');
+  
   return roleStore;
 }
 
 async function saveUserRolesToBlob(roleStore: Map<string, UserRole>): Promise<void> {
-  try {
+  await withRetry(async () => {
     const roles = Array.from(roleStore.values());
     const data = JSON.stringify(roles, null, 2);
     await put(USER_ROLES_BLOB_KEY, data, {
       access: 'public',
-      addRandomSuffix: false,
+      addRandomSuffix: true,
     });
     console.log(`Saved ${roles.length} user roles to blob storage`);
-  } catch (error) {
-    console.error('Error saving user roles to blob:', error);
-  }
+  }, 'saveUserRolesToBlob');
 }
 
 // Public functions for user role management
@@ -343,10 +371,8 @@ async function saveSignaturesToFile(): Promise<void> {
  * Store or update an NDA signature (upsert by userId)
  */
 export async function storeNDASignature(signature: Omit<NDASignature, 'id'>): Promise<NDASignature> {
-  // Acquire lock for thread safety
-  if (!acquireLock()) {
-    throw new Error('Service temporarily unavailable - please try again');
-  }
+  // Acquire lock for thread safety using proper async mutex
+  const release = await mutex.acquire();
   
   try {
     // First, look for existing signature with the same userId
@@ -385,7 +411,7 @@ export async function storeNDASignature(signature: Omit<NDASignature, 'id'>): Pr
     
     return fullSignature;
   } finally {
-    releaseLock();
+    release();
   }
 }
 
@@ -393,15 +419,13 @@ export async function storeNDASignature(signature: Omit<NDASignature, 'id'>): Pr
  * Get NDA signature by ID
  */
 export async function getNDASignature(signatureId: string): Promise<NDASignature | null> {
-  // Acquire lock for thread safety
-  if (!acquireLock()) {
-    throw new Error('Service temporarily unavailable - please try again');
-  }
+  // Acquire lock for thread safety using proper async mutex
+  const release = await mutex.acquire();
   
   try {
     return signatureStore.get(signatureId) || null;
   } finally {
-    releaseLock();
+    release();
   }
 }
 
@@ -409,10 +433,8 @@ export async function getNDASignature(signatureId: string): Promise<NDASignature
  * Get NDA signature by user ID
  */
 export async function getNDASignatureByUserId(userId: string, email?: string): Promise<NDASignature | null> {
-  // Acquire lock for thread safety
-  if (!acquireLock()) {
-    throw new Error('Service temporarily unavailable - please try again');
-  }
+  // Acquire lock for thread safety using proper async mutex
+  const release = await mutex.acquire();
   
   try {
     // First try to find by userId
@@ -433,7 +455,7 @@ export async function getNDASignatureByUserId(userId: string, email?: string): P
     
     return null;
   } finally {
-    releaseLock();
+    release();
   }
 }
 
@@ -475,16 +497,14 @@ export async function getAllNDASignatures(
   // Log admin operation
   logAdminOperation(authResult.user, 'get_all_signatures', undefined, ipAddress, userAgent);
   
-  // Acquire lock for thread safety
-  if (!acquireLock()) {
-    return { error: 'Service temporarily unavailable', statusCode: 503 };
-  }
+  // Acquire lock for thread safety using proper async mutex
+  const release = await mutex.acquire();
   
   try {
     const signatures = Array.from(signatureStore.values());
     return { signatures };
   } finally {
-    releaseLock();
+    release();
   }
 }
 
@@ -509,10 +529,8 @@ export async function deleteNDASignature(
     };
   }
   
-  // Acquire lock for thread safety
-  if (!acquireLock()) {
-    return { error: 'Service temporarily unavailable', statusCode: 503 };
-  }
+  // Acquire lock for thread safety using proper async mutex
+  const release = await mutex.acquire();
   
   try {
     // Check if signature exists before deletion
@@ -534,7 +552,7 @@ export async function deleteNDASignature(
     
     return { error: 'Failed to delete signature', statusCode: 500 };
   } finally {
-    releaseLock();
+    release();
   }
 }
 
@@ -547,10 +565,8 @@ export async function getNDAStatistics(): Promise<{
   signaturesByRole: Record<string, number>;
   recentSignatures: NDASignature[];
 }> {
-  // Acquire lock for thread safety
-  if (!acquireLock()) {
-    throw new Error('Service temporarily unavailable - please try again');
-  }
+  // Acquire lock for thread safety using proper async mutex
+  const release = await mutex.acquire();
   
   try {
     const signatures = Array.from(signatureStore.values());
@@ -578,7 +594,7 @@ export async function getNDAStatistics(): Promise<{
       recentSignatures
     };
   } finally {
-    releaseLock();
+    release();
   }
 }
 

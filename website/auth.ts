@@ -1,5 +1,6 @@
 import NextAuth from "next-auth"
 import Google from "next-auth/providers/google"
+import { getUserRole } from "./src/lib/nda-storage"
 
 // Module-load validation for required environment variables
 const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID
@@ -26,6 +27,13 @@ if (!AUTH_SECRET) {
     "Please set this in your .env.local file or Vercel secrets."
   )
 }
+
+// In-memory cache for user roles to avoid repeated blob storage calls
+const roleCache = new Map<string, { role: 'admin' | 'buyer' | 'lawyer' | 'viewer', timestamp: number }>()
+const CACHE_TTL = 5 * 60 * 1000 // 5 minutes
+
+// Valid roles allowlist
+const VALID_ROLES = ['admin', 'buyer', 'lawyer', 'viewer'] as const
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
   providers: [
@@ -59,38 +67,58 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     },
     async jwt({ token, user, account }) {
       if (user) {
-        // Get admin emails from environment variables (only for admin role)
+        // Get admin emails from environment variables
         const adminEmails = (process.env.ADMIN_EMAILS ?? "")
           .split(",")
           .map((e) => e.trim().toLowerCase())
           .filter(Boolean)
         const email = (user.email ?? "").toLowerCase()
 
-        // Only admin role is determined by email - all others start as viewer
-        if (adminEmails.includes(email)) {
-          token.role = 'admin'
-        } else {
-          token.role = 'viewer'
-        }
-        
         // Ensure user data is preserved
         token.email = user.email
         token.name = user.name
         token.picture = user.image
-      }
-      
-      // Check user role from Vercel Blob storage
-      if (token.sub) {
-        try {
-          const { getUserRole } = await import('@/lib/nda-storage')
-          const userRole = await getUserRole(token.sub, token.email as string)
-          token.role = userRole
-        } catch (error) {
-          console.error('Error getting user role from blob:', error)
-          // Keep the original role if there's an error
+
+        // Check if user is admin from environment variable
+        if (adminEmails.includes(email)) {
+          token.role = 'admin'
+        } else {
+          // For non-admin users, check blob storage for other roles
+          const userId = user.id || token.sub
+          if (userId && email) {
+            // Check cache first
+            const cacheKey = `${userId}:${email}`
+            const cached = roleCache.get(cacheKey)
+            const now = Date.now()
+            
+            if (cached && (now - cached.timestamp) < CACHE_TTL) {
+              token.role = cached.role
+            } else {
+              try {
+                const blobRole = await getUserRole(userId, email)
+                
+                // Validate the returned role
+                if (VALID_ROLES.includes(blobRole)) {
+                  token.role = blobRole
+                  // Update cache
+                  roleCache.set(cacheKey, { role: blobRole, timestamp: now })
+                } else {
+                  console.warn(`Invalid role returned from blob storage: ${blobRole}`)
+                  token.role = 'viewer'
+                }
+              } catch (error) {
+                console.error('Error fetching user role from blob storage:', error)
+                // Don't mutate token.role on failure, keep existing or default to viewer
+                if (!token.role) {
+                  token.role = 'viewer'
+                }
+              }
+            }
+          } else {
+            token.role = 'viewer'
+          }
         }
       }
-      
       return token
     },
     async session({ session, token }) {

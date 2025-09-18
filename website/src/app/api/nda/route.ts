@@ -19,11 +19,21 @@ import { NDASigningRequest, NDASigningResponse } from '@/types/nda';
 import { promises as fs } from 'fs';
 import path from 'path';
 
+// Singleton initialization for NDA storage
+let ndaStorageInitialized: Promise<void> | null = null;
+
+async function initializeNDAStorage(): Promise<void> {
+  if (!ndaStorageInitialized) {
+    ndaStorageInitialized = enableNDAStorage({ enablePersistence: true });
+  }
+  return ndaStorageInitialized;
+}
+
 // GET /api/nda - Get user's NDA status
 export async function GET(request: NextRequest) {
   try {
-    // Initialize NDA storage with Vercel Blob persistence
-    await enableNDAStorage({ enablePersistence: true });
+    // Initialize NDA storage with Vercel Blob persistence (singleton)
+    await initializeNDAStorage();
     
     const session = await auth();
     
@@ -74,8 +84,8 @@ export async function GET(request: NextRequest) {
 // POST /api/nda - Submit NDA signature
 export async function POST(request: NextRequest) {
   try {
-    // Initialize NDA storage with Vercel Blob persistence
-    await enableNDAStorage({ enablePersistence: true });
+    // Initialize NDA storage with Vercel Blob persistence (singleton)
+    await initializeNDAStorage();
     
     const session = await auth();
     
@@ -194,17 +204,6 @@ export async function POST(request: NextRequest) {
       ndaVersion: '1.0',
       documentHash
     });
-
-    // Update user role to buyer after successful NDA signing
-    if (userRole === 'viewer') {
-      try {
-        const { updateUserRole } = await import('@/lib/nda-storage')
-        await updateUserRole(userId, session.user.email, 'buyer')
-        console.log(`Updated user ${userId} role from viewer to buyer after NDA signing`)
-      } catch (error) {
-        console.error('Error updating user role after NDA signing:', error)
-      }
-    }
 
     // Log successful signing
     logNDAActivity(userId, 'sign', {

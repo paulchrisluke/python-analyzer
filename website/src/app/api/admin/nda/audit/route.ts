@@ -15,7 +15,7 @@ export async function GET(request: NextRequest) {
                      'unknown';
     const userAgent = request.headers.get('user-agent') || 'unknown';
     
-    // Get audit logs with admin auth
+    // Get admin audit logs (includes authentication check)
     const result = await getAdminAuditLogs(ipAddress, userAgent);
     
     if ('error' in result) {
@@ -27,8 +27,7 @@ export async function GET(request: NextRequest) {
     
     return NextResponse.json({
       success: true,
-      data: result.auditLogs,
-      count: result.auditLogs.length
+      auditLogs: result.auditLogs
     });
     
   } catch (error) {
