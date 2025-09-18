@@ -21,14 +21,8 @@ export async function DELETE(
       );
     }
     
-    // Get client information for audit logging
-    const ipAddress = request.headers.get('x-forwarded-for') || 
-                     request.headers.get('x-real-ip') || 
-                     'unknown';
-    const userAgent = request.headers.get('user-agent') || 'unknown';
-    
     // Delete signature with admin auth
-    const result = await deleteNDASignature(signatureId, ipAddress, userAgent);
+    const result = await deleteNDASignature(signatureId);
     
     if ('error' in result) {
       return NextResponse.json(

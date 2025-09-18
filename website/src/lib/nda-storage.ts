@@ -52,8 +52,7 @@ interface AdminAuditLog {
   action: 'get_all_signatures' | 'delete_signature';
   targetSignatureId?: string;
   timestamp: string;
-  ipAddress?: string;
-  userAgent?: string;
+  // Note: ipAddress and userAgent removed for privacy compliance
 }
 
 const auditLog: AdminAuditLog[] = [];
@@ -114,9 +113,7 @@ async function verifyAdminAuth(): Promise<{
 function logAdminOperation(
   adminUser: { id: string; email: string },
   action: AdminAuditLog['action'],
-  targetSignatureId?: string,
-  ipAddress?: string,
-  userAgent?: string
+  targetSignatureId?: string
 ): void {
   const auditEntry: AdminAuditLog = {
     id: `audit_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
@@ -124,9 +121,7 @@ function logAdminOperation(
     adminEmail: adminUser.email,
     action,
     targetSignatureId,
-    timestamp: new Date().toISOString(),
-    ipAddress,
-    userAgent
+    timestamp: new Date().toISOString()
   };
   
   auditLog.push(auditEntry);
@@ -523,13 +518,9 @@ export async function hasUserSignedNDA(userId: string): Promise<boolean> {
 
 /**
  * Get all NDA signatures (admin only)
- * @param ipAddress Optional IP address for audit logging
- * @param userAgent Optional user agent for audit logging
  * @returns Promise<{ signatures: NDASignature[] } | { error: string; statusCode: number }>
  */
 export async function getAllNDASignatures(
-  ipAddress?: string,
-  userAgent?: string
 ): Promise<{ signatures: NDASignature[] } | { error: string; statusCode: number }> {
   // Verify admin authentication
   const authResult = await verifyAdminAuth();
@@ -541,7 +532,7 @@ export async function getAllNDASignatures(
   }
   
   // Log admin operation
-  logAdminOperation(authResult.user, 'get_all_signatures', undefined, ipAddress, userAgent);
+  logAdminOperation(authResult.user, 'get_all_signatures', undefined);
   
   // Acquire lock for thread safety using proper async mutex
   const release = await mutex.acquire();
@@ -557,14 +548,10 @@ export async function getAllNDASignatures(
 /**
  * Delete NDA signature (admin only)
  * @param signatureId The ID of the signature to delete
- * @param ipAddress Optional IP address for audit logging
- * @param userAgent Optional user agent for audit logging
  * @returns Promise<{ success: boolean; signature?: NDASignature } | { error: string; statusCode: number }>
  */
 export async function deleteNDASignature(
-  signatureId: string,
-  ipAddress?: string,
-  userAgent?: string
+  signatureId: string
 ): Promise<{ success: boolean; signature?: NDASignature } | { error: string; statusCode: number }> {
   // Verify admin authentication
   const authResult = await verifyAdminAuth();
@@ -591,7 +578,7 @@ export async function deleteNDASignature(
       await saveSignaturesToFile();
       
       // Log admin operation with target signature info
-      logAdminOperation(authResult.user, 'delete_signature', signatureId, ipAddress, userAgent);
+      logAdminOperation(authResult.user, 'delete_signature', signatureId);
       
       return { success: true, signature: existingSignature };
     }
@@ -646,13 +633,9 @@ export async function getNDAStatistics(): Promise<{
 
 /**
  * Get admin audit logs (admin only)
- * @param ipAddress Optional IP address for audit logging
- * @param userAgent Optional user agent for audit logging
  * @returns Promise<{ auditLogs: AdminAuditLog[] } | { error: string; statusCode: number }>
  */
 export async function getAdminAuditLogs(
-  ipAddress?: string,
-  userAgent?: string
 ): Promise<{ auditLogs: AdminAuditLog[] } | { error: string; statusCode: number }> {
   // Verify admin authentication
   const authResult = await verifyAdminAuth();
@@ -664,7 +647,7 @@ export async function getAdminAuditLogs(
   }
   
   // Log admin operation
-  logAdminOperation(authResult.user, 'get_all_signatures', undefined, ipAddress, userAgent);
+  logAdminOperation(authResult.user, 'get_all_signatures', undefined);
   
   return { auditLogs: [...auditLog] }; // Return a copy to prevent external modification
 }

@@ -14,14 +14,8 @@ export async function GET(request: NextRequest) {
     // Initialize NDA storage (in-memory only for API routes)
     await enableNDAStorage({ enablePersistence: false });
     
-    // Get client information for audit logging
-    const ipAddress = request.headers.get('x-forwarded-for') || 
-                     request.headers.get('x-real-ip') || 
-                     'unknown';
-    const userAgent = request.headers.get('user-agent') || 'unknown';
-    
     // Get all signatures with admin auth
-    const result = await getAllNDASignatures(ipAddress, userAgent);
+    const result = await getAllNDASignatures();
     
     if ('error' in result) {
       return NextResponse.json(
