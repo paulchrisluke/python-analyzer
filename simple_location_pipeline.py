@@ -17,7 +17,6 @@ from decimal import Decimal, ROUND_HALF_UP
 # Configuration
 CONFIG = {
     "lease_data_path": "docs/legal/Leases",
-    "business_rules_path": "etl_pipeline/config/business_rules.yaml",
     "locations": {
         "cranberry_pa": {
             "location_id": "cranberry_pa",
