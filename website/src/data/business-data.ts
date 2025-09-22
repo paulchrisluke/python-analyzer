@@ -6,11 +6,11 @@
 export const staticBusinessData = {
   businessMetrics: {
     askingPrice: 650000,
-    annualRevenue: 2400000,
+    annualRevenue: 2470115, // Updated to match API data
     annualEbitda: 1032000, // 43% margin of $2.4M revenue
-    annualSde: 839000, // From financial_highlights
+    annualSde: 839245, // Updated to match your correct numbers
     ebitdaMargin: 0.43,
-    sdeMargin: 0.35, // From financial_highlights
+    sdeMargin: 0.34, // Updated to match your correct numbers (839245/2470115)
   },
   listing_details: {
     business_name: 'Cranberry Hearing & Balance Center',
@@ -22,15 +22,15 @@ export const staticBusinessData = {
   },
   financial_highlights: {
     asking_price: 650000,
-    annual_revenue: 2400000,
+    annual_revenue: 2470115, // Updated to match API data
     annual_ebitda: 1032000, // 43% margin of $2.4M revenue
-    annual_sde: 839000,
-    sde: 839000,
-    monthly_cash_flow: 69917, // $839K / 12 months
-    roi: 1.29, // $839K / $650K asking price
-    payback_period: 0.78, // $650K / $839K annual SDE
+    annual_sde: 839245, // Updated to match your correct numbers
+    sde: 839245,
+    monthly_cash_flow: 69937, // $839,245 / 12 months
+    roi: 1.29, // $839,245 / $650K asking price
+    payback_period: 0.77, // $650K / $839,245 annual SDE
     ebitda_margin: 0.43,
-    sde_margin: 0.35, // $839K / $2.4M revenue
+    sde_margin: 0.34, // $839,245 / $2,470,115 revenue
   },
   property_details: {
     primary_location: {
