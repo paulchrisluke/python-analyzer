@@ -7,10 +7,17 @@ export async function GET(request: NextRequest) {
     await initializeNDAStorage();
     
     // Get all signatures
-    const signatures = await getAllNDASignatures();
+    const result = await getAllNDASignatures();
+    
+    if ('error' in result) {
+      return NextResponse.json(
+        { success: false, error: result.error },
+        { status: result.statusCode }
+      );
+    }
     
     // Return just the email addresses for privacy
-    const emails = signatures.map(sig => ({
+    const emails = result.signatures.map(sig => ({
       email: sig.userEmail,
       name: sig.userName,
       signedAt: sig.signedAt
