@@ -4,7 +4,8 @@ import {
   storeNDASignature, 
   getNDAStatus, 
   hasUserSignedNDA,
-  enableNDAStorage
+  enableNDAStorage,
+  updateUserRole
 } from '@/lib/nda-storage';
 import { 
   validateSignatureData, 
@@ -217,6 +218,15 @@ export async function POST(request: NextRequest) {
         );
       }
       throw error; // Re-throw unexpected errors
+    }
+
+    // Update user role to buyer after successful NDA signing
+    try {
+      await updateUserRole(userId, session.user.email, 'buyer');
+      console.log(`Updated user ${userId} role to buyer after NDA signing`);
+    } catch (error) {
+      console.error('Error updating user role to buyer:', error);
+      // Don't fail the NDA signing if role update fails, but log the error
     }
 
     // Log successful signing
