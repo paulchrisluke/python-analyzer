@@ -48,9 +48,9 @@ export async function GET(request: NextRequest) {
       day: 'numeric'
     });
 
-    // Use session user data or fallback to defaults, with HTML escaping
-    const userName = escapeHtml(session?.user?.name || 'Potential Buyer');
-    const userEmail = escapeHtml(session?.user?.email || 'buyer@example.com');
+    // Temporarily disable auth for testing - use same data as signing endpoint
+    const userName = escapeHtml('Test User');
+    const userEmail = escapeHtml('test@example.com');
 
     const personalizedContent = ndaContent
       .replace(/\[Date\]/g, currentDate)
