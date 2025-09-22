@@ -3,31 +3,44 @@ import { list } from '@vercel/blob';
 
 export async function GET(request: NextRequest) {
   try {
-    // List all files in the NDA signatures blob storage
+    // List all files in blob storage to see what's actually there
     const { blobs } = await list({
-      prefix: 'nda-signatures/',
       limit: 100
     });
 
-    // Find the most recent signatures file
-    const signaturesBlob = blobs.find(blob => 
-      blob.pathname.includes('nda-signatures') && 
+    // Debug: return all blob paths to see what's available
+    const allBlobPaths = blobs.map(blob => blob.pathname);
+    
+    // Look for any files that might contain NDA signatures
+    const signatureBlobs = blobs.filter(blob => 
+      blob.pathname.includes('nda') || 
+      blob.pathname.includes('signature') ||
       blob.pathname.endsWith('.json')
     );
 
-    if (!signaturesBlob) {
+    if (signatureBlobs.length === 0) {
       return NextResponse.json({
         success: false,
-        error: 'No signatures found'
+        error: 'No signature files found in blob storage',
+        debug: {
+          totalBlobs: blobs.length,
+          allPaths: allBlobPaths
+        }
       });
     }
 
-    // Fetch the signatures file content
+    // Try to fetch from the first signature blob found
+    const signaturesBlob = signatureBlobs[0];
     const response = await fetch(signaturesBlob.url);
+    
     if (!response.ok) {
       return NextResponse.json({
         success: false,
-        error: 'Failed to fetch signatures'
+        error: 'Failed to fetch signatures',
+        debug: {
+          blobPath: signaturesBlob.pathname,
+          blobUrl: signaturesBlob.url
+        }
       });
     }
 
@@ -43,7 +56,11 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({
       success: true,
       count: emails.length,
-      signatures: emails
+      signatures: emails,
+      debug: {
+        blobPath: signaturesBlob.pathname,
+        totalBlobs: blobs.length
+      }
     });
   } catch (error) {
     console.error('Error fetching NDA signatures:', error);
