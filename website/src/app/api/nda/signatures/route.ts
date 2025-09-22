@@ -11,11 +11,9 @@ export async function GET(request: NextRequest) {
     // Debug: return all blob paths to see what's available
     const allBlobPaths = blobs.map(blob => blob.pathname);
     
-    // Look for any files that might contain NDA signatures
+    // Look for the specific NDA signatures file
     const signatureBlobs = blobs.filter(blob => 
-      blob.pathname.includes('nda') || 
-      blob.pathname.includes('signature') ||
-      blob.pathname.endsWith('.json')
+      blob.pathname === 'nda-signatures.json'
     );
 
     if (signatureBlobs.length === 0) {
