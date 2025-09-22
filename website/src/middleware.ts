@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server"
-import { auth } from "@/auth"
+import { auth } from "../auth"
 import { NDA_REQUIRED_PHASES, isNDAExempt } from "@/lib/nda-edge"
 
 export async function middleware(req: any) {
