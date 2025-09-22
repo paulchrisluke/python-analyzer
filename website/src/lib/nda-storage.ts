@@ -448,7 +448,7 @@ export async function storeNDASignature(
       signatureStore.set(id, fullSignature);
     }
     
-    await saveSignaturesToFile();
+    await saveSignaturesToBlob();
     
     return fullSignature;
   } finally {
