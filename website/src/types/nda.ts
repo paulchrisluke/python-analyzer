@@ -44,7 +44,6 @@ export interface NDASigningRequest {
   agreedToTerms: boolean;
   understoodBinding: boolean;
   documentHash: string;
-  effectiveDate: string; // e.g., "September 18, 2025" or ISO string
 }
 
 export interface NDASigningResponse {

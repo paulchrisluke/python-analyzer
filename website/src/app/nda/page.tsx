@@ -102,12 +102,7 @@ export default function NDASigningPage() {
           signatureData: signature,
           agreedToTerms: consentA,
           understoodBinding: consentB,
-          documentHash,
-          effectiveDate: new Date().toLocaleDateString('en-US', {
-            year: 'numeric',
-            month: 'long',
-            day: 'numeric'
-          })
+          documentHash
         }),
       });
 

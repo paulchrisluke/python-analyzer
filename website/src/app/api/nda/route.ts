@@ -115,20 +115,9 @@ export async function POST(request: NextRequest) {
     const body: NDASigningRequest = await request.json();
     
     // Validate required fields
-    if (!body.signatureData || !body.agreedToTerms || !body.understoodBinding || !body.effectiveDate) {
+    if (!body.signatureData || !body.agreedToTerms || !body.understoodBinding) {
       return NextResponse.json(
         { success: false, error: 'Missing required fields' },
-        { status: 400 }
-      );
-    }
-
-    // Validate effectiveDate format
-    const dateRegex = /^(January|February|March|April|May|June|July|August|September|October|November|December)\s+\d{1,2},\s+\d{4}$/;
-    const isoDateRegex = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d{3})?Z?$/;
-    
-    if (!dateRegex.test(body.effectiveDate) && !isoDateRegex.test(body.effectiveDate)) {
-      return NextResponse.json(
-        { success: false, error: 'Invalid effectiveDate format. Expected "Month DD, YYYY" or ISO string' },
         { status: 400 }
       );
     }
@@ -156,8 +145,12 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Use client-provided effectiveDate for consistent hashing
-    const currentDate = body.effectiveDate;
+    // Use the same date generation logic as the document endpoint for consistent hashing
+    const currentDate = new Date().toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    });
 
     // Function to escape HTML entities to prevent injection
     function escapeHtml(text: string): string {
