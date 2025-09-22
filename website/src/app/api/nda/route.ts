@@ -189,10 +189,8 @@ export async function POST(request: NextRequest) {
     // Store NDA signature with createOnly to prevent overwriting existing signatures
     let signature;
     try {
-      // Convert effectiveDate to ISO string for storage
-      const signedAt = dateRegex.test(body.effectiveDate) 
-        ? new Date(body.effectiveDate).toISOString()
-        : body.effectiveDate; // Already ISO format
+      // Use current date for storage
+      const signedAt = new Date().toISOString();
 
       signature = await storeNDASignature({
         userId,
